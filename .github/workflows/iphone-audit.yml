@@ -5,6 +5,7 @@ on:
     branches:
       - work/iphone-voiceover-tablature-audit
       - work/phase-2-parser-measure-navigation
+      - work/phase-3-guided-practice
     paths-ignore:
       - docs/proof-automated-results.md
 
