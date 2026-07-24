@@ -25,61 +25,46 @@ const chordDocument = parseSixStringTabText(
 );
 
 describe("IPhoneTabReader", () => {
-  test("separates the current instruction from navigation controls", () => {
+  test("presents one instruction and one simple navigation group", () => {
     render(<IPhoneTabReader document={document} />);
 
-    expect(screen.getByRole("heading", { name: "Current step" })).toBeInTheDocument();
-    expect(screen.getByText("Measure 1 of 2. Step 1 of 1.")).toBeInTheDocument();
-    expect(screen.getByText("One note. Play High E string, open.")).toBeInTheDocument();
-
-    const nextButton = screen.getByRole("button", { name: "Next step" });
-    expect(nextButton).not.toHaveAttribute("aria-describedby");
-    expect(screen.getByRole("group", { name: "Move one musical step" })).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Jump to a measure beginning" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What to play now" })).toBeInTheDocument();
+    expect(screen.getByText("Play High E string, open.")).toBeInTheDocument();
+    expect(screen.getByText("Measure 1 of 2, step 1 of 1.")).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Move through the tablature" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Repeat instruction" })).toBeEnabled();
+    expect(screen.queryByText(/measure beginning/i)).not.toBeInTheDocument();
   });
 
-  test("moves focus to the new current step instead of repeating the old instruction on the button", () => {
-    const { container } = render(<IPhoneTabReader document={document} />);
+  test("moves to the next complete musical instruction and focuses it", () => {
+    render(<IPhoneTabReader document={document} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Next step" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
 
-    expect(screen.getByRole("heading", { name: "Current step" })).toHaveFocus();
-    expect(container.querySelector(".position-location")).toHaveTextContent(
-      "Measure 2 of 2. Step 1 of 1."
-    );
-    expect(container.querySelector(".position-description")).toHaveTextContent(
-      "One note. Play High E string, fret 3."
-    );
+    expect(screen.getByRole("heading", { name: "What to play now" })).toHaveFocus();
+    expect(screen.getByText("Play High E string, fret 3.")).toBeInTheDocument();
+    expect(screen.getByText("Measure 2 of 2, step 1 of 1.")).toBeInTheDocument();
   });
 
-  test("states explicitly when several strings are played together", () => {
+  test("states clearly when strings are played together", () => {
     render(<IPhoneTabReader document={chordDocument} />);
 
     expect(
       screen.getByText(
-        "Play these 4 strings together: Low E string, fret 3; A string, fret 5; D string, fret 5; G string, fret 5."
+        "Play together: Low E string, fret 3; A string, fret 5; D string, fret 5; G string, fret 5."
       )
     ).toBeInTheDocument();
   });
 
-  test("jumps to measure beginnings and focuses the resulting current step", () => {
-    render(<IPhoneTabReader document={document} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Next measure beginning" }));
-
-    expect(screen.getByRole("heading", { name: "Current step" })).toHaveFocus();
-    expect(screen.getByText("Measure 2 of 2. Step 1 of 1.")).toBeInTheDocument();
-  });
-
-  test("repeats only the current location and playing instruction on request", () => {
+  test("repeats only the current instruction and location on request", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Repeat current step" }));
+    fireEvent.click(screen.getByRole("button", { name: "Repeat instruction" }));
 
-    const liveRegion = container.querySelector('[aria-live="polite"]');
-    expect(liveRegion).toHaveTextContent(
-      "Measure 1 of 2. Step 1 of 1. One note. Play High E string, open."
+    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent(
+      "Play High E string, open. Measure 1 of 2, step 1 of 1."
     );
-    expect(liveRegion).not.toHaveTextContent(/silent/i);
   });
 });
