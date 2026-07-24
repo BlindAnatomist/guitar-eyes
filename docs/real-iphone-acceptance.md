@@ -10,7 +10,7 @@ Preview: `https://blindanatomist.github.io/guitar-eyes/`
 
 ## Checkpoint 1: Initial page order and mode state
 
-Reported behavior:
+Initial reported behavior:
 
 1. The page opened and announced Jason Washburn's existing Mac-oriented Guitar Eyes title.
 2. The Mac keyboard-command instructions were exposed near the beginning of the page.
@@ -18,9 +18,9 @@ Reported behavior:
 4. `iPhone semantic reader` was selected.
 5. The upload control was present immediately below the reading-mode controls and was understandable as the upload control.
 
-Verdict: Partial pass with an iPhone-first ordering defect.
+Initial verdict: Partial pass with an iPhone-first ordering defect.
 
-What passed:
+What initially passed:
 
 1. The hosted proof loaded in iPhone Safari.
 2. Jason's desktop title and material remained present.
@@ -48,10 +48,27 @@ Remediation commits:
 Automated remediation verification:
 
 1. Installation passed.
-2. All automated tests passed, including the touch-device order and collapsed-instructions test.
+2. All 13 automated tests passed, including the touch-device order and collapsed-instructions test.
 3. Production build passed.
 4. Refreshed GitHub Pages deployment passed.
 5. Hosted page, JavaScript, and CSS read-back passed.
 6. Fork `main` was restored and verified identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-Retest status: Refreshed preview ready. Real-iPhone confirmation of the repaired control order remains pending.
+Real-iPhone retest result:
+
+The tester confirmed that the refreshed page presented exactly this order:
+
+1. Jason's Guitar Eyes title.
+2. The extension explanation.
+3. Reading mode, with `iPhone semantic reader` selected.
+4. The upload control.
+5. The instrument selector.
+6. The collapsed `Open Mac keyboard instructions` control later in the page.
+
+Checkpoint 1 verdict: Pass.
+
+## Checkpoint 2: Clean six-string upload and focus recovery
+
+Status: Pending.
+
+The next test will use the repository fixture `public/fixtures/iphone-proof-clean-six-string.txt`. Acceptance will verify file selection, restrained status feedback, focus movement to the iPhone tablature reader heading, and the initial semantic position description.
