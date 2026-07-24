@@ -1,6 +1,6 @@
 # iPhone Proof Hosted Preview Status
 
-Temporary publisher workflow commit: `51573ac73890407dc2420591ae1bb804fc09e79a`
+Temporary publisher workflow commit: `99c799d35a989c1606d7fb43e4bd2375104f6e47`
 
 Published source branch: `work/iphone-voiceover-tablature-audit`
 
