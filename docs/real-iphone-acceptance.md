@@ -71,4 +71,4 @@ Checkpoint 1 verdict: Pass.
 
 Status: Pending.
 
-The next test will use the repository fixture `public/fixtures/iphone-proof-clean-six-string.txt`. Acceptance will verify file selection, restrained status feedback, focus movement to the iPhone tablature reader heading, and the initial semantic position description.
+The next test will use the repository fixture `fixtures/iphone-proof-clean-six-string.txt`. Acceptance will verify file selection, restrained status feedback, focus movement to the iPhone tablature reader heading, and the initial semantic position description.
