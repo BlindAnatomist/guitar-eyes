@@ -66,6 +66,10 @@ The exact verified clarity redesign was published successfully.
 
 See `docs/phase-2-clarity-preview-status.md`.
 
+## Safari refresh note
+
+During the first Phase 2 hosted test, an already-open Safari tab retained the previous application build and reported the old parser's `too many lines` error. Refreshing the page loaded the correct Phase 2 parser and the same file worked. Treat an unexpected old-interface message as possible stale page state and refresh once before diagnosing a deployment or parser regression.
+
 ## Remaining acceptance gate
 
 A focused real-iPhone Safari and VoiceOver pass is required to determine whether the simplified model is understandable in actual use.
