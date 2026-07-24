@@ -1,5 +1,41 @@
-import React, { forwardRef, useEffect, useState } from "react";
-import { describePosition } from "./iphoneTabModel";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
+
+function describeWhatToPlay(document, position) {
+  const stringById = new Map(document.strings.map((string) => [string.id, string]));
+  const instructions = [];
+
+  [...position.strings].reverse().forEach((state) => {
+    const string = stringById.get(state.stringId);
+    if (!string) return;
+
+    switch (state.type) {
+      case "fret":
+        instructions.push(`${string.spokenName}, fret ${state.fret}`);
+        break;
+      case "open":
+        instructions.push(`${string.spokenName}, open`);
+        break;
+      case "technique":
+        instructions.push(`${string.spokenName}, ${state.name} symbol`);
+        break;
+      case "unsupported":
+        instructions.push(`${string.spokenName}, unrecognized symbol`);
+        break;
+      case "continuation":
+        instructions.push(`${string.spokenName}, hold fret ${state.fret}`);
+        break;
+      default:
+        break;
+    }
+  });
+
+  if (instructions.length === 0) return "Rest. Play nothing at this step.";
+  return `Play ${instructions.join("; ")}.`;
+}
+
+function describeLocation(document, position) {
+  return `Measure ${position.measureNumber} of ${document.measures.length}. Step ${position.positionInMeasure} of ${position.positionsInMeasure}.`;
+}
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,10 +49,13 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   if (!document || document.positions.length === 0) return null;
 
   const currentPosition = document.positions[currentIndex];
-  const currentMeasure = document.measures[currentPosition.measureIndex];
-  const currentDescription = describePosition(document, currentIndex);
-  const isFirstPosition = currentIndex === 0;
-  const isLastPosition = currentIndex === document.positions.length - 1;
+  const locationText = describeLocation(document, currentPosition);
+  const playingText = useMemo(
+    () => describeWhatToPlay(document, currentPosition),
+    [document, currentPosition]
+  );
+  const isFirstStep = currentIndex === 0;
+  const isLastStep = currentIndex === document.positions.length - 1;
   const isFirstMeasure = currentPosition.measureIndex === 0;
   const isLastMeasure = currentPosition.measureIndex === document.measures.length - 1;
 
@@ -25,8 +64,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   };
 
   const moveTo = (nextIndex) => {
+    const nextPosition = document.positions[nextIndex];
     setCurrentIndex(nextIndex);
-    announce(describePosition(document, nextIndex));
+    announce(`${describeLocation(document, nextPosition)} ${describeWhatToPlay(document, nextPosition)}`);
   };
 
   const moveToMeasure = (measureIndex) => {
@@ -41,64 +81,61 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </h2>
 
       <p>
-        Navigate synchronized musical positions or jump by measure without placing every
-        dash, separator, and source character in the VoiceOver swipe order.
+        The reader first tells you where you are, then what to play. Use step controls for the
+        next playable event. Use measure controls to jump to the beginning of another measure.
       </p>
 
-      <p className="position-description" id="current-position-description">
-        {currentDescription}
-      </p>
+      <section aria-labelledby="current-step-heading">
+        <h3 id="current-step-heading">Current step</h3>
+        <p className="position-location">{locationText}</p>
+        <p className="position-description" id="current-position-description">
+          {playingText}
+        </p>
+      </section>
 
-      <div className="position-controls" aria-describedby="current-position-description">
-        <button type="button" onClick={() => moveTo(0)} disabled={isFirstPosition}>
-          Start of tablature
+      <fieldset className="position-controls" aria-describedby="current-position-description">
+        <legend>Move one step</legend>
+        <button type="button" onClick={() => moveTo(currentIndex - 1)} disabled={isFirstStep}>
+          Previous step
         </button>
+        <button type="button" onClick={() => moveTo(currentIndex + 1)} disabled={isLastStep}>
+          Next step
+        </button>
+        <button type="button" onClick={() => announce(`${locationText} ${playingText}`)}>
+          Repeat current step
+        </button>
+      </fieldset>
+
+      <fieldset className="measure-controls">
+        <legend>Jump by measure</legend>
         <button
           type="button"
           onClick={() => moveToMeasure(currentPosition.measureIndex - 1)}
           disabled={isFirstMeasure}
         >
-          Previous measure
-        </button>
-        <button
-          type="button"
-          onClick={() => moveTo(currentIndex - 1)}
-          disabled={isFirstPosition}
-        >
-          Previous position
-        </button>
-        <button
-          type="button"
-          onClick={() => moveTo(currentIndex + 1)}
-          disabled={isLastPosition}
-        >
-          Next position
+          Previous measure start
         </button>
         <button
           type="button"
           onClick={() => moveToMeasure(currentPosition.measureIndex + 1)}
           disabled={isLastMeasure}
         >
-          Next measure
+          Next measure start
         </button>
-        <button type="button" onClick={() => announce(currentDescription)}>
-          Read current position
+        <button type="button" onClick={() => moveTo(0)} disabled={isFirstStep}>
+          Beginning of tablature
         </button>
-      </div>
-
-      <p className="position-count">
-        Measure {currentMeasure.number} of {document.measures.length}; position {currentPosition.positionInMeasure} of {currentPosition.positionsInMeasure} in this measure; position {currentIndex + 1} of {document.positions.length} overall.
-      </p>
+      </fieldset>
 
       {document.warnings.length > 0 && (
-        <div className="reader-warning" aria-labelledby="reader-warning-heading">
-          <h3 id="reader-warning-heading">Parsing notes</h3>
+        <details className="reader-warning">
+          <summary>Parsing notes</summary>
           <ul>
             {document.warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
 
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
