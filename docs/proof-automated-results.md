@@ -1,6 +1,6 @@
 # Bounded iPhone Proof Automated Results
 
-Generated from audit-branch commit: `6882c3af634a8d72d46f4b0269b7236421ee5bad`
+Generated from audit-branch commit: `6ced8df807c7c1d119bd6dc7576a718b8adae931`
 
 Node version: `v20.20.2`
 
@@ -18,9 +18,9 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
 
     npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
     npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+    npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
     npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
-    npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
     npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
     npm warn deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
@@ -89,13 +89,13 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
         console.error
           Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
-        [0m [90m 4 |[39m describe([32m"Guitar Eyes application shell"[39m[33m,[39m () [33m=>[39m {
-         [90m 5 |[39m   test([32m"preserves the desktop reader and exposes the iPhone mode"[39m[33m,[39m () [33m=>[39m {
-        [31m[1m>[22m[39m[90m 6 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
-         [90m   |[39m           [31m[1m^[22m[39m
-         [90m 7 |[39m
-         [90m 8 |[39m     expect(
-         [90m 9 |[39m       screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m {[0m
+        [0m [90m 18 |[39m describe([32m"Guitar Eyes application shell"[39m[33m,[39m () [33m=>[39m {
+         [90m 19 |[39m   test([32m"preserves the desktop reader and exposes the iPhone mode"[39m[33m,[39m () [33m=>[39m {
+        [31m[1m>[22m[39m[90m 20 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
+         [90m    |[39m           [31m[1m^[22m[39m
+         [90m 21 |[39m
+         [90m 22 |[39m     expect(
+         [90m 23 |[39m       screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m {[0m
     
           at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
           at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
@@ -103,14 +103,14 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at node_modules/@testing-library/react/dist/act-compat.js:63:25
           at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
-          at Object.<anonymous> (src/App.test.js:6:11)
+          at Object.<anonymous> (src/App.test.js:20:11)
     
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
     Test Suites: 3 passed, 3 total
-    Tests:       12 passed, 12 total
+    Tests:       13 passed, 13 total
     Snapshots:   0 total
-    Time:        2.595 s
+    Time:        3.277 s
     Ran all test suites.
 
 ## Production build log
@@ -142,7 +142,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      74.44 kB  build/static/js/main.79af68fa.js
+      74.46 kB  build/static/js/main.747e4e0d.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
