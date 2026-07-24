@@ -1,6 +1,6 @@
 # iPhone Proof Hosted Preview Status
 
-Temporary publisher workflow commit: `79712f8346d7e04cfdb55cf879a16edd3bc008d6`
+Temporary publisher workflow commit: `0780387a086b423870942a8f52216d5f4374b727`
 
 Published source branch: `work/iphone-voiceover-tablature-audit`
 
@@ -8,6 +8,8 @@ Build and test job: `success`
 
 Deployment job: `success`
 
-Preview URL: `https://blindanatomist.github.io/guitar-eyes/`
+Hosted page and asset verification: `failure`
 
-The proof was published through a temporary main-authorized workflow. The fork main branch must be restored to the authoritative upstream commit immediately after verification.
+Preview URL: Not accepted.
+
+The temporary main-authorized publishing or hosted read-back attempt did not succeed.
