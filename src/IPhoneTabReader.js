@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 
 function describeWhatToPlay(document, position) {
   const stringById = new Map(document.strings.map((string) => [string.id, string]));
@@ -50,10 +50,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const currentPosition = document.positions[currentIndex];
   const locationText = describeLocation(document, currentPosition);
-  const playingText = useMemo(
-    () => describeWhatToPlay(document, currentPosition),
-    [document, currentPosition]
-  );
+  const playingText = describeWhatToPlay(document, currentPosition);
   const isFirstStep = currentIndex === 0;
   const isLastStep = currentIndex === document.positions.length - 1;
   const isFirstMeasure = currentPosition.measureIndex === 0;
