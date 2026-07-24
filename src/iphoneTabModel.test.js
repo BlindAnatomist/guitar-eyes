@@ -6,6 +6,15 @@ import {
 
 const makeTab = (lines) => lines.join("\n");
 
+const silentLines = (highE) => [
+  `e|${highE}`,
+  "B|----------------|",
+  "G|----------------|",
+  "D|----------------|",
+  "A|----------------|",
+  "E|----------------|",
+];
+
 describe("parseSixStringTabText", () => {
   test("creates a synchronized semantic position from a clean six-string chord", () => {
     const document = parseSixStringTabText(
@@ -20,10 +29,11 @@ describe("parseSixStringTabText", () => {
     );
 
     expect(document.type).toBe("tablature-document");
-    expect(document.strings).toHaveLength(6);
+    expect(document.blocks).toHaveLength(1);
+    expect(document.measures).toHaveLength(1);
     expect(document.positions).toHaveLength(1);
     expect(describePosition(document, 0)).toBe(
-      "Position 1 of 1. Low E string, fret 3. A string, fret 5. D string, fret 5. G string, fret 5. B and high E strings are silent."
+      "Measure 1 of 1, position 1 of 1. Low E string, fret 3. A string, fret 5. D string, fret 5. G string, fret 5. B and high E strings are silent."
     );
   });
 
@@ -42,9 +52,7 @@ describe("parseSixStringTabText", () => {
     expect(document.positions.map((position) => position.sourceColumn)).toEqual([2, 3]);
     expect(describePosition(document, 0)).toContain("High E string, fret 10.");
     expect(describePosition(document, 1)).toContain("B string, fret 3.");
-    expect(describePosition(document, 1)).toContain(
-      "High E string, continuation of fret 10."
-    );
+    expect(describePosition(document, 1)).toContain("continuation of fret 10");
   });
 
   test("distinguishes an open string from silent strings", () => {
@@ -65,20 +73,42 @@ describe("parseSixStringTabText", () => {
     );
   });
 
-  test("preserves source columns when string lines have unequal lengths", () => {
+  test("uses internal bar lines as measure boundaries", () => {
     const document = parseSixStringTabText(
-      makeTab([
-        "e|--0----|",
-        "B|-------|",
-        "G|-------|",
-        "D|-------|",
-        "A|---3|",
-        "E|-------|",
-      ])
+      makeTab(silentLines("--0---|--3---|"))
     );
 
-    expect(document.positions.map((position) => position.sourceColumn)).toEqual([2, 3]);
-    expect(document.warnings[0]).toMatch(/unequal lengths/i);
+    expect(document.measures).toHaveLength(2);
+    expect(document.positions).toHaveLength(2);
+    expect(document.positions[0]).toMatchObject({
+      measureNumber: 1,
+      totalMeasures: 2,
+      positionInMeasure: 1,
+    });
+    expect(document.positions[1]).toMatchObject({
+      measureNumber: 2,
+      totalMeasures: 2,
+      positionInMeasure: 1,
+    });
+    expect(describePosition(document, 1)).toContain(
+      "Measure 2 of 2, position 1 of 1."
+    );
+  });
+
+  test("accepts headings, blank lines, and multiple six-string blocks", () => {
+    const firstBlock = silentLines("--0---|--3---|");
+    const secondBlock = silentLines("--5---|--7---|");
+    const document = parseSixStringTabText(
+      makeTab(["Intro", "", ...firstBlock, "", "Verse", ...secondBlock])
+    );
+
+    expect(document.blocks).toHaveLength(2);
+    expect(document.measures).toHaveLength(4);
+    expect(document.positions).toHaveLength(4);
+    expect(document.warnings).toContain(
+      "2 non-tablature lines were ignored, such as headings or notes."
+    );
+    expect(describePosition(document, 3)).toContain("Measure 4 of 4");
   });
 
   test("preserves recognized technique notation without pretending to interpret it", () => {
@@ -119,7 +149,7 @@ describe("parseSixStringTabText", () => {
     );
   });
 
-  test("rejects files that are not exactly one six-string block", () => {
+  test("rejects incomplete six-string blocks", () => {
     expect(() =>
       parseSixStringTabText(
         makeTab([
@@ -129,7 +159,6 @@ describe("parseSixStringTabText", () => {
           "G|-----|",
           "D|-----|",
           "A|-----|",
-          "E|-----|",
         ])
       )
     ).toThrow(TabParseError);
@@ -137,15 +166,13 @@ describe("parseSixStringTabText", () => {
     expect(() =>
       parseSixStringTabText(
         makeTab([
-          "Title",
           "e|--0--|",
           "B|-----|",
           "G|-----|",
           "D|-----|",
           "A|-----|",
-          "E|-----|",
         ])
       )
-    ).toThrow(/exactly one six-string tablature block/i);
+    ).toThrow(/exactly six consecutive string lines/i);
   });
 });
