@@ -1,15 +1,13 @@
 # iPhone Proof Hosted Preview Status
 
-One-time publisher commit: `60bf9ca0950912aa92329a3ffc3631677a0d597e`
+Focus-repair publisher commit: `7fe456c8fd5bb8c38a459db61d0b9b7ba20e8185`
 
 Published source branch: `work/iphone-voiceover-tablature-audit`
 
-Test and build job: `success`
+Build and automated test job: `failure`
 
-Deployment job: `success`
+Deployment job: `skipped`
 
-Hosted page and asset verification: `success`
+Hosted page and asset verification: `skipped`
 
 Preview URL: `https://blindanatomist.github.io/guitar-eyes/`
-
-The refreshed iPhone-first ordering repair passed tests, built, deployed, and completed hosted asset read-back.
