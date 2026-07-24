@@ -1,6 +1,6 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `89f594feaeaa10333ca35f370bab2207df567497`
+Generated from branch commit: `c2f9ab0b43a754f635a1b8fb1760e23cf84ebe53`
 
 Branch: `work/phase-3-guided-practice`
 
@@ -11,7 +11,7 @@ npm version: `10.8.2`
 ## Result summary
 
 - npm ci exit code: `0`
-- automated test exit code: `1`
+- automated test exit code: `0`
 - production build exit code: `0`
 
 Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.
@@ -58,170 +58,32 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
 
 ## Automated test log
 
-                  [0mBack[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mNext[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mRepeat instruction[0m
-                [36m</button>[39m
-              [36m</fieldset>[39m
-              [36m<div[39m
-                [33maria-atomic[39m=[32m"true"[39m
-                [33maria-live[39m=[32m"polite"[39m
-                [33mclass[39m=[32m"visually-hidden"[39m
-              [36m/>[39m
-            [36m</section>[39m
-          [36m</div>[39m
-        [36m</body>[39m
     
-        [0m [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"What to play now"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 32 |[39m     expect(screen[33m.[39mgetByText([32m"Play High E string, open."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
-        [31m[1m>[22m[39m[90m 33 |[39m     expect(screen[33m.[39mgetByText([32m"Measure 1 of 2, step 1 of 1."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m    |[39m                   [31m[1m^[22m[39m
-         [90m 34 |[39m     expect(screen[33m.[39mgetByRole([32m"group"[39m[33m,[39m { name[33m:[39m [32m"Move through the tablature"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 35 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Back"[39m }))[33m.[39mtoBeDisabled()[33m;[39m
-         [90m 36 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Next"[39m }))[33m.[39mtoBeEnabled()[33m;[39m[0m
+    > guitar-eyes@0.1.0 test
+    > react-scripts test --watchAll=false
     
-          at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
-          at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-          at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-          at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:33:19)
+    PASS src/iphoneTabModel.test.js
+    PASS src/IPhoneTabReader.test.js
+      ● Console
     
-      ● IPhoneTabReader › moves to the next complete musical instruction and focuses it
+        console.error
+          Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
-        TestingLibraryElementError: Unable to find an element with the text: Measure 2 of 2, step 1 of 1.. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+        [0m [90m 27 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
+         [90m 28 |[39m   test([32m"preserves the accepted simple reading flow"[39m[33m,[39m () [33m=>[39m {
+        [31m[1m>[22m[39m[90m 29 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
+         [90m    |[39m           [31m[1m^[22m[39m
+         [90m 30 |[39m
+         [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"iPhone tablature reader"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
+         [90m 32 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"What to play now"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
     
-        Ignored nodes: comments, script, style
-        [36m<body>[39m
-          [36m<div>[39m
-            [36m<section[39m
-              [33maria-labelledby[39m=[32m"iphone-reader-heading"[39m
-              [33mclass[39m=[32m"iphone-reader"[39m
-            [36m>[39m
-              [36m<h2[39m
-                [33mid[39m=[32m"iphone-reader-heading"[39m
-                [33mtabindex[39m=[32m"-1"[39m
-              [36m>[39m
-                [0miPhone tablature reader[0m
-              [36m</h2>[39m
-              [36m<fieldset[39m
-                [33mclass[39m=[32m"iphone-activity-selector"[39m
-              [36m>[39m
-                [36m<legend>[39m
-                  [0mChoose an activity[0m
-                [36m</legend>[39m
-                [36m<label>[39m
-                  [36m<input[39m
-                    [33mchecked[39m=[32m""[39m
-                    [33mname[39m=[32m"iphone-activity"[39m
-                    [33mtype[39m=[32m"radio"[39m
-                    [33mvalue[39m=[32m"read"[39m
-                  [36m/>[39m
-                  [0mRead tablature[0m
-                [36m</label>[39m
-                [36m<label>[39m
-                  [36m<input[39m
-                    [33mname[39m=[32m"iphone-activity"[39m
-                    [33mtype[39m=[32m"radio"[39m
-                    [33mvalue[39m=[32m"practice"[39m
-                  [36m/>[39m
-                  [0mGuided practice[0m
-                [36m</label>[39m
-              [36m</fieldset>[39m
-              [36m<p>[39m
-                [0mEach instruction is one complete musical event. Use Next to move forward, Back to return, or Repeat instruction without changing your place.[0m
-              [36m</p>[39m
-              [36m<section[39m
-                [33maria-labelledby[39m=[32m"current-instruction-heading"[39m
-              [36m>[39m
-                [36m<h3[39m
-                  [33mid[39m=[32m"current-instruction-heading"[39m
-                  [33mtabindex[39m=[32m"-1"[39m
-                [36m>[39m
-                  [0mWhat to play now[0m
-                [36m</h3>[39m
-                [36m<p[39m
-                  [33mclass[39m=[32m"position-location"[39m
-                [36m>[39m
-                  [0mMeasure 2 of 2. Step 1 of 1.[0m
-                [36m</p>[39m
-                [36m<p[39m
-                  [33mclass[39m=[32m"position-description"[39m
-                [36m>[39m
-                  [0mPlay High E string, fret 3.[0m
-                [36m</p>[39m
-              [36m</section>[39m
-              [36m<fieldset[39m
-                [33mclass[39m=[32m"position-controls"[39m
-              [36m>[39m
-                [36m<legend>[39m
-                  [0mReading controls[0m
-                [36m</legend>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mBack[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mdisabled[39m=[32m""[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mNext[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mRepeat instruction[0m
-                [36m</button>[39m
-              [36m</fieldset>[39m
-              [36m<div[39m
-                [33maria-atomic[39m=[32m"true"[39m
-                [33maria-live[39m=[32m"polite"[39m
-                [33mclass[39m=[32m"visually-hidden"[39m
-              [36m/>[39m
-            [36m</section>[39m
-          [36m</div>[39m
-        [36m</body>[39m
-    
-        [0m [90m 46 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"What to play now"[39m }))[33m.[39mtoHaveFocus()[33m;[39m
-         [90m 47 |[39m     expect(screen[33m.[39mgetByText([32m"Play High E string, fret 3."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
-        [31m[1m>[22m[39m[90m 48 |[39m     expect(screen[33m.[39mgetByText([32m"Measure 2 of 2, step 1 of 1."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m    |[39m                   [31m[1m^[22m[39m
-         [90m 49 |[39m   })[33m;[39m
-         [90m 50 |[39m
-         [90m 51 |[39m   test([32m"states clearly when strings are played together"[39m[33m,[39m () [33m=>[39m {[0m
-    
-          at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
-          at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
-          at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
-          at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:48:19)
-    
-      ● IPhoneTabReader › repeats only the current instruction and location on request
-    
-        expect(element).toHaveTextContent()
-    
-        Expected element to have text content:
-          Play High E string, open. Measure 1 of 2, step 1 of 1.
-        Received:
-          Measure 1 of 2. Step 1 of 1. Play High E string, open.
-    
-        [0m [90m 64 |[39m     fireEvent[33m.[39mclick(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Repeat instruction"[39m }))[33m;[39m
-         [90m 65 |[39m
-        [31m[1m>[22m[39m[90m 66 |[39m     expect(container[33m.[39mquerySelector([32m'[aria-live="polite"]'[39m))[33m.[39mtoHaveTextContent(
-         [90m    |[39m                                                             [31m[1m^[22m[39m
-         [90m 67 |[39m       [32m"Play High E string, open. Measure 1 of 2, step 1 of 1."[39m
-         [90m 68 |[39m     )[33m;[39m
-         [90m 69 |[39m   })[33m;[39m[0m
-    
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:66:61)
+          at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
+          at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
+          at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1736:7)
+          at node_modules/@testing-library/react/dist/act-compat.js:63:25
+          at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
+          at render (node_modules/@testing-library/react/dist/pure.js:246:10)
+          at Object.<anonymous> (src/IPhoneTabReader.test.js:29:11)
     
     PASS src/GuidedPractice.test.js
       ● Console
@@ -293,10 +155,10 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
       
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
-    Test Suites: 1 failed, 3 passed, 4 total
-    Tests:       3 failed, 16 passed, 19 total
+    Test Suites: 4 passed, 4 total
+    Tests:       19 passed, 19 total
     Snapshots:   0 total
-    Time:        3.814 s
+    Time:        3.805 s
     Ran all test suites.
 
 ## Production build log
