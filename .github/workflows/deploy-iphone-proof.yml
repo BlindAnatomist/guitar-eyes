@@ -6,6 +6,8 @@ on:
       - work/iphone-voiceover-tablature-audit
     paths-ignore:
       - docs/hosted-preview-status.md
+      - docs/proof-automated-results.md
+      - docs/baseline-automated-results.md
   workflow_dispatch:
 
 concurrency:
