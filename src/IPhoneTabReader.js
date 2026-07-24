@@ -10,24 +10,28 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     setAnnouncement({ text: "", sequence: 0 });
   }, [document]);
 
-  if (!document || document.positions.length === 0) {
-    return null;
-  }
+  if (!document || document.positions.length === 0) return null;
 
+  const currentPosition = document.positions[currentIndex];
+  const currentMeasure = document.measures[currentPosition.measureIndex];
   const currentDescription = describePosition(document, currentIndex);
   const isFirstPosition = currentIndex === 0;
   const isLastPosition = currentIndex === document.positions.length - 1;
+  const isFirstMeasure = currentPosition.measureIndex === 0;
+  const isLastMeasure = currentPosition.measureIndex === document.measures.length - 1;
 
   const announce = (text) => {
-    setAnnouncement((current) => ({
-      text,
-      sequence: current.sequence + 1,
-    }));
+    setAnnouncement((current) => ({ text, sequence: current.sequence + 1 }));
   };
 
   const moveTo = (nextIndex) => {
     setCurrentIndex(nextIndex);
     announce(describePosition(document, nextIndex));
+  };
+
+  const moveToMeasure = (measureIndex) => {
+    const target = document.measures[measureIndex]?.positions?.[0];
+    if (target) moveTo(target.index);
   };
 
   return (
@@ -37,8 +41,8 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </h2>
 
       <p>
-        This proof presents synchronized musical positions without placing every dash,
-        separator, and source character in the VoiceOver swipe order.
+        Navigate synchronized musical positions or jump by measure without placing every
+        dash, separator, and source character in the VoiceOver swipe order.
       </p>
 
       <p className="position-description" id="current-position-description">
@@ -46,6 +50,16 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </p>
 
       <div className="position-controls" aria-describedby="current-position-description">
+        <button type="button" onClick={() => moveTo(0)} disabled={isFirstPosition}>
+          Start of tablature
+        </button>
+        <button
+          type="button"
+          onClick={() => moveToMeasure(currentPosition.measureIndex - 1)}
+          disabled={isFirstMeasure}
+        >
+          Previous measure
+        </button>
         <button
           type="button"
           onClick={() => moveTo(currentIndex - 1)}
@@ -60,13 +74,20 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         >
           Next position
         </button>
+        <button
+          type="button"
+          onClick={() => moveToMeasure(currentPosition.measureIndex + 1)}
+          disabled={isLastMeasure}
+        >
+          Next measure
+        </button>
         <button type="button" onClick={() => announce(currentDescription)}>
           Read current position
         </button>
       </div>
 
       <p className="position-count">
-        Position {currentIndex + 1} of {document.positions.length}
+        Measure {currentMeasure.number} of {document.measures.length}; position {currentPosition.positionInMeasure} of {currentPosition.positionsInMeasure} in this measure; position {currentIndex + 1} of {document.positions.length} overall.
       </p>
 
       {document.warnings.length > 0 && (
@@ -81,9 +102,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       )}
 
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
-        {announcement.text && (
-          <span key={announcement.sequence}>{announcement.text}</span>
-        )}
+        {announcement.text && <span key={announcement.sequence}>{announcement.text}</span>}
       </div>
     </section>
   );
