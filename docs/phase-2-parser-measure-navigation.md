@@ -66,16 +66,25 @@ The verified Phase 2 branch was built and published through the proven temporary
 
 See `docs/phase-2-hosted-preview-status.md`.
 
-## Manual acceptance status
+## Real-iPhone acceptance progress
 
-Automated and hosted work is complete. A narrowly bounded real-iPhone Safari and VoiceOver acceptance is now the only remaining gate.
+The owner first uploaded the Phase 2 fixture from an already-open Safari tab without refreshing. Safari was still running the previously published bounded-proof JavaScript and returned the old `too many lines` rejection. After refreshing the page, the same fixture loaded successfully under the Phase 2 parser.
 
-Required observations:
+This establishes:
 
-1. The hosted multi-measure fixture loads without returning focus to Safari Page Menu.
-2. The first result announces measure 1 and position 1.
-3. `Next measure` lands at the first position of measure 2.
-4. `Previous measure` returns to the first position of measure 1.
-5. `Next position` and `Previous position` remain understandable.
-6. `Start of tablature` returns to the first position after moving away.
-7. Button order and announcements do not become confusing or excessively verbose in VoiceOver.
+1. the hosted Phase 2 parser is present;
+2. the multi-block fixture is accepted after a current-page load;
+3. the earlier rejection was stale page state, not a parser or deployment failure.
+
+This result must not be misrecorded as an intermittent parser failure.
+
+## Remaining manual acceptance gate
+
+Only the new measure-navigation behavior still requires real-iPhone confirmation:
+
+1. The first result announces measure 1 and position 1.
+2. `Next measure` lands at the first position of measure 2.
+3. `Previous measure` returns to the first position of measure 1.
+4. `Next position` and `Previous position` remain understandable.
+5. `Start of tablature` returns to the first position after moving away.
+6. Button order and announcements do not become confusing or excessively verbose in VoiceOver.
