@@ -1,10 +1,10 @@
 # iPhone Proof Hosted Preview Status
 
-Source commit: `ec8674468c4c886e9db5f32f98170f585fbc713a`
+Source commit: `99f98525de5abd2e54fc10065a6adfbac92bf72e`
 
-Build job: `cancelled`
+Build job: `success`
 
-Deployment job: `cancelled`
+Deployment job: `failure`
 
 Preview URL: Not available.
 
@@ -13,9 +13,11 @@ No hosted preview is accepted yet. A failed or skipped deployment must be resolv
 ## Deployment diagnostic
 
     Deployment job metadata:
-    {"completed_at":"2026-07-24T19:36:30Z","conclusion":"cancelled","name":"Publish isolated iPhone proof","started_at":"2026-07-24T19:36:30Z","status":"completed","steps":[]}
+    {"completed_at":"2026-07-24T19:38:27Z","conclusion":"failure","name":"Publish isolated iPhone proof","started_at":"2026-07-24T19:38:25Z","status":"completed","steps":[]}
     
     Check annotations:
+    {"annotation_level":"failure","message":"Branch \"work/iphone-voiceover-tablature-audit\" is not allowed to deploy to github-pages due to environment protection rules.","raw_details":null,"title":".github#L1"}
+    {"annotation_level":"failure","message":"The deployment was rejected or didn't satisfy other protection rules.","raw_details":"","title":""}
     
     Failed job log attempt:
-    run 30121135420 is still in progress; logs will be available when it is complete
+    run 30121189762 is still in progress; logs will be available when it is complete
