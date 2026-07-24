@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import IPhoneTabReader from "./IPhoneTabReader";
 import { parseSixStringTabText } from "./iphoneTabModel";
 
@@ -14,10 +14,6 @@ const document = parseSixStringTabText(
 );
 
 describe("IPhoneTabReader", () => {
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   test("exposes the three bounded iPhone controls", () => {
     render(<IPhoneTabReader document={document} />);
 
@@ -38,13 +34,9 @@ describe("IPhoneTabReader", () => {
   });
 
   test("reads the current semantic description through a restrained live region", () => {
-    jest.useFakeTimers();
     const { container } = render(<IPhoneTabReader document={document} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
-    act(() => {
-      jest.advanceTimersByTime(30);
-    });
 
     const liveRegion = container.querySelector('[aria-live="polite"]');
     expect(liveRegion).toHaveTextContent("Position 1 of 2. High E string, open.");
