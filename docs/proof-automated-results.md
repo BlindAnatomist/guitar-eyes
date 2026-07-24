@@ -1,6 +1,6 @@
 # Bounded iPhone Proof Automated Results
 
-Generated from audit-branch commit: `5f864e83b73d10f8fc1899ce9f264962aa98f1ea`
+Generated from audit-branch commit: `b427d82dbd31f02302e9cfaad1d8d7803a74f13d`
 
 Node version: `v20.20.2`
 
@@ -9,7 +9,7 @@ npm version: `10.8.2`
 ## Result summary
 
 - npm ci exit code: `0`
-- automated test exit code: `1`
+- automated test exit code: `0`
 - production build exit code: `0`
 
 Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.
@@ -20,8 +20,8 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
     npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
-    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
     npm warn deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
     npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
@@ -61,7 +61,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     > react-scripts test --watchAll=false
     
     PASS src/iphoneTabModel.test.js
-    FAIL src/IPhoneTabReader.test.js
+    PASS src/IPhoneTabReader.test.js
       ● Console
     
         console.error
@@ -82,106 +82,6 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
           at Object.<anonymous> (src/IPhoneTabReader.test.js:18:11)
-    
-      ● IPhoneTabReader › moves predictably between synchronized positions
-    
-        TestingLibraryElementError: Found multiple elements with the text: /Position 2 of 2\. High E string, fret 3\./
-    
-        Here are the matching elements:
-    
-        Ignored nodes: comments, script, style
-        [36m<p[39m
-          [33mclass[39m=[32m"position-description"[39m
-          [33mid[39m=[32m"current-position-description"[39m
-        [36m>[39m
-          [0mPosition 2 of 2. High E string, fret 3. low E, A, D, G, and B strings are silent.[0m
-        [36m</p>[39m
-    
-        Ignored nodes: comments, script, style
-        [36m<span>[39m
-          [0mPosition 2 of 2. High E string, fret 3. low E, A, D, G, and B strings are silent.[0m
-        [36m</span>[39m
-    
-        (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
-    
-        Ignored nodes: comments, script, style
-        [36m<body>[39m
-          [36m<div>[39m
-            [36m<section[39m
-              [33maria-labelledby[39m=[32m"iphone-reader-heading"[39m
-              [33mclass[39m=[32m"iphone-reader"[39m
-            [36m>[39m
-              [36m<h2[39m
-                [33mid[39m=[32m"iphone-reader-heading"[39m
-                [33mtabindex[39m=[32m"-1"[39m
-              [36m>[39m
-                [0miPhone tablature reader[0m
-              [36m</h2>[39m
-              [36m<p>[39m
-                [0mThis proof presents synchronized musical positions without placing every dash, separator, and source character in the VoiceOver swipe order.[0m
-              [36m</p>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"position-description"[39m
-                [33mid[39m=[32m"current-position-description"[39m
-              [36m>[39m
-                [0mPosition 2 of 2. High E string, fret 3. low E, A, D, G, and B strings are silent.[0m
-              [36m</p>[39m
-              [36m<div[39m
-                [33maria-describedby[39m=[32m"current-position-description"[39m
-                [33mclass[39m=[32m"position-controls"[39m
-              [36m>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mPrevious position[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mdisabled[39m=[32m""[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mNext position[0m
-                [36m</button>[39m
-                [36m<button[39m
-                  [33mtype[39m=[32m"button"[39m
-                [36m>[39m
-                  [0mRead current position[0m
-                [36m</button>[39m
-              [36m</div>[39m
-              [36m<p[39m
-                [33mclass[39m=[32m"position-count"[39m
-              [36m>[39m
-                [0mPosition [0m
-                [0m2[0m
-                [0m of [0m
-                [0m2[0m
-              [36m</p>[39m
-              [36m<div[39m
-                [33maria-atomic[39m=[32m"true"[39m
-                [33maria-live[39m=[32m"polite"[39m
-                [33mclass[39m=[32m"visually-hidden"[39m
-              [36m>[39m
-                [36m<span>[39m
-                  [0mPosition 2 of 2. High E string, fret 3. low E, A, D, G, and B strings are silent.[0m
-                [36m</span>[39m
-              [36m</div>[39m
-            [36m</section>[39m
-          [36m</div>[39m
-        [36m</body>[39m
-    
-        [0m [90m 29 |[39m     fireEvent[33m.[39mclick(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Next position"[39m }))[33m;[39m
-         [90m 30 |[39m
-        [31m[1m>[22m[39m[90m 31 |[39m     expect(screen[33m.[39mgetByText([35m/Position 2 of 2\. High E string, fret 3\./[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m    |[39m                   [31m[1m^[22m[39m
-         [90m 32 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Next position"[39m }))[33m.[39mtoBeDisabled()[33m;[39m
-         [90m 33 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Previous position"[39m }))[33m.[39mtoBeEnabled()[33m;[39m
-         [90m 34 |[39m   })[33m;[39m[0m
-    
-          at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
-          at getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
-          at getMultipleElementsFoundError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
-          at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
-          at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:31:19)
     
     PASS src/App.test.js
       ● Console
@@ -207,10 +107,10 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
-    Test Suites: 1 failed, 2 passed, 3 total
-    Tests:       1 failed, 11 passed, 12 total
+    Test Suites: 3 passed, 3 total
+    Tests:       12 passed, 12 total
     Snapshots:   0 total
-    Time:        3.186 s
+    Time:        2.396 s
     Ran all test suites.
 
 ## Production build log
