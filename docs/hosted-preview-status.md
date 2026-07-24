@@ -1,15 +1,15 @@
 # iPhone Proof Hosted Preview Status
 
-Temporary publisher workflow commit: `99c799d35a989c1606d7fb43e4bd2375104f6e47`
+Temporary publisher workflow commit: `06d10b34645fd3ca84a76d11a07e50e01b0d6304`
 
 Published source branch: `work/iphone-voiceover-tablature-audit`
 
-Build and automated test job: `failure`
+Build and automated test job: `success`
 
-Deployment job: `skipped`
+Deployment job: `success`
 
-Hosted page and asset verification: `skipped`
+Hosted page and asset verification: `success`
 
-Preview URL: Not accepted.
+Preview URL: `https://blindanatomist.github.io/guitar-eyes/`
 
-The test, build, deployment, or hosted read-back gate did not succeed.
+The page, JavaScript, and CSS were read back successfully after deployment.
