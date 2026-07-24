@@ -10,27 +10,41 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Audit branch: `work/iphone-voiceover-tablature-audit`
+Audit and proof branch: `work/iphone-voiceover-tablature-audit`
 
-Authoritative baseline commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
+Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
 ## Current checkpoint
 
-Checkpoint 2: Fork verified; source and automated baseline audit established.
+Checkpoint 3: Bounded iPhone proof implemented, verified, and hosted for real-device acceptance.
 
 1. GitHub recognizes `BlindAnatomist/guitar-eyes` as a fork.
-2. Fork `main` matches upstream `main` at the authoritative baseline commit.
-3. Fork `main` has not been modified.
-4. The dedicated audit branch was created from the exact baseline commit.
-5. No pull request has been opened.
-6. No upstream files or branches have been modified.
-7. No production or nonproduction deployment has been created yet.
-8. No application behavior has been changed yet.
-9. GitHub Actions is enabled and has executed the branch-only baseline workflow.
-10. The source audit is recorded in `docs/iphone-voiceover-tablature-audit.md`.
-11. Automated baseline evidence is recorded in `docs/baseline-automated-results.md`.
+2. Fork `main` is identical to the authoritative upstream commit: zero commits ahead, zero behind, and no changed files.
+3. Jason Washburn's upstream repository has not been modified.
+4. No pull request has been opened.
+5. The source audit is recorded in `docs/iphone-voiceover-tablature-audit.md`.
+6. Baseline automation results are recorded in `docs/baseline-automated-results.md`.
+7. Proof automation results are recorded in `docs/proof-automated-results.md`.
+8. Hosted preview status is recorded in `docs/hosted-preview-status.md`.
 
-## Automated baseline result
+## Implemented bounded proof
+
+The audit branch now:
+
+1. preserves Jason's desktop grid reader;
+2. adds a separate iPhone semantic reader mode;
+3. accepts one clean plain-text six-string tablature block;
+4. constructs synchronized musical positions rather than splitting only into raw characters;
+5. distinguishes fretted notes, open strings, silent strings, technique notation, and unsupported material;
+6. provides Previous position, Next position, and Read current position controls;
+7. provides semantic vertical descriptions;
+8. avoids placing every dash and separator in the iPhone VoiceOver swipe order;
+9. exposes understandable upload and parse errors;
+10. repairs the multi-column checkbox label association;
+11. uses restrained live announcements and deliberate post-upload focus;
+12. includes a known clean six-string test fixture.
+
+## Automated verification
 
 Environment:
 
@@ -40,59 +54,42 @@ Environment:
 Results:
 
 1. `npm ci` passes.
-2. The untouched application production build passes and compiles successfully.
-3. The committed test command fails because the sole test is stale Create React App boilerplate that still searches for a `Learn React` link.
-4. The red GitHub Actions failure shown during the initial runs did not mean the application could not build.
-5. Installation reported 64 dependency vulnerabilities: 15 low, 15 moderate, 31 high, and 3 critical. These belong to the inherited dependency tree and require separate dependency-risk treatment rather than indiscriminate automated upgrades during the bounded proof.
-6. Create React App and several inherited packages report deprecation or maintenance warnings, but those warnings do not currently prevent a production build.
+2. All 12 automated tests pass.
+3. The production build passes.
+4. The hosted page returns successfully.
+5. The deployed JavaScript asset loads successfully.
+6. The deployed CSS asset loads successfully.
 
-## Commits on the audit branch
+Inherited Create React App, dependency deprecation, and vulnerability warnings remain recorded for later treatment. They do not currently prevent this bounded proof from building or running.
 
-1. `4cde3742bcc352c38e0ef48edbb3d06e79f1aec1` — Add branch-only baseline audit checks.
-2. `37ff09e609f09d2a6d8f04c6d4b691cec8d9e728` — Record the iPhone VoiceOver source audit.
-3. `9babc79b9ec3e4bb28ea393a44030905cabab855` — Establish the first implementation-status checkpoint.
-4. `be24148b315c0c44b62c7667d96de62d049dd943` — Make the workflow self-report installation, build, and test results.
-5. The GitHub Actions bot then committed `docs/baseline-automated-results.md` with the measured result.
+## Hosted preview
 
-## Confirmed source and automated findings
+Preview URL:
 
-1. The existing application intentionally targets Mac keyboard and VoiceOver navigation.
-2. The current parser groups arbitrary nonempty lines and does not create synchronized musical positions.
-3. Whitespace can be destroyed by line trimming.
-4. Fret values above 22 can be corrupted.
-5. Independent per-row digit collapsing can disturb spatial alignment.
-6. The existing grid creates approximately one focusable cell per rendered character.
-7. Technique notation is retained as raw characters but not interpreted.
-8. Errors are console-only.
-9. The multi-column checkbox label is not programmatically associated.
-10. The current test is stale Create React App boilerplate.
-11. The prior GitHub Pages workflow was deleted upstream, leaving no confirmed hosted preview.
-12. The inherited application installs and builds successfully from its committed lockfile.
+`https://blindanatomist.github.io/guitar-eyes/`
 
-## Open gates before proof implementation
+GitHub's `github-pages` environment permits only `main`, so direct publication from the audit branch was rejected. Publication was completed without changing the final repository authority:
 
-1. Replace the stale boilerplate test with tests that describe current preserved behavior and the new bounded parser behavior.
-2. Decide whether an untouched baseline preview adds enough evidence to justify deployment before implementation.
-3. Complete any remaining runtime audit that can only be measured through a hosted iPhone Safari and VoiceOver session.
-4. Implement only the bounded six-string iPhone proof after the audit findings are translated into explicit tests and interfaces.
+1. a temporary workflow commit was placed on fork `main`;
+2. that workflow checked out, tested, built, published, and read back the audit branch;
+3. `main` was then restored to the exact upstream commit;
+4. GitHub comparison confirmed complete restoration;
+5. the permanently failing audit-branch deployment workflow was removed.
 
-## First proof boundary
+The same controlled procedure can be repeated for future preview updates without requiring the user to navigate GitHub settings or spend Work credits.
 
-The proof will:
+## Manual acceptance gate
 
-1. accept one clean plain-text six-string tablature file;
-2. create synchronized musical positions;
-3. preserve the existing desktop mode;
-4. add Previous position, Next position, and Read current position controls;
-5. generate semantic vertical descriptions;
-6. avoid raw-character VoiceOver swipe navigation in the iPhone mode;
-7. expose restrained status and understandable errors;
-8. add deterministic automated tests;
-9. deploy only to an isolated nonproduction preview;
-10. require real-iPhone Safari and VoiceOver acceptance before any upstream proposal.
+Real-iPhone Safari and VoiceOver acceptance has not yet been completed.
 
-## Manual acceptance record
+The next gate is a short test of:
 
-No Guitar Eyes real-iPhone application acceptance test has been requested or completed yet.
+1. initial page and mode announcement;
+2. selecting the known clean text fixture;
+3. predictable focus after upload;
+4. Previous position, Next position, and Read current position behavior;
+5. semantic position descriptions;
+6. absence of raw dash-by-dash VoiceOver navigation in iPhone mode;
+7. restrained announcements and understandable errors.
 
-The July 24 screenshot of the GitHub Actions page confirmed that Actions was already enabled and that three workflow runs had completed with failure status. Subsequent self-reporting established that the failures were caused by the stale test, while installation and production build passed.
+No upstream proposal or pull request is authorized before this gate passes and the result is recorded in the repository.
