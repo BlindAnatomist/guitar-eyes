@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - work/iphone-voiceover-tablature-audit
+      - work/phase-2-parser-measure-navigation
     paths-ignore:
       - docs/proof-automated-results.md
 
 concurrency:
-  group: iphone-extension-verification
+  group: iphone-extension-verification-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -16,7 +17,7 @@ permissions:
 
 jobs:
   verify:
-    name: Test and build bounded iPhone proof
+    name: Test and build iPhone semantic reader
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -73,9 +74,11 @@ jobs:
         run: |
           mkdir -p docs
           {
-            echo '# Bounded iPhone Proof Automated Results'
+            echo '# iPhone Semantic Reader Automated Results'
             echo
-            echo "Generated from audit-branch commit: \`$GITHUB_SHA\`"
+            echo "Generated from branch commit: \`$GITHUB_SHA\`"
+            echo
+            echo "Branch: \`$GITHUB_REF_NAME\`"
             echo
             echo "Node version: \`$(node --version)\`"
             echo
@@ -95,14 +98,14 @@ jobs:
             echo
             echo '## Automated test log'
             echo
-            tail -n 200 test.log | sed 's/^/    /'
+            tail -n 240 test.log | sed 's/^/    /'
             echo
             echo '## Production build log'
             echo
             tail -n 160 build.log | sed 's/^/    /'
           } > docs/proof-automated-results.md
 
-      - name: Commit verification result to audit branch
+      - name: Commit verification result to current branch
         shell: bash
         run: |
           git config user.name 'github-actions[bot]'
