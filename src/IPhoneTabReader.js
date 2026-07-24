@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 function describeWhatToPlay(document, position) {
   const stringById = new Map(document.strings.map((string) => [string.id, string]));
@@ -29,8 +29,9 @@ function describeWhatToPlay(document, position) {
     }
   });
 
-  if (instructions.length === 0) return "Rest. Play nothing at this step.";
-  return `Play ${instructions.join("; ")}.`;
+  if (instructions.length === 0) return "Rest. Play nothing.";
+  if (instructions.length === 1) return `One note. Play ${instructions[0]}.`;
+  return `Play these ${instructions.length} strings together: ${instructions.join("; ")}.`;
 }
 
 function describeLocation(document, position) {
@@ -40,11 +41,20 @@ function describeLocation(document, position) {
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
+  const currentStepHeadingRef = useRef(null);
+  const pendingStepFocusRef = useRef(false);
 
   useEffect(() => {
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
+    pendingStepFocusRef.current = false;
   }, [document]);
+
+  useLayoutEffect(() => {
+    if (!pendingStepFocusRef.current) return;
+    currentStepHeadingRef.current?.focus({ preventScroll: true });
+    pendingStepFocusRef.current = false;
+  }, [currentIndex]);
 
   if (!document || document.positions.length === 0) return null;
 
@@ -61,9 +71,8 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   };
 
   const moveTo = (nextIndex) => {
-    const nextPosition = document.positions[nextIndex];
+    pendingStepFocusRef.current = true;
     setCurrentIndex(nextIndex);
-    announce(`${describeLocation(document, nextPosition)} ${describeWhatToPlay(document, nextPosition)}`);
   };
 
   const moveToMeasure = (measureIndex) => {
@@ -78,20 +87,21 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </h2>
 
       <p>
-        The reader first tells you where you are, then what to play. Use step controls for the
-        next playable event. Use measure controls to jump to the beginning of another measure.
+        Each step is one complete musical event. One string means one note. Multiple strings
+        listed together are played at the same time. Activate a navigation button, then the
+        reader moves focus to the new current step.
       </p>
 
       <section aria-labelledby="current-step-heading">
-        <h3 id="current-step-heading">Current step</h3>
+        <h3 id="current-step-heading" ref={currentStepHeadingRef} tabIndex="-1">
+          Current step
+        </h3>
         <p className="position-location">{locationText}</p>
-        <p className="position-description" id="current-position-description">
-          {playingText}
-        </p>
+        <p className="position-description">{playingText}</p>
       </section>
 
-      <fieldset className="position-controls" aria-describedby="current-position-description">
-        <legend>Move one step</legend>
+      <fieldset className="position-controls">
+        <legend>Move one musical step</legend>
         <button type="button" onClick={() => moveTo(currentIndex - 1)} disabled={isFirstStep}>
           Previous step
         </button>
@@ -104,20 +114,20 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </fieldset>
 
       <fieldset className="measure-controls">
-        <legend>Jump by measure</legend>
+        <legend>Jump to a measure beginning</legend>
         <button
           type="button"
           onClick={() => moveToMeasure(currentPosition.measureIndex - 1)}
           disabled={isFirstMeasure}
         >
-          Previous measure start
+          Previous measure beginning
         </button>
         <button
           type="button"
           onClick={() => moveToMeasure(currentPosition.measureIndex + 1)}
           disabled={isLastMeasure}
         >
-          Next measure start
+          Next measure beginning
         </button>
         <button type="button" onClick={() => moveTo(0)} disabled={isFirstStep}>
           Beginning of tablature
