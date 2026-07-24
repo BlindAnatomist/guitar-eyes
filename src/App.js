@@ -34,7 +34,9 @@ function App() {
   const [iphoneDocument, setIphoneDocument] = useState(null);
   const [numColumns, setNumColumns] = useState(1);
   const [isMultiColumnNav, setIsMultiColumnNav] = useState(false);
-  const [isInfoOpen, setIsInfoOpen] = useState(true);
+  const [isInfoOpen, setIsInfoOpen] = useState(
+    () => getInitialReadingMode() === "desktop"
+  );
   const [selectedInstrument, setSelectedInstrument] = useState("guitar");
   const [readingMode, setReadingMode] = useState(getInitialReadingMode);
   const [isReadingFile, setIsReadingFile] = useState(false);
@@ -185,22 +187,6 @@ function App() {
         Safari and VoiceOver proof.
       </p>
 
-      <section>
-        <button
-          type="button"
-          onClick={toggleInfoSection}
-          aria-expanded={isInfoOpen}
-          aria-controls="desktop-instructions"
-        >
-          {isInfoOpen ? "Close info section" : "Open info section"}
-        </button>
-        {isInfoOpen && (
-          <div id="desktop-instructions">
-            <InfoSection />
-          </div>
-        )}
-      </section>
-
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>
         <label>
@@ -247,6 +233,24 @@ function App() {
       <div hidden={readingMode !== "iphone"}>
         <IPhoneTabReader document={iphoneDocument} ref={iphoneHeadingRef} />
       </div>
+
+      <section className="desktop-instructions-control">
+        <button
+          type="button"
+          onClick={toggleInfoSection}
+          aria-expanded={isInfoOpen}
+          aria-controls="desktop-instructions"
+        >
+          {isInfoOpen
+            ? "Close Mac keyboard instructions"
+            : "Open Mac keyboard instructions"}
+        </button>
+        {isInfoOpen && (
+          <div id="desktop-instructions">
+            <InfoSection />
+          </div>
+        )}
+      </section>
 
       <section hidden={readingMode !== "desktop"} aria-label="Desktop grid reader">
         <div>
