@@ -1,4 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { flushSync } from "react-dom";
 import Upload from "./Upload";
 import { parseFile } from "./parseFile";
@@ -49,6 +55,34 @@ function App() {
   const iphoneHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
   const desktopFocusPendingRef = useRef(false);
+  const iphoneFocusPendingRef = useRef(false);
+  const iphoneFocusFrameRef = useRef(null);
+
+  const focusIphoneReaderWhenBrowserReturns = useCallback(() => {
+    if (
+      !iphoneFocusPendingRef.current ||
+      readingMode !== "iphone" ||
+      document.visibilityState === "hidden"
+    ) {
+      return;
+    }
+
+    if (iphoneFocusFrameRef.current !== null) {
+      window.cancelAnimationFrame(iphoneFocusFrameRef.current);
+    }
+
+    iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
+      iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
+        const heading = iphoneHeadingRef.current;
+        if (!heading) return;
+
+        heading.focus({ preventScroll: true });
+        if (document.activeElement === heading) {
+          iphoneFocusPendingRef.current = false;
+        }
+      });
+    });
+  }, [readingMode]);
 
   useEffect(() => {
     if (
@@ -63,8 +97,30 @@ function App() {
 
   useLayoutEffect(() => {
     if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
-    iphoneHeadingRef.current?.focus({ preventScroll: true });
-  }, [iphoneFocusRequest, readingMode]);
+    iphoneFocusPendingRef.current = true;
+    focusIphoneReaderWhenBrowserReturns();
+  }, [focusIphoneReaderWhenBrowserReturns, iphoneFocusRequest, readingMode]);
+
+  useEffect(() => {
+    const recoverPendingIphoneFocus = () => {
+      if (document.visibilityState === "visible") {
+        focusIphoneReaderWhenBrowserReturns();
+      }
+    };
+
+    window.addEventListener("focus", recoverPendingIphoneFocus);
+    window.addEventListener("pageshow", recoverPendingIphoneFocus);
+    document.addEventListener("visibilitychange", recoverPendingIphoneFocus);
+
+    return () => {
+      window.removeEventListener("focus", recoverPendingIphoneFocus);
+      window.removeEventListener("pageshow", recoverPendingIphoneFocus);
+      document.removeEventListener("visibilitychange", recoverPendingIphoneFocus);
+      if (iphoneFocusFrameRef.current !== null) {
+        window.cancelAnimationFrame(iphoneFocusFrameRef.current);
+      }
+    };
+  }, [focusIphoneReaderWhenBrowserReturns]);
 
   const focusSoon = (ref) => {
     window.setTimeout(() => ref.current?.focus(), 0);
@@ -117,6 +173,7 @@ function App() {
     }
 
     if (readingMode === "iphone" && mobileResult) {
+      iphoneFocusPendingRef.current = true;
       flushSync(() => {
         setIphoneDocument(mobileResult);
         setIsReadingFile(false);
@@ -156,11 +213,14 @@ function App() {
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {
-      if (iphoneDocument) setIphoneFocusRequest((current) => current + 1);
-      else if (iphoneError) focusSoon(errorHeadingRef);
+      if (iphoneDocument) {
+        iphoneFocusPendingRef.current = true;
+        setIphoneFocusRequest((current) => current + 1);
+      } else if (iphoneError) focusSoon(errorHeadingRef);
       return;
     }
 
+    iphoneFocusPendingRef.current = false;
     if (tablature.length > 0) {
       window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
     } else if (desktopError) {
