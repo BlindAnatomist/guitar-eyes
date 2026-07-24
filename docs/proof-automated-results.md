@@ -1,8 +1,8 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `3b2baaf16eff8d9b3c28d34fdd2e91c16c64016b`
+Generated from branch commit: `b907bb6b31e7bf99dd4ceeba9785b49787a80bf7`
 
-Branch: `work/phase-2-parser-measure-navigation`
+Branch: `work/phase-3-guided-practice`
 
 Node version: `v20.20.2`
 
@@ -11,7 +11,7 @@ npm version: `10.8.2`
 ## Result summary
 
 - npm ci exit code: `0`
-- automated test exit code: `0`
+- automated test exit code: `1`
 - production build exit code: `0`
 
 Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.
@@ -41,7 +41,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 10s
+    added 1678 packages, and audited 1679 packages in 11s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -59,33 +59,13 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
 ## Automated test log
 
     
-    > guitar-eyes@0.1.0 test
-    > react-scripts test --watchAll=false
-    
-    PASS src/iphoneTabModel.test.js
-    PASS src/IPhoneTabReader.test.js
-      ● Console
-    
-        console.error
-          Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
-    
-        [0m [90m 27 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
-         [90m 28 |[39m   test([32m"presents one instruction and one simple navigation group"[39m[33m,[39m () [33m=>[39m {
-        [31m[1m>[22m[39m[90m 29 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
-         [90m    |[39m           [31m[1m^[22m[39m
-         [90m 30 |[39m
-         [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"What to play now"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 32 |[39m     expect(screen[33m.[39mgetByText([32m"Play High E string, open."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
-    
-          at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
-          at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
-          at actWithWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:1736:7)
-          at node_modules/@testing-library/react/dist/act-compat.js:63:25
-          at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
-          at render (node_modules/@testing-library/react/dist/pure.js:246:10)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:29:11)
-    
-    PASS src/App.test.js
+    babel-preset-react-app is part of the create-react-app project, [1mwhich
+    is not maintianed anymore[0;33m. It is thus unlikely that this bug will
+    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
+    your devDependencies to work around this error. This will make this message
+    go away.[0m
+      
+    FAIL src/App.test.js
       ● Console
     
         console.error
@@ -107,12 +87,216 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
           at Object.<anonymous> (src/App.test.js:29:11)
     
-    A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+      ● Guitar Eyes application shell › recovers focus to the persistent iPhone reader heading after Safari returns from file selection
     
-    Test Suites: 3 passed, 3 total
-    Tests:       16 passed, 16 total
+        Unable to find role="heading" and name "iPhone tablature reader"
+    
+        Ignored nodes: comments, script, style
+        [36m<body>[39m
+          [36m<div>[39m
+            [36m<main[39m
+              [33mclass[39m=[32m"app-shell"[39m
+            [36m>[39m
+              [36m<h1>[39m
+                [0mGuitar Eyes for Mac - The Guitar Tablature reader for the Visually Impaired Guitarist[0m
+              [36m</h1>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"extension-note"[39m
+              [36m>[39m
+                [0mThis branch preserves Jason Washburn's desktop reader and adds a bounded iPhone Safari and VoiceOver proof.[0m
+              [36m</p>[39m
+              [36m<fieldset[39m
+                [33mclass[39m=[32m"mode-selector"[39m
+              [36m>[39m
+                [36m<legend>[39m
+                  [0mReading mode[0m
+                [36m</legend>[39m
+                [36m<label>[39m
+                  [36m<input[39m
+                    [33mchecked[39m=[32m""[39m
+                    [33mname[39m=[32m"reading-mode"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"iphone"[39m
+                  [36m/>[39m
+                  [0miPhone semantic reader[0m
+                [36m</label>[39m
+                [36m<label>[39m
+                  [36m<input[39m
+                    [33mname[39m=[32m"reading-mode"[39m
+                    [33mtype[39m=[32m"radio"[39m
+                    [33mvalue[39m=[32m"desktop"[39m
+                  [36m/>[39m
+                  [0mDesktop grid reader[0m
+                [36m</label>[39m
+              [36m</fieldset>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"upload-control"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mfor[39m=[32m"file-upload"[39m
+                [36m>[39m
+                  [0mUpload .txt file:[0m
+                [36m</label>[39m
+                [0m [0m
+                [36m<input[39m
+                  [33maccept[39m=[32m".txt,text/plain"[39m
+                  [33mid[39m=[32m"file-upload"[39m
+                  [33mtype[39m=[32m"file"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div>[39m
+                [36m<label[39m
+                  [33mfor[39m=[32m"instrument-dropdown"[39m
+                [36m>[39m
+                  [0mChoose Instrument: [0m
+                [36m</label>[39m
+                [36m<select[39m
+                  [33mid[39m=[32m"instrument-dropdown"[39m
+                [36m>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"guitar"[39m
+                  [36m>[39m
+                    [0mGuitar (6 strings)[0m
+                  [36m</option>[39m
+                  [36m<option[39m
+                    [33mvalue[39m=[32m"bass"[39m
+                  [36m>[39m
+                    [0mBass (4 strings)[0m
+                  [36m</option>[39m
+                [36m</select>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-atomic[39m=[32m"true"[39m
+                [33maria-live[39m=[32m"polite"[39m
+                [33mclass[39m=[32m"status-message"[39m
+              [36m>[39m
+                [0mLoaded 5 synchronized positions in iPhone reading mode.[0m
+              [36m</div>[39m
+              [36m<div>[39m
+                [36m<section[39m
+                  [33maria-labelledby[39m=[32m"iphone-reader-heading"[39m
+                  [33mclass[39m=[32m"iphone-reader"[39m
+                [36m>[39m
+                  [36m<h2[39m
+                    [33mid[39m=[32m"iphone-reader-heading"[39m
+                    [33mtabindex[39m=[32m"-1"[39m
+                  [36m>[39m
+                    [0miPhone tablature[0m
+                  [36m</h2>[39m
+                  [36m<fieldset[39m
+                    [33mclass[39m=[32m"iphone-activity-selector"[39m
+                  [36m>[39m
+                    [36m<legend>[39m
+                      [0mChoose an activity[0m
+                    [36m</legend>[39m
+                    [36m<label>[39m
+                      [36m<input[39m
+                        [33mchecked[39m=[32m""[39m
+                        [33mname[39m=[32m"iphone-activity"[39m
+                        [33mtype[39m=[32m"radio"[39m
+                        [33mvalue[39m=[32m"read"[39m
+                      [36m/>[39m
+                      [0mRead tablature[0m
+                    [36m</label>[39m
+                    [36m<label>[39m
+                      [36m<input[39m
+                        [33mname[39m=[32m"iphone-activity"[39m
+                        [33mtype[39m=[32m"radio"[39m
+                        [33mvalue[39m=[32m"practice"[39m
+                      [36m/>[39m
+                      [0mGuided practice[0m
+                    [36m</label>[39m
+                  [36m</fieldset>[39m
+                  [36m<p>[39m
+                    [0mEach instruction is one complete musical event. Use Next to move forward, Back to return, or Repeat instruction without changing your place.[0m
+                  [36m</p>[39m
+                  [36m<section[39m
+                    [33maria-labelledby[39m=[32m"current-instruction-heading"[39m
+                  [36m>[39m
+                    [36m<h3[39m
+                      [33mid[39m=[32m"current-instruction-heading"[39m
+                      [33mtabindex[39m=[32m"-1"[39m
+                    [36m>[39m
+                      [0mWhat to play now[0m
+                    [36m</h3>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"position-location"[39m
+                    [36m>[39m
+                      [0mMeasure 1 of 1. Step 1 of 5.[0m
+                    [36m</p>[39m
+                    [36m<p[39m
+                      [33mclass[39m=[32m"position-description"[39m
+                    [36m>[39m
+                      [0mPlay together: A string, fret 3; D string, fret 2; G string, open; B string, fret 1; High E string, open.[0m
+                    [36m</p>[39m
+                  [36m</section>[39m
+                  [36m<fieldset[39m
+                    [33mclass[39m=[32m"position-controls"[39m
+                  [36m>[39m
+                    [36m<legend>[39m
+                      [0mReading controls[0m
+                    [36m</legend>[39m
+                    [36m<button[39m
+                      [33mdisabled[39m=[32m""[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mBack[0m
+                    [36m</button>[39m
+                    [36m<button[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mNext[0m
+                    [36m</button>[39m
+                    [36m<button[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [0mRepeat instruction[0m
+                    [36m</button>[39m
+                  [36m</fieldset>[39m
+                  [36m<details[39m
+                    [33mclass[39m=[32m"reader-warning"[39m
+                  [36m>[39m
+                    [36m<summary>[39m
+                      [0mParsing notes[0m
+                    [36m</summary>[39m
+                    [36m<ul>[39m
+                      [36m<li>[39m
+                        [0mOne or more string blocks have unequal line lengths. Original columns were preserved, and missing trailing columns are treated as silent.[0m
+                      [36m</li>[39m
+                    [36m</ul>[39m
+                  [36m</details>[39m
+                  [36m<div[39m
+                    [33maria-atomic[39m=[32m"true"[39m
+                    [33maria-live[39m=[32m"polite"[39m
+                    [33mclass[39m=[32m"visually-hidden"[39m
+                  [36m/>[39m
+                [36m</section>[39m
+              [36m</div>[39m
+              [36m<section[39m
+                [33mclass[39m=[32m"desktop-instructions-control"[39m
+              [36m>[39m
+                [36m<button[39m
+                  [33maria-controls[39m=[32m"desktop-instructions"[39m
+                  [33maria-expanded[39m=[32m"false"[39m
+                  [33mtype[39m=[32m"button"[39m
+                [...
+    
+        [0m [90m 121 |[39m     })[33m;[39m
+         [90m 122 |[39m
+        [31m[1m>[22m[39m[90m 123 |[39m     [36mconst[39m heading [33m=[39m [36mawait[39m screen[33m.[39mfindByRole([32m"heading"[39m[33m,[39m {
+         [90m     |[39m                                  [31m[1m^[22m[39m
+         [90m 124 |[39m       level[33m:[39m [35m2[39m[33m,[39m
+         [90m 125 |[39m       name[33m:[39m [32m"iPhone tablature reader"[39m[33m,[39m
+         [90m 126 |[39m     })[33m;[39m[0m
+    
+          at waitForWrapper (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/wait-for.js:166:27)
+          at findByRole (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:86:33)
+          at Object.<anonymous> (src/App.test.js:123:34)
+    
+    Test Suites: 2 failed, 2 passed, 4 total
+    Tests:       4 failed, 15 passed, 19 total
     Snapshots:   0 total
-    Time:        3.357 s
+    Time:        4.065 s
     Ran all test suites.
 
 ## Production build log
@@ -144,7 +328,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      75.08 kB  build/static/js/main.ec6f8ba9.js
+      75.76 kB  build/static/js/main.7985cb8b.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
