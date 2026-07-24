@@ -1,6 +1,6 @@
 # Baseline Automated Audit Results
 
-Generated from audit-branch commit: `be24148b315c0c44b62c7667d96de62d049dd943`
+Generated from audit-branch commit: `ea86e1de18b3f4df290dcba40781d3683229043f`
 
 Node version: `v20.20.2`
 
@@ -18,9 +18,9 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
 
     npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
     npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
-    npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
     npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+    npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
     npm warn deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
@@ -39,7 +39,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 12s
+    added 1678 packages, and audited 1679 packages in 11s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -246,7 +246,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     Test Suites: 1 failed, 1 total
     Tests:       1 failed, 1 total
     Snapshots:   0 total
-    Time:        1.492 s
+    Time:        1.48 s
     Ran all test suites.
     Jest did not exit one second after the test run has completed.
     
