@@ -1,10 +1,10 @@
 # iPhone Proof Hosted Preview Status
 
-Source commit: `6ced8df807c7c1d119bd6dc7576a718b8adae931`
+Source commit: `e67d9bbdd98d50914478873ea6d647c1f500a5dd`
 
-Build job: `success`
+Build job: `cancelled`
 
-Deployment job: `failure`
+Deployment job: `cancelled`
 
 Preview URL: Not available. GitHub Pages may still need to be enabled with GitHub Actions as its source.
 
