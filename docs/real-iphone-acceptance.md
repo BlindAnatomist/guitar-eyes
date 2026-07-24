@@ -69,6 +69,41 @@ Checkpoint 1 verdict: Pass.
 
 ## Checkpoint 2: Clean six-string upload and focus recovery
 
-Status: Pending.
+Fixture: `fixtures/iphone-proof-clean-six-string.txt`
 
-The next test will use the repository fixture `fixtures/iphone-proof-clean-six-string.txt`. Acceptance will verify file selection, restrained status feedback, focus movement to the iPhone tablature reader heading, and the initial semantic position description.
+Reported behavior:
+
+1. The file was selected successfully from the iPhone Files interface.
+2. Safari and VoiceOver returned focus to the browser page menu instead of the application result.
+3. After swiping back through the page, the tester found the guitar-or-bass instrument selector.
+4. The restrained status announced that five synchronized positions had loaded in iPhone reader mode.
+5. The `iPhone tablature reader` heading was present.
+6. The semantic tablature output was understandable and appeared to describe the synchronized positions correctly.
+
+What passed:
+
+1. Plain-text file selection worked.
+2. Six-string parsing worked.
+3. Five synchronized positions were produced.
+4. The iPhone reader rendered.
+5. The semantic descriptions were understandable in VoiceOver.
+
+Defect found:
+
+Focus did not recover to the `iPhone tablature reader` heading after the native iPhone file picker closed. The existing single zero-delay focus attempt was not sufficient to overcome Safari's return to browser chrome.
+
+Checkpoint 2 verdict: Partial pass with a focus-recovery defect.
+
+Remediation:
+
+1. Keep the reader heading programmatically focusable.
+2. Retry heading focus immediately and again after 250 and 700 milliseconds when a new document mounts.
+3. Scroll the focused heading into view when supported.
+4. Add an automated test that verifies all three focus attempts and final active-element state.
+
+Remediation commits:
+
+- `dee70f65c2b15f79efeaccf8d881d00a655516b4`
+- `d788004aae732bbc8781e938a5d5e11fa8ae89a1`
+
+Retest status: Pending automated verification and refreshed hosted preview.
