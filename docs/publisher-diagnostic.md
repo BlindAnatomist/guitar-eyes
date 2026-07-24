@@ -1,10 +1,12 @@
 # Temporary Publisher Diagnostic
 
-Workflow commit: `51573ac73890407dc2420591ae1bb804fc09e79a`
+Workflow commit: `06d10b34645fd3ca84a76d11a07e50e01b0d6304`
+
+Tested audit commit: `de72d0d336c1e23db9c796141f05f6a06fc92770`
 
 Install exit code: `0`
 
-Test exit code: `1`
+Test exit code: `0`
 
 Build exit code: `0`
 
@@ -37,7 +39,7 @@ Build exit code: `0`
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
           at Object.<anonymous> (src/IPhoneTabReader.test.js:18:11)
     
-    FAIL src/App.test.js
+    PASS src/App.test.js
       ● Console
     
         console.error
@@ -59,39 +61,12 @@ Build exit code: `0`
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
           at Object.<anonymous> (src/App.test.js:20:11)
     
-      ● Guitar Eyes application shell › preserves the desktop reader and exposes the iPhone mode
-    
-        TypeError: expect(...).toBeExpanded is not a function
-    
-        [0m [90m 34 |[39m     expect(
-         [90m 35 |[39m       screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Close Mac keyboard instructions"[39m })
-        [31m[1m>[22m[39m[90m 36 |[39m     )[33m.[39mtoBeExpanded()[33m;[39m
-         [90m    |[39m       [31m[1m^[22m[39m
-         [90m 37 |[39m   })[33m;[39m
-         [90m 38 |[39m
-         [90m 39 |[39m   test([32m"allows the reader mode to change without removing desktop controls"[39m[33m,[39m () [33m=>[39m {[0m
-    
-          at Object.<anonymous> (src/App.test.js:36:7)
-    
-      ● Guitar Eyes application shell › puts iPhone controls before collapsed Mac instructions on a touch device
-    
-        TypeError: expect(...).not.toBeExpanded is not a function
-    
-        [0m [90m 72 |[39m
-         [90m 73 |[39m     expect(iphoneMode)[33m.[39mtoBeChecked()[33m;[39m
-        [31m[1m>[22m[39m[90m 74 |[39m     expect(instructionsButton)[33m.[39mnot[33m.[39mtoBeExpanded()[33m;[39m
-         [90m    |[39m                                    [31m[1m^[22m[39m
-         [90m 75 |[39m     expect(screen[33m.[39mqueryByText([35m/Welcome to Guitar Eyes for Mac!/i[39m))[33m.[39mnot[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 76 |[39m     expect(
-         [90m 77 |[39m       upload[33m.[39mcompareDocumentPosition(instructionsButton) [33m&[39m [33mNode[39m[33m.[39m[33mDOCUMENT_POSITION_FOLLOWING[39m[0m
-    
-          at Object.<anonymous> (src/App.test.js:74:36)
-    
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
-    Test Suites: 1 failed, 2 passed, 3 total
-    Tests:       2 failed, 11 passed, 13 total
+    
+    Test Suites: 3 passed, 3 total
+    Tests:       13 passed, 13 total
     Snapshots:   0 total
-    Time:        3.144 s
+    Time:        3.317 s
     Ran all test suites.
 
 ## Build log
