@@ -1,6 +1,6 @@
 # Bounded iPhone Proof Automated Results
 
-Generated from audit-branch commit: `4a1afdd688e22c1e16c4c1e3127699274dd74a27`
+Generated from audit-branch commit: `fc91883edf079a0f0f92eda6a679d31dacedc939`
 
 Node version: `v20.20.2`
 
@@ -39,7 +39,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 12s
+    added 1678 packages, and audited 1679 packages in 13s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -89,13 +89,13 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
         console.error
           Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
-        [0m [90m 18 |[39m describe([32m"Guitar Eyes application shell"[39m[33m,[39m () [33m=>[39m {
-         [90m 19 |[39m   test([32m"preserves the desktop reader and exposes the iPhone mode"[39m[33m,[39m () [33m=>[39m {
-        [31m[1m>[22m[39m[90m 20 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
+        [0m [90m 27 |[39m describe([32m"Guitar Eyes application shell"[39m[33m,[39m () [33m=>[39m {
+         [90m 28 |[39m   test([32m"preserves the desktop reader and exposes the iPhone mode"[39m[33m,[39m () [33m=>[39m {
+        [31m[1m>[22m[39m[90m 29 |[39m     render([33m<[39m[33mApp[39m [33m/[39m[33m>[39m)[33m;[39m
          [90m    |[39m           [31m[1m^[22m[39m
-         [90m 21 |[39m
-         [90m 22 |[39m     expect(
-         [90m 23 |[39m       screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m {[0m
+         [90m 30 |[39m
+         [90m 31 |[39m     expect(
+         [90m 32 |[39m       screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m {[0m
     
           at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
           at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
@@ -103,14 +103,14 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at node_modules/@testing-library/react/dist/act-compat.js:63:25
           at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
-          at Object.<anonymous> (src/App.test.js:20:11)
+          at Object.<anonymous> (src/App.test.js:29:11)
     
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
     Test Suites: 3 passed, 3 total
     Tests:       14 passed, 14 total
     Snapshots:   0 total
-    Time:        3.518 s
+    Time:        3.619 s
     Ran all test suites.
 
 ## Production build log
@@ -142,7 +142,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      74.53 kB  build/static/js/main.8e8501b5.js
+      74.73 kB  build/static/js/main.77e81560.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
