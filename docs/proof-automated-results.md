@@ -1,6 +1,6 @@
 # Bounded iPhone Proof Automated Results
 
-Generated from audit-branch commit: `f34fb1efb9c5b2c766ae5fa43f186fcd5e7cded0`
+Generated from audit-branch commit: `4a1afdd688e22c1e16c4c1e3127699274dd74a27`
 
 Node version: `v20.20.2`
 
@@ -9,7 +9,7 @@ npm version: `10.8.2`
 ## Result summary
 
 - npm ci exit code: `0`
-- automated test exit code: `1`
+- automated test exit code: `0`
 - production build exit code: `0`
 
 Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.
@@ -20,8 +20,8 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
     npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
-    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
     npm warn deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
     npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
@@ -39,7 +39,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 11s
+    added 1678 packages, and audited 1679 packages in 12s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -61,19 +61,19 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     > react-scripts test --watchAll=false
     
     PASS src/iphoneTabModel.test.js
-    FAIL src/IPhoneTabReader.test.js
+    PASS src/IPhoneTabReader.test.js
       ● Console
     
         console.error
           Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
-        [0m [90m 17 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
-         [90m 18 |[39m   test([32m"exposes the three bounded iPhone controls"[39m[33m,[39m () [33m=>[39m {
-        [31m[1m>[22m[39m[90m 19 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
+        [0m [90m 16 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
+         [90m 17 |[39m   test([32m"exposes the three bounded iPhone controls"[39m[33m,[39m () [33m=>[39m {
+        [31m[1m>[22m[39m[90m 18 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
          [90m    |[39m           [31m[1m^[22m[39m
-         [90m 20 |[39m
-         [90m 21 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Previous position"[39m }))[33m.[39mtoBeDisabled()[33m;[39m
-         [90m 22 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Next position"[39m }))[33m.[39mtoBeEnabled()[33m;[39m[0m
+         [90m 19 |[39m
+         [90m 20 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Previous position"[39m }))[33m.[39mtoBeDisabled()[33m;[39m
+         [90m 21 |[39m     expect(screen[33m.[39mgetByRole([32m"button"[39m[33m,[39m { name[33m:[39m [32m"Next position"[39m }))[33m.[39mtoBeEnabled()[33m;[39m[0m
     
           at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
           at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
@@ -81,24 +81,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at node_modules/@testing-library/react/dist/act-compat.js:63:25
           at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:19:11)
-    
-      ● IPhoneTabReader › retries focus on the reader heading after a document loads
-    
-        expect(jest.fn()).toHaveBeenCalledTimes(expected)
-    
-        Expected number of calls: 3
-        Received number of calls: 0
-    
-        [0m [90m 57 |[39m     })[33m;[39m
-         [90m 58 |[39m
-        [31m[1m>[22m[39m[90m 59 |[39m     expect(focusSpy)[33m.[39mtoHaveBeenCalledTimes([35m3[39m)[33m;[39m
-         [90m    |[39m                      [31m[1m^[22m[39m
-         [90m 60 |[39m     expect(document[33m.[39mactiveElement)[33m.[39mtoBe(headingRef[33m.[39mcurrent)[33m;[39m
-         [90m 61 |[39m
-         [90m 62 |[39m     focusSpy[33m.[39mmockRestore()[33m;[39m[0m
-    
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:59:22)
+          at Object.<anonymous> (src/IPhoneTabReader.test.js:18:11)
     
     PASS src/App.test.js
       ● Console
@@ -124,10 +107,10 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
-    Test Suites: 1 failed, 2 passed, 3 total
-    Tests:       1 failed, 13 passed, 14 total
+    Test Suites: 3 passed, 3 total
+    Tests:       14 passed, 14 total
     Snapshots:   0 total
-    Time:        3.478 s
+    Time:        3.518 s
     Ran all test suites.
 
 ## Production build log
@@ -159,7 +142,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      74.46 kB  build/static/js/main.747e4e0d.js
+      74.53 kB  build/static/js/main.8e8501b5.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
