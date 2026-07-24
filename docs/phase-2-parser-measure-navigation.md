@@ -37,13 +37,45 @@ Expand the accepted semantic reader without disturbing its proven iPhone reading
 - Global and per-measure position metadata.
 - Measure-aware spoken position descriptions.
 - Start, previous measure, next measure, previous position, next position, and read-current controls.
-- Multi-block, multi-measure fixture.
+- Multi-block, multi-measure fixture in both repository and hosted-public fixture paths.
 - Parser and reader regression tests.
 
-## Verification status
+## Automated verification
 
-Pending repository automation.
+Repository automation passed on the implementation head:
+
+1. `npm ci` passed.
+2. Three test suites passed.
+3. All 16 automated tests passed.
+4. The production build passed.
+5. Existing upload-focus regression coverage continued to pass.
+6. Parser tests cover headings, blank lines, multiple blocks, internal measure boundaries, two-digit frets, open strings, techniques, unsupported notation, and incomplete blocks.
+7. Reader tests cover position navigation, measure navigation, return to beginning, disabled boundary states, and restrained live announcements.
+
+See `docs/proof-automated-results.md`.
+
+## Hosted verification
+
+The verified Phase 2 branch was built and published through the proven temporary-main procedure.
+
+- Verification and build: success.
+- GitHub Pages deployment: success.
+- Preview: `https://blindanatomist.github.io/guitar-eyes/`
+- Hosted fixture: `https://blindanatomist.github.io/guitar-eyes/fixtures/phase-2-multi-measure-six-string.txt`
+- Fork `main` was restored to `60c2e5de0887b1bcdd426d932632946edd07d3c3` and independently compared as identical: zero ahead, zero behind, no changed files.
+
+See `docs/phase-2-hosted-preview-status.md`.
 
 ## Manual acceptance status
 
-Not requested. Manual testing remains blocked until automation and hosted publication pass.
+Automated and hosted work is complete. A narrowly bounded real-iPhone Safari and VoiceOver acceptance is now the only remaining gate.
+
+Required observations:
+
+1. The hosted multi-measure fixture loads without returning focus to Safari Page Menu.
+2. The first result announces measure 1 and position 1.
+3. `Next measure` lands at the first position of measure 2.
+4. `Previous measure` returns to the first position of measure 1.
+5. `Next position` and `Previous position` remain understandable.
+6. `Start of tablature` returns to the first position after moving away.
+7. Button order and announcements do not become confusing or excessively verbose in VoiceOver.
