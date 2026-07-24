@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Upload from "./Upload";
 import { parseFile } from "./parseFile";
 import DataGrid from "./DataGrid";
@@ -43,6 +44,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("");
   const [iphoneError, setIphoneError] = useState("");
   const [desktopError, setDesktopError] = useState("");
+  const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
   const gridRefs = useRef([]);
   const iphoneHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
@@ -58,6 +60,11 @@ function App() {
       desktopFocusPendingRef.current = false;
     }
   }, [tablature, readingMode]);
+
+  useLayoutEffect(() => {
+    if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
+    iphoneHeadingRef.current?.focus({ preventScroll: true });
+  }, [iphoneFocusRequest, readingMode]);
 
   const focusSoon = (ref) => {
     window.setTimeout(() => ref.current?.focus(), 0);
@@ -102,7 +109,6 @@ function App() {
       try {
         const sourceText = await readTextFile(file);
         mobileResult = parseSixStringTabText(sourceText);
-        setIphoneDocument(mobileResult);
       } catch (error) {
         setIphoneError(
           messageFromError(error, "The file could not be parsed for iPhone reading mode.")
@@ -110,18 +116,24 @@ function App() {
       }
     }
 
-    setIsReadingFile(false);
-
-    if (readingMode === "iphone") {
-      if (mobileResult) {
+    if (readingMode === "iphone" && mobileResult) {
+      flushSync(() => {
+        setIphoneDocument(mobileResult);
+        setIsReadingFile(false);
         setStatusMessage(
           `Loaded ${mobileResult.positions.length} synchronized positions in iPhone reading mode.`
         );
-        focusSoon(iphoneHeadingRef);
-      } else {
-        setStatusMessage("The file could not be loaded in iPhone reading mode.");
-        focusSoon(errorHeadingRef);
-      }
+        setIphoneFocusRequest((current) => current + 1);
+      });
+      return;
+    }
+
+    setIphoneDocument(mobileResult);
+    setIsReadingFile(false);
+
+    if (readingMode === "iphone") {
+      setStatusMessage("The file could not be loaded in iPhone reading mode.");
+      focusSoon(errorHeadingRef);
       return;
     }
 
@@ -144,11 +156,8 @@ function App() {
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {
-      if (iphoneDocument) {
-        focusSoon(iphoneHeadingRef);
-      } else if (iphoneError) {
-        focusSoon(errorHeadingRef);
-      }
+      if (iphoneDocument) setIphoneFocusRequest((current) => current + 1);
+      else if (iphoneError) focusSoon(errorHeadingRef);
       return;
     }
 
@@ -190,42 +199,23 @@ function App() {
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>
         <label>
-          <input
-            type="radio"
-            name="reading-mode"
-            value="iphone"
-            checked={readingMode === "iphone"}
-            onChange={handleReadingModeChange}
-          />
+          <input type="radio" name="reading-mode" value="iphone" checked={readingMode === "iphone"} onChange={handleReadingModeChange} />
           iPhone semantic reader
         </label>
         <label>
-          <input
-            type="radio"
-            name="reading-mode"
-            value="desktop"
-            checked={readingMode === "desktop"}
-            onChange={handleReadingModeChange}
-          />
+          <input type="radio" name="reading-mode" value="desktop" checked={readingMode === "desktop"} onChange={handleReadingModeChange} />
           Desktop grid reader
         </label>
       </fieldset>
 
       <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
-      <InstrumentDropdown
-        selectedInstrument={selectedInstrument}
-        onSelectInstrument={handleInstrumentChange}
-      />
+      <InstrumentDropdown selectedInstrument={selectedInstrument} onSelectInstrument={handleInstrumentChange} />
 
-      <div className="status-message" aria-live="polite" aria-atomic="true">
-        {statusMessage}
-      </div>
+      <div className="status-message" aria-live="polite" aria-atomic="true">{statusMessage}</div>
 
       {currentError && (
         <section className="error-message" role="alert" aria-labelledby="upload-error-heading">
-          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">
-            Tablature could not be loaded
-          </h2>
+          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">Tablature could not be loaded</h2>
           <p>{currentError}</p>
         </section>
       )}
@@ -235,53 +225,22 @@ function App() {
       </div>
 
       <section className="desktop-instructions-control">
-        <button
-          type="button"
-          onClick={toggleInfoSection}
-          aria-expanded={isInfoOpen}
-          aria-controls="desktop-instructions"
-        >
-          {isInfoOpen
-            ? "Close Mac keyboard instructions"
-            : "Open Mac keyboard instructions"}
+        <button type="button" onClick={toggleInfoSection} aria-expanded={isInfoOpen} aria-controls="desktop-instructions">
+          {isInfoOpen ? "Close Mac keyboard instructions" : "Open Mac keyboard instructions"}
         </button>
-        {isInfoOpen && (
-          <div id="desktop-instructions">
-            <InfoSection />
-          </div>
-        )}
+        {isInfoOpen && <div id="desktop-instructions"><InfoSection /></div>}
       </section>
 
       <section hidden={readingMode !== "desktop"} aria-label="Desktop grid reader">
         <div>
-          <input
-            id="multi-column"
-            type="checkbox"
-            checked={isMultiColumnNav}
-            onChange={handleCheckboxChange}
-          />
+          <input id="multi-column" type="checkbox" checked={isMultiColumnNav} onChange={handleCheckboxChange} />
           <label htmlFor="multi-column">Multi-Column Navigation</label>
         </div>
-        <ColumnDropdown
-          value={numColumns}
-          numOptions={tablature.length > 0 ? tablature[0][0].length : 1}
-          onChange={handleDropdownChange}
-        />
+        <ColumnDropdown value={numColumns} numOptions={tablature.length > 0 ? tablature[0][0].length : 1} onChange={handleDropdownChange} />
         {tablature.map((subarray, index) => (
-          <div
-            key={index}
-            ref={(element) => (gridRefs.current[index] = element)}
-            tabIndex={index === 0 ? 0 : -1}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-          >
+          <div key={index} ref={(element) => (gridRefs.current[index] = element)} tabIndex={index === 0 ? 0 : -1} onKeyDown={(event) => handleKeyDown(event, index)}>
             <h2>Tablature {index + 1}</h2>
-            <DataGrid
-              data={subarray}
-              numColumns={numColumns}
-              isMultiColumnNav={isMultiColumnNav}
-              setNumColumns={setNumColumns}
-              selectedInstrument={selectedInstrument}
-            />
+            <DataGrid data={subarray} numColumns={numColumns} isMultiColumnNav={isMultiColumnNav} setNumColumns={setNumColumns} selectedInstrument={selectedInstrument} />
           </div>
         ))}
       </section>
