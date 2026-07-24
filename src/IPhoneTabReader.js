@@ -1,6 +1,6 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-function describeWhatToPlay(document, position) {
+export function describeWhatToPlay(document, position) {
   const stringById = new Map(document.strings.map((string) => [string.id, string]));
   const instructions = [];
 
@@ -34,8 +34,8 @@ function describeWhatToPlay(document, position) {
   return `Play together: ${instructions.join("; ")}.`;
 }
 
-function describeLocation(document, position) {
-  return `Measure ${position.measureNumber} of ${document.measures.length}, step ${position.positionInMeasure} of ${position.positionsInMeasure}.`;
+export function describeLocation(document, position) {
+  return `Measure ${position.measureNumber} of ${document.measures.length}. Step ${position.positionInMeasure} of ${position.positionsInMeasure}.`;
 }
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
@@ -61,19 +61,16 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   const currentPosition = document.positions[currentIndex];
   const locationText = describeLocation(document, currentPosition);
   const playingText = describeWhatToPlay(document, currentPosition);
-  const isFirst = currentIndex === 0;
-  const isLast = currentIndex === document.positions.length - 1;
+  const isFirstStep = currentIndex === 0;
+  const isLastStep = currentIndex === document.positions.length - 1;
+
+  const announce = (text) => {
+    setAnnouncement((current) => ({ text, sequence: current.sequence + 1 }));
+  };
 
   const moveTo = (nextIndex) => {
     pendingInstructionFocusRef.current = true;
     setCurrentIndex(nextIndex);
-  };
-
-  const repeat = () => {
-    setAnnouncement((current) => ({
-      text: `${playingText} ${locationText}`,
-      sequence: current.sequence + 1,
-    }));
   };
 
   return (
@@ -82,25 +79,28 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         iPhone tablature reader
       </h2>
 
-      <p>Each instruction is the complete note or chord to play now.</p>
+      <p>
+        Each instruction is one complete musical event. Use Next to move forward, Back to return,
+        or Repeat instruction without changing your place.
+      </p>
 
       <section aria-labelledby="current-instruction-heading">
         <h3 id="current-instruction-heading" ref={instructionHeadingRef} tabIndex="-1">
           What to play now
         </h3>
-        <p className="position-description">{playingText}</p>
         <p className="position-location">{locationText}</p>
+        <p className="position-description">{playingText}</p>
       </section>
 
       <fieldset className="position-controls">
-        <legend>Move through the tablature</legend>
-        <button type="button" onClick={() => moveTo(currentIndex - 1)} disabled={isFirst}>
+        <legend>Reading controls</legend>
+        <button type="button" onClick={() => moveTo(currentIndex - 1)} disabled={isFirstStep}>
           Back
         </button>
-        <button type="button" onClick={() => moveTo(currentIndex + 1)} disabled={isLast}>
+        <button type="button" onClick={() => moveTo(currentIndex + 1)} disabled={isLastStep}>
           Next
         </button>
-        <button type="button" onClick={repeat}>
+        <button type="button" onClick={() => announce(`${locationText} ${playingText}`)}>
           Repeat instruction
         </button>
       </fieldset>
