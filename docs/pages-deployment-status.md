@@ -1,6 +1,6 @@
 # iPhone Proof Hosted Preview Status
 
-Source commit: `d659e83c1a8729e5a56eec4178b7a1061afd5924`
+Source commit: `71b31e6ca59a36c47489beff69b25533d593fda4`
 
 Build job: `cancelled`
 
