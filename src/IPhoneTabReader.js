@@ -49,7 +49,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   return (
     <section className="iphone-reader" aria-labelledby="iphone-reader-heading">
-      <h2 id="iphone-reader-heading" ref={headingRef} tabIndex="-1">iPhone tablature</h2>
+      <h2 id="iphone-reader-heading" ref={headingRef} tabIndex="-1">iPhone tablature reader</h2>
 
       <fieldset className="iphone-activity-selector">
         <legend>Choose an activity</legend>
