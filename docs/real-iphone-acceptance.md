@@ -18,14 +18,14 @@ The repaired iPhone order was confirmed as Jason's title, extension explanation,
 
 Fixture: `fixtures/iphone-proof-clean-six-string.txt`
 
-Reported behavior:
+Initial reported behavior:
 
 1. File selection succeeded.
 2. Five synchronized positions loaded.
 3. The `iPhone tablature reader` heading and understandable semantic output rendered.
 4. Safari and VoiceOver returned focus to the browser Page Menu instead of the reader heading.
 
-Checkpoint 2 verdict: Parsing and semantic reading pass; focus recovery fails.
+Initial verdict: Parsing and semantic reading passed; focus recovery failed.
 
 ## First remediation and real-device result
 
@@ -41,7 +41,7 @@ After the refreshed page and file were reloaded on the real iPhone, VoiceOver ag
 
 This failed retest must not be rewritten as an intermittent result. The owner reproduced the same browser-chrome landing twice.
 
-## Second remediation boundary
+## Second remediation
 
 The stronger repair retains the pending focus request beyond the React commit and fulfills it only after Safari signals that the page has returned from the external picker:
 
@@ -51,11 +51,46 @@ The stronger repair retains the pending focus request beyond the React commit an
 4. Focus the persistent `iPhone tablature reader` heading with `preventScroll`.
 5. Clear the request only when the heading is actually `document.activeElement`.
 6. Keep automated browser-return regression coverage.
-7. Require another bounded real-iPhone VoiceOver retest before acceptance.
 
 Second remediation commits:
 
 - `7031e3581840c36ce3cd83e1907b1e77e41b31cd` — retain and recover pending reader focus after Safari returns from file selection.
 - `539e7c97a75f02da250f53eeb4c9062ad6680479` — test focus recovery after the simulated browser-return event.
 
-Retest status: Pending automated verification and refreshed hosted preview. Do not ask the owner to repeat the upload until the exact repair head passes the automated and hosted gates.
+## Automated and hosted gates
+
+Exact repair source recorded by the temporary publisher: `fc91883edf079a0f0f92eda6a679d31dacedc939`.
+
+1. `npm ci` passed.
+2. All 14 automated tests passed.
+3. The production build passed.
+4. GitHub Pages publication passed.
+5. Fork `main` was restored to the exact upstream commit and compared as identical.
+
+## Final real-iPhone retest
+
+The owner refreshed the hosted page and selected the same fixture once.
+
+Confirmed behavior:
+
+1. Safari returned from the native Files picker.
+2. VoiceOver did not remain on the browser Page Menu.
+3. Focus landed on the successful result and announced: `Loaded five synchronized positions in iPhone reader mode.`
+4. The announcement correctly conveyed both successful loading and the number of parsed synchronized positions.
+
+Checkpoint 2 verdict: Pass.
+
+## Bounded proof verdict
+
+The real-iPhone Safari and VoiceOver acceptance gate for the bounded proof passes.
+
+Accepted behaviors:
+
+1. iPhone-first reading order.
+2. Six-string fixture parsing.
+3. Understandable semantic output.
+4. Persistent result creation.
+5. Recovery across the native iOS Files-picker boundary.
+6. Useful post-upload focus and completion announcement.
+
+This acceptance applies only to the bounded proof and does not authorize a pull request, upstream change, production redesign, or expansion beyond the documented branch scope.
