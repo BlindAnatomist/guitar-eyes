@@ -24,11 +24,13 @@ describe("IPhoneTabReader", () => {
   });
 
   test("moves predictably between synchronized positions", () => {
-    render(<IPhoneTabReader document={document} />);
+    const { container } = render(<IPhoneTabReader document={document} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
 
-    expect(screen.getByText(/Position 2 of 2\. High E string, fret 3\./)).toBeInTheDocument();
+    expect(container.querySelector(".position-description")).toHaveTextContent(
+      "Position 2 of 2. High E string, fret 3."
+    );
     expect(screen.getByRole("button", { name: "Next position" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous position" })).toBeEnabled();
   });
