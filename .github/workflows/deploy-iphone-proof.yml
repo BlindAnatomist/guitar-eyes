@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  actions: read
   contents: write
   pages: write
   id-token: write
@@ -72,6 +73,25 @@ jobs:
         with:
           ref: work/iphone-voiceover-tablature-audit
 
+      - name: Collect failed deployment log
+        if: needs.deploy.result != 'success'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          job_id=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" \
+            --jq '.jobs[] | select(.name == "Publish isolated iPhone proof") | .id' | tail -n 1)
+          if [ -z "$job_id" ]; then
+            printf '%s\n' 'The failed deployment job ID could not be resolved.' > deploy-job.log
+            exit 0
+          fi
+          gh api "/repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" > deploy-job.log 2>&1
+          if [ ! -s deploy-job.log ]; then
+            printf '%s\n' 'The deployment job log was empty.' > deploy-job.log
+          fi
+          exit 0
+
       - name: Write hosted preview status
         shell: bash
         env:
@@ -96,6 +116,14 @@ jobs:
               echo 'Preview URL: Not available.'
               echo
               echo 'No hosted preview is accepted yet. A failed or skipped deployment must be resolved before real-iPhone acceptance.'
+              echo
+              echo '## Deployment diagnostic'
+              echo
+              if [ -f deploy-job.log ]; then
+                tail -n 100 deploy-job.log | sed 's/^/    /'
+              else
+                echo '    No deployment log was collected.'
+              fi
             fi
           } > docs/hosted-preview-status.md
 
