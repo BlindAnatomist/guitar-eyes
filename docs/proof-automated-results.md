@@ -1,6 +1,6 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `9912df63bc85ad068e5baf87173167e44ef75621`
+Generated from branch commit: `8b70d35372a9f17ee62c751733c4c4fd347b67cd`
 
 Branch: `work/phase-2-parser-measure-navigation`
 
@@ -41,7 +41,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 13s
+    added 1678 packages, and audited 1679 packages in 10s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -70,12 +70,12 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
         [0m [90m 27 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
-         [90m 28 |[39m   test([32m"separates the current instruction from navigation controls"[39m[33m,[39m () [33m=>[39m {
+         [90m 28 |[39m   test([32m"presents one instruction and one simple navigation group"[39m[33m,[39m () [33m=>[39m {
         [31m[1m>[22m[39m[90m 29 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
          [90m    |[39m           [31m[1m^[22m[39m
          [90m 30 |[39m
-         [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"Current step"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 32 |[39m     expect(screen[33m.[39mgetByText([32m"Measure 1 of 2. Step 1 of 1."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
+         [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"What to play now"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
+         [90m 32 |[39m     expect(screen[33m.[39mgetByText([32m"Play High E string, open."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
     
           at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
           at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
@@ -107,47 +107,12 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
           at Object.<anonymous> (src/App.test.js:29:11)
     
-    [0;33mOne of your dependencies, babel-preset-react-app, is importing the
-    "@babel/plugin-proposal-private-property-in-object" package without
-    declaring it in its dependencies. This is currently working because
-    "@babel/plugin-proposal-private-property-in-object" is already in your
-    node_modules folder for unrelated reasons, but it [1mmay break at any time[0;33m.
-    
-    babel-preset-react-app is part of the create-react-app project, [1mwhich
-    is not maintianed anymore[0;33m. It is thus unlikely that this bug will
-    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
-    your devDependencies to work around this error. This will make this message
-    go away.[0m
-      
-    [0;33mOne of your dependencies, babel-preset-react-app, is importing the
-    "@babel/plugin-proposal-private-property-in-object" package without
-    declaring it in its dependencies. This is currently working because
-    "@babel/plugin-proposal-private-property-in-object" is already in your
-    node_modules folder for unrelated reasons, but it [1mmay break at any time[0;33m.
-    
-    babel-preset-react-app is part of the create-react-app project, [1mwhich
-    is not maintianed anymore[0;33m. It is thus unlikely that this bug will
-    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
-    your devDependencies to work around this error. This will make this message
-    go away.[0m
-      
-    [0;33mOne of your dependencies, babel-preset-react-app, is importing the
-    "@babel/plugin-proposal-private-property-in-object" package without
-    declaring it in its dependencies. This is currently working because
-    "@babel/plugin-proposal-private-property-in-object" is already in your
-    node_modules folder for unrelated reasons, but it [1mmay break at any time[0;33m.
-    
-    babel-preset-react-app is part of the create-react-app project, [1mwhich
-    is not maintianed anymore[0;33m. It is thus unlikely that this bug will
-    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
-    your devDependencies to work around this error. This will make this message
-    go away.[0m
-      
+    A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
     Test Suites: 3 passed, 3 total
-    Tests:       17 passed, 17 total
+    Tests:       16 passed, 16 total
     Snapshots:   0 total
-    Time:        3.948 s
+    Time:        2.973 s
     Ran all test suites.
 
 ## Production build log
@@ -179,7 +144,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      75.29 kB  build/static/js/main.de66d401.js
+      75.08 kB  build/static/js/main.ec6f8ba9.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
