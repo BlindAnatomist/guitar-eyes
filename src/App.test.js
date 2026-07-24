@@ -77,4 +77,45 @@ describe("Guitar Eyes application shell", () => {
       upload.compareDocumentPosition(instructionsButton) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
+
+  test("moves focus to the persistent iPhone reader heading after a file loads", async () => {
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: jest.fn().mockReturnValue({
+        matches: true,
+        media: "(pointer: coarse)",
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      }),
+    });
+
+    render(<App />);
+    const file = new File(
+      [
+        "e|--0--2--3--2--0-----|\n",
+        "B|--1--3--0--3--1-----|\n",
+        "G|--0--2--0--2--0-----|\n",
+        "D|--2--0--0--0--2-----|\n",
+        "A|--3--------3--3------|\n",
+        "E|--------------------|\n",
+      ],
+      "iphone-proof-clean-six-string.txt",
+      { type: "text/plain" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+      target: { files: [file] },
+    });
+
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: "iPhone tablature reader",
+    });
+    expect(document.activeElement).toBe(heading);
+    expect(screen.getByText(/Loaded 5 synchronized positions/i)).toBeInTheDocument();
+  });
 });
