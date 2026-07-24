@@ -7,6 +7,10 @@ on:
     paths-ignore:
       - docs/proof-automated-results.md
 
+concurrency:
+  group: iphone-extension-verification
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
