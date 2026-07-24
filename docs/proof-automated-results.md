@@ -1,6 +1,6 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `556c08573c7292d51b56f191c400516b327f0c92`
+Generated from branch commit: `9912df63bc85ad068e5baf87173167e44ef75621`
 
 Branch: `work/phase-2-parser-measure-navigation`
 
@@ -22,8 +22,8 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
     npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
     npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
-    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+    npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
     npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
     npm warn deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
     npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
@@ -69,13 +69,13 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
         console.error
           Warning: `ReactDOMTestUtils.act` is deprecated in favor of `React.act`. Import `act` from `react` instead of `react-dom/test-utils`. See https://react.dev/warnings/react-dom-test-utils for more info.
     
-        [0m [90m 16 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
-         [90m 17 |[39m   test([32m"separates location, playing instruction, step controls, and measure controls"[39m[33m,[39m () [33m=>[39m {
-        [31m[1m>[22m[39m[90m 18 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
+        [0m [90m 27 |[39m describe([32m"IPhoneTabReader"[39m[33m,[39m () [33m=>[39m {
+         [90m 28 |[39m   test([32m"separates the current instruction from navigation controls"[39m[33m,[39m () [33m=>[39m {
+        [31m[1m>[22m[39m[90m 29 |[39m     render([33m<[39m[33mIPhoneTabReader[39m document[33m=[39m{document} [33m/[39m[33m>[39m)[33m;[39m
          [90m    |[39m           [31m[1m^[22m[39m
-         [90m 19 |[39m
-         [90m 20 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"Current step"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
-         [90m 21 |[39m     expect(screen[33m.[39mgetByText([32m"Measure 1 of 2. Step 1 of 1."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
+         [90m 30 |[39m
+         [90m 31 |[39m     expect(screen[33m.[39mgetByRole([32m"heading"[39m[33m,[39m { name[33m:[39m [32m"Current step"[39m }))[33m.[39mtoBeInTheDocument()[33m;[39m
+         [90m 32 |[39m     expect(screen[33m.[39mgetByText([32m"Measure 1 of 2. Step 1 of 1."[39m))[33m.[39mtoBeInTheDocument()[33m;[39m[0m
     
           at printWarning (node_modules/react-dom/cjs/react-dom-test-utils.development.js:71:30)
           at error (node_modules/react-dom/cjs/react-dom-test-utils.development.js:45:7)
@@ -83,7 +83,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
           at node_modules/@testing-library/react/dist/act-compat.js:63:25
           at renderRoot (node_modules/@testing-library/react/dist/pure.js:159:26)
           at render (node_modules/@testing-library/react/dist/pure.js:246:10)
-          at Object.<anonymous> (src/IPhoneTabReader.test.js:18:11)
+          at Object.<anonymous> (src/IPhoneTabReader.test.js:29:11)
     
     PASS src/App.test.js
       ● Console
@@ -145,9 +145,9 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
       
     
     Test Suites: 3 passed, 3 total
-    Tests:       16 passed, 16 total
+    Tests:       17 passed, 17 total
     Snapshots:   0 total
-    Time:        3.977 s
+    Time:        3.948 s
     Ran all test suites.
 
 ## Production build log
@@ -179,7 +179,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     
     File sizes after gzip:
     
-      75.24 kB  build/static/js/main.3e00a2c7.js
+      75.29 kB  build/static/js/main.de66d401.js
       1.77 kB   build/static/js/453.eaf0ef0f.chunk.js
       841 B     build/static/css/main.e7bcd723.css
     
