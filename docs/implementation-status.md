@@ -16,7 +16,7 @@ Authoritative baseline commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
 ## Current checkpoint
 
-Checkpoint 1: Fork verification and source audit established.
+Checkpoint 2: Fork verified; source and automated baseline audit established.
 
 1. GitHub recognizes `BlindAnatomist/guitar-eyes` as a fork.
 2. Fork `main` matches upstream `main` at the authoritative baseline commit.
@@ -26,15 +26,35 @@ Checkpoint 1: Fork verification and source audit established.
 6. No upstream files or branches have been modified.
 7. No production or nonproduction deployment has been created yet.
 8. No application behavior has been changed yet.
-9. A branch-only workflow was added to run baseline build and test jobs.
+9. GitHub Actions is enabled and has executed the branch-only baseline workflow.
 10. The source audit is recorded in `docs/iphone-voiceover-tablature-audit.md`.
+11. Automated baseline evidence is recorded in `docs/baseline-automated-results.md`.
+
+## Automated baseline result
+
+Environment:
+
+- Node `v20.20.2`
+- npm `10.8.2`
+
+Results:
+
+1. `npm ci` passes.
+2. The untouched application production build passes and compiles successfully.
+3. The committed test command fails because the sole test is stale Create React App boilerplate that still searches for a `Learn React` link.
+4. The red GitHub Actions failure shown during the initial runs did not mean the application could not build.
+5. Installation reported 64 dependency vulnerabilities: 15 low, 15 moderate, 31 high, and 3 critical. These belong to the inherited dependency tree and require separate dependency-risk treatment rather than indiscriminate automated upgrades during the bounded proof.
+6. Create React App and several inherited packages report deprecation or maintenance warnings, but those warnings do not currently prevent a production build.
 
 ## Commits on the audit branch
 
 1. `4cde3742bcc352c38e0ef48edbb3d06e79f1aec1` — Add branch-only baseline audit checks.
 2. `37ff09e609f09d2a6d8f04c6d4b691cec8d9e728` — Record the iPhone VoiceOver source audit.
+3. `9babc79b9ec3e4bb28ea393a44030905cabab855` — Establish the first implementation-status checkpoint.
+4. `be24148b315c0c44b62c7667d96de62d049dd943` — Make the workflow self-report installation, build, and test results.
+5. The GitHub Actions bot then committed `docs/baseline-automated-results.md` with the measured result.
 
-## Confirmed source findings
+## Confirmed source and automated findings
 
 1. The existing application intentionally targets Mac keyboard and VoiceOver navigation.
 2. The current parser groups arbitrary nonempty lines and does not create synchronized musical positions.
@@ -47,14 +67,14 @@ Checkpoint 1: Fork verification and source audit established.
 9. The multi-column checkbox label is not programmatically associated.
 10. The current test is stale Create React App boilerplate.
 11. The prior GitHub Pages workflow was deleted upstream, leaving no confirmed hosted preview.
+12. The inherited application installs and builds successfully from its committed lockfile.
 
-## Open gates before implementation
+## Open gates before proof implementation
 
-1. Enable GitHub Actions for the new fork or establish another isolated automated build path.
-2. Record baseline `npm ci`, test, and production-build results.
-3. Decide whether an untouched baseline preview is needed before the proof implementation.
-4. Finalize the audit after automated and real-device evidence is available.
-5. Implement only the bounded six-string iPhone proof after the audit gate is complete.
+1. Replace the stale boilerplate test with tests that describe current preserved behavior and the new bounded parser behavior.
+2. Decide whether an untouched baseline preview adds enough evidence to justify deployment before implementation.
+3. Complete any remaining runtime audit that can only be measured through a hosted iPhone Safari and VoiceOver session.
+4. Implement only the bounded six-string iPhone proof after the audit findings are translated into explicit tests and interfaces.
 
 ## First proof boundary
 
@@ -73,4 +93,6 @@ The proof will:
 
 ## Manual acceptance record
 
-No real-iPhone acceptance test has been requested or completed yet.
+No Guitar Eyes real-iPhone application acceptance test has been requested or completed yet.
+
+The July 24 screenshot of the GitHub Actions page confirmed that Actions was already enabled and that three workflow runs had completed with failure status. Subsequent self-reporting established that the failures were caused by the stale test, while installation and production build passed.
