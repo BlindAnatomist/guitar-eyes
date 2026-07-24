@@ -70,30 +70,30 @@ Responsive accessibility includes reading order and disclosure state, not only r
 
 ## GE-002 — VoiceOver focus is lost after the native iOS file picker closes
 
-State: `candidate`
+State: `local-proven`
 
-Cross-repository source: `BlindAnatomist/val-music-vault`
+Cross-repository foundation: `BlindAnatomist/val-music-vault`
 
 ### Symptoms
 
 After selecting a valid six-string text file in the iPhone Files picker:
 
-- parsing succeeds;
-- five synchronized positions load;
-- the iPhone tablature reader is understandable;
-- Safari and VoiceOver return to the browser Page Menu rather than the reader heading;
-- the user must swipe back into the application to find the result.
+- parsing succeeded;
+- five synchronized positions loaded;
+- the iPhone tablature reader was understandable;
+- Safari and VoiceOver initially returned to the browser Page Menu rather than the reader result;
+- the user had to swipe back into the application to find the result.
 
 The owner reproduced the same Page Menu landing after refreshing the hosted page and reloading the fixture.
 
-### Refined cause class
+### Refined cause
 
 There are two separate transition boundaries:
 
 1. React must commit the newly created persistent reader target.
 2. Safari must finish returning from the external native Files picker and return control to the web document.
 
-The committed-target pattern solves the first boundary. The real-iPhone retest proved that focusing during the React commit can still occur before Safari completes the second boundary. Safari then overwrites the page focus with browser chrome.
+The committed-target pattern solves the first boundary. Real-iPhone testing proved that focusing during the React commit can still occur before Safari completes the second boundary. Safari then overwrites page focus with browser chrome.
 
 ### Failed-do-not-repeat approaches
 
@@ -102,50 +102,44 @@ The committed-target pattern solves the first boundary. The real-iPhone retest p
 3. Do not declare the repair complete merely because `document.activeElement` is correct in an automated DOM test.
 4. Do not assume the ordinary `flushSync` plus `useLayoutEffect` committed-target pattern alone covers an external native picker boundary. It passed automation but failed twice on the real iPhone.
 
-### Cross-repository proven foundation
+### Proven solution
 
-Val Music Vault established the necessary internal React transition pattern:
+Use the Val Music Vault committed-target pattern as the foundation, then preserve the request across the external picker boundary:
 
 1. Synchronize the decisive state transition with `flushSync` when necessary.
-2. Store a dedicated pending-focus marker or focus-request state.
+2. Store a dedicated pending-focus marker.
 3. Use `useLayoutEffect` after React commits the persistent target.
-4. Focus the target with `focus({ preventScroll: true })`.
-5. Ensure the destination remains in the DOM after the initiating control or prior content disappears.
-6. Test the DOM focus contract automatically.
-7. Treat automated focus tests as necessary but insufficient.
-8. Require bounded real-iPhone VoiceOver acceptance.
+4. Keep the pending request durable beyond that initial commit.
+5. Listen for `window` focus, `pageshow`, and document `visibilitychange`.
+6. When the page is visible again, wait for two animation frames so Safari can finish restoring web content.
+7. Focus the persistent `iPhone tablature reader` heading with `focus({ preventScroll: true })`.
+8. Clear the request only after the heading is confirmed as `document.activeElement`.
+9. Retain the direct committed-state attempt for browsers that do not leave the web document.
+10. Cover both the ordinary DOM focus contract and the browser-return event contract automatically.
+11. Require hosted real-iPhone VoiceOver acceptance.
 
-### Current Guitar Eyes candidate extension
+### Acceptance result
 
-For native iOS picker return, retain the pending request beyond the React commit:
+On the refreshed hosted build, the owner selected the same fixture once. VoiceOver recovered from the native Files picker and landed on the successful result announcement:
 
-1. Keep a durable pending-focus ref until the target is confirmed as `document.activeElement`.
-2. Listen for `window` focus, `pageshow`, and document `visibilitychange`.
-3. When the page is visible again, wait for two animation frames so Safari can finish restoring web content.
-4. Focus the persistent `iPhone tablature reader` heading with `preventScroll`.
-5. Clear the request only after the heading is confirmed active.
-6. Retain the direct committed-state attempt for browsers that do not leave the web document.
-7. Test the browser-return event contract automatically.
-8. Do not mark this extension proven until the owner confirms it on the hosted real-iPhone build.
+`Loaded five synchronized positions in iPhone reader mode.`
 
-### Current acceptance boundary
-
-- Target: the persistent `iPhone tablature reader` heading.
-- Expected behavior: after successful file parsing and Safari's return from Files, VoiceOver lands on that heading rather than Page Menu.
-- The parser and semantic reader already pass.
-- Focus acceptance remains pending.
+The parser, semantic reader, browser-return focus recovery, and useful completion announcement all passed on the real target device.
 
 ### Evidence
 
-- Guitar Eyes real-device reports and repair history: `docs/real-iphone-acceptance.md`.
-- Current candidate implementation: `src/App.js`.
+- Real-device failure history and final pass: `docs/real-iphone-acceptance.md`.
+- Proven implementation: `src/App.js`.
 - Browser-return regression coverage: `src/App.test.js`.
-- Val Music Vault implementation: `src/admin/AdminWorkspace.tsx`.
-- Val Music Vault acceptance records: `docs/phase-7-real-iphone-checkpoint-20-refresh-recovery-finalization.md` and `docs/phase-7-real-iphone-checkpoint-21-resume-feedback.md`.
+- Repair commits: `7031e3581840c36ce3cd83e1907b1e77e41b31cd` and `539e7c97a75f02da250f53eeb4c9062ad6680479`.
+- Exact published repair source: `fc91883edf079a0f0f92eda6a679d31dacedc939`.
+- Automated gate: dependency installation, all 14 tests, and production build passed.
+- Hosted gate: GitHub Pages publication passed, followed by clean restoration of fork `main`.
+- Val Music Vault foundation: `src/admin/AdminWorkspace.tsx` and its Phase 7 acceptance records.
 
-### Derived shared candidate
+### Derived shared standard
 
-A native iOS picker is an external browser-boundary transition, not merely a React rendering transition. Preserve the committed-target focus request until Safari signals that the web document is visible and focused again. Real-device acceptance remains mandatory.
+A native iOS picker is an external browser-boundary transition, not merely a React rendering transition. Preserve the committed-target focus request until Safari signals that the web document is visible and focused again, allow Safari to finish restoring web content, then focus the persistent result and clear the request only after confirming success.
 
 ---
 
@@ -182,7 +176,7 @@ A temporary deployment workaround is incomplete until repository authority is re
 
 ---
 
-## Cross-repository candidates
+## Cross-repository standards
 
 ### XR-VOICEOVER-FOCUS-001
 
@@ -190,28 +184,30 @@ State: `cross-repository-proven`
 
 State-driven committed-target VoiceOver focus pattern:
 
-- pending focus state/ref;
+- pending focus state or ref;
 - `useLayoutEffect` after commit;
 - persistent destination;
 - `preventScroll`;
 - automatic DOM regression coverage;
 - bounded real-iPhone VoiceOver acceptance.
 
-Source of strongest evidence: Val Music Vault Phase 7.
+Source of strongest internal-transition evidence: Val Music Vault Phase 7.
 
 ### XR-IOS-PICKER-FOCUS-001
 
-State: `candidate`
+State: `cross-repository-proven`
 
 External native-picker return pattern:
 
 - retain the pending focus request beyond the React commit;
 - respond to page visibility and browser-return events;
-- defer the focus operation until Safari has restored web content;
-- clear pending state only after confirming the persistent target is active;
+- wait for Safari to finish restoring web content;
+- focus the persistent destination with `preventScroll`;
+- clear pending state only after confirming that destination is active;
+- preserve automatic browser-return regression coverage;
 - require hosted real-iPhone acceptance.
 
-Source of current evidence: Guitar Eyes GE-002. Do not propagate this as proven until the owner passes the retest.
+Source of strongest external-boundary evidence: Guitar Eyes GE-002.
 
 ### XR-REAL-DEVICE-001
 
