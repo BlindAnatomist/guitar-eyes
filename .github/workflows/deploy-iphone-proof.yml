@@ -1,0 +1,112 @@
+name: Deploy iPhone proof to GitHub Pages
+
+on:
+  push:
+    branches:
+      - work/iphone-voiceover-tablature-audit
+    paths-ignore:
+      - docs/hosted-preview-status.md
+  workflow_dispatch:
+
+concurrency:
+  group: guitar-eyes-iphone-proof-pages
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build isolated iPhone proof
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build for repository Pages path
+        env:
+          PUBLIC_URL: /guitar-eyes
+        run: npm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload proof artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+  deploy:
+    name: Publish isolated iPhone proof
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  record:
+    name: Record hosted preview status
+    if: always()
+    needs:
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out audit branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/iphone-voiceover-tablature-audit
+
+      - name: Write hosted preview status
+        shell: bash
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+        run: |
+          mkdir -p docs
+          {
+            echo '# iPhone Proof Hosted Preview Status'
+            echo
+            echo "Source commit: \`$GITHUB_SHA\`"
+            echo
+            echo "Build job: \`$BUILD_RESULT\`"
+            echo
+            echo "Deployment job: \`$DEPLOY_RESULT\`"
+            echo
+            if [ "$DEPLOY_RESULT" = 'success' ]; then
+              echo 'Preview URL: `https://blindanatomist.github.io/guitar-eyes/`'
+              echo
+              echo 'The isolated preview is deployed from the audit branch. It does not alter Jason Washburn’s upstream repository or any existing production site.'
+            else
+              echo 'Preview URL: Not available.'
+              echo
+              echo 'No hosted preview is accepted yet. A failed or skipped deployment must be resolved before real-iPhone acceptance.'
+            fi
+          } > docs/hosted-preview-status.md
+
+      - name: Commit hosted preview status
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/hosted-preview-status.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'docs: record hosted preview status [skip ci]'
+          git push
