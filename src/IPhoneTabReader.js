@@ -8,7 +8,27 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   useEffect(() => {
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
-  }, [document]);
+
+    if (!document || document.positions.length === 0) {
+      return undefined;
+    }
+
+    const focusHeading = () => {
+      const heading = headingRef?.current;
+      if (!heading) {
+        return;
+      }
+
+      heading.focus();
+      if (typeof heading.scrollIntoView === "function") {
+        heading.scrollIntoView({ block: "nearest" });
+      }
+    };
+
+    const timers = [0, 250, 700].map((delay) => window.setTimeout(focusHeading, delay));
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [document, headingRef]);
 
   if (!document || document.positions.length === 0) {
     return null;
