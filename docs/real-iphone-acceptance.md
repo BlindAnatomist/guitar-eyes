@@ -29,15 +29,18 @@ Checkpoint 2 verdict: Partial pass with a focus-recovery defect.
 
 Proven-pattern review:
 
-The tester correctly identified that comparable focus transitions had already been solved in `BlindAnatomist/val-music-vault`. Inspection confirmed its stronger pattern: committed state, a dedicated focus request, `flushSync` where synchronous transition is required, and `useLayoutEffect` to focus a persistent target with `preventScroll`. The speculative repeated-timer repair was removed before acceptance.
+The tester correctly identified that comparable VoiceOver focus transitions had already been solved in `BlindAnatomist/val-music-vault`. The Guitar Eyes repair must reuse those repository lessons rather than inventing an isolated strategy.
+
+The inspected Music Vault implementation uses committed state, a dedicated focus request or pending-focus marker, `flushSync` where a synchronous transition is required, and `useLayoutEffect` to focus a persistent target with `preventScroll` after React commits it. Its acceptance records also explicitly treat DOM focus tests as necessary but insufficient and require bounded real-iPhone confirmation.
 
 Final remediation:
 
-1. Commit the parsed document, completion status, and focus request together with `flushSync`.
-2. Use `useLayoutEffect` keyed to the focus request to focus the persistent reader heading with `preventScroll`.
-3. Keep the heading programmatically focusable.
-4. Add an integration test that selects an in-memory six-string text file, verifies five synchronized positions, waits for the heading, and confirms it is the active element.
-5. Treat DOM focus verification as necessary but not sufficient; require real-iPhone VoiceOver retest.
+1. Remove the speculative repeated-timer repair.
+2. Commit the parsed document, completion status, and focus request together with `flushSync`.
+3. Use `useLayoutEffect` keyed to the focus request to focus the persistent reader heading with `preventScroll`.
+4. Keep the heading programmatically focusable.
+5. Add an integration test that selects an in-memory six-string text file, verifies five synchronized positions, waits for the heading, and confirms it is the active element.
+6. Require real-iPhone VoiceOver retest.
 
 Final remediation commits:
 
