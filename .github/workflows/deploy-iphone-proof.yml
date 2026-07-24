@@ -14,6 +14,7 @@ concurrency:
 
 permissions:
   actions: read
+  checks: read
   contents: write
   pages: write
   id-token: write
@@ -73,23 +74,50 @@ jobs:
         with:
           ref: work/iphone-voiceover-tablature-audit
 
-      - name: Collect failed deployment log
+      - name: Collect failed deployment diagnostics
         if: needs.deploy.result != 'success'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
-          job_id=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs" \
-            --jq '.jobs[] | select(.name == "Publish isolated iPhone proof") | .id' | tail -n 1)
-          if [ -z "$job_id" ]; then
-            printf '%s\n' 'The failed deployment job ID could not be resolved.' > deploy-job.log
+          jobs_json=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs")
+          printf '%s\n' "$jobs_json" > workflow-jobs.json
+          job_id=$(printf '%s\n' "$jobs_json" | jq -r '.jobs[] | select(.name == "Publish isolated iPhone proof") | .id' | tail -n 1)
+          if [ -z "$job_id" ] || [ "$job_id" = 'null' ]; then
+            printf '%s\n' 'The failed deployment job ID could not be resolved.' > deploy-diagnostic.log
             exit 0
           fi
-          gh api "/repos/$GITHUB_REPOSITORY/actions/jobs/$job_id/logs" > deploy-job.log 2>&1
-          if [ ! -s deploy-job.log ]; then
-            printf '%s\n' 'The deployment job log was empty.' > deploy-job.log
-          fi
+
+          {
+            echo 'Deployment job metadata:'
+            gh api "/repos/$GITHUB_REPOSITORY/actions/jobs/$job_id" \
+              --jq '{name,status,conclusion,started_at,completed_at,steps}'
+            echo
+            check_url=$(gh api "/repos/$GITHUB_REPOSITORY/actions/jobs/$job_id" --jq '.check_run_url')
+            check_id=${check_url##*/}
+            echo 'Check annotations:'
+            if [ -n "$check_id" ] && [ "$check_id" != 'null' ]; then
+              gh api "/repos/$GITHUB_REPOSITORY/check-runs/$check_id/annotations" \
+                --jq '.[] | {annotation_level,title,message,raw_details}'
+            else
+              echo 'No check-run identifier was available.'
+            fi
+            echo
+            echo 'Failed job log attempt:'
+            for attempt in 1 2 3 4 5; do
+              gh run view "$GITHUB_RUN_ID" --log-failed > failed-run.log 2>&1
+              if [ -s failed-run.log ] && ! grep -q 'BlobNotFound' failed-run.log; then
+                break
+              fi
+              sleep 5
+            done
+            if [ -s failed-run.log ]; then
+              tail -n 120 failed-run.log
+            else
+              echo 'No failed-run log was available.'
+            fi
+          } > deploy-diagnostic.log 2>&1
           exit 0
 
       - name: Write hosted preview status
@@ -119,10 +147,10 @@ jobs:
               echo
               echo '## Deployment diagnostic'
               echo
-              if [ -f deploy-job.log ]; then
-                tail -n 100 deploy-job.log | sed 's/^/    /'
+              if [ -f deploy-diagnostic.log ]; then
+                tail -n 180 deploy-diagnostic.log | sed 's/^/    /'
               else
-                echo '    No deployment log was collected.'
+                echo '    No deployment diagnostic was collected.'
               fi
             fi
           } > docs/hosted-preview-status.md
