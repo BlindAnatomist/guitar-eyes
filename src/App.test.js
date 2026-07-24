@@ -1,7 +1,16 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 
 const originalMatchMedia = window.matchMedia;
+
+beforeEach(() => {
+  if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = (callback) => window.setTimeout(callback, 0);
+  }
+  if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+  }
+});
 
 afterEach(() => {
   if (originalMatchMedia) {
@@ -78,7 +87,7 @@ describe("Guitar Eyes application shell", () => {
     ).toBeTruthy();
   });
 
-  test("moves focus to the persistent iPhone reader heading after a file loads", async () => {
+  test("recovers focus to the persistent iPhone reader heading after Safari returns from file selection", async () => {
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       writable: true,
@@ -115,7 +124,10 @@ describe("Guitar Eyes application shell", () => {
       level: 2,
       name: "iPhone tablature reader",
     });
-    expect(document.activeElement).toBe(heading);
+
+    fireEvent.focus(window);
+
+    await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/Loaded 5 synchronized positions/i)).toBeInTheDocument();
   });
 });
