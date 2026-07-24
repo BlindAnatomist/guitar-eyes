@@ -1,24 +1,14 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useState } from "react";
 import { describePosition } from "./iphoneTabModel";
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [announcement, setAnnouncement] = useState("");
-  const announcementTimerRef = useRef(null);
+  const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
 
   useEffect(() => {
     setCurrentIndex(0);
-    setAnnouncement("");
+    setAnnouncement({ text: "", sequence: 0 });
   }, [document]);
-
-  useEffect(
-    () => () => {
-      if (announcementTimerRef.current) {
-        window.clearTimeout(announcementTimerRef.current);
-      }
-    },
-    []
-  );
 
   if (!document || document.positions.length === 0) {
     return null;
@@ -29,14 +19,10 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   const isLastPosition = currentIndex === document.positions.length - 1;
 
   const announce = (text) => {
-    if (announcementTimerRef.current) {
-      window.clearTimeout(announcementTimerRef.current);
-    }
-
-    setAnnouncement("");
-    announcementTimerRef.current = window.setTimeout(() => {
-      setAnnouncement(text);
-    }, 30);
+    setAnnouncement((current) => ({
+      text,
+      sequence: current.sequence + 1,
+    }));
   };
 
   const moveTo = (nextIndex) => {
@@ -95,7 +81,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       )}
 
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
-        {announcement}
+        {announcement.text && (
+          <span key={announcement.sequence}>{announcement.text}</span>
+        )}
       </div>
     </section>
   );
