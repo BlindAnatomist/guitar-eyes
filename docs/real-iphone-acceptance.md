@@ -94,16 +94,24 @@ Focus did not recover to the `iPhone tablature reader` heading after the native 
 
 Checkpoint 2 verdict: Partial pass with a focus-recovery defect.
 
-Remediation:
+Proven-pattern review:
 
-1. Keep the reader heading programmatically focusable.
-2. Retry heading focus immediately and again after 250 and 700 milliseconds when a new document mounts.
-3. Scroll the focused heading into view when supported.
-4. Add an automated test that verifies all three focus attempts and final active-element state.
+The first attempted repair used repeated arbitrary timers. Before accepting or publishing that approach, the tester correctly identified that comparable VoiceOver focus transitions had already been solved and tested in `BlindAnatomist/val-music-vault`.
 
-Remediation commits:
+The Music Vault implementation was inspected. Its stronger accepted engineering pattern uses committed state, a dedicated focus request, `flushSync` where a synchronous transition is required, and `useLayoutEffect` to focus the persistent target with `preventScroll` after React commits it. Browser DOM focus tests remain necessary but real-iPhone VoiceOver acceptance remains authoritative.
 
-- `dee70f65c2b15f79efeaccf8d881d00a655516b4`
-- `d788004aae732bbc8781e938a5d5e11fa8ae89a1`
+Final remediation boundary:
+
+1. Remove the speculative repeated-timer focus logic.
+2. Commit the parsed iPhone document, completion status, and a dedicated focus request together with `flushSync`.
+3. Use `useLayoutEffect` keyed to that focus request to focus the persistent `iPhone tablature reader` heading with `preventScroll`.
+4. Keep the heading programmatically focusable and present after the upload control's native file-picker transition.
+5. Require a bounded real-iPhone retest; automated DOM focus alone is insufficient.
+
+Final remediation commits:
+
+- `f34fb1efb9c5b2c766ae5fa43f186fcd5e7cded0` — removed speculative timer retries.
+- `10c3b231b444342a7f7ce82d163e76f9896b560c` — applied the committed-state Music Vault focus pattern.
+- `e0182902fe05544c6d01038cad5ce7f8b9fbb3c2` — removed the obsolete timer-specific test.
 
 Retest status: Pending automated verification and refreshed hosted preview.
