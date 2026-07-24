@@ -1,6 +1,6 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `c2f9ab0b43a754f635a1b8fb1760e23cf84ebe53`
+Generated from branch commit: `83fddf110f1b1506b0d55591f4caed2df4d63488`
 
 Branch: `work/phase-3-guided-practice`
 
@@ -41,7 +41,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
     npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
     
-    added 1678 packages, and audited 1679 packages in 12s
+    added 1678 packages, and audited 1679 packages in 13s
     
     262 packages are looking for funding
       run `npm fund` for details
@@ -141,24 +141,12 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     your devDependencies to work around this error. This will make this message
     go away.[0m
       
-    [0;33mOne of your dependencies, babel-preset-react-app, is importing the
-    "@babel/plugin-proposal-private-property-in-object" package without
-    declaring it in its dependencies. This is currently working because
-    "@babel/plugin-proposal-private-property-in-object" is already in your
-    node_modules folder for unrelated reasons, but it [1mmay break at any time[0;33m.
-    
-    babel-preset-react-app is part of the create-react-app project, [1mwhich
-    is not maintianed anymore[0;33m. It is thus unlikely that this bug will
-    ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
-    your devDependencies to work around this error. This will make this message
-    go away.[0m
-      
     A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
     
     Test Suites: 4 passed, 4 total
     Tests:       19 passed, 19 total
     Snapshots:   0 total
-    Time:        3.805 s
+    Time:        3.814 s
     Ran all test suites.
 
 ## Production build log
