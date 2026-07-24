@@ -1,6 +1,6 @@
 # iPhone Proof Hosted Preview Status
 
-Source commit: `5dcbcc1701175a0db79e5e74ca7d01150e8908dd`
+Source commit: `6ced8df807c7c1d119bd6dc7576a718b8adae931`
 
 Build job: `success`
 
