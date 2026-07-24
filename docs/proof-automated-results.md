@@ -1,6 +1,6 @@
 # iPhone Semantic Reader Automated Results
 
-Generated from branch commit: `ecd58bb27e024c36e26a3201051dc25d8222bf69`
+Generated from branch commit: `521c0245c981ae39f0a71fb57cca16f3132e073b`
 
 Branch: `work/phase-2-parser-measure-navigation`
 
@@ -112,7 +112,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     Test Suites: 3 passed, 3 total
     Tests:       16 passed, 16 total
     Snapshots:   0 total
-    Time:        3.481 s
+    Time:        2.919 s
     Ran all test suites.
 
 ## Production build log
