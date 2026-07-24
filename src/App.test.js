@@ -33,7 +33,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
-    ).toBeExpanded();
+    ).toHaveAttribute("aria-expanded", "true");
   });
 
   test("allows the reader mode to change without removing desktop controls", () => {
@@ -71,7 +71,7 @@ describe("Guitar Eyes application shell", () => {
     });
 
     expect(iphoneMode).toBeChecked();
-    expect(instructionsButton).not.toBeExpanded();
+    expect(instructionsButton).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText(/Welcome to Guitar Eyes for Mac!/i)).not.toBeInTheDocument();
     expect(
       upload.compareDocumentPosition(instructionsButton) & Node.DOCUMENT_POSITION_FOLLOWING
