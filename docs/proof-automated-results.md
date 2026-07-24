@@ -1,6 +1,6 @@
 # Bounded iPhone Proof Automated Results
 
-Generated from audit-branch commit: `8f96a801d6ea2c8f6fe6145204a7d18167bd423c`
+Generated from audit-branch commit: `5f864e83b73d10f8fc1899ce9f264962aa98f1ea`
 
 Node version: `v20.20.2`
 
@@ -210,7 +210,7 @@ Exit code 0 means success. Exit code 125 means the command was skipped because i
     Test Suites: 1 failed, 2 passed, 3 total
     Tests:       1 failed, 11 passed, 12 total
     Snapshots:   0 total
-    Time:        3.142 s
+    Time:        3.186 s
     Ran all test suites.
 
 ## Production build log
