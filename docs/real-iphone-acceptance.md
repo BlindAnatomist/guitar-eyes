@@ -43,5 +43,15 @@ Remediation commits:
 
 - `34ebaafc261b401f05d9a7d57965d88216b373d2`
 - `8f4e1aa22177d8297184346bebd395cee98a8d0f`
+- `6ced8df807c7c1d119bd6dc7576a718b8adae931`
 
-Retest status: Pending automated verification and refreshed hosted preview.
+Automated remediation verification:
+
+1. Installation passed.
+2. All automated tests passed, including the touch-device order and collapsed-instructions test.
+3. Production build passed.
+4. Refreshed GitHub Pages deployment passed.
+5. Hosted page, JavaScript, and CSS read-back passed.
+6. Fork `main` was restored and verified identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+
+Retest status: Refreshed preview ready. Real-iPhone confirmation of the repaired control order remains pending.
