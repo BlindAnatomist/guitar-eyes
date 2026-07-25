@@ -1,6 +1,6 @@
 # Solved Problems and Reusable Procedures
 
-Last updated: July 24, 2026
+Last updated: July 25, 2026
 
 ## Purpose
 
@@ -144,6 +144,39 @@ The semantic tablature model is the single authoritative representation used by:
 Core reading, navigation, playback, section selection, looping, exact repetition detection, chord-shape recognition, and basic riff or variation suggestions should be deterministic and usable without AI.
 
 AI should be optional and used for higher-level pedagogical judgments, such as naming uncertain sections, recommending learning order, explaining relationships among patterns, or producing a reusable lesson plan from already-parsed semantic data.
+
+## Metered execution scope must not be inferred from diff size
+
+Cross-repository source: Val Music Vault `VMV-007`.
+
+### Observed problem
+
+A focused source repair can be described as small while the assigned Work session silently includes broad reconstruction, a complete regression gate, packaging, hosted verification, documentation, fixture preparation, workflow administration, and handoff work. The diff may be small while the execution envelope consumes substantial time and Work credits.
+
+### Failed or wasteful approaches
+
+1. Promising low Work-credit use because the expected code change is small.
+2. Bundling tasks that Chat and connected tools can perform into the metered implementation session.
+3. Using Work for manual iPhone testing, repository records, hosted read-backs, or link delivery.
+4. Discovering connector or workflow limitations only after the metered assignment has begun.
+5. Weakening required evidence merely to make the task appear cheaper.
+
+### Confirmed procedure
+
+Before starting a metered execution session:
+
+1. Define the exact source-change boundary.
+2. Identify the minimum repository reconstruction required for that boundary.
+3. Separate verification that requires the authenticated working environment from tasks Chat and connectors can perform.
+4. Identify unavailable external actions before the session begins.
+5. Keep owner-operated and real-iPhone testing outside Work.
+6. State the precise stopping point.
+7. Classify the complete assignment as focused or verification-heavy independently of diff size.
+8. Never predict a credit percentage or promise low usage without reliable platform evidence.
+
+### Reuse rule
+
+Use the least expensive capable environment for each part without weakening build, accessibility, repository-authority, deployment, or real-device evidence. Exhaust Chat, connector, CLI, and REST routes before transferring a tool limitation to the owner.
 
 ## Maintenance rule for this ledger
 
