@@ -1,15 +1,10 @@
-name: Deploy iPhone proof to GitHub Pages
+name: Build iPhone proof for GitHub Pages
 
 on:
-  push:
-    branches:
-      - work/iphone-voiceover-tablature-audit
-    paths-ignore:
-      - docs/pages-deployment-status.md
   workflow_dispatch:
 
 concurrency:
-  group: guitar-eyes-iphone-proof-pages
+  group: guitar-eyes-iphone-proof-pages-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -20,9 +15,10 @@ permissions:
 jobs:
   build:
     name: Build isolated iPhone proof
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - name: Check out audit branch
+      - name: Check out requested source
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -32,7 +28,7 @@ jobs:
           cache: npm
 
       - name: Install locked dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Build for repository Pages path
         env:
@@ -49,10 +45,10 @@ jobs:
 
   deploy:
     name: Publish isolated iPhone proof
+    if: github.ref == 'refs/heads/main'
     needs: build
-    runs-on: ubuntu-latest
-    outputs:
-      page_url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -60,63 +56,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  record:
-    name: Record hosted-preview result
-    if: ${{ always() }}
-    needs:
-      - build
-      - deploy
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out current audit branch
-        uses: actions/checkout@v4
-        with:
-          ref: work/iphone-voiceover-tablature-audit
-
-      - name: Refresh branch before recording
-        run: git pull --rebase origin work/iphone-voiceover-tablature-audit
-
-      - name: Write deployment result
-        shell: bash
-        env:
-          BUILD_RESULT: ${{ needs.build.result }}
-          DEPLOY_RESULT: ${{ needs.deploy.result }}
-          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
-          SOURCE_SHA: ${{ github.sha }}
-        run: |
-          mkdir -p docs
-          if [ -z "$PAGE_URL" ]; then
-            PAGE_URL='Not available. GitHub Pages may still need to be enabled with GitHub Actions as its source.'
-          fi
-          {
-            echo '# iPhone Proof Hosted Preview Status'
-            echo
-            echo "Source commit: \`$SOURCE_SHA\`"
-            echo
-            echo "Build job: \`$BUILD_RESULT\`"
-            echo
-            echo "Deployment job: \`$DEPLOY_RESULT\`"
-            echo
-            echo "Preview URL: $PAGE_URL"
-            echo
-            if [ "$DEPLOY_RESULT" = 'success' ]; then
-              echo 'The preview is isolated under the BlindAnatomist fork. It does not publish to or modify the upstream repository.'
-            else
-              echo 'No hosted preview is accepted yet. A failed or skipped deployment must be resolved before real-iPhone acceptance.'
-            fi
-          } > docs/pages-deployment-status.md
-
-      - name: Commit deployment result
-        shell: bash
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/pages-deployment-status.md
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m 'docs: record hosted preview status [skip ci]'
-          git push
