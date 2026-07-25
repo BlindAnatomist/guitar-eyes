@@ -209,6 +209,26 @@ External native-picker return pattern:
 
 Source of strongest external-boundary evidence: Guitar Eyes GE-002.
 
+### XR-EXECUTION-SCOPE-001
+
+State: `cross-repository-proven`
+
+A focused source repair can still become a large metered execution assignment when reconstruction, the full regression gate, packaging, hosted verification, documentation, fixture preparation, workflow administration, and handoff work are bundled together.
+
+Before using Work, Codex, GitHub Actions, or another metered execution environment:
+
+- define the exact source-change boundary;
+- separate mandatory authenticated-environment verification from work Chat and connectors can complete;
+- identify unavailable external actions before the session begins;
+- keep manual iPhone testing outside Work;
+- state the exact stop condition;
+- classify the complete execution envelope honestly as focused or verification-heavy, independent of diff size;
+- never predict a credit percentage or promise low metered usage without reliable platform evidence.
+
+Use the least expensive capable environment for each part without weakening security, accessibility, build, repository-authority, or real-device evidence. Do not transfer connector or workflow limitations to the owner until Chat, connector, CLI, and REST routes have been checked.
+
+Source and failure evidence: Val Music Vault `VMV-007` in `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`.
+
 ### XR-REAL-DEVICE-001
 
 State: `cross-repository-proven`
