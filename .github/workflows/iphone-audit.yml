@@ -1,14 +1,10 @@
 name: iPhone extension verification
 
 on:
-  push:
-    branches:
-      - work/iphone-voiceover-tablature-audit
-    paths-ignore:
-      - docs/proof-automated-results.md
+  workflow_dispatch:
 
 concurrency:
-  group: iphone-extension-verification
+  group: iphone-extension-verification-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -17,9 +13,10 @@ permissions:
 jobs:
   verify:
     name: Test and build bounded iPhone proof
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - name: Check out repository
+      - name: Check out requested source
         uses: actions/checkout@v4
 
       - name: Set up Node.js
@@ -33,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          npm ci > install.log 2>&1
+          npm ci --no-audit --no-fund > install.log 2>&1
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
           exit 0
@@ -111,7 +108,7 @@ jobs:
           if git diff --cached --quiet; then
             exit 0
           fi
-          git commit -m 'docs: record proof automation results [skip ci]'
+          git commit -m 'docs: record intentional proof checkpoint [skip ci]'
           git push
 
       - name: Enforce verification result
