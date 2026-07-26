@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useState } from "react";
-import { describePosition } from "./iphoneTabModel";
+import { describePlayablePosition } from "./positionDescription";
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,7 +15,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   }
 
   const currentPosition = document.positions[currentIndex];
-  const currentDescription = describePosition(document, currentIndex);
+  const currentDescription = describePlayablePosition(document, currentIndex);
   const isFirstPosition = currentIndex === 0;
   const isLastPosition = currentIndex === document.positions.length - 1;
   const hasMultipleBlocks = document.blocks.length > 1;
