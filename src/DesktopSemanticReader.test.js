@@ -84,7 +84,7 @@ describe("DesktopSemanticReader", () => {
     });
   });
 
-  test("does not intercept VoiceOver modifier commands", () => {
+  test("does not intercept VoiceOver modifier commands or speak from the navigator", () => {
     const { container } = render(<DesktopSemanticReader document={measureDocument} />);
     const navigator = screen.getByRole("group", { name: "Position keyboard navigator" });
     const description = container.querySelector(".position-description");
@@ -103,7 +103,7 @@ describe("DesktopSemanticReader", () => {
     expect(liveRegion).toBeEmptyDOMElement();
 
     fireEvent.keyDown(navigator, { key: "Enter" });
-    expect(liveRegion).toHaveTextContent("High E string, fret 2");
+    expect(liveRegion).toBeEmptyDOMElement();
   });
 
   test("jumps between blocks quietly and preserves the original spatial rows on demand", () => {
