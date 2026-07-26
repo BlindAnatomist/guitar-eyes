@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "./App";
 
 function makeRhythmMeasureFile() {
@@ -31,6 +31,7 @@ describe("desktop and iPhone convergence from the accepted semantic core", () =>
     });
     const desktopReader = desktopHeading.closest("section");
 
+    await waitFor(() => expect(document.activeElement).toBe(desktopHeading));
     expect(screen.getByText(/desktop semantic reader mode/i)).toBeInTheDocument();
     expect(screen.queryByLabelText("Multi-Column Navigation")).not.toBeInTheDocument();
     expect(within(desktopReader).getByText(/Duration, quarter note/)).toBeInTheDocument();
