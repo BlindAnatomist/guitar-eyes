@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "./App";
 
 const originalMatchMedia = window.matchMedia;
@@ -24,35 +24,65 @@ afterEach(() => {
   }
 });
 
-describe("Guitar Eyes application shell", () => {
-  test("preserves the desktop reader and exposes the iPhone mode", () => {
+function makeGuitarFile(name = "shared-guitar-tab.txt") {
+  return new File(
+    [
+      "e|--0--2--3--2--0-----|\n",
+      "B|--1--3--0--3--1-----|\n",
+      "G|--0--2--0--2--0-----|\n",
+      "D|--2--0--0--0--2-----|\n",
+      "A|--3--------3--3------|\n",
+      "E|--------------------|\n",
+    ],
+    name,
+    { type: "text/plain" }
+  );
+}
+
+describe("Guitar Eyes converged application shell", () => {
+  test("starts with the semantic desktop reader while retaining the iPhone mode", () => {
     render(<App />);
 
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /Guitar Eyes for Mac - The Guitar Tablature reader/i,
+        name: /Guitar Eyes for Mac and iPhone/i,
       })
     ).toBeInTheDocument();
 
-    expect(screen.getByRole("radio", { name: "Desktop grid reader" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Desktop semantic reader" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "iPhone semantic reader" })).not.toBeChecked();
     expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
-    expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Multi-Column Navigation")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
     ).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("allows the reader mode to change without removing desktop controls", () => {
+  test("allows mode changes without replacing the uploaded semantic document", async () => {
     render(<App />);
+
+    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+      target: { files: [makeGuitarFile()] },
+    });
+
+    const desktopHeading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Desktop tablature reader",
+    });
+    const desktopSection = desktopHeading.closest("section");
+    expect(within(desktopSection).getByText(/Measure 1, position 1 of 5/)).toBeInTheDocument();
+    expect(screen.getByText(/same semantic document is available in both reading modes/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("radio", { name: "iPhone semantic reader" }));
 
-    expect(screen.getByRole("radio", { name: "iPhone semantic reader" })).toBeChecked();
-    expect(screen.getByRole("radio", { name: "Desktop grid reader" })).not.toBeChecked();
-    expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
+    const iphoneHeading = await screen.findByRole("heading", {
+      level: 2,
+      name: "iPhone tablature reader",
+    });
+    const iphoneSection = iphoneHeading.closest("section");
+    expect(within(iphoneSection).getByText(/Measure 1, position 1 of 5/)).toBeInTheDocument();
   });
 
   test("puts iPhone controls before collapsed Mac instructions on a touch device", () => {
@@ -81,7 +111,7 @@ describe("Guitar Eyes application shell", () => {
 
     expect(iphoneMode).toBeChecked();
     expect(instructionsButton).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText(/Welcome to Guitar Eyes for Mac!/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Desktop navigation/i)).not.toBeInTheDocument();
     expect(
       upload.compareDocumentPosition(instructionsButton) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
@@ -103,21 +133,8 @@ describe("Guitar Eyes application shell", () => {
     });
 
     render(<App />);
-    const file = new File(
-      [
-        "e|--0--2--3--2--0-----|\n",
-        "B|--1--3--0--3--1-----|\n",
-        "G|--0--2--0--2--0-----|\n",
-        "D|--2--0--0--0--2-----|\n",
-        "A|--3--------3--3------|\n",
-        "E|--------------------|\n",
-      ],
-      "iphone-proof-clean-six-string.txt",
-      { type: "text/plain" }
-    );
-
     fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
-      target: { files: [file] },
+      target: { files: [makeGuitarFile("iphone-proof-clean-six-string.txt")] },
     });
 
     const heading = await screen.findByRole("heading", {
@@ -129,5 +146,30 @@ describe("Guitar Eyes application shell", () => {
 
     await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/Loaded 5 synchronized positions/i)).toBeInTheDocument();
+  });
+
+  test("loads bass through the shared model", async () => {
+    render(<App />);
+
+    fireEvent.change(screen.getByLabelText("Choose Instrument:"), {
+      target: { value: "bass" },
+    });
+
+    const bassFile = new File(
+      ["G|--0--|\n", "D|-----|\n", "A|-----|\n", "E|--3--|\n"],
+      "bass-tab.txt",
+      { type: "text/plain" }
+    );
+    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+      target: { files: [bassFile] },
+    });
+
+    const desktopHeading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Desktop tablature reader",
+    });
+    const desktopSection = desktopHeading.closest("section");
+    expect(within(desktopSection).getByText(/E string, fret 3/)).toBeInTheDocument();
+    expect(screen.getByText(/Loaded 1 synchronized position/i)).toBeInTheDocument();
   });
 });
