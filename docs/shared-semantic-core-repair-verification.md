@@ -65,7 +65,7 @@ Versioned preview:
 
 ## Repository authority
 
-The temporary publication workflow used fork `main` only as the already-authorized Pages deployment context. Fork `main` was restored to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3` and independently compared as identical after deployment.
+The temporary publication workflow used fork `main` only as the already-authorized Pages deployment context. Fork `main` is being restored to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`; the restoration comparison is part of this same bounded repair operation.
 
 ## Real-iPhone acceptance required
 
