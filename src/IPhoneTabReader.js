@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { describePosition } from "./tablatureModel";
+import { describeNavigationLocation } from "./navigationAnnouncements";
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -33,7 +34,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       Math.min(nextIndex, document.positions.length - 1)
     );
     setCurrentIndex(boundedIndex);
-    announce(describePosition(document, boundedIndex));
+    announce(describeNavigationLocation(document, boundedIndex));
   };
 
   const moveToBlock = (direction) => {
@@ -62,7 +63,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         className="position-controls"
         role="group"
         aria-label="Position navigation"
-        aria-describedby="iphone-current-position-description"
       >
         <button
           type="button"
@@ -92,7 +92,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
           className="position-controls block-controls"
           role="group"
           aria-label="Tablature block navigation"
-          aria-describedby="iphone-current-position-description"
         >
           <button
             type="button"
