@@ -24,7 +24,8 @@ Before changing implementation, accessibility behavior, repository administratio
 7. `docs/rhythm-duration-checkpoint-1.md`;
 8. `docs/measure-recognition-checkpoint-1.md`;
 9. `docs/convergence-lineage-recovery-2026-07-26.md`;
-10. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+10. `docs/convergence-recovery-source-checkpoint-1.md`;
+11. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
 
@@ -40,7 +41,7 @@ The accepted semantic foundation includes:
 - Previous position, Read current position, Next position in that order;
 - quiet Previous and Next movement;
 - quiet tablature-block movement;
-- Read current position as the only control that announces full playing instructions;
+- Read current position as the only action that announces full playing instructions in a semantic reader;
 - omission of ordinary unplayed strings from speech;
 - continued speech for open strings, frets, explicit mute notation, techniques, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure.
