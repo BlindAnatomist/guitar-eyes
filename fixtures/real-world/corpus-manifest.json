@@ -36,7 +36,7 @@
         "count line",
         "one six-string block"
       ],
-      "currentExpectation": "Notes are imported; rhythm line is not yet mapped to semantic durations"
+      "currentExpectation": "W H Q E S symbols map to playable semantic positions as whole, half, quarter, eighth, and sixteenth-note durations; ambiguous symbol counts are preserved with a warning rather than guessed"
     },
     {
       "path": "ascii-techniques-and-annotations.txt",
@@ -85,7 +85,7 @@
         "quarter eighth and half durations",
         "explicit string and fret technical data"
       ],
-      "currentExpectation": "Recognized by future format preflight; structured import not yet implemented"
+      "currentExpectation": "Recognized by format preflight; structured import not yet implemented"
     }
   ],
   "externalSources": [
