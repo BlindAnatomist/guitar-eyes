@@ -53,7 +53,8 @@ Before changing implementation, deployment, accessibility, testing, or repositor
 11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
 12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
 13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
-14. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+14. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
+15. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory, branch names, or recent modification dates when exact ancestry and accepted evidence exist.
 
@@ -168,43 +169,53 @@ Detailed record:
 
 - `docs/convergence-recovery-publication-result-2026-07-26.md`.
 
+## Passed real-iPhone Safari and VoiceOver acceptance
+
+John tested the corrected hosted recovery preview on his iPhone with Safari and VoiceOver using a controlled multi-block guitar fixture containing aligned measures and rhythm values.
+
+Authoritative owner report:
+
+> Everything worked. Focus worked well. It read what it was supposed to. The Next and Previous buttons just said what they did. They did not read what was supposed to be played. It was good. It passed.
+
+The test confirms useful Files-picker return focus, quiet movement controls, dedicated playing-instruction speech, and preservation of the tested rhythm, measure, open-string, omitted-unplayed-string, and multi-block contracts.
+
+Detailed record:
+
+- `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`.
+
 ## Current checkpoint verdict
 
-Passed:
+Convergence recovery checkpoint 1: passed.
 
-1. shared semantic core;
+Passed evidence:
+
+1. accepted shared semantic core;
 2. real-world ASCII corpus foundation;
 3. rhythm duration checkpoint 1;
 4. measure recognition checkpoint 1;
 5. convergence recovery source checkpoint 1;
-6. convergence recovery local execution gate;
-7. corrected Pages publication;
-8. hosted artifact and live-bundle read-back;
-9. final fork-main restoration.
+6. locked local execution gate;
+7. 17 of 17 automated suites;
+8. 81 of 81 automated tests;
+9. successful production build;
+10. corrected Pages publication;
+11. hosted artifact and live-bundle read-back;
+12. exact fork-main restoration;
+13. real-iPhone Safari and VoiceOver acceptance.
 
-Still open:
+The only uncompleted convergence evidence is optional desktop owner acceptance. Jason Washburn has not agreed to participate and is not an active blocker.
 
-1. one bounded real-iPhone Safari and VoiceOver regression;
-2. desktop owner acceptance only if Jason agrees to participate.
+## Next decision boundary
 
-## Next bounded task
+Do not begin another repair, publication, or implementation cycle for convergence unless a new defect is reported.
 
-John performs the real-device test on his iPhone in Chat.
+The owner may next choose among:
 
-The test should cover:
+1. pause with convergence recovery checkpoint 1 preserved as the current accepted state;
+2. request a later desktop experience review if Jason agrees to participate;
+3. authorize a separately scoped next phase such as teacher mode or playback after reviewing priorities.
 
-1. opening the valid recovery preview in Safari with VoiceOver;
-2. selecting iPhone semantic reader;
-3. uploading a controlled multi-block guitar file containing aligned measure bars and rhythm values;
-4. confirming focus returns to the successful load result or iPhone reader rather than Safari Page Menu;
-5. confirming Previous position, Read current position, Next position order;
-6. confirming Previous and Next move without announcing full playing instructions;
-7. confirming Read current announces measure, position, duration, and only the strings that are played or explicitly muted;
-8. confirming ordinary unplayed strings are omitted;
-9. confirming open strings are spoken;
-10. confirming Previous and Next tablature block move quietly and enforce first/last boundaries.
-
-Do not begin another implementation or publication cycle unless this real-device test identifies a defect.
+No next phase is implied or automatically authorized by this checkpoint.
 
 ## Scope boundaries
 
