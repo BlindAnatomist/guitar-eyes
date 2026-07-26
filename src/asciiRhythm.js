@@ -6,7 +6,7 @@ const DURATION_DEFINITIONS = {
   S: { symbol: "S", name: "sixteenth note", quarterNoteUnits: 0.25 },
 };
 
-const RHYTHM_LINE_PATTERN = /^\s*(?:rhythm|rhythms|duration|durations)\s*:?\s*(.*)$/i;
+const RHYTHM_LINE_PATTERN = /^\s*(?:rhythm|rhythms|duration|durations)\s*:?(.*)$/i;
 
 function normalizeLines(sourceText) {
   return String(sourceText).replace(/\r\n?/g, "\n").split("\n");
