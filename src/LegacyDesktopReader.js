@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useState } from "react";
 import ColumnDropdown from "./ColumnDropdown";
 import DataGrid from "./DataGrid";
 
@@ -8,25 +8,7 @@ const LegacyDesktopReader = forwardRef(function LegacyDesktopReader(
 ) {
   const [numColumns, setNumColumns] = useState(1);
   const [isMultiColumnNav, setIsMultiColumnNav] = useState(false);
-  const gridRefs = useRef([]);
   const hasTablature = tablature.length > 0;
-
-  useEffect(() => {
-    gridRefs.current = gridRefs.current.slice(0, tablature.length);
-  }, [tablature]);
-
-  const handleKeyDown = (event, gridIndex) => {
-    if (event.key !== "Tab" || gridRefs.current.length === 0) {
-      return;
-    }
-
-    event.preventDefault();
-    const nextIndex = event.shiftKey
-      ? (gridIndex - 1 + gridRefs.current.length) % gridRefs.current.length
-      : (gridIndex + 1) % gridRefs.current.length;
-    gridRefs.current[nextIndex]?.focus();
-  };
-
   const numOptions = hasTablature && tablature[0]?.[0]?.length
     ? tablature[0][0].length
     : 1;
@@ -59,15 +41,8 @@ const LegacyDesktopReader = forwardRef(function LegacyDesktopReader(
       />
 
       {tablature.map((subarray, index) => (
-        <div
-          key={index}
-          ref={(element) => {
-            gridRefs.current[index] = element;
-          }}
-          tabIndex={index === 0 ? 0 : -1}
-          onKeyDown={(event) => handleKeyDown(event, index)}
-        >
-          <h3>Tablature {index + 1}</h3>
+        <section key={index} aria-labelledby={`legacy-tablature-${index + 1}-heading`}>
+          <h3 id={`legacy-tablature-${index + 1}-heading`}>Tablature {index + 1}</h3>
           <DataGrid
             data={subarray}
             numColumns={numColumns}
@@ -75,7 +50,7 @@ const LegacyDesktopReader = forwardRef(function LegacyDesktopReader(
             setNumColumns={setNumColumns}
             selectedInstrument={selectedInstrument}
           />
-        </div>
+        </section>
       ))}
     </section>
   );
