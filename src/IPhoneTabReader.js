@@ -31,7 +31,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const moveTo = (nextIndex) => {
     setCurrentIndex(nextIndex);
-    announce(describePosition(document, nextIndex));
   };
 
   const moveToBlock = (nextBlockIndex) => {
@@ -55,12 +54,8 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         separator, and source character in the VoiceOver swipe order.
       </p>
 
-      <p className="position-description" id="current-position-description">
-        {currentDescription}
-      </p>
-
       {hasMultipleBlocks && (
-        <div className="block-controls" aria-describedby="current-position-description">
+        <div className="block-controls">
           <button
             type="button"
             onClick={() => moveToBlock(currentPosition.blockIndex - 1)}
@@ -78,7 +73,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </div>
       )}
 
-      <div className="position-controls" aria-describedby="current-position-description">
+      <div className="position-controls">
         <button
           type="button"
           onClick={() => moveTo(currentIndex - 1)}
@@ -103,6 +98,13 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
           ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${currentIndex + 1} of ${document.positions.length}.`
           : `Position ${currentIndex + 1} of ${document.positions.length}`}
       </p>
+
+      <section className="current-position" aria-labelledby="current-position-heading">
+        <h3 id="current-position-heading">Current position</h3>
+        <p className="position-description" id="current-position-description">
+          {currentDescription}
+        </p>
+      </section>
 
       {document.warnings.length > 0 && (
         <div className="reader-warning" aria-labelledby="reader-warning-heading">
