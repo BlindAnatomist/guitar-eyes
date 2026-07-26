@@ -14,6 +14,11 @@ import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
 import { buildReaderDocuments } from "./tabImportCoordinator";
+import {
+  detectTabFileFormat,
+  shouldReadTabFileAsText,
+  unsupportedTabFormatMessage,
+} from "./tabFormatDetector";
 import "./App.css";
 
 const TEST_BUILD_LABEL = "Shared semantic core repair 1";
@@ -172,6 +177,13 @@ function App() {
     focusSoon(errorHeadingRef);
   };
 
+  const finishRecognizedUnsupportedFormat = (format) => {
+    finishUnreadableUpload(
+      unsupportedTabFormatMessage(format),
+      `Recognized ${format.label}, but import support is not available yet.`
+    );
+  };
+
   const handleFileUpload = async (file) => {
     pendingIphoneFocusTargetRef.current = null;
     setIsReadingFile(true);
@@ -181,11 +193,18 @@ function App() {
     setIphoneDocument(null);
     setTablature([]);
 
-    if (!file?.name?.toLowerCase().endsWith(".txt")) {
+    if (!file) {
       finishUnreadableUpload(
-        "Choose a plain-text file whose name ends in .txt.",
-        "The selected file was not accepted."
+        "Choose a tablature file first.",
+        "No tablature file was selected."
       );
+      return;
+    }
+
+    const initialFormat = detectTabFileFormat(file.name);
+
+    if (!shouldReadTabFileAsText(initialFormat)) {
+      finishRecognizedUnsupportedFormat(initialFormat);
       return;
     }
 
@@ -198,6 +217,20 @@ function App() {
         messageFromError(error, "The selected file could not be read."),
         "The selected file could not be read."
       );
+      return;
+    }
+
+    const detectedFormat = detectTabFileFormat(file.name, sourceText);
+
+    if (detectedFormat.id !== "ascii-text") {
+      if (detectedFormat.support === "planned") {
+        finishRecognizedUnsupportedFormat(detectedFormat);
+      } else {
+        finishUnreadableUpload(
+          unsupportedTabFormatMessage(detectedFormat),
+          "The selected file format could not be identified."
+        );
+      }
       return;
     }
 
@@ -349,23 +382,46 @@ function App() {
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>
         <label>
-          <input type="radio" name="reading-mode" value="iphone" checked={readingMode === "iphone"} onChange={handleReadingModeChange} />
+          <input
+            type="radio"
+            name="reading-mode"
+            value="iphone"
+            checked={readingMode === "iphone"}
+            onChange={handleReadingModeChange}
+          />
           iPhone semantic reader
         </label>
         <label>
-          <input type="radio" name="reading-mode" value="desktop" checked={readingMode === "desktop"} onChange={handleReadingModeChange} />
+          <input
+            type="radio"
+            name="reading-mode"
+            value="desktop"
+            checked={readingMode === "desktop"}
+            onChange={handleReadingModeChange}
+          />
           Desktop grid reader
         </label>
       </fieldset>
 
-      <InstrumentDropdown selectedInstrument={selectedInstrument} onSelectInstrument={handleInstrumentChange} />
+      <InstrumentDropdown
+        selectedInstrument={selectedInstrument}
+        onSelectInstrument={handleInstrumentChange}
+      />
       <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
 
-      <div className="status-message" aria-live="polite" aria-atomic="true">{statusMessage}</div>
+      <div className="status-message" aria-live="polite" aria-atomic="true">
+        {statusMessage}
+      </div>
 
       {currentError && (
-        <section className="error-message" role="alert" aria-labelledby="upload-error-heading">
-          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">Tablature could not be loaded</h2>
+        <section
+          className="error-message"
+          role="alert"
+          aria-labelledby="upload-error-heading"
+        >
+          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">
+            Tablature could not be loaded
+          </h2>
           <p>{currentError}</p>
         </section>
       )}
@@ -375,22 +431,51 @@ function App() {
       </div>
 
       <section className="desktop-instructions-control">
-        <button type="button" onClick={toggleInfoSection} aria-expanded={isInfoOpen} aria-controls="desktop-instructions">
+        <button
+          type="button"
+          onClick={toggleInfoSection}
+          aria-expanded={isInfoOpen}
+          aria-controls="desktop-instructions"
+        >
           {isInfoOpen ? "Close Mac keyboard instructions" : "Open Mac keyboard instructions"}
         </button>
-        {isInfoOpen && <div id="desktop-instructions"><InfoSection /></div>}
+        {isInfoOpen && (
+          <div id="desktop-instructions">
+            <InfoSection />
+          </div>
+        )}
       </section>
 
       <section hidden={readingMode !== "desktop"} aria-label="Desktop grid reader">
         <div>
-          <input id="multi-column" type="checkbox" checked={isMultiColumnNav} onChange={handleCheckboxChange} />
+          <input
+            id="multi-column"
+            type="checkbox"
+            checked={isMultiColumnNav}
+            onChange={handleCheckboxChange}
+          />
           <label htmlFor="multi-column">Multi-Column Navigation</label>
         </div>
-        <ColumnDropdown value={numColumns} numOptions={tablature.length > 0 ? tablature[0][0].length : 1} onChange={handleDropdownChange} />
+        <ColumnDropdown
+          value={numColumns}
+          numOptions={tablature.length > 0 ? tablature[0][0].length : 1}
+          onChange={handleDropdownChange}
+        />
         {tablature.map((subarray, index) => (
-          <div key={index} ref={(element) => (gridRefs.current[index] = element)} tabIndex={index === 0 ? 0 : -1} onKeyDown={(event) => handleKeyDown(event, index)}>
+          <div
+            key={index}
+            ref={(element) => (gridRefs.current[index] = element)}
+            tabIndex={index === 0 ? 0 : -1}
+            onKeyDown={(event) => handleKeyDown(event, index)}
+          >
             <h2>Tablature {index + 1}</h2>
-            <DataGrid data={subarray} numColumns={numColumns} isMultiColumnNav={isMultiColumnNav} setNumColumns={setNumColumns} selectedInstrument={selectedInstrument} />
+            <DataGrid
+              data={subarray}
+              numColumns={numColumns}
+              isMultiColumnNav={isMultiColumnNav}
+              setNumColumns={setNumColumns}
+              selectedInstrument={selectedInstrument}
+            />
           </div>
         ))}
       </section>
