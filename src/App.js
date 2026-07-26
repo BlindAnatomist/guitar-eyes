@@ -7,17 +7,15 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import Upload from "./Upload";
-import { parseFile } from "./parseFile";
-import DataGrid from "./DataGrid";
-import ColumnDropdown from "./ColumnDropdown";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
+import DesktopTabReader from "./DesktopTabReader";
 import {
-  parseSixStringTabText,
+  parseTabText,
   readTextFile,
   TabParseError,
-} from "./iphoneTabModel";
+} from "./tablatureModel";
 import "./App.css";
 
 function getInitialReadingMode() {
@@ -32,15 +30,19 @@ function messageFromError(error, fallback) {
   if (error instanceof TabParseError || error instanceof Error) {
     return error.message;
   }
-
   return fallback;
 }
 
+function loadedStatus(document) {
+  const positionWord = document.positions.length === 1 ? "position" : "positions";
+  const blockWord = document.blocks.length === 1 ? "block" : "blocks";
+  return `Loaded ${document.positions.length} synchronized ${positionWord} across ${document.blocks.length} tablature ${blockWord}. The same semantic document is available in both reading modes.`;
+}
+
 function App() {
-  const [tablature, setTablature] = useState([]);
-  const [iphoneDocument, setIphoneDocument] = useState(null);
-  const [numColumns, setNumColumns] = useState(1);
-  const [isMultiColumnNav, setIsMultiColumnNav] = useState(false);
+  const [tabDocument, setTabDocument] = useState(null);
+  const [sourceText, setSourceText] = useState("");
+  const [sourceFileName, setSourceFileName] = useState("");
   const [isInfoOpen, setIsInfoOpen] = useState(
     () => getInitialReadingMode() === "desktop"
   );
@@ -48,11 +50,11 @@ function App() {
   const [readingMode, setReadingMode] = useState(getInitialReadingMode);
   const [isReadingFile, setIsReadingFile] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
-  const [iphoneError, setIphoneError] = useState("");
-  const [desktopError, setDesktopError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
-  const gridRefs = useRef([]);
+
   const iphoneHeadingRef = useRef(null);
+  const desktopHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
   const desktopFocusPendingRef = useRef(false);
   const iphoneFocusPendingRef = useRef(false);
@@ -88,12 +90,13 @@ function App() {
     if (
       readingMode === "desktop" &&
       desktopFocusPendingRef.current &&
-      gridRefs.current.length > 0
+      tabDocument &&
+      desktopHeadingRef.current
     ) {
-      gridRefs.current[0]?.focus();
+      desktopHeadingRef.current.focus({ preventScroll: true });
       desktopFocusPendingRef.current = false;
     }
-  }, [tablature, readingMode]);
+  }, [tabDocument, readingMode]);
 
   useLayoutEffect(() => {
     if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
@@ -123,88 +126,60 @@ function App() {
   }, [focusIphoneReaderWhenBrowserReturns]);
 
   const focusSoon = (ref) => {
-    window.setTimeout(() => ref.current?.focus(), 0);
+    window.setTimeout(() => ref.current?.focus({ preventScroll: true }), 0);
+  };
+
+  const commitParsedDocument = (parsedDocument, mode = readingMode) => {
+    setErrorMessage("");
+
+    if (mode === "iphone") {
+      iphoneFocusPendingRef.current = true;
+      flushSync(() => {
+        setTabDocument(parsedDocument);
+        setStatusMessage(loadedStatus(parsedDocument));
+        setIphoneFocusRequest((current) => current + 1);
+      });
+      return;
+    }
+
+    desktopFocusPendingRef.current = true;
+    setTabDocument(parsedDocument);
+    setStatusMessage(loadedStatus(parsedDocument));
   };
 
   const handleFileUpload = async (file) => {
     setIsReadingFile(true);
     setStatusMessage("Reading the selected tablature file.");
-    setIphoneError("");
-    setDesktopError("");
-    setIphoneDocument(null);
+    setErrorMessage("");
+    setTabDocument(null);
 
     if (!file?.name?.toLowerCase().endsWith(".txt")) {
-      const message = "Choose a plain-text file whose name ends in .txt.";
-      setIphoneError(message);
-      setDesktopError(message);
+      setSourceText("");
+      setSourceFileName("");
+      setErrorMessage("Choose a plain-text file whose name ends in .txt.");
       setStatusMessage("The selected file was not accepted.");
       setIsReadingFile(false);
       focusSoon(errorHeadingRef);
       return;
     }
 
-    const numStrings = selectedInstrument === "guitar" ? 6 : 4;
-    let desktopResult = null;
-    let mobileResult = null;
-
     try {
-      desktopResult = await parseFile(file, numStrings);
-      setTablature(desktopResult);
+      const text = await readTextFile(file);
+      const parsedDocument = parseTabText(text, selectedInstrument);
+      setSourceText(text);
+      setSourceFileName(file.name);
+      commitParsedDocument(parsedDocument);
     } catch (error) {
-      setTablature([]);
-      setDesktopError(
-        messageFromError(error, "The file could not be opened in desktop grid mode.")
+      setSourceText("");
+      setSourceFileName("");
+      setTabDocument(null);
+      setErrorMessage(
+        messageFromError(error, "The tablature file could not be read or parsed.")
       );
-    }
-
-    if (selectedInstrument !== "guitar") {
-      setIphoneError(
-        "The iPhone proof currently supports one six-string guitar block. Jason's existing four-string bass reader remains available in Desktop grid mode."
-      );
-    } else {
-      try {
-        const sourceText = await readTextFile(file);
-        mobileResult = parseSixStringTabText(sourceText);
-      } catch (error) {
-        setIphoneError(
-          messageFromError(error, "The file could not be parsed for iPhone reading mode.")
-        );
-      }
-    }
-
-    if (readingMode === "iphone" && mobileResult) {
-      iphoneFocusPendingRef.current = true;
-      flushSync(() => {
-        setIphoneDocument(mobileResult);
-        setIsReadingFile(false);
-        setStatusMessage(
-          `Loaded ${mobileResult.positions.length} synchronized positions in iPhone reading mode.`
-        );
-        setIphoneFocusRequest((current) => current + 1);
-      });
-      return;
-    }
-
-    setIphoneDocument(mobileResult);
-    setIsReadingFile(false);
-
-    if (readingMode === "iphone") {
-      setStatusMessage("The file could not be loaded in iPhone reading mode.");
+      setStatusMessage("The file could not be loaded.");
       focusSoon(errorHeadingRef);
-      return;
-    }
-
-    if (desktopResult?.length > 0) {
-      setStatusMessage(
-        `Loaded ${desktopResult.length} tablature ${
-          desktopResult.length === 1 ? "block" : "blocks"
-        } in desktop grid mode.`
-      );
-      desktopFocusPendingRef.current = true;
-      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
-    } else {
-      setStatusMessage("The file could not be loaded in desktop grid mode.");
-      focusSoon(errorHeadingRef);
+    } finally {
+      setIsReadingFile(false);
     }
   };
 
@@ -212,97 +187,126 @@ function App() {
     const nextMode = event.target.value;
     setReadingMode(nextMode);
 
+    if (!tabDocument) {
+      if (errorMessage) focusSoon(errorHeadingRef);
+      return;
+    }
+
     if (nextMode === "iphone") {
-      if (iphoneDocument) {
-        iphoneFocusPendingRef.current = true;
-        setIphoneFocusRequest((current) => current + 1);
-      } else if (iphoneError) focusSoon(errorHeadingRef);
+      iphoneFocusPendingRef.current = true;
+      setIphoneFocusRequest((current) => current + 1);
       return;
     }
 
     iphoneFocusPendingRef.current = false;
-    if (tablature.length > 0) {
-      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
-    } else if (desktopError) {
+    desktopFocusPendingRef.current = true;
+    focusSoon(desktopHeadingRef);
+  };
+
+  const handleInstrumentChange = (instrument) => {
+    setSelectedInstrument(instrument);
+    if (!sourceText) return;
+
+    try {
+      const parsedDocument = parseTabText(sourceText, instrument);
+      commitParsedDocument(parsedDocument);
+    } catch (error) {
+      setTabDocument(null);
+      setErrorMessage(
+        messageFromError(
+          error,
+          `The uploaded file could not be parsed as ${instrument} tablature.`
+        )
+      );
+      setStatusMessage(
+        `${sourceFileName || "The uploaded file"} could not be loaded as ${instrument} tablature.`
+      );
       focusSoon(errorHeadingRef);
     }
   };
 
-  const handleDropdownChange = (value) => setNumColumns(value);
-  const handleCheckboxChange = () => setIsMultiColumnNav(!isMultiColumnNav);
-  const toggleInfoSection = () => setIsInfoOpen(!isInfoOpen);
-  const handleInstrumentChange = (instrument) => setSelectedInstrument(instrument);
-
-  const handleKeyDown = (event, gridIndex) => {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      const nextIndex = event.shiftKey
-        ? (gridIndex - 1 + gridRefs.current.length) % gridRefs.current.length
-        : (gridIndex + 1) % gridRefs.current.length;
-      gridRefs.current[nextIndex]?.focus();
-    }
-  };
-
-  const currentError = readingMode === "iphone" ? iphoneError : desktopError;
+  const toggleInfoSection = () => setIsInfoOpen((current) => !current);
 
   return (
     <main className="app-shell">
       <h1>
-        Guitar Eyes for Mac - The Guitar Tablature reader for the Visually Impaired
-        Guitarist
+        Guitar Eyes for Mac and iPhone - Accessible Guitar and Bass Tablature Reader
       </h1>
       <p className="extension-note">
-        This branch preserves Jason Washburn's desktop reader and adds a bounded iPhone
-        Safari and VoiceOver proof.
+        Jason Washburn&apos;s desktop concept and the iPhone semantic reader now use one
+        synchronized tablature model. Phone and desktop are two ways of navigating the
+        same parsed music, not separate applications.
       </p>
 
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>
         <label>
-          <input type="radio" name="reading-mode" value="iphone" checked={readingMode === "iphone"} onChange={handleReadingModeChange} />
+          <input
+            type="radio"
+            name="reading-mode"
+            value="iphone"
+            checked={readingMode === "iphone"}
+            onChange={handleReadingModeChange}
+          />
           iPhone semantic reader
         </label>
         <label>
-          <input type="radio" name="reading-mode" value="desktop" checked={readingMode === "desktop"} onChange={handleReadingModeChange} />
-          Desktop grid reader
+          <input
+            type="radio"
+            name="reading-mode"
+            value="desktop"
+            checked={readingMode === "desktop"}
+            onChange={handleReadingModeChange}
+          />
+          Desktop semantic reader
         </label>
       </fieldset>
 
       <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
-      <InstrumentDropdown selectedInstrument={selectedInstrument} onSelectInstrument={handleInstrumentChange} />
+      <InstrumentDropdown
+        selectedInstrument={selectedInstrument}
+        onSelectInstrument={handleInstrumentChange}
+      />
 
-      <div className="status-message" aria-live="polite" aria-atomic="true">{statusMessage}</div>
+      <div className="status-message" aria-live="polite" aria-atomic="true">
+        {statusMessage}
+      </div>
 
-      {currentError && (
-        <section className="error-message" role="alert" aria-labelledby="upload-error-heading">
-          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">Tablature could not be loaded</h2>
-          <p>{currentError}</p>
+      {errorMessage && (
+        <section
+          className="error-message"
+          role="alert"
+          aria-labelledby="upload-error-heading"
+        >
+          <h2 id="upload-error-heading" ref={errorHeadingRef} tabIndex="-1">
+            Tablature could not be loaded
+          </h2>
+          <p>{errorMessage}</p>
         </section>
       )}
 
       <div hidden={readingMode !== "iphone"}>
-        <IPhoneTabReader document={iphoneDocument} ref={iphoneHeadingRef} />
+        <IPhoneTabReader document={tabDocument} ref={iphoneHeadingRef} />
+      </div>
+
+      <div hidden={readingMode !== "desktop"}>
+        <DesktopTabReader document={tabDocument} ref={desktopHeadingRef} />
       </div>
 
       <section className="desktop-instructions-control">
-        <button type="button" onClick={toggleInfoSection} aria-expanded={isInfoOpen} aria-controls="desktop-instructions">
+        <button
+          type="button"
+          onClick={toggleInfoSection}
+          aria-expanded={isInfoOpen}
+          aria-controls="desktop-instructions"
+        >
           {isInfoOpen ? "Close Mac keyboard instructions" : "Open Mac keyboard instructions"}
         </button>
-        {isInfoOpen && <div id="desktop-instructions"><InfoSection /></div>}
-      </section>
-
-      <section hidden={readingMode !== "desktop"} aria-label="Desktop grid reader">
-        <div>
-          <input id="multi-column" type="checkbox" checked={isMultiColumnNav} onChange={handleCheckboxChange} />
-          <label htmlFor="multi-column">Multi-Column Navigation</label>
-        </div>
-        <ColumnDropdown value={numColumns} numOptions={tablature.length > 0 ? tablature[0][0].length : 1} onChange={handleDropdownChange} />
-        {tablature.map((subarray, index) => (
-          <div key={index} ref={(element) => (gridRefs.current[index] = element)} tabIndex={index === 0 ? 0 : -1} onKeyDown={(event) => handleKeyDown(event, index)}>
-            <h2>Tablature {index + 1}</h2>
-            <DataGrid data={subarray} numColumns={numColumns} isMultiColumnNav={isMultiColumnNav} setNumColumns={setNumColumns} selectedInstrument={selectedInstrument} />
+        {isInfoOpen && (
+          <div id="desktop-instructions">
+            <InfoSection />
           </div>
-        ))}
+        )}
       </section>
     </main>
   );
