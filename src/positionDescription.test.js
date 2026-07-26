@@ -80,7 +80,7 @@ describe("describePlayablePosition", () => {
     const document = buildReaderDocuments(source, "guitar").semanticDocument;
 
     expect(describePlayablePosition(document, 0)).toBe(
-      "Position 1 of 1. Duration, quarter note. High E string, open."
+      "Measure 1 of 1. Position 1 of 1 in this measure. Duration, quarter note. High E string, open."
     );
   });
 });
