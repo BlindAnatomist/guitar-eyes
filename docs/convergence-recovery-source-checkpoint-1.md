@@ -8,9 +8,9 @@ Branch: `work/convergence-from-accepted-semantic-core`
 
 Accepted foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
 
-Source checkpoint before this record: `cdb74b074caa76b0c44707c4e534db0b39754b82`
+Implementation source before this final record: `fcb55ad76caf1c0a6c84df4f5e0acceed03b9214`
 
-Status: source implementation complete and reviewed; dependency installation, automated execution, production build, hosted publication, and real-device regression remain unverified
+Status: source implementation complete and statically verified; dependency installation, automated execution, production build, hosted publication, and real-device regression remain unverified
 
 ## Why this checkpoint exists
 
@@ -18,9 +18,18 @@ The previous convergence candidate was built from a diverged source line that wa
 
 ## Preserved accepted behavior
 
-No source changes were made to the accepted iPhone reader, position-description layer, semantic parser, rhythm mapper, measure model, format detector, import coordinator, or Files-picker focus-recovery algorithm.
+No source changes were made to:
 
-The inherited tests continue to protect:
+1. `src/IPhoneTabReader.js`;
+2. `src/positionDescription.js`;
+3. `src/iphoneTabModel.js`;
+4. `src/asciiRhythm.js`;
+5. `src/measureModel.js`;
+6. `src/tabImportCoordinator.js`;
+7. `src/tabFormatDetector.js`;
+8. inherited parser, rhythm, measure, import, playing-description, and iPhone tests.
+
+The inherited contracts continue to require:
 
 1. Previous position, Read current position, Next position in the accepted order;
 2. quiet Previous and Next movement;
@@ -45,15 +54,19 @@ The desktop reader provides:
 3. duration in column headings when available;
 4. measure and position context;
 5. Previous position, Read current position, Next position in the same order as iPhone;
-6. quiet movement and explicit read speech;
-7. Previous and Next tablature-block controls for multi-block files;
+6. quiet movement and explicit Read current speech;
+7. quiet Previous and Next tablature-block controls for multi-block files;
 8. a plain-key keyboard navigator using Left Arrow, Right Arrow, Home, End, and Enter;
 9. no interception of VoiceOver Control+Option commands;
 10. a collapsed Original spatial source layout disclosure for each block;
-11. a named horizontally scrollable semantic table region;
-12. a highlighted current-position column.
+11. a named horizontally scrollable semantic-table region;
+12. a highlighted current-position column;
+13. a nonduplicated position-count summary;
+14. desktop upload focus on the semantic reader heading.
 
-Document-level positions are used when building every block table. This prevents block-local indexes from being mistaken for global indexes when the reader moves into block two or later.
+Document-global positions are used when building every block table. This prevents block-local indexes from being mistaken for global indexes when the reader moves into block two or later.
+
+The spatial table may expose `Not played` in inactive cells because absence is structurally meaningful in a string-by-position grid. The dedicated playing instruction continues to omit ordinary inactive strings.
 
 ## Compatibility fallback
 
@@ -65,48 +78,75 @@ The fallback now:
 2. keeps raw cells out of the ordinary Tab sequence;
 3. leaves VoiceOver Control+Option commands untouched;
 4. offers optional plain-arrow movement after the grid itself is focused;
-5. retains the existing multi-column group controls and explicit speech action.
+5. retains multi-column grouping and an explicit speech action;
+6. removes the previous document-level Escape-listener leak;
+7. no longer traps Tab between raw grid wrappers.
 
-The compatibility fallback is not the primary reader for supported semantic files.
+The compatibility fallback is not the primary reader for supported semantic files and is not a second musical authority.
 
-## New regression coverage authored
+## Application shell
+
+`src/App.js` now:
+
+1. parses supported files once through the accepted import coordinator;
+2. stores one semantic document for both interfaces;
+3. mounts only the active interface;
+4. routes supported files to the semantic desktop reader;
+5. routes unsafe semantic material to the compatibility grid only in desktop mode;
+6. preserves the accepted iPhone success-and-error focus mechanism;
+7. preserves automatic instrument correction;
+8. switches interfaces without reparsing or replacing the musical document.
+
+## Regression coverage authored
 
 New tests cover:
 
 1. accepted duration and measure data reaching the desktop reader;
 2. switching between desktop and iPhone without reparsing or weakening speech;
-3. exact iPhone control order after interface switching;
-4. absence of ordinary `silent` speech in the iPhone reader;
+3. exact iPhone and desktop control order;
+4. absence of ordinary `silent` speech in complete playing descriptions;
 5. quiet desktop position movement;
 6. explicit desktop Read current speech;
 7. desktop block jumps using document-global indexes;
 8. preservation of original source rows on demand;
 9. non-interception of VoiceOver modifier commands;
 10. raw compatibility cells remaining outside the Tab sequence;
-11. plain-arrow fallback navigation.
+11. plain-arrow fallback navigation;
+12. desktop result-heading focus;
+13. deterministic static build identity before the React root.
 
-These tests have been authored and source-reviewed but have not yet been executed in an environment with installed project dependencies.
+The inherited suite was retained rather than replaced.
 
-## Static source review completed
+## Static verification completed
 
-The following were reviewed together for state flow, imports, indexes, focus targets, labels, and accessibility relationships:
+The changed JavaScript and JSX files and the new test files were parsed and transpiled successfully with the TypeScript compiler available in the Chat execution container.
 
-- `src/App.js`
-- `src/DesktopSemanticReader.js`
-- `src/LegacyDesktopReader.js`
-- `src/DataGrid.js`
-- `src/InfoSection.js`
-- `src/App.css`
-- `src/App.convergence.test.js`
-- `src/DesktopSemanticReader.test.js`
-- `src/DataGrid.test.js`
-- inherited iPhone and position-description tests
+The reviewed set included:
 
-The static build identity is now:
+- `src/App.js`;
+- `src/DesktopSemanticReader.js`;
+- `src/LegacyDesktopReader.js`;
+- `src/DataGrid.js`;
+- `src/InfoSection.js`;
+- `src/App.css`;
+- `src/App.convergence.test.js`;
+- `src/DesktopSemanticReader.test.js`;
+- `src/DataGrid.test.js`;
+- `src/buildIdentity.test.js`;
+- inherited iPhone and position-description tests.
 
-`Test build: Convergence recovery checkpoint 1.`
+This was a syntax and static state-flow gate. The environment does not contain a runnable checkout with locked project dependencies and cannot reach the npm registry, so no React test or production-build result is claimed.
 
-This identity exists in the document title and as the first heading before the React root.
+## Build identity
+
+The candidate static HTML uses:
+
+- page title: `Test build Convergence recovery checkpoint 1`;
+- first heading: `Test build: Convergence recovery checkpoint 1.`
+
+`src/buildIdentity.test.js` asserts that the unique heading occurs once and precedes the React root.
+
+The stable Pages address still serves the invalidated convergence preview until a corrected candidate is deliberately verified and published. Do not continue iPhone acceptance against the current hosted build.
 
 ## Evidence boundary
 
@@ -117,25 +157,24 @@ This checkpoint does not claim:
 - production build success;
 - browser execution success;
 - hosted publication;
-- iPhone acceptance;
-- Mac acceptance.
-
-The chat runtime cannot reach GitHub or npm directly, so it cannot execute the repository. No substitute or fabricated local result is recorded.
+- iPhone acceptance of the recovery candidate;
+- Mac owner acceptance.
 
 ## Next bounded gate
 
 Before any publication:
 
 1. obtain the exact final branch head;
-2. run locked dependency installation once in an authenticated execution environment;
-3. run the complete inherited and new automated test suite once;
-4. run the production build once;
-5. inspect any exact failure before changing source or rerunning;
-6. verify compiled artifacts contain the accepted duration, measure, quiet-navigation, and build-identity strings;
-7. publish only after all preceding gates pass;
-8. restore fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3` after any temporary publication procedure;
-9. ask John for one bounded iPhone regression only after a corrected preview is stable;
-10. defer Jason's desktop acceptance unless he agrees to participate.
+2. compare it against the accepted foundation and require zero commits behind;
+3. run locked dependency installation once in an authenticated execution environment;
+4. run the complete inherited and new automated suite once;
+5. run the production build once;
+6. inspect any exact failure before changing source or rerunning;
+7. verify compiled artifacts contain accepted duration, measure, quiet-navigation, compact-speech, control-order, and build-identity material;
+8. publish only after all preceding gates pass;
+9. restore fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3` after the temporary publication procedure;
+10. ask John for one bounded iPhone regression only after a corrected preview is stable;
+11. defer Jason's desktop acceptance unless he agrees to participate.
 
 ## Repository authority
 
