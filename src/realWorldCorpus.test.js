@@ -22,14 +22,22 @@ describe("real-world tablature format corpus", () => {
     expect(result.semanticDocument.warnings.join(" ")).toMatch(/non-tablature lines? were ignored/i);
   });
 
-  test("imports notes from a rhythm-line specimen without pretending durations are mapped", () => {
+  test("maps W H Q E S rhythm notation onto semantic positions", () => {
     const source = fixture("ascii-rhythm-line.txt");
     const result = buildReaderDocuments(source, "guitar");
+    const durations = result.semanticDocument.positions.map(
+      (position) => position.duration?.symbol
+    );
 
     expect(result.semanticDocument).not.toBeNull();
-    expect(result.semanticDocument.positions.length).toBeGreaterThan(0);
-    expect(result.semanticDocument.positions[0]).not.toHaveProperty("duration");
-    expect(source).toMatch(/Rhythm: Q\s+E E\s+H/);
+    expect(result.semanticDocument.blocks[0].rhythm.alignment).toBe("column");
+    expect(result.semanticDocument.blocks[0].rhythm.mappedCount).toBe(9);
+    expect(durations).toEqual(["Q", "E", "E", "H", "Q", "Q", "S", "S", "E"]);
+    expect(result.semanticDocument.positions[0].duration).toMatchObject({
+      name: "quarter note",
+      quarterNoteUnits: 1,
+      source: "ascii-rhythm-line",
+    });
   });
 
   test("preserves recognized inline techniques from annotated ASCII", () => {
