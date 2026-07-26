@@ -43,6 +43,22 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     }
   };
 
+  const positionCount = currentPosition.measureNumber
+    ? `${
+        hasMultipleBlocks
+          ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. `
+          : ""
+      }Measure ${currentPosition.measureNumber} of ${
+        currentPosition.measureCountInBlock
+      }${hasMultipleBlocks ? " in this block" : ""}. Position ${
+        currentPosition.positionInMeasure
+      } of ${currentPosition.positionsInMeasure} in this measure. Overall position ${
+        currentIndex + 1
+      } of ${document.positions.length}.`
+    : hasMultipleBlocks
+    ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${currentIndex + 1} of ${document.positions.length}.`
+    : `Position ${currentIndex + 1} of ${document.positions.length}`;
+
   return (
     <section className="iphone-reader" aria-labelledby="iphone-reader-heading">
       <h2 id="iphone-reader-heading" ref={headingRef} tabIndex="-1">
@@ -74,15 +90,15 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       )}
 
       <div className="position-controls">
-        <button type="button" onClick={() => announce(currentDescription)}>
-          Read current position
-        </button>
         <button
           type="button"
           onClick={() => moveTo(currentIndex - 1)}
           disabled={isFirstPosition}
         >
           Previous position
+        </button>
+        <button type="button" onClick={() => announce(currentDescription)}>
+          Read current position
         </button>
         <button
           type="button"
@@ -93,11 +109,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </button>
       </div>
 
-      <p className="position-count">
-        {hasMultipleBlocks
-          ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${currentIndex + 1} of ${document.positions.length}.`
-          : `Position ${currentIndex + 1} of ${document.positions.length}`}
-      </p>
+      <p className="position-count">{positionCount}</p>
 
       <section className="current-position" aria-labelledby="current-position-heading">
         <h3 id="current-position-heading">Current position</h3>
