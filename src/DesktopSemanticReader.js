@@ -147,10 +147,6 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
         event.preventDefault();
         moveTo(document.positions.length - 1);
         break;
-      case "Enter":
-        event.preventDefault();
-        announce(currentDescription);
-        break;
       default:
         break;
     }
@@ -181,8 +177,9 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
       >
         <p id="desktop-keyboard-help">
           With this navigator focused, use Left and Right Arrow to move one synchronized
-          position, Home and End to jump, and Enter to read the current position. Guitar
-          Eyes does not intercept VoiceOver modifier-key commands here.
+          position and Home and End to jump. Use the Read current position button for the
+          complete playing instruction. Guitar Eyes does not intercept VoiceOver
+          modifier-key commands here.
         </p>
       </div>
 
