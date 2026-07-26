@@ -43,7 +43,7 @@ describe("DesktopTabReader", () => {
   });
 
   test("uses the same Previous, Read current, Next controls as the iPhone reader", () => {
-    const { container } = render(<DesktopTabReader document={document} />);
+    render(<DesktopTabReader document={document} />);
     const positionGroup = screen.getByRole("group", { name: "Position navigation" });
     const buttons = [...positionGroup.querySelectorAll("button")];
 
@@ -52,11 +52,22 @@ describe("DesktopTabReader", () => {
       "Read current position",
       "Next position",
     ]);
+    expect(positionGroup).not.toHaveAttribute("aria-describedby");
+  });
+
+  test("moves with location-only announcements", () => {
+    const { container } = render(<DesktopTabReader document={document} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
+
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Measure 1, position 2 of 2. High E string, fret 3."
     );
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).toHaveTextContent(
+      "Measure 1, position 2 of 2. Overall position 2 of 2."
+    );
+    expect(liveRegion).not.toHaveTextContent(/string|fret|open/i);
   });
 
   test("supports plain-key position navigation without stealing VoiceOver modifier commands", () => {
@@ -64,21 +75,30 @@ describe("DesktopTabReader", () => {
     const navigator = screen.getByRole("group", { name: "Position keyboard navigator" });
     const description = container.querySelector(".position-description");
 
+    expect(navigator).toHaveAttribute("aria-describedby", "desktop-keyboard-help");
+
     fireEvent.keyDown(navigator, { key: "ArrowRight", ctrlKey: true, altKey: true });
     expect(description).toHaveTextContent("position 1 of 2");
 
     fireEvent.keyDown(navigator, { key: "ArrowRight" });
     expect(description).toHaveTextContent("position 2 of 2");
 
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).toHaveTextContent(
+      "Measure 1, position 2 of 2. Overall position 2 of 2."
+    );
+    expect(liveRegion).not.toHaveTextContent(/string|fret|open/i);
+
     fireEvent.keyDown(navigator, { key: "Home" });
     expect(description).toHaveTextContent("position 1 of 2");
   });
 
-  test("provides the same explicit block jumps as the iPhone reader", () => {
+  test("moves between blocks with location-only announcements", () => {
     const { container } = render(<DesktopTabReader document={multiBlockDocument} />);
     const blockGroup = screen.getByRole("group", { name: "Tablature block navigation" });
     const nextBlock = screen.getByRole("button", { name: "Next tablature block" });
 
+    expect(blockGroup).not.toHaveAttribute("aria-describedby");
     fireEvent.click(nextBlock);
 
     expect(container.querySelector(".position-description")).toHaveTextContent(
@@ -86,9 +106,22 @@ describe("DesktopTabReader", () => {
     );
     expect(screen.getByRole("button", { name: "Previous tablature block" })).toBeEnabled();
     expect(nextBlock).toBeDisabled();
-    expect(blockGroup).toHaveAttribute(
-      "aria-describedby",
-      "desktop-current-position-description"
+
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).toHaveTextContent(
+      "Tablature block 2 of 2. Measure 1, position 1 of 1. Overall position 2 of 2."
+    );
+    expect(liveRegion).not.toHaveTextContent(/string|fret|open/i);
+  });
+
+  test("reserves full playing instructions for Read current position", () => {
+    const { container } = render(<DesktopTabReader document={document} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
+
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).toHaveTextContent(
+      "Measure 1, position 1 of 2. High E string, open."
     );
   });
 });
