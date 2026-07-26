@@ -50,6 +50,10 @@ export function describePlayablePosition(document, positionIndex) {
         ]
       : [`Position ${position.number} of ${position.total}.`];
 
+  if (position.duration?.name) {
+    parts.push(`Duration, ${position.duration.name}.`);
+  }
+
   parts.push(...playableDescriptions);
   return parts.join(" ");
 }
