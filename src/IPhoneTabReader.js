@@ -12,9 +12,13 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   if (!document || document.positions.length === 0) return null;
 
-  const currentDescription = describePosition(document, currentIndex);
-  const isFirstPosition = currentIndex === 0;
-  const isLastPosition = currentIndex === document.positions.length - 1;
+  const currentPosition = document.positions[currentIndex] ?? document.positions[0];
+  const activeIndex = currentPosition.index;
+  const currentDescription = describePosition(document, activeIndex);
+  const isFirstPosition = activeIndex === 0;
+  const isLastPosition = activeIndex === document.positions.length - 1;
+  const isFirstBlock = currentPosition.blockIndex === 0;
+  const isLastBlock = currentPosition.blockIndex === document.blocks.length - 1;
 
   const announce = (text) => {
     setAnnouncement((current) => ({
@@ -24,8 +28,18 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   };
 
   const moveTo = (nextIndex) => {
-    setCurrentIndex(nextIndex);
-    announce(describePosition(document, nextIndex));
+    const boundedIndex = Math.max(
+      0,
+      Math.min(nextIndex, document.positions.length - 1)
+    );
+    setCurrentIndex(boundedIndex);
+    announce(describePosition(document, boundedIndex));
+  };
+
+  const moveToBlock = (direction) => {
+    const targetBlock = document.blocks[currentPosition.blockIndex + direction];
+    const targetPosition = targetBlock?.positions?.[0];
+    if (targetPosition) moveTo(targetPosition.index);
   };
 
   return (
@@ -46,11 +60,13 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
       <div
         className="position-controls"
+        role="group"
+        aria-label="Position navigation"
         aria-describedby="iphone-current-position-description"
       >
         <button
           type="button"
-          onClick={() => moveTo(currentIndex - 1)}
+          onClick={() => moveTo(activeIndex - 1)}
           disabled={isFirstPosition}
         >
           Previous position
@@ -60,7 +76,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </button>
         <button
           type="button"
-          onClick={() => moveTo(currentIndex + 1)}
+          onClick={() => moveTo(activeIndex + 1)}
           disabled={isLastPosition}
         >
           Next position
@@ -68,8 +84,32 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       </div>
 
       <p className="position-count">
-        Overall position {currentIndex + 1} of {document.positions.length}
+        Overall position {activeIndex + 1} of {document.positions.length}
       </p>
+
+      {document.blocks.length > 1 && (
+        <div
+          className="position-controls block-controls"
+          role="group"
+          aria-label="Tablature block navigation"
+          aria-describedby="iphone-current-position-description"
+        >
+          <button
+            type="button"
+            onClick={() => moveToBlock(-1)}
+            disabled={isFirstBlock}
+          >
+            Previous tablature block
+          </button>
+          <button
+            type="button"
+            onClick={() => moveToBlock(1)}
+            disabled={isLastBlock}
+          >
+            Next tablature block
+          </button>
+        </div>
+      )}
 
       {document.warnings.length > 0 && (
         <div className="reader-warning" aria-labelledby="iphone-reader-warning-heading">
