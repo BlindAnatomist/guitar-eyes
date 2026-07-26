@@ -50,12 +50,16 @@ function DataGrid({ data, numColumns, isMultiColumnNav, setNumColumns, selectedI
 
   const width = Math.max(1, Math.min(Number(numColumns) || 1, fullWidth));
   const groupCount = Math.max(1, Math.ceil(fullWidth / width));
-  const gridData = buildGridData(
-    data,
-    selectedInstrument,
-    isMultiColumnNav,
-    width,
-    currentGroupIndex
+  const gridData = useMemo(
+    () =>
+      buildGridData(
+        data,
+        selectedInstrument,
+        isMultiColumnNav,
+        width,
+        currentGroupIndex
+      ),
+    [data, selectedInstrument, isMultiColumnNav, width, currentGroupIndex]
   );
   const renderedColumnCount = Math.max(1, ...gridData.map((row) => row.length));
 
