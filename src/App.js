@@ -412,9 +412,9 @@ function App() {
         </section>
       )}
 
-      <div hidden={readingMode !== "iphone"}>
+      {readingMode === "iphone" && (
         <IPhoneTabReader document={semanticDocument} ref={iphoneHeadingRef} />
-      </div>
+      )}
 
       <section className="desktop-instructions-control">
         <button
@@ -432,8 +432,8 @@ function App() {
         )}
       </section>
 
-      <div hidden={readingMode !== "desktop"}>
-        {semanticDocument ? (
+      {readingMode === "desktop" &&
+        (semanticDocument ? (
           <DesktopSemanticReader document={semanticDocument} ref={desktopHeadingRef} />
         ) : (
           <LegacyDesktopReader
@@ -441,8 +441,7 @@ function App() {
             selectedInstrument={selectedInstrument}
             ref={legacyDesktopHeadingRef}
           />
-        )}
-      </div>
+        ))}
     </main>
   );
 }
