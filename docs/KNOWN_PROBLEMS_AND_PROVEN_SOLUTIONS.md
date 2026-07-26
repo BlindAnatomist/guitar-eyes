@@ -52,7 +52,7 @@ Desktop instructions were expanded and ordered ahead of the touch workflow regar
 
 ### Proven solution
 
-- Place reading mode, upload, and instrument controls before desktop instructions.
+- Place reading mode, instrument, and upload controls before desktop instructions.
 - Keep desktop instructions expanded by default on desktop.
 - Collapse desktop instructions by default on coarse-pointer devices.
 - Expose explicit `Open Mac keyboard instructions` and `Close Mac keyboard instructions` controls.
@@ -101,45 +101,45 @@ The committed-target pattern solves the first boundary. Real-iPhone testing prov
 2. Do not use a chain of arbitrary delayed timers that repeatedly calls `focus()` in the hope that one attempt lands after rendering.
 3. Do not declare the repair complete merely because `document.activeElement` is correct in an automated DOM test.
 4. Do not assume the ordinary `flushSync` plus `useLayoutEffect` committed-target pattern alone covers an external native picker boundary. It passed automation but failed twice on the real iPhone.
+5. Do not preserve the durable picker-return request only for successful parsing. A failed parse crosses the same external picker boundary and requires the same durable recovery mechanism.
 
 ### Proven solution
 
 Use the Val Music Vault committed-target pattern as the foundation, then preserve the request across the external picker boundary:
 
 1. Synchronize the decisive state transition with `flushSync` when necessary.
-2. Store a dedicated pending-focus marker.
+2. Store a dedicated pending-focus target, not merely a success flag.
 3. Use `useLayoutEffect` after React commits the persistent target.
 4. Keep the pending request durable beyond that initial commit.
 5. Listen for `window` focus, `pageshow`, and document `visibilitychange`.
 6. When the page is visible again, wait for two animation frames so Safari can finish restoring web content.
-7. Focus the persistent `iPhone tablature reader` heading with `focus({ preventScroll: true })`.
-8. Clear the request only after the heading is confirmed as `document.activeElement`.
-9. Retain the direct committed-state attempt for browsers that do not leave the web document.
-10. Cover both the ordinary DOM focus contract and the browser-return event contract automatically.
-11. Require hosted real-iPhone VoiceOver acceptance.
+7. Focus the persistent result heading with `focus({ preventScroll: true })`.
+8. Use the `iPhone tablature reader` heading after success and the `Tablature could not be loaded` heading after failure.
+9. Clear the request only after the selected heading is confirmed as `document.activeElement`.
+10. Retain the direct committed-state attempt for browsers that do not leave the web document.
+11. Cover both successful and failed picker-return contracts automatically.
+12. Require hosted real-iPhone VoiceOver acceptance.
 
 ### Acceptance result
 
-On the refreshed hosted build, the owner selected the same fixture once. VoiceOver recovered from the native Files picker and landed on the successful result announcement:
+The original success path passed on the refreshed hosted build when VoiceOver landed on:
 
 `Loaded five synchronized positions in iPhone reader mode.`
 
-The parser, semantic reader, browser-return focus recovery, and useful completion announcement all passed on the real target device.
+On July 25, 2026, the first bass handoff exposed that the failure path had not inherited the same durable focus target. That handoff is invalidated. The generalized success-or-error repair is automated and deployed but remains `candidate` until the owner retests it on the real iPhone.
 
 ### Evidence
 
-- Real-device failure history and final pass: `docs/real-iphone-acceptance.md`.
-- Proven implementation: `src/App.js`.
-- Browser-return regression coverage: `src/App.test.js`.
-- Repair commits: `7031e3581840c36ce3cd83e1907b1e77e41b31cd` and `539e7c97a75f02da250f53eeb4c9062ad6680479`.
-- Exact published repair source: `fc91883edf079a0f0f92eda6a679d31dacedc939`.
-- Automated gate: dependency installation, all 14 tests, and production build passed.
-- Hosted gate: GitHub Pages publication passed, followed by clean restoration of fork `main`.
+- Real-device failure history and original success pass: `docs/real-iphone-acceptance.md`.
+- Generalized repair implementation: `src/App.js`.
+- Success and failure browser-return regression coverage: `src/App.test.js`.
+- Repair source checkpoint: `d2b9a6ca7f38c8c7285e6c57b2327c7eb2dfba94`.
+- Repair workflow result: `docs/shared-semantic-core-repair-automated-result.md`.
 - Val Music Vault foundation: `src/admin/AdminWorkspace.tsx` and its Phase 7 acceptance records.
 
 ### Derived shared standard
 
-A native iOS picker is an external browser-boundary transition, not merely a React rendering transition. Preserve the committed-target focus request until Safari signals that the web document is visible and focused again, allow Safari to finish restoring web content, then focus the persistent result and clear the request only after confirming success.
+A native iOS picker is an external browser-boundary transition whether the operation succeeds or fails. Preserve a target-specific committed-focus request until Safari signals that the web document is visible and focused again, allow Safari to finish restoring web content, then focus the persistent success or error destination and clear the request only after confirming success.
 
 ---
 
@@ -155,8 +155,8 @@ The working branch could build successfully, but GitHub Pages environment protec
 
 - Preserve `Phlypper/guitar-eyes` untouched.
 - Preserve fork `main` as a clean upstream-tracking branch.
-- Work only on `work/iphone-voiceover-tablature-audit`.
-- Do not open a pull request.
+- Work only on the authorized work branch.
+- Do not open a pull request unless explicitly authorized.
 
 ### Proven solution
 
@@ -176,6 +176,68 @@ A temporary deployment workaround is incomplete until repository authority is re
 
 ---
 
+## GE-004 — A fixture can fail when the instrument selector and file disagree
+
+State: `candidate`
+
+### Symptoms
+
+A four-string bass fixture was handed off for iPhone testing, but the semantic import depended on the selector already being set to Bass. A selector mismatch caused semantic rejection and exposed the incomplete failure-focus path.
+
+### Cause
+
+Instrument identity was treated as an infallible prerequisite supplied by the interface rather than information that could be inferred from a structurally valid four- or six-string document.
+
+### Repair
+
+1. Attempt semantic parsing with the selected instrument.
+2. If it fails, attempt the alternate supported instrument.
+3. When the alternate parse succeeds, use that semantic document for both readers.
+4. Update the selector to the detected instrument.
+5. Announce the detected instrument in the load status.
+6. Retain the legacy parser only when both semantic interpretations fail.
+
+### Evidence
+
+- Implementation: `src/tabImportCoordinator.js` and `src/App.js`.
+- Contract coverage: `src/tabImportCoordinator.test.js` and `src/App.sharedCore.test.js`.
+- Repair source checkpoint: `d2b9a6ca7f38c8c7285e6c57b2327c7eb2dfba94`.
+- Automated verification and deployment: `docs/shared-semantic-core-repair-automated-result.md`.
+
+### Acceptance boundary
+
+Automated and hosted verification passed. Real-iPhone acceptance remains required before changing this entry to `local-proven`.
+
+---
+
+## GE-005 — A successful deployment can still hand the tester a stale cached preview
+
+State: `candidate`
+
+### Risk
+
+The GitHub Pages address remains stable between checkpoints. Safari may reuse a previously cached page, causing the tester to exercise older JavaScript while the repository and deployment records show that a newer build succeeded.
+
+### Repair
+
+1. Give each acceptance build an audible in-page test-build label.
+2. Update the page title and description for the checkpoint.
+3. Add conservative no-cache metadata hints.
+4. Provide a versioned query string in the handoff address.
+5. Require the tester to hear the expected build label before uploading a fixture.
+
+### Evidence
+
+- `src/App.js` announces `Test build: Shared semantic core repair 1.`
+- `public/index.html` identifies the repair build and includes no-cache metadata hints.
+- Versioned preview: `https://blindanatomist.github.io/guitar-eyes/?build=shared-core-repair-1`.
+
+### Acceptance boundary
+
+This remains `candidate` until the owner confirms that the versioned address announces the expected build label on the real iPhone.
+
+---
+
 ## Cross-repository standards
 
 ### XR-VOICEOVER-FOCUS-001
@@ -185,8 +247,9 @@ State: `cross-repository-proven`
 State-driven committed-target VoiceOver focus pattern:
 
 - pending focus state or ref;
-- `useLayoutEffect` after commit;
 - persistent destination;
+- success-or-error target identity;
+- `useLayoutEffect` after commit;
 - `preventScroll`;
 - automatic DOM regression coverage;
 - bounded real-iPhone VoiceOver acceptance.
@@ -200,6 +263,7 @@ State: `cross-repository-proven`
 External native-picker return pattern:
 
 - retain the pending focus request beyond the React commit;
+- retain the correct success or failure destination;
 - respond to page visibility and browser-return events;
 - wait for Safari to finish restoring web content;
 - focus the persistent destination with `preventScroll`;
@@ -218,59 +282,13 @@ A focused source repair can still become a large metered execution assignment wh
 Before using Work, Codex, GitHub Actions, or another metered execution environment:
 
 - define the exact source-change boundary;
-- separate mandatory authenticated-environment verification from work Chat and connectors can complete;
-- identify unavailable external actions before the session begins;
-- keep manual iPhone testing outside Work;
-- state the exact stop condition;
-- classify the complete execution envelope honestly as focused or verification-heavy, independent of diff size;
-- never predict a credit percentage or promise low metered usage without reliable platform evidence.
-
-Use the least expensive capable environment for each part without weakening security, accessibility, build, repository-authority, or real-device evidence. Do not transfer connector or workflow limitations to the owner until Chat, connector, CLI, and REST routes have been checked.
-
-Source and failure evidence: Val Music Vault `VMV-007` in `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`.
-
-### XR-REAL-DEVICE-001
-
-State: `cross-repository-proven`
-
-Automated DOM focus and accessibility tests are necessary but insufficient. Claims about VoiceOver focus, announcement clarity, control discoverability, and state transitions require real-device acceptance on the owner's iPhone.
-
-### XR-REPOSITORY-AUTHORITY-001
-
-State: `cross-repository-proven`
-
-Before implementation, reconstruct authority from repository branches, commits, current-state documents, hosted state, and acceptance records. Do not rely on a prompt or chat memory alone.
-
----
-
-## Entry template
-
-Copy this section for each new entry.
-
-```markdown
-## REPO-### — Short problem title
-
-State: `candidate | local-proven | cross-repository-proven | failed-do-not-repeat | superseded`
-
-### Symptoms
-
-### Cause
-
-### Constraints
-
-### Failed-do-not-repeat approaches
-
-### Proven solution
-
-### Evidence
-
-### Applies to
-
-### Cross-repository transfer status
-
-### Derived standard
-```
+- separate tasks by the least expensive capable environment;
+- keep owner-operated testing outside metered work;
+- do not predict credit consumption from expected diff size;
+- preserve required evidence rather than weakening the gate.
 
 ## Maintenance rule
 
-Do not delete failed approaches merely because the current implementation works. A failed approach is durable protection against repeating the same waste. Mark obsolete entries `superseded` and link to the replacement.
+When a problem takes more than one serious attempt to solve, recurs across threads, requires a non-obvious workaround, or is likely to be mistaken for a platform limitation, update this document before closing the checkpoint.
+
+A future worker must not rely on chat memory alone. Repository documentation is authoritative.
