@@ -1,8 +1,8 @@
 GUITAR EYES FORMAT SPECIMEN 02
 Original project-authored material
 
-Rhythm: Q   E E   H      Q   S S E
-         1   & 2   3      4   e & a
+Rhythm:  Q E E H   Q          Q   S S E
+         1 & 2 &   3          4   e & a
 
 e|------0-2---3----------2---0-2-3-|
 B|----1---3---0----------3---1-----|
@@ -12,4 +12,4 @@ A|--3---------2--------------3-----|
 E|------------3--------------------|
 
 Legend: W whole, H half, Q quarter, E eighth, S sixteenth.
-The current ASCII parser should find the notes but does not yet attach these durations to positions.
+The rhythm line aligns one duration symbol with each playable semantic position.
