@@ -18,25 +18,31 @@ const multiBlockDocument = parseTabDocumentText(
 );
 
 describe("IPhoneTabReader", () => {
-  test("exposes quiet navigation controls and one dedicated current-position description", () => {
+  test("orders the primary current-position action before quiet navigation", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
+    const read = screen.getByRole("button", { name: "Read current position" });
     const previous = screen.getByRole("button", { name: "Previous position" });
     const next = screen.getByRole("button", { name: "Next position" });
-    const read = screen.getByRole("button", { name: "Read current position" });
     const description = container.querySelector(".position-description");
 
+    expect(read).toBeEnabled();
     expect(previous).toBeDisabled();
     expect(next).toBeEnabled();
-    expect(read).toBeEnabled();
+    expect(read).not.toHaveAttribute("aria-describedby");
     expect(previous).not.toHaveAttribute("aria-describedby");
     expect(next).not.toHaveAttribute("aria-describedby");
-    expect(read).not.toHaveAttribute("aria-describedby");
     expect(
       screen.queryByRole("button", { name: "Next tablature block" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Current position" })).toBeInTheDocument();
     expect(description).toHaveTextContent("Position 1 of 2. High E string, open.");
+    expect(
+      read.compareDocumentPosition(previous) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      previous.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(
       next.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
