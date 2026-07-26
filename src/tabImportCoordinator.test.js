@@ -25,6 +25,8 @@ describe("buildReaderDocuments", () => {
     expect(result.semanticError).toBeNull();
     expect(result.desktopBlocks).toEqual([guitarLines]);
     expect(result.semanticDocument.positions.length).toBeGreaterThan(0);
+    expect(result.resolvedInstrument).toBe("guitar");
+    expect(result.instrumentWasDetected).toBe(false);
   });
 
   test("uses one multi-block guitar document for both reader projections", () => {
@@ -45,6 +47,27 @@ describe("buildReaderDocuments", () => {
     expect(result.semanticDocument.blocks).toHaveLength(1);
     expect(result.desktopBlocks).toEqual([bassLines]);
     expect(result.semanticError).toBeNull();
+  });
+
+  test("auto-detects bass when the interface still says guitar", () => {
+    const result = buildReaderDocuments(bassLines.join("\n"), "guitar");
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.instrument).toBe("bass");
+    expect(result.desktopBlocks).toEqual([bassLines]);
+    expect(result.requestedInstrument).toBe("guitar");
+    expect(result.resolvedInstrument).toBe("bass");
+    expect(result.instrumentWasDetected).toBe(true);
+  });
+
+  test("auto-detects guitar when the interface still says bass", () => {
+    const result = buildReaderDocuments(guitarLines.join("\n"), "bass");
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.instrument).toBe("guitar");
+    expect(result.desktopBlocks).toEqual([guitarLines]);
+    expect(result.resolvedInstrument).toBe("guitar");
+    expect(result.instrumentWasDetected).toBe(true);
   });
 
   test("retains the legacy desktop fallback when semantic parsing is unsafe", () => {
