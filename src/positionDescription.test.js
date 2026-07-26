@@ -1,5 +1,6 @@
 import { parseFourStringBassTabText, parseSixStringTabText } from "./iphoneTabModel";
 import { describePlayablePosition } from "./positionDescription";
+import { buildReaderDocuments } from "./tabImportCoordinator";
 
 const makeTab = (lines) => lines.join("\n");
 
@@ -63,6 +64,23 @@ describe("describePlayablePosition", () => {
 
     expect(describePlayablePosition(document, 0)).toContain(
       "High E string, muted note notation preserved but not yet interpreted."
+    );
+  });
+
+  test("announces a mapped duration through the existing current-position action", () => {
+    const source = makeTab([
+      "Rhythm: Q",
+      "e|--0--|",
+      "B|-----|",
+      "G|-----|",
+      "D|-----|",
+      "A|-----|",
+      "E|-----|",
+    ]);
+    const document = buildReaderDocuments(source, "guitar").semanticDocument;
+
+    expect(describePlayablePosition(document, 0)).toBe(
+      "Position 1 of 1. Duration, quarter note. High E string, open."
     );
   });
 });
