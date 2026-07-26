@@ -1,27 +1,32 @@
 import React, { forwardRef, useEffect, useState } from "react";
 import { describePlayablePosition } from "./positionDescription";
 
-function positionLocation(position, document) {
-  const parts = [];
+function positionCountText(position, document) {
+  if (position.measureNumber) {
+    const blockPrefix =
+      document.blocks.length > 1
+        ? `Block ${position.blockNumber} of ${document.blocks.length}. `
+        : "";
+    const blockSuffix = document.blocks.length > 1 ? " in this block" : "";
+
+    return `${blockPrefix}Measure ${position.measureNumber} of ${
+      position.measureCountInBlock
+    }${blockSuffix}. Position ${position.positionInMeasure} of ${
+      position.positionsInMeasure
+    } in this measure. Overall position ${position.index + 1} of ${
+      document.positions.length
+    }.`;
+  }
 
   if (document.blocks.length > 1) {
-    parts.push(`Block ${position.blockNumber} of ${document.blocks.length}`);
+    return `Block ${position.blockNumber} of ${document.blocks.length}. Position ${
+      position.positionInBlock
+    } of ${position.positionsInBlock} in this block. Overall position ${
+      position.index + 1
+    } of ${document.positions.length}.`;
   }
 
-  if (position.measureNumber) {
-    parts.push(`Measure ${position.measureNumber} of ${position.measureCountInBlock}`);
-    parts.push(
-      `Position ${position.positionInMeasure} of ${position.positionsInMeasure} in this measure`
-    );
-  } else if (document.blocks.length > 1) {
-    parts.push(
-      `Position ${position.positionInBlock} of ${position.positionsInBlock} in this block`
-    );
-  } else {
-    parts.push(`Position ${position.number} of ${position.total}`);
-  }
-
-  return `${parts.join(". ")}.`;
+  return `Position ${position.index + 1} of ${document.positions.length}`;
 }
 
 function positionColumnLabel(position) {
@@ -220,10 +225,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
         </button>
       </div>
 
-      <p className="position-count">
-        {positionLocation(currentPosition, document)} Overall position {activeIndex + 1} of{" "}
-        {document.positions.length}.
-      </p>
+      <p className="position-count">{positionCountText(currentPosition, document)}</p>
 
       <section className="current-position" aria-labelledby="desktop-current-position-heading">
         <h3 id="desktop-current-position-heading">Current position</h3>
