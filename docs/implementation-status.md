@@ -42,7 +42,7 @@ The proof established synchronized positions, semantic descriptions, understanda
 
 ### Checkpoint 4: desktop and phone semantic convergence
 
-Source status: implemented and pre-device hardened on the authorized work branch.
+Source status: implemented, locally verified, GitHub-hosted verified, and published for real-device acceptance on the authorized work branch.
 
 The active application now:
 
@@ -66,10 +66,11 @@ Detailed records:
 
 - `docs/desktop-phone-semantic-convergence.md`
 - `docs/convergence-pre-device-hardening-2026-07-26.md`
+- `docs/convergence-verification-preview-2026-07-26.md`
 
 ## Verification state for Checkpoint 4
 
-Completed without GitHub-hosted execution:
+Completed before GitHub-hosted execution:
 
 - repository-authority reconstruction from branch, implementation, acceptance, and known-problem records;
 - JavaScript and JSX syntax parsing;
@@ -77,16 +78,30 @@ Completed without GitHub-hosted execution:
 - direct semantic-model assertions covering guitar, bass, multiple blocks, measure derivation, multi-digit frets, warnings, and descriptions;
 - syntax parsing and transpilation of the restored block-navigation source and tests;
 - YAML parsing of the hardened manual verification workflow;
-- confirmation that the verification workflow is read-only, manual, bounded, and does not create bot commits.
+- confirmation that the verification workflow is read-only, manual, bounded, and does not create bot commits;
+- locked local dependency installation after one environment-only cache retry;
+- all 4 local test suites and all 20 local tests;
+- a successful local production build.
+
+Completed through the intentional temporary-main publication checkpoint:
+
+1. exact published source `d26e4172a0386ceb56ad5c0061e72d975b42fc43`;
+2. GitHub Actions run `30217532641`;
+3. successful locked installation;
+4. all 4 hosted test suites and all 20 hosted tests;
+5. successful production build with `PUBLIC_URL=/guitar-eyes`;
+6. successful compiled-artifact checks for the shared controls and restored block navigation;
+7. successful publication at `https://blindanatomist.github.io/guitar-eyes/`;
+8. HTTP 200 read-back of the HTML and exact built main asset;
+9. live-asset confirmation of `Previous tablature block` and `Next tablature block`;
+10. exact restoration of fork `main`, independently compared as identical with zero ahead, zero behind, and zero changed files;
+11. no GitHub Actions rerun and no bot commit.
 
 Still required before Checkpoint 4 can be marked passed:
 
-1. one intentional `workflow_dispatch` run for locked dependency installation, the complete automated test suite, and the production build;
-2. inspection of any failed job before any source change or rerun;
-3. hosted preview publication through the proven protected-main procedure, only after the automated gate passes;
-4. John's real-iPhone VoiceOver regression acceptance of upload recovery, position controls, multiple blocks, measure context, and restored block jumps;
-5. continued desktop automated and browser-level inspection without assuming Jason's participation;
-6. Jason's Mac recognition and usability acceptance only if he agrees to test the mature preview.
+1. John's real-iPhone VoiceOver regression acceptance of upload recovery, position controls, multiple blocks, measure context, and restored block jumps;
+2. continued desktop automated and browser-level inspection without assuming Jason's participation;
+3. Jason's Mac recognition and usability acceptance only if he agrees to test the mature preview.
 
 Jason is not a blocker to completing source work, automated verification, hosted preview preparation, or John's iPhone acceptance. Without his participation, the project may record desktop owner acceptance as deferred rather than fabricate it.
 
