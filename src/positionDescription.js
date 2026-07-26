@@ -42,13 +42,28 @@ export function describePlayablePosition(document, positionIndex) {
     }
   });
 
-  const parts =
-    document.blocks.length > 1
-      ? [
-          `Block ${position.blockNumber} of ${document.blocks.length}.`,
-          `Position ${position.positionInBlock} of ${position.positionsInBlock} in this block.`,
-        ]
-      : [`Position ${position.number} of ${position.total}.`];
+  const parts = [];
+
+  if (document.blocks.length > 1) {
+    parts.push(`Block ${position.blockNumber} of ${document.blocks.length}.`);
+  }
+
+  if (position.measureNumber) {
+    parts.push(
+      document.blocks.length > 1
+        ? `Measure ${position.measureNumber} of ${position.measureCountInBlock} in this block.`
+        : `Measure ${position.measureNumber} of ${position.measureCountInBlock}.`
+    );
+    parts.push(
+      `Position ${position.positionInMeasure} of ${position.positionsInMeasure} in this measure.`
+    );
+  } else if (document.blocks.length > 1) {
+    parts.push(
+      `Position ${position.positionInBlock} of ${position.positionsInBlock} in this block.`
+    );
+  } else {
+    parts.push(`Position ${position.number} of ${position.total}.`);
+  }
 
   if (position.duration?.name) {
     parts.push(`Duration, ${position.duration.name}.`);
