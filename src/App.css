@@ -31,6 +31,7 @@
 .app-shell button:focus-visible,
 .app-shell input:focus-visible,
 .app-shell select:focus-visible,
+.app-shell [tabindex="0"]:focus-visible,
 .app-shell [tabindex="-1"]:focus {
   outline: 3px solid currentColor;
   outline-offset: 3px;
@@ -40,8 +41,9 @@
 .status-message,
 .upload-control,
 .mode-selector,
-.iphone-reader,
-.error-message {
+.semantic-reader,
+.error-message,
+.desktop-instructions-control {
   margin-block: 1rem;
 }
 
@@ -67,9 +69,10 @@
   min-height: 0;
 }
 
-.iphone-reader,
+.semantic-reader,
 .error-message,
-.reader-warning {
+.reader-warning,
+.desktop-keyboard-navigator {
   border: 2px solid currentColor;
   border-radius: 0.5rem;
   padding: 1rem;
@@ -89,6 +92,62 @@
 
 .position-count {
   margin-bottom: 0;
+}
+
+.desktop-keyboard-navigator {
+  margin-block: 1rem;
+}
+
+.desktop-keyboard-navigator p {
+  margin: 0;
+}
+
+.desktop-overview {
+  margin-top: 1.5rem;
+}
+
+.semantic-block {
+  margin-top: 1.5rem;
+}
+
+.semantic-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0.25rem;
+}
+
+.semantic-table {
+  border-collapse: collapse;
+  min-width: 100%;
+}
+
+.semantic-table caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.semantic-table th,
+.semantic-table td {
+  border: 1px solid currentColor;
+  padding: 0.55rem;
+  text-align: left;
+  vertical-align: top;
+  min-width: 8rem;
+}
+
+.semantic-table th:first-child {
+  position: sticky;
+  left: 0;
+  background: Canvas;
+  color: CanvasText;
+  min-width: 8rem;
+}
+
+.current-position-column {
+  font-weight: 700;
+  outline: 3px solid currentColor;
+  outline-offset: -3px;
 }
 
 .reader-warning {
