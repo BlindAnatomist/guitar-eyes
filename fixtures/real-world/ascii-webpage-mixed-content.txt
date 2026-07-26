@@ -1,0 +1,30 @@
+GUITAR EYES FORMAT SPECIMEN 01
+Original project-authored material
+Instrument: Guitar
+Tuning: Standard E A D G B E
+Capo: 2
+Tempo: 92 BPM
+
+[Intro]
+Chords: Cadd9  G  Dsus4  Em7
+A line of copied webpage prose that should not become a musical position.
+
+e|--0---3---2---0---|
+B|--3---3---3---0---|
+G|--0---0---2---0---|
+D|--2---0---0---2---|
+A|--3---2-------2---|
+E|------3-------0---|
+
+Verse 1
+These invented words imitate lyrics between tablature blocks.
+Another lyric line appears here.
+
+e|--0---2---3---2---0---|
+B|--1---3---0---3---1---|
+G|--0---2---0---2---0---|
+D|--2---0---0---0---2---|
+A|--3-------2-------3---|
+E|----------3-----------|
+
+Source note: copied-page structures are retained; musical content is original.
