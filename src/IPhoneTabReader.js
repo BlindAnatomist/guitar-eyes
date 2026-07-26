@@ -74,6 +74,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       )}
 
       <div className="position-controls">
+        <button type="button" onClick={() => announce(currentDescription)}>
+          Read current position
+        </button>
         <button
           type="button"
           onClick={() => moveTo(currentIndex - 1)}
@@ -87,9 +90,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
           disabled={isLastPosition}
         >
           Next position
-        </button>
-        <button type="button" onClick={() => announce(currentDescription)}>
-          Read current position
         </button>
       </div>
 
