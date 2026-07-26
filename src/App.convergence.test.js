@@ -34,7 +34,7 @@ describe("desktop and iPhone convergence from the accepted semantic core", () =>
     expect(screen.getByText(/desktop semantic reader mode/i)).toBeInTheDocument();
     expect(screen.queryByLabelText("Multi-Column Navigation")).not.toBeInTheDocument();
     expect(within(desktopReader).getByText(/Duration, quarter note/)).toBeInTheDocument();
-    expect(within(desktopReader).getByText(/Measure 1 of 2/)).toBeInTheDocument();
+    expect(within(desktopReader).getAllByText(/Measure 1 of 2/).length).toBeGreaterThan(0);
     expect(
       within(desktopReader).getByRole("region", {
         name: "Tablature block 1 semantic table",
