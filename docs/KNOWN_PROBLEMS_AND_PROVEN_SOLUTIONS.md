@@ -55,12 +55,12 @@ Desktop instructions were expanded and ordered ahead of the touch workflow regar
 - Place reading mode, instrument, and upload controls before desktop instructions.
 - Keep desktop instructions expanded by default on desktop.
 - Collapse desktop instructions by default on coarse-pointer devices.
-- Expose explicit `Open Mac keyboard instructions` and `Close Mac keyboard instructions` controls.
+- Expose explicit Open and Close Mac keyboard instruction controls.
 
 ### Evidence
 
-- Real-iPhone VoiceOver acceptance: the owner confirmed the corrected order exactly.
-- See `docs/real-iphone-acceptance.md` and `docs/hosted-preview-status.md`.
+- Real-iPhone VoiceOver acceptance.
+- `docs/real-iphone-acceptance.md`.
 
 ### Derived standard
 
@@ -76,70 +76,53 @@ Cross-repository foundation: `BlindAnatomist/val-music-vault`
 
 ### Symptoms
 
-After selecting a valid six-string text file in the iPhone Files picker:
+After selecting a file in the iPhone Files picker, Safari and VoiceOver may return to browser chrome or the Page Menu rather than the application result. The problem occurs after both successful and failed imports.
 
-- parsing succeeded;
-- five synchronized positions loaded;
-- the iPhone tablature reader was understandable;
-- Safari and VoiceOver initially returned to the browser Page Menu rather than the reader result;
-- the user had to swipe back into the application to find the result.
-
-The owner reproduced the same Page Menu landing after refreshing the hosted page and reloading the fixture.
-
-### Refined cause
+### Cause
 
 There are two separate transition boundaries:
 
-1. React must commit the newly created persistent reader target.
+1. React must commit the persistent result or error target.
 2. Safari must finish returning from the external native Files picker and return control to the web document.
 
-The committed-target pattern solves the first boundary. Real-iPhone testing proved that focusing during the React commit can still occur before Safari completes the second boundary. Safari then overwrites page focus with browser chrome.
+Focusing only during React commit can happen before Safari completes the second boundary. Safari then overwrites page focus with browser chrome.
 
 ### Failed-do-not-repeat approaches
 
 1. Do not rely on the browser to restore useful focus automatically.
-2. Do not use a chain of arbitrary delayed timers that repeatedly calls `focus()` in the hope that one attempt lands after rendering.
-3. Do not declare the repair complete merely because `document.activeElement` is correct in an automated DOM test.
-4. Do not assume the ordinary `flushSync` plus `useLayoutEffect` committed-target pattern alone covers an external native picker boundary. It passed automation but failed twice on the real iPhone.
-5. Do not preserve the durable picker-return request only for successful parsing. A failed parse crosses the same external picker boundary and requires the same durable recovery mechanism.
+2. Do not use arbitrary delayed timer chains that repeatedly call `focus()`.
+3. Do not declare the repair complete because `document.activeElement` is correct in a DOM test.
+4. Do not assume `flushSync` plus `useLayoutEffect` alone covers an external picker boundary.
+5. Do not implement durable focus only for successful parsing. Failure crosses the same boundary.
 
 ### Proven solution
 
-Use the Val Music Vault committed-target pattern as the foundation, then preserve the request across the external picker boundary:
-
 1. Synchronize the decisive state transition with `flushSync` when necessary.
 2. Store a dedicated pending-focus target, not merely a success flag.
-3. Use `useLayoutEffect` after React commits the persistent target.
-4. Keep the pending request durable beyond that initial commit.
-5. Listen for `window` focus, `pageshow`, and document `visibilitychange`.
-6. When the page is visible again, wait for two animation frames so Safari can finish restoring web content.
-7. Focus the persistent result heading with `focus({ preventScroll: true })`.
-8. Use the `iPhone tablature reader` heading after success and the `Tablature could not be loaded` heading after failure.
-9. Clear the request only after the selected heading is confirmed as `document.activeElement`.
-10. Retain the direct committed-state attempt for browsers that do not leave the web document.
-11. Cover both successful and failed picker-return contracts automatically.
-12. Require hosted real-iPhone VoiceOver acceptance.
+3. Use a persistent success heading and persistent error heading.
+4. Attempt focus after React commits.
+5. Keep the request durable beyond that first attempt.
+6. Listen for `window` focus, `pageshow`, and document `visibilitychange`.
+7. When the page becomes visible, wait for two animation frames so Safari can finish restoring web content.
+8. Focus with `preventScroll: true`.
+9. Clear the request only after the intended heading is confirmed as active.
+10. Test success and failure paths automatically.
+11. Require hosted real-iPhone acceptance.
 
 ### Acceptance result
 
-The original success path passed on the refreshed hosted build when VoiceOver landed on:
-
-`Loaded five synchronized positions in iPhone reader mode.`
-
-On July 25, 2026, the first bass handoff exposed that the failure path had not inherited the same durable focus target. That handoff is invalidated. The generalized success-or-error repair is automated and deployed but remains `candidate` until the owner retests it on the real iPhone.
+Real-iPhone acceptance passed for valid guitar, valid bass, multiple guitar blocks, and the repaired failure boundary. Focus returned to `iPhone tablature reader` after successful imports rather than remaining on Safari chrome.
 
 ### Evidence
 
-- Real-device failure history and original success pass: `docs/real-iphone-acceptance.md`.
-- Generalized repair implementation: `src/App.js`.
-- Success and failure browser-return regression coverage: `src/App.test.js`.
-- Repair source checkpoint: `d2b9a6ca7f38c8c7285e6c57b2327c7eb2dfba94`.
-- Repair workflow result: `docs/shared-semantic-core-repair-automated-result.md`.
-- Val Music Vault foundation: `src/admin/AdminWorkspace.tsx` and its Phase 7 acceptance records.
+- `src/App.js`.
+- `src/App.test.js`.
+- `docs/shared-semantic-core-repair-automated-result.md`.
+- Shared-core and later real-iPhone checkpoint records.
 
 ### Derived shared standard
 
-A native iOS picker is an external browser-boundary transition whether the operation succeeds or fails. Preserve a target-specific committed-focus request until Safari signals that the web document is visible and focused again, allow Safari to finish restoring web content, then focus the persistent success or error destination and clear the request only after confirming success.
+A native iOS picker is an external browser-boundary transition whether the operation succeeds or fails. Preserve a target-specific focus request until Safari has returned control to the visible web document, then focus the persistent destination and clear the request only after confirmation.
 
 ---
 
@@ -149,26 +132,28 @@ State: `local-proven`
 
 ### Symptoms
 
-The working branch could build successfully, but GitHub Pages environment protection rejected deployment from that branch. A temporary publication mechanism used `main`, creating a risk that the fork's clean upstream-tracking branch would retain publisher-only commits.
+GitHub Pages environment protection rejected deployment from the work branch. A temporary publication mechanism had to use fork `main`, creating a risk that publisher-only commits would remain there.
 
 ### Constraints
 
 - Preserve `Phlypper/guitar-eyes` untouched.
 - Preserve fork `main` as a clean upstream-tracking branch.
-- Work only on the authorized work branch.
+- Work only on authorized branches.
 - Do not open a pull request unless explicitly authorized.
 
 ### Proven solution
 
-- Use a tightly bounded temporary publisher only when required for hosted iPhone acceptance.
-- Record build, deployment, and hosted verification evidence.
-- After publication, force-restore fork `main` to the exact upstream commit.
-- Verify with a commit comparison showing `identical`, zero ahead, zero behind, and no changed files.
+1. Use a tightly bounded temporary publisher only when hosted iPhone acceptance is required.
+2. Make testing and build prerequisites for deployment.
+3. Record the exact source checkpoint, run ID, and verdict on the work branch.
+4. Inspect the deployed artifact rather than trusting source alone.
+5. Force-restore fork `main` to the exact upstream commit.
+6. Compare `main` against upstream and require identical, zero ahead, zero behind, and no changed files.
 
 ### Evidence
 
-- Upstream/fork authority commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
-- See `docs/hosted-preview-status.md`.
+- Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+- Rhythm and measure checkpoint workflow records.
 
 ### Derived shared standard
 
@@ -176,65 +161,238 @@ A temporary deployment workaround is incomplete until repository authority is re
 
 ---
 
-## GE-004 — A fixture can fail when the instrument selector and file disagree
+## GE-004 — The instrument selector and uploaded document can disagree
 
-State: `candidate`
+State: `local-proven`
 
 ### Symptoms
 
-A four-string bass fixture was handed off for iPhone testing, but the semantic import depended on the selector already being set to Bass. A selector mismatch caused semantic rejection and exposed the incomplete failure-focus path.
+A valid four-string bass file could fail while the selector still said Guitar. Later, a two-block six-string guitar file was misread as custom-tuned bass because the detector tried the selected instrument first and accepted incomplete structural evidence.
 
 ### Cause
 
-Instrument identity was treated as an infallible prerequisite supplied by the interface rather than information that could be inferred from a structurally valid four- or six-string document.
+Instrument identity was treated as an infallible interface prerequisite. Early alternate parsing also checked whether lines could be grouped in fours or sixes without first validating the complete contiguous string-run structure.
 
-### Repair
+### Failed-do-not-repeat approaches
 
-1. Attempt semantic parsing with the selected instrument.
-2. If it fails, attempt the alternate supported instrument.
-3. When the alternate parse succeeds, use that semantic document for both readers.
-4. Update the selector to the detected instrument.
-5. Announce the detected instrument in the load status.
-6. Retain the legacy parser only when both semantic interpretations fail.
+1. Do not require the user to select the correct instrument before choosing a file.
+2. Do not accept a four-line subset of a six-line block as a complete bass document.
+3. Do not infer instrument identity from a parser's willingness to consume partial structure.
+
+### Proven solution
+
+1. Inspect complete contiguous tablature string runs.
+2. A six-line run qualifies as guitar, not bass.
+3. A four-line run qualifies as bass, not guitar.
+4. Use the selected instrument only to break a genuine structural tie.
+5. Parse the structurally valid candidate into the shared semantic document.
+6. Update the selector automatically.
+7. Announce the detected instrument.
+8. Preserve the legacy desktop parser only when semantic interpretation is unsafe.
+
+### Acceptance result
+
+Real-iPhone acceptance passed in both directions:
+
+- Bass uploaded while Guitar was selected automatically resolved to Bass.
+- Two six-string guitar blocks uploaded while Bass was selected automatically resolved to Guitar.
+- Guitar speech used High E, B, G, D, A, and Low E rather than numbered custom-tuning descriptions.
 
 ### Evidence
 
-- Implementation: `src/tabImportCoordinator.js` and `src/App.js`.
-- Contract coverage: `src/tabImportCoordinator.test.js` and `src/App.sharedCore.test.js`.
-- Repair source checkpoint: `d2b9a6ca7f38c8c7285e6c57b2327c7eb2dfba94`.
-- Automated verification and deployment: `docs/shared-semantic-core-repair-automated-result.md`.
-
-### Acceptance boundary
-
-Automated and hosted verification passed. Real-iPhone acceptance remains required before changing this entry to `local-proven`.
+- `src/tabImportCoordinator.js`.
+- `src/tabImportCoordinator.test.js`.
+- `src/App.sharedCore.test.js`.
 
 ---
 
-## GE-005 — A successful deployment can still hand the tester a stale cached preview
+## GE-005 — A successful deployment can still hand the tester stale code
 
-State: `candidate`
+State: `local-proven`
 
-### Risk
+### Symptoms
 
-The GitHub Pages address remains stable between checkpoints. Safari may reuse a previously cached page, causing the tester to exercise older JavaScript while the repository and deployment records show that a newer build succeeded.
+The GitHub Pages address remains stable between checkpoints. Safari can reuse an earlier build while repository and workflow records show that a newer deployment succeeded.
 
-### Repair
+A further handoff error occurred when a build label existed only as an ordinary paragraph. VoiceOver correctly read the first page heading instead of automatically announcing the buried paragraph, making the acceptance instruction false.
 
-1. Give each acceptance build an audible in-page test-build label.
-2. Update the page title and description for the checkpoint.
-3. Add conservative no-cache metadata hints.
-4. Provide a versioned query string in the handoff address.
-5. Require the tester to hear the expected build label before uploading a fixture.
+### Failed-do-not-repeat approaches
+
+1. Do not assume a query string alone proves that Safari loaded the intended build.
+2. Do not tell the tester that VoiceOver will announce ordinary paragraph text automatically on page load.
+3. Do not verify only that an identity string exists somewhere in source or compiled JavaScript.
+4. Do not leave two conflicting build labels in the accessibility tree.
+
+### Proven solution
+
+1. Give every acceptance build a unique page title.
+2. Place the build identity in static HTML before the React root.
+3. Make it the first level-one heading in document order.
+4. Remove obsolete build labels from the accessibility tree.
+5. Add no-cache metadata hints.
+6. Provide a versioned query string.
+7. Verify the exact built `index.html`, not only source.
+8. Download and inspect the deployed Pages artifact.
+9. Require the tester to confirm the first heading before uploading a fixture.
+
+### Acceptance result
+
+Real-iPhone VoiceOver acceptance passed beginning with Shared semantic core repair 2 and continued through rhythm and measure checkpoints.
+
+### Derived standard
+
+An acceptance-build identity must be part of deterministic document order, not a hoped-for live announcement.
+
+---
+
+## GE-006 — Previous and Next controls speak the full musical description
+
+State: `local-proven`
+
+### Symptoms
+
+VoiceOver announced string and fret instructions while encountering or activating Previous and Next. The user could not tell whether the description referred to the position being left, the position being entered, or the button itself.
+
+### Cause
+
+The navigation group was connected to the current-position description through `aria-describedby`, and movement also wrote the same description into a live region.
+
+### Failed-do-not-repeat approaches
+
+- Do not attach the full musical description to movement controls.
+- Do not make a movement action double as an automatic read action.
+- Do not interpret repeated speech as harmless verbosity; it destroys temporal clarity.
+
+### Proven solution
+
+1. Previous and Next only change position.
+2. Movement writes nothing to the live region.
+3. No navigation button inherits the current-position description.
+4. Current position appears once in ordinary swipe order.
+5. Read current position is the only explicit action that speaks the complete instruction.
+
+### Acceptance result
+
+Real-iPhone acceptance passed. Previous and Next move quietly; Read current position speaks on demand.
+
+### Derived standard
+
+Navigation answers “where to move.” Content speech answers “what is here.” Do not fuse the two contracts.
+
+---
+
+## GE-007 — Ordinary blank strings are announced as silent
+
+State: `local-proven`
+
+### Symptoms
+
+Some positions suddenly included statements that one or more strings were silent, while positions using all strings did not. The inconsistency sounded as though silence had special musical meaning.
+
+### Cause
+
+The semantic model correctly stored inactive strings, but the speech layer verbalized every absence as an instruction.
+
+### Proven solution
+
+1. Preserve inactive-string state in the semantic model.
+2. Omit ordinary inactive strings from spoken playing instructions.
+3. Continue announcing open strings, fret numbers, and explicit mute notation such as `x`.
+
+### Acceptance result
+
+Real-iPhone bass acceptance passed. The reader now names only what the player must do.
+
+### Derived standard
+
+Semantic completeness and spoken usefulness are different layers. Preserve absence in data; speak it only when it is an actionable instruction.
+
+---
+
+## GE-008 — Position-control order makes repeated practice awkward
+
+State: `local-proven`
+
+### History
+
+The controls were first ordered Read current, Previous, Next. The owner later determined that Previous, Read current, Next is more natural because the primary content action sits between backward and forward movement.
+
+### Proven solution
+
+Use this exact position-control order:
+
+1. Previous position.
+2. Read current position.
+3. Next position.
+
+Keep upload focus on the reader heading, not on the initially disabled Previous button.
+
+### Acceptance result
+
+Real-iPhone acceptance passed during Measure Recognition Checkpoint 1. The owner explicitly approved the centered arrangement.
+
+### Derived standard
+
+Control order should support the repeated motor sequence of practice, while initial focus should land on stable context rather than the first control.
+
+---
+
+## GE-009 — Technique symbols and barlines become fake musical positions
+
+State: `local-proven`
+
+### Symptoms
+
+Raw notation symbols can appear at their own source columns. If every token column becomes a semantic position, a barline or technique connector can be presented as though it were a note onset.
+
+### Cause
+
+Source-column preservation was being confused with playable-event identity.
+
+### Proven solution
+
+1. Preserve raw notation tokens and source columns.
+2. Give durations only to playable onset positions.
+3. Exclude technique-only positions from independent rhythm assignment.
+4. Recognize barlines structurally when their columns align across every string.
+5. Remove shared barline columns from semantic position navigation.
+6. Preserve visible barlines in Jason's desktop rows.
 
 ### Evidence
 
-- `src/App.js` announces `Test build: Shared semantic core repair 1.`
-- `public/index.html` identifies the repair build and includes no-cache metadata hints.
-- Versioned preview: `https://blindanatomist.github.io/guitar-eyes/?build=shared-core-repair-1`.
+- `src/asciiRhythm.js`.
+- `src/measureModel.js`.
+- Rhythm and measure checkpoint tests.
 
-### Acceptance boundary
+### Derived standard
 
-This remains `candidate` until the owner confirms that the versioned address announces the expected build label on the real iPhone.
+The source is a notation surface; the semantic reader is an event model. Not every printed symbol is a separate event.
+
+---
+
+## GE-010 — Misaligned barlines tempt the parser to invent measures
+
+State: `local-proven`
+
+### Symptoms
+
+The first project-authored two-measure fixture accidentally used different column lengths on the played and blank strings. A permissive parser could have forced a plausible two-measure interpretation.
+
+### Proven solution
+
+1. Recognize an explicit barline only when the same vertical-bar column exists across every string in the block.
+2. Preserve misaligned bars without assigning measure metadata.
+3. Add a parsing warning.
+4. Correct malformed fixtures rather than weakening the rule.
+5. Calculate measure duration totals only when all playable positions have mapped durations.
+
+### Acceptance result
+
+The corrected two-measure fixture passed automated and real-iPhone acceptance. Measure number, position within measure, duration, and fret instructions were coherent.
+
+### Derived standard
+
+Refuse plausible musical guesses when source structure is contradictory. Strict uncertainty is better than false precision.
 
 ---
 
@@ -272,6 +430,34 @@ External native-picker return pattern:
 - require hosted real-iPhone acceptance.
 
 Source of strongest external-boundary evidence: Guitar Eyes GE-002.
+
+### XR-ACCESSIBLE-BUILD-IDENTITY-001
+
+State: `cross-repository-proven`
+
+For hosted accessibility acceptance on a stable URL:
+
+- unique static page title;
+- unique first heading before the application root;
+- one identity in the accessibility tree;
+- built-artifact ordering assertion;
+- downloaded deployed-artifact inspection;
+- real-device confirmation before functional testing.
+
+Source: Guitar Eyes GE-005.
+
+### XR-SPEECH-CONTRACT-SEPARATION-001
+
+State: `cross-repository-proven`
+
+Keep navigation, status, and content-description speech separate:
+
+- navigation controls announce their labels and move only;
+- status regions report state transitions;
+- a dedicated content action speaks the complete current item;
+- passive data that is not actionable remains available in the model but need not be verbalized.
+
+Source: Guitar Eyes GE-006 and GE-007.
 
 ### XR-EXECUTION-SCOPE-001
 
