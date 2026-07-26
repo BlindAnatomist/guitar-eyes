@@ -43,12 +43,10 @@ afterEach(() => {
 });
 
 describe("shared semantic core in the iPhone workflow", () => {
-  test("loads four-string bass into the semantic iPhone reader", async () => {
+  test("auto-detects and loads four-string bass into the semantic iPhone reader", async () => {
     render(<App />);
 
-    fireEvent.change(screen.getByLabelText("Choose Instrument:"), {
-      target: { value: "bass" },
-    });
+    expect(screen.getByLabelText("Choose Instrument:")).toHaveValue("guitar");
 
     const file = new File(
       [
@@ -66,6 +64,8 @@ describe("shared semantic core in the iPhone workflow", () => {
     });
 
     expect(await screen.findByText(/E string, fret 3\./)).toBeInTheDocument();
+    expect(screen.getByLabelText("Choose Instrument:")).toHaveValue("bass");
+    expect(screen.getByText(/Detected four-string bass/i)).toBeInTheDocument();
     expect(screen.getByText(/Loaded 4 synchronized positions/i)).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Next tablature block" })
