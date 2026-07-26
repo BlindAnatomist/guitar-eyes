@@ -1,18 +1,18 @@
-name: iPhone extension verification
+name: Guitar Eyes convergence verification
 
 on:
   workflow_dispatch:
 
 concurrency:
-  group: iphone-extension-verification-${{ github.ref }}
+  group: guitar-eyes-convergence-verification-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify:
-    name: Test and build bounded iPhone proof
+    name: Test and build semantic convergence checkpoint
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -27,95 +27,45 @@ jobs:
 
       - name: Install locked dependencies
         id: install
-        shell: bash
-        run: |
-          set +e
-          npm ci --no-audit --no-fund > install.log 2>&1
-          code=$?
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          exit 0
+        continue-on-error: true
+        run: npm ci --no-audit --no-fund
 
-      - name: Run automated tests once
+      - name: Run the complete automated test suite once
         id: test
-        shell: bash
-        run: |
-          set +e
-          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
-            CI=true npm test -- --watchAll=false > test.log 2>&1
-            code=$?
-          else
-            printf '%s\n' 'Skipped because npm ci failed.' > test.log
-            code=125
-          fi
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          exit 0
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        env:
+          CI: true
+        run: npm test -- --watchAll=false
 
-      - name: Build production application
+      - name: Build the production application
         id: build
-        shell: bash
-        run: |
-          set +e
-          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
-            npm run build > build.log 2>&1
-            code=$?
-          else
-            printf '%s\n' 'Skipped because npm ci failed.' > build.log
-            code=125
-          fi
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          exit 0
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        run: npm run build
 
-      - name: Write repository verification result
+      - name: Record checkpoint summary
+        if: always()
         shell: bash
         run: |
-          mkdir -p docs
           {
-            echo '# Bounded iPhone Proof Automated Results'
+            echo '# Guitar Eyes convergence verification'
             echo
-            echo "Generated from audit-branch commit: \`$GITHUB_SHA\`"
+            echo "Source commit: \`$GITHUB_SHA\`"
             echo
-            echo "Node version: \`$(node --version)\`"
+            echo "- npm ci outcome: \`${{ steps.install.outcome }}\`"
+            echo "- automated test outcome: \`${{ steps.test.outcome }}\`"
+            echo "- production build outcome: \`${{ steps.build.outcome }}\`"
             echo
-            echo "npm version: \`$(npm --version)\`"
-            echo
-            echo '## Result summary'
-            echo
-            echo "- npm ci exit code: \`${{ steps.install.outputs.exit_code }}\`"
-            echo "- automated test exit code: \`${{ steps.test.outputs.exit_code }}\`"
-            echo "- production build exit code: \`${{ steps.build.outputs.exit_code }}\`"
-            echo
-            echo 'Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.'
-            echo
-            echo '## npm ci log'
-            echo
-            tail -n 120 install.log | sed 's/^/    /'
-            echo
-            echo '## Automated test log'
-            echo
-            tail -n 200 test.log | sed 's/^/    /'
-            echo
-            echo '## Production build log'
-            echo
-            tail -n 160 build.log | sed 's/^/    /'
-          } > docs/proof-automated-results.md
+            echo 'This workflow is an intentional checkpoint. It does not commit results or modify repository branches.'
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit verification result to audit branch
+      - name: Enforce checkpoint result
+        if: always()
         shell: bash
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add docs/proof-automated-results.md
-          if git diff --cached --quiet; then
-            exit 0
-          fi
-          git commit -m 'docs: record intentional proof checkpoint [skip ci]'
-          git push
-
-      - name: Enforce verification result
-        shell: bash
-        run: |
-          if [ "${{ steps.install.outputs.exit_code }}" != "0" ] || \
-             [ "${{ steps.test.outputs.exit_code }}" != "0" ] || \
-             [ "${{ steps.build.outputs.exit_code }}" != "0" ]; then
+          if [ "${{ steps.install.outcome }}" != "success" ] || \
+             [ "${{ steps.test.outcome }}" != "success" ] || \
+             [ "${{ steps.build.outcome }}" != "success" ]; then
             exit 1
           fi
