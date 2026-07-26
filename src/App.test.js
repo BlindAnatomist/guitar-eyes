@@ -57,7 +57,9 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Upload tablature file:")).toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
-    expect(screen.getByText(/Test build: Shared semantic core repair 1/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Test build: Convergence recovery from accepted semantic core/i)
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
     ).toHaveAttribute("aria-expanded", "true");
