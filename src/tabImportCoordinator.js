@@ -1,26 +1,13 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
-import { parseSixStringTabText, TabParseError } from "./iphoneTabModel";
+import { parseTabDocumentText } from "./iphoneTabModel";
 import { parseTabText } from "./parseFile";
 
 export function buildReaderDocuments(sourceText, selectedInstrument) {
-  const isGuitar = selectedInstrument === "guitar";
-  const numStrings = isGuitar ? 6 : 4;
+  const numStrings = selectedInstrument === "bass" ? 4 : 6;
   let desktopBlocks = parseTabText(sourceText, numStrings);
 
-  if (!isGuitar) {
-    return {
-      desktopBlocks,
-      desktopSource: "legacy-fallback",
-      semanticDocument: null,
-      semanticError: new TabParseError(
-        "The shared semantic core currently supports one six-string guitar block. Jason's existing four-string bass parser remains active as a compatibility fallback.",
-        "SEMANTIC_BASS_NOT_IMPLEMENTED"
-      ),
-    };
-  }
-
   try {
-    const semanticDocument = parseSixStringTabText(sourceText);
+    const semanticDocument = parseTabDocumentText(sourceText, selectedInstrument);
     const semanticDesktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
     if (semanticDesktopBlocks.length > 0) {
