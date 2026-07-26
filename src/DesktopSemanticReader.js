@@ -66,6 +66,10 @@ function sourceLayoutForBlock(block) {
   return block.strings.map((string) => string.sourceLine).join("\n");
 }
 
+function positionsForBlock(document, block) {
+  return document.positions.filter((position) => position.blockIndex === block.index);
+}
+
 const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
   { document },
   headingRef
@@ -263,7 +267,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
                 <thead>
                   <tr>
                     <th scope="col">String</th>
-                    {block.positions.map((position) => (
+                    {positionsForBlock(document, block).map((position) => (
                       <th
                         scope="col"
                         key={`position-${position.index}`}
@@ -281,7 +285,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
                   {block.strings.map((string) => (
                     <tr key={string.id}>
                       <th scope="row">{string.spokenName}</th>
-                      {block.positions.map((position) => {
+                      {positionsForBlock(document, block).map((position) => {
                         const state = position.strings.find(
                           (candidate) => candidate.stringId === string.id
                         );
