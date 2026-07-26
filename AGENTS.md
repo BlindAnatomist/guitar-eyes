@@ -5,9 +5,11 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 ## Repository authority
 
 - Preserve `Phlypper/guitar-eyes` completely untouched.
-- Preserve fork `main` as a clean upstream-tracking branch.
-- Perform bounded iPhone work only on `work/iphone-voiceover-tablature-audit` unless the owner authorizes a separate branch.
-- Do not open a pull request or merge the work branch without the owner's explicit authorization.
+- Preserve fork `main` as a clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+- The accepted iPhone, rhythm, measure, and shared-core foundation is commit `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
+- Perform convergence recovery only on `work/convergence-from-accepted-semantic-core` unless the owner explicitly authorizes another branch.
+- Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature repair there.
+- Do not open a pull request or merge any work branch without the owner's explicit authorization.
 
 ## Required continuity reading
 
@@ -16,11 +18,42 @@ Before changing implementation, accessibility behavior, repository administratio
 1. `docs/implementation-status.md`;
 2. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
 3. `docs/solved-problems-and-reusable-procedures.md`;
-4. `docs/iphone-voiceover-tablature-audit.md`;
-5. `docs/real-iphone-acceptance.md`;
-6. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+4. `docs/shared-semantic-core-plan.md`;
+5. `docs/shared-semantic-core-implementation.md`;
+6. `docs/real-world-tab-format-corpus-checkpoint-1.md`;
+7. `docs/rhythm-duration-checkpoint-1.md`;
+8. `docs/measure-recognition-checkpoint-1.md`;
+9. `docs/convergence-lineage-recovery-2026-07-26.md`;
+10. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
+
+## Accepted behavior is authoritative
+
+The accepted semantic foundation includes:
+
+- automatic guitar and bass detection;
+- multiple complete tablature blocks;
+- W, H, Q, E, and S duration mapping and speech;
+- aligned explicit measure recognition;
+- measure and position-within-measure speech;
+- Previous position, Read current position, Next position in that order;
+- quiet Previous and Next movement;
+- quiet tablature-block movement;
+- Read current position as the only control that announces full playing instructions;
+- omission of ordinary unplayed strings from speech;
+- continued speech for open strings, frets, explicit mute notation, techniques, and supported duration;
+- durable iPhone Files-picker focus recovery for success and failure.
+
+Do not weaken or replace those contracts while improving desktop presentation.
+
+## Convergence architecture
+
+The semantic tablature document is the authority for instrument identity, blocks, strings, synchronized positions, durations, and measures.
+
+Desktop and iPhone may present that document differently, but neither may create a second musical interpretation. Desktop convergence must begin from the accepted semantic core and preserve Jason Washburn's recognizable spatial desktop concept unless the owner separately authorizes a redesign.
+
+Do not restore active interception of VoiceOver Control+Option commands. Do not expose every dash and separator as an ordinary navigation stop merely to preserve visual source layout.
 
 ## Zero-dollar automation
 
@@ -32,10 +65,10 @@ For a failed Actions run, inspect the failed job and logs before acting. Rerun o
 
 ## Accessibility and evidence
 
-The iPhone semantic reader extends rather than replaces Jason's desktop reader. Preserve the semantic model, real-iPhone VoiceOver evidence, native Files-picker focus repair, and exact accepted behavior recorded in the repository.
-
 Automated DOM tests are necessary but do not replace bounded real-iPhone Safari and VoiceOver acceptance. Record the owner's exact observation without strengthening or rewriting it.
+
+A published preview from the diverged convergence line is not accepted merely because its build and tests passed. Structural verification cannot override a real-device regression or an incorrect source lineage.
 
 ## Scope boundary
 
-The accepted bounded proof does not authorize redesign of the desktop reader, playback, teacher mode, pattern analysis, bookmarks, AI implementation, upstream changes, or production expansion. Each requires a separately bounded objective.
+This recovery authorizes only restoration of the accepted semantic foundation and careful desktop-phone convergence. It does not authorize playback, teacher mode, pattern analysis, bookmarks, AI implementation, upstream changes, a pull request, a merge, or production expansion.
