@@ -1,5 +1,6 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { parseSixStringTabText, parseTabDocumentText } from "./iphoneTabModel";
+import { buildReaderDocuments } from "./tabImportCoordinator";
 
 const guitarLines = [
   "e|--10h12--|",
@@ -40,6 +41,17 @@ describe("semanticDocumentToDesktopBlocks", () => {
     const document = parseTabDocumentText(bassLines.join("\n"), "bass");
 
     expect(semanticDocumentToDesktopBlocks(document)).toEqual([bassLines]);
+  });
+
+  test("keeps Jason's desktop string rows unchanged when shared rhythm is attached", () => {
+    const source = ["Rhythm: Q E", ...bassLines].join("\n");
+    const result = buildReaderDocuments(source, "bass");
+
+    expect(result.semanticDocument.positions.map((position) => position.duration?.symbol)).toEqual([
+      "Q",
+      "E",
+    ]);
+    expect(result.desktopBlocks).toEqual([bassLines]);
   });
 
   test("returns no desktop blocks when no semantic document is available", () => {
