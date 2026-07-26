@@ -35,14 +35,28 @@ Rationale: understanding the current musical position is the primary action; bac
 7. The exact Pages artifact was inspected and identified as Shared semantic core repair 4.
 8. Fork `main` was restored and independently confirmed identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-## Remaining real-iPhone gate
+## Real-iPhone result
 
-With the bass fixture loaded, confirm VoiceOver encounters the controls in this order:
+Status: control order and movement passed.
 
-1. Read current position.
-2. Previous position.
-3. Next position.
+The owner confirmed that VoiceOver encountered the controls in the accepted order and that movement changed positions correctly.
 
-Also confirm that Read current position still speaks the musical description and Previous and Next remain quiet.
+## Newly discovered speech-policy problem
+
+While reviewing the bass positions, the owner heard ordinary unplayed strings described as `silent` in some positions but not others. The behavior reflected the fixture: position 1 used all four strings, while later positions left one or two strings unmarked. The parser was consistent, but the speech policy was cognitively misleading because blank tablature strings were verbalized as instructions only when they occurred.
+
+Accepted repair direction:
+
+1. announce fretted notes;
+2. announce open strings;
+3. preserve explicit muted-note notation such as `x`;
+4. preserve unsupported or technique notation without pretending to interpret it;
+5. omit ordinary blank or inactive strings from iPhone speech.
+
+This keeps parser state available for desktop projection while restricting iPhone speech to actionable musical information.
+
+## Next real-iPhone gate
+
+Test Shared Semantic Core Repair 5 with the bass fixture and confirm positions 2 through 4 no longer use the word `silent` or enumerate strings that are not played.
 
 No desktop or laptop acceptance testing is assigned to the owner.
