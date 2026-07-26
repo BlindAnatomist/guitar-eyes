@@ -59,7 +59,7 @@ describe("shared semantic core in the iPhone workflow", () => {
       { type: "text/plain" }
     );
 
-    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [file] },
     });
 
@@ -96,7 +96,7 @@ describe("shared semantic core in the iPhone workflow", () => {
       { type: "text/plain" }
     );
 
-    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [file] },
     });
 
