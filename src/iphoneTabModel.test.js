@@ -112,14 +112,14 @@ describe("parseSixStringTabText", () => {
     );
 
     expect(document.warnings).toContain(
-      "1 notation symbol was preserved but cannot yet be interpreted."
+      "Block 1 contains 1 notation symbol that was preserved but cannot yet be interpreted."
     );
     expect(describePosition(document, 0)).toContain(
       "notation at this position cannot yet be interpreted"
     );
   });
 
-  test("rejects files that are not exactly one six-string block", () => {
+  test("keeps the clean one-block wrapper strict", () => {
     expect(() =>
       parseSixStringTabText(
         makeTab([
@@ -146,6 +146,6 @@ describe("parseSixStringTabText", () => {
           "E|-----|",
         ])
       )
-    ).toThrow(/exactly one six-string tablature block/i);
+    ).toThrow(/not part of the required clean six-string guitar tablature block/i);
   });
 });
