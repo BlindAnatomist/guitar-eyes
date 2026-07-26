@@ -9,6 +9,13 @@ const guitarLines = [
   "E|--------|",
 ];
 
+const bassLines = [
+  "G|--0--|",
+  "D|--0--|",
+  "A|--2--|",
+  "E|--3--|",
+];
+
 describe("buildReaderDocuments", () => {
   test("uses one semantic guitar document for both reader projections", () => {
     const result = buildReaderDocuments(guitarLines.join("\n"), "guitar");
@@ -20,28 +27,33 @@ describe("buildReaderDocuments", () => {
     expect(result.semanticDocument.positions.length).toBeGreaterThan(0);
   });
 
-  test("retains the legacy desktop fallback for multiple guitar blocks", () => {
-    const source = [...guitarLines, ...guitarLines].join("\n");
+  test("uses one multi-block guitar document for both reader projections", () => {
+    const source = ["Intro", ...guitarLines, "Verse", ...guitarLines].join("\n");
+    const result = buildReaderDocuments(source, "guitar");
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.blocks).toHaveLength(2);
+    expect(result.desktopBlocks).toEqual([guitarLines, guitarLines]);
+    expect(result.semanticError).toBeNull();
+  });
+
+  test("uses the shared semantic core for four-string bass", () => {
+    const result = buildReaderDocuments(bassLines.join("\n"), "bass");
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.instrument).toBe("bass");
+    expect(result.semanticDocument.blocks).toHaveLength(1);
+    expect(result.desktopBlocks).toEqual([bassLines]);
+    expect(result.semanticError).toBeNull();
+  });
+
+  test("retains the legacy desktop fallback when semantic parsing is unsafe", () => {
+    const source = ["Title", ...guitarLines.slice(0, 5)].join("\n");
     const result = buildReaderDocuments(source, "guitar");
 
     expect(result.desktopSource).toBe("legacy-fallback");
     expect(result.semanticDocument).toBeNull();
-    expect(result.semanticError).not.toBeNull();
-    expect(result.desktopBlocks).toHaveLength(2);
-  });
-
-  test("retains Jason's four-string bass path until the semantic core supports bass", () => {
-    const source = [
-      "G|--0--|",
-      "D|--0--|",
-      "A|--2--|",
-      "E|--3--|",
-    ].join("\n");
-    const result = buildReaderDocuments(source, "bass");
-
-    expect(result.desktopSource).toBe("legacy-fallback");
-    expect(result.semanticDocument).toBeNull();
-    expect(result.desktopBlocks).toHaveLength(1);
-    expect(result.semanticError.code).toBe("SEMANTIC_BASS_NOT_IMPLEMENTED");
+    expect(result.semanticError.code).toBe("INCOMPLETE_TABLATURE_BLOCK");
+    expect(result.desktopBlocks.length).toBeGreaterThan(0);
   });
 });
