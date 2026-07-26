@@ -70,15 +70,24 @@ Result:
 7. the downloaded deployed artifact was inspected directly;
 8. fork `main` was restored and confirmed identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-## Remaining real-iPhone gate
+## Real-iPhone acceptance
 
-Upload `ascii-two-measures-rhythm.txt` in iPhone Safari with VoiceOver and confirm:
+Status: passed.
 
-1. focus returns to `iPhone tablature reader`;
-2. the position controls occur as Previous position, Read current position, Next position;
-3. Read current position begins with `Measure 1 of 2` and `Position 1 of 3 in this measure`;
-4. moving forward three times reaches measure 2, position 1;
-5. Previous and Next remain quiet;
-6. duration and string-and-fret instructions remain understandable.
+Tester: John Darrin Washburn.
 
-No desktop or laptop acceptance testing is assigned to the owner.
+Environment: iPhone Safari with VoiceOver.
+
+Accepted results:
+
+1. focus returned to the `iPhone tablature reader` heading after upload;
+2. the position controls occurred as Previous position, Read current position, Next position;
+3. Read current position correctly announced measure 1 of 2 and position 1 of 3 within the measure;
+4. three quiet Next actions moved to measure 2, position 1;
+5. Previous and Next remained quiet movement actions;
+6. duration, string, and fret instructions remained understandable and musically coherent;
+7. the owner explicitly approved the centered control arrangement and measure language.
+
+This completes Measure Recognition Checkpoint 1 on the real target device.
+
+No desktop or laptop acceptance testing was assigned to the owner.
