@@ -4,11 +4,11 @@ Original project-authored material
 Rhythm: Q Q H Q Q H
 
  e|--0--2--3--|--5--3--2--|
- B|------------|------------|
- G|------------|------------|
- D|------------|------------|
- A|------------|------------|
- E|------------|------------|
+ B|-----------|-----------|
+ G|-----------|-----------|
+ D|-----------|-----------|
+ A|-----------|-----------|
+ E|-----------|-----------|
 
 Legend: W whole, H half, Q quarter, E eighth, S sixteenth.
 Each shared vertical bar ends one explicit measure.
