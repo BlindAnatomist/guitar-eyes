@@ -18,7 +18,22 @@ const TECHNIQUE_NAMES = {
   S: "slide",
 };
 
-const STANDARD_TUNING = ["E", "B", "G", "D", "A", "E"];
+const INSTRUMENTS = {
+  guitar: {
+    id: "guitar",
+    label: "six-string guitar",
+    stringCount: 6,
+    standardTuning: ["E", "B", "G", "D", "A", "E"],
+  },
+  bass: {
+    id: "bass",
+    label: "four-string bass",
+    stringCount: 4,
+    standardTuning: ["G", "D", "A", "E"],
+  },
+};
+
+const STRING_LINE_PATTERN = /^\s*([A-Ga-g](?:#|b)?)\s*\|(.*)$/;
 
 export class TabParseError extends Error {
   constructor(message, code = "TAB_PARSE_ERROR") {
@@ -43,6 +58,19 @@ export function readTextFile(file) {
   });
 }
 
+function getInstrumentConfig(selectedInstrument) {
+  const config = INSTRUMENTS[selectedInstrument];
+
+  if (!config) {
+    throw new TabParseError(
+      `The instrument "${selectedInstrument}" is not supported.`,
+      "UNSUPPORTED_INSTRUMENT"
+    );
+  }
+
+  return config;
+}
+
 function normalizePitch(rawPitch) {
   const letter = rawPitch.charAt(0).toUpperCase();
   const accidental = rawPitch.slice(1);
@@ -59,17 +87,17 @@ function pitchForSpeech(pitch) {
   return pitch;
 }
 
-function makeStringIdentity(index, tuning) {
-  const isStandard = tuning === STANDARD_TUNING[index];
+function makeStringIdentity(index, tuning, config) {
+  const isStandard = tuning === config.standardTuning[index];
 
-  if (isStandard && index === 0) {
+  if (config.id === "guitar" && isStandard && index === 0) {
     return {
       shortName: "high E",
       spokenName: "High E string",
     };
   }
 
-  if (isStandard && index === 5) {
+  if (config.id === "guitar" && isStandard && index === config.stringCount - 1) {
     return {
       shortName: "low E",
       spokenName: "Low E string",
@@ -143,25 +171,29 @@ function tokenizeContent(content) {
   return tokens;
 }
 
-function parseStringLine(line, index) {
-  const match = line.match(/^\s*([A-Ga-g](?:#|b)?)\s*\|(.*)$/);
+function parseStringLine(entry, index, blockIndex, config) {
+  const line = typeof entry === "string" ? entry : entry.line;
+  const lineNumber = typeof entry === "string" ? index + 1 : entry.lineNumber;
+  const match = line.match(STRING_LINE_PATTERN);
 
   if (!match) {
     throw new TabParseError(
-      `Line ${index + 1} is not a supported tablature string. Each line must begin with a tuning label followed by a vertical bar, such as E|----0----|.`,
+      `Line ${lineNumber} is not a supported tablature string. Each string line must begin with a tuning label followed by a vertical bar, such as E|----0----|.`,
       "INVALID_STRING_LINE"
     );
   }
 
   const tuning = normalizePitch(match[1]);
   const content = match[2].replace(/\r$/, "");
-  const identity = makeStringIdentity(index, tuning);
+  const identity = makeStringIdentity(index, tuning, config);
 
   return {
-    id: `string-${index + 1}`,
+    id: `block-${blockIndex + 1}-string-${index + 1}`,
     index,
+    blockIndex,
     tuning,
     sourceLine: line,
+    sourceLineNumber: lineNumber,
     content,
     tokens: tokenizeContent(content),
     ...identity,
@@ -211,25 +243,26 @@ function stateAtColumn(string, column) {
   return { type: "silent" };
 }
 
-function buildPositions(strings) {
+function buildBlockPositions(strings, blockIndex) {
   const eventColumns = new Set();
 
   strings.forEach((string) => {
     string.tokens.forEach((token) => eventColumns.add(token.startColumn));
   });
 
-  return [...eventColumns]
-    .sort((left, right) => left - right)
-    .map((sourceColumn, index, columns) => ({
-      index,
-      number: index + 1,
-      total: columns.length,
-      sourceColumn,
-      strings: strings.map((string) => ({
-        stringId: string.id,
-        ...stateAtColumn(string, sourceColumn),
-      })),
-    }));
+  const columns = [...eventColumns].sort((left, right) => left - right);
+
+  return columns.map((sourceColumn, positionIndex) => ({
+    blockIndex,
+    blockNumber: blockIndex + 1,
+    positionInBlock: positionIndex + 1,
+    positionsInBlock: columns.length,
+    sourceColumn,
+    strings: strings.map((string) => ({
+      stringId: string.id,
+      ...stateAtColumn(string, sourceColumn),
+    })),
+  }));
 }
 
 function formatList(items) {
@@ -244,40 +277,14 @@ function formatList(items) {
   return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
-export function parseSixStringTabText(sourceText) {
-  if (typeof sourceText !== "string" || sourceText.trim().length === 0) {
-    throw new TabParseError("The file is empty.", "EMPTY_FILE");
-  }
-
-  const nonEmptyLines = sourceText
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .filter((line) => line.trim().length > 0);
-
-  if (nonEmptyLines.length !== 6) {
-    throw new TabParseError(
-      `This iPhone proof accepts exactly one six-string tablature block. The file contains ${nonEmptyLines.length} nonempty lines.`,
-      "WRONG_LINE_COUNT"
-    );
-  }
-
-  const strings = nonEmptyLines.map(parseStringLine);
-  const positions = buildPositions(strings);
-
-  if (positions.length === 0) {
-    throw new TabParseError(
-      "No frets or recognizable tablature notation were found in the six string lines.",
-      "NO_MUSICAL_POSITIONS"
-    );
-  }
-
+function collectBlockWarnings(strings, blockNumber) {
+  const warnings = [];
   const lineLengths = strings.map((string) => string.content.length);
   const maxLineLength = Math.max(...lineLengths);
-  const warnings = [];
 
   if (lineLengths.some((length) => length !== maxLineLength)) {
     warnings.push(
-      "The string lines have unequal lengths. Their original columns were preserved, and missing trailing columns are treated as silent."
+      `Block ${blockNumber} has string lines of unequal lengths. Their original columns were preserved, and missing trailing columns are treated as silent.`
     );
   }
 
@@ -289,26 +296,159 @@ export function parseSixStringTabText(sourceText) {
 
   if (unsupportedCount > 0) {
     warnings.push(
-      `${unsupportedCount} notation ${unsupportedCount === 1 ? "symbol was" : "symbols were"} preserved but cannot yet be interpreted.`
+      `Block ${blockNumber} contains ${unsupportedCount} notation ${
+        unsupportedCount === 1 ? "symbol that was" : "symbols that were"
+      } preserved but cannot yet be interpreted.`
     );
   }
+
+  return { warnings, maxLineLength };
+}
+
+function locateTabBlocks(sourceText, config, { allowNonTabText }) {
+  const normalizedLines = sourceText.replace(/\r\n?/g, "\n").split("\n");
+  const blocks = [];
+  const ignoredNonTabLines = [];
+  let pending = [];
+
+  normalizedLines.forEach((line, lineIndex) => {
+    if (STRING_LINE_PATTERN.test(line)) {
+      pending.push({ line, lineNumber: lineIndex + 1 });
+
+      if (pending.length === config.stringCount) {
+        blocks.push(pending);
+        pending = [];
+      }
+      return;
+    }
+
+    if (line.trim().length > 0) {
+      if (!allowNonTabText) {
+        throw new TabParseError(
+          `Line ${lineIndex + 1} is not part of the required clean ${config.label} tablature block.`,
+          "NON_TAB_TEXT_NOT_ALLOWED"
+        );
+      }
+      ignoredNonTabLines.push(lineIndex + 1);
+    }
+  });
+
+  if (pending.length > 0) {
+    throw new TabParseError(
+      `The final ${config.label} tablature block contains ${pending.length} string ${
+        pending.length === 1 ? "line" : "lines"
+      }; ${config.stringCount} are required.`,
+      "INCOMPLETE_TABLATURE_BLOCK"
+    );
+  }
+
+  if (blocks.length === 0) {
+    throw new TabParseError(
+      `No complete ${config.label} tablature block was found.`,
+      "NO_TABLATURE_BLOCKS"
+    );
+  }
+
+  return { blocks, ignoredNonTabLines };
+}
+
+function parseDocument(sourceText, selectedInstrument, options = {}) {
+  if (typeof sourceText !== "string" || sourceText.trim().length === 0) {
+    throw new TabParseError("The file is empty.", "EMPTY_FILE");
+  }
+
+  const config = getInstrumentConfig(selectedInstrument);
+  const allowNonTabText = options.allowNonTabText !== false;
+  const requireBlockCount = options.requireBlockCount ?? null;
+  const located = locateTabBlocks(sourceText, config, { allowNonTabText });
+
+  if (requireBlockCount !== null && located.blocks.length !== requireBlockCount) {
+    throw new TabParseError(
+      `This parser accepts exactly ${requireBlockCount} ${config.label} tablature ${
+        requireBlockCount === 1 ? "block" : "blocks"
+      }. The file contains ${located.blocks.length}.`,
+      "WRONG_BLOCK_COUNT"
+    );
+  }
+
+  const warnings = [];
+
+  if (located.ignoredNonTabLines.length > 0) {
+    warnings.push(
+      `${located.ignoredNonTabLines.length} non-tablature ${
+        located.ignoredNonTabLines.length === 1 ? "line was" : "lines were"
+      } ignored while locating tablature blocks.`
+    );
+  }
+
+  const blocks = located.blocks.map((entries, blockIndex) => {
+    const strings = entries.map((entry, stringIndex) =>
+      parseStringLine(entry, stringIndex, blockIndex, config)
+    );
+    const positions = buildBlockPositions(strings, blockIndex);
+
+    if (positions.length === 0) {
+      throw new TabParseError(
+        `Block ${blockIndex + 1} contains no frets or recognizable tablature notation.`,
+        "NO_MUSICAL_POSITIONS"
+      );
+    }
+
+    const blockDetails = collectBlockWarnings(strings, blockIndex + 1);
+    warnings.push(...blockDetails.warnings);
+
+    return {
+      type: "tablature-block",
+      index: blockIndex,
+      number: blockIndex + 1,
+      strings,
+      positions,
+      maxLineLength: blockDetails.maxLineLength,
+    };
+  });
+
+  const positions = blocks
+    .flatMap((block) => block.positions)
+    .map((position, index, allPositions) => ({
+      ...position,
+      index,
+      number: index + 1,
+      total: allPositions.length,
+    }));
+
+  const strings = blocks.flatMap((block) => block.strings);
 
   return {
     type: "tablature-document",
     sourceText,
-    blocks: [
-      {
-        type: "tablature-block",
-        index: 0,
-        strings,
-        positions,
-        maxLineLength,
-      },
-    ],
+    instrument: config.id,
+    instrumentLabel: config.label,
+    stringCount: config.stringCount,
+    blocks,
     strings,
     positions,
     warnings,
   };
+}
+
+export function parseTabDocumentText(sourceText, selectedInstrument = "guitar") {
+  return parseDocument(sourceText, selectedInstrument, {
+    allowNonTabText: true,
+  });
+}
+
+export function parseSixStringTabText(sourceText) {
+  return parseDocument(sourceText, "guitar", {
+    allowNonTabText: false,
+    requireBlockCount: 1,
+  });
+}
+
+export function parseFourStringBassTabText(sourceText) {
+  return parseDocument(sourceText, "bass", {
+    allowNonTabText: false,
+    requireBlockCount: 1,
+  });
 }
 
 export function describePosition(document, positionIndex) {
@@ -356,7 +496,14 @@ export function describePosition(document, positionIndex) {
     }
   });
 
-  const parts = [`Position ${position.number} of ${position.total}.`];
+  const parts =
+    document.blocks.length > 1
+      ? [
+          `Block ${position.blockNumber} of ${document.blocks.length}.`,
+          `Position ${position.positionInBlock} of ${position.positionsInBlock} in this block.`,
+        ]
+      : [`Position ${position.number} of ${position.total}.`];
+
   parts.push(...playedDescriptions);
 
   if (silentStrings.length > 0) {
