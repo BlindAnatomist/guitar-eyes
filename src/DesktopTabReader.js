@@ -16,9 +16,13 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
 
   if (!document || document.positions.length === 0) return null;
 
-  const currentDescription = describePosition(document, currentIndex);
-  const isFirstPosition = currentIndex === 0;
-  const isLastPosition = currentIndex === document.positions.length - 1;
+  const currentPosition = document.positions[currentIndex] ?? document.positions[0];
+  const activeIndex = currentPosition.index;
+  const currentDescription = describePosition(document, activeIndex);
+  const isFirstPosition = activeIndex === 0;
+  const isLastPosition = activeIndex === document.positions.length - 1;
+  const isFirstBlock = currentPosition.blockIndex === 0;
+  const isLastBlock = currentPosition.blockIndex === document.blocks.length - 1;
 
   const announce = (text) => {
     setAnnouncement((current) => ({
@@ -36,17 +40,23 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
     announce(describePosition(document, boundedIndex));
   };
 
+  const moveToBlock = (direction) => {
+    const targetBlock = document.blocks[currentPosition.blockIndex + direction];
+    const targetPosition = targetBlock?.positions?.[0];
+    if (targetPosition) moveTo(targetPosition.index);
+  };
+
   const handleNavigatorKeyDown = (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
 
     switch (event.key) {
       case "ArrowLeft":
         event.preventDefault();
-        if (!isFirstPosition) moveTo(currentIndex - 1);
+        if (!isFirstPosition) moveTo(activeIndex - 1);
         break;
       case "ArrowRight":
         event.preventDefault();
-        if (!isLastPosition) moveTo(currentIndex + 1);
+        if (!isLastPosition) moveTo(activeIndex + 1);
         break;
       case "Home":
         event.preventDefault();
@@ -98,11 +108,13 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
 
       <div
         className="position-controls"
+        role="group"
+        aria-label="Position navigation"
         aria-describedby="desktop-current-position-description"
       >
         <button
           type="button"
-          onClick={() => moveTo(currentIndex - 1)}
+          onClick={() => moveTo(activeIndex - 1)}
           disabled={isFirstPosition}
         >
           Previous position
@@ -112,7 +124,7 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
         </button>
         <button
           type="button"
-          onClick={() => moveTo(currentIndex + 1)}
+          onClick={() => moveTo(activeIndex + 1)}
           disabled={isLastPosition}
         >
           Next position
@@ -120,8 +132,32 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
       </div>
 
       <p className="position-count">
-        Overall position {currentIndex + 1} of {document.positions.length}
+        Overall position {activeIndex + 1} of {document.positions.length}
       </p>
+
+      {document.blocks.length > 1 && (
+        <div
+          className="position-controls block-controls"
+          role="group"
+          aria-label="Tablature block navigation"
+          aria-describedby="desktop-current-position-description"
+        >
+          <button
+            type="button"
+            onClick={() => moveToBlock(-1)}
+            disabled={isFirstBlock}
+          >
+            Previous tablature block
+          </button>
+          <button
+            type="button"
+            onClick={() => moveToBlock(1)}
+            disabled={isLastBlock}
+          >
+            Next tablature block
+          </button>
+        </div>
+      )}
 
       <div className="desktop-overview">
         <h3>Semantic tablature overview</h3>
@@ -139,7 +175,12 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
             <h4 id={`desktop-block-${block.index + 1}-heading`}>
               Tablature block {block.index + 1} of {document.blocks.length}
             </h4>
-            <div className="semantic-table-scroll" tabIndex="0">
+            <div
+              className="semantic-table-scroll"
+              role="region"
+              aria-label={`Tablature block ${block.index + 1} table`}
+              tabIndex="0"
+            >
               <table className="semantic-table">
                 <caption>
                   Block {block.index + 1}: rows are strings and columns are synchronized
@@ -149,7 +190,7 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
                   <tr>
                     <th scope="col">String</th>
                     {block.positions.map((position) => {
-                      const isCurrent = position.index === currentIndex;
+                      const isCurrent = position.index === activeIndex;
                       return (
                         <th
                           scope="col"
@@ -171,7 +212,7 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
                         const state = position.strings.find(
                           (candidate) => candidate.stringId === string.id
                         );
-                        const isCurrent = position.index === currentIndex;
+                        const isCurrent = position.index === activeIndex;
                         return (
                           <td
                             key={`${string.id}-${position.index}`}
