@@ -1,0 +1,20 @@
+GUITAR EYES FORMAT SPECIMEN 04
+Original project-authored material
+Instrument: 4-string bass
+Tuning: E A D G
+Tempo: 108 BPM
+Feel: straight eighths
+
+[Main riff]
+Count: 1 & 2 & 3 & 4 &
+
+G|----------------0---2---|
+D|----------0---2---------|
+A|----0---2---------------|
+E|--3---------------------|
+
+[Variation]
+G|--4---2---0-------------|
+D|------------2---0-------|
+A|------------------2-----|
+E|--------------------3---|
