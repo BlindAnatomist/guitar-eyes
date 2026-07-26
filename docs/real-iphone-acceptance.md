@@ -94,3 +94,24 @@ Accepted behaviors:
 6. Useful post-upload focus and completion announcement.
 
 This acceptance applies only to the bounded proof and does not authorize a pull request, upstream change, production redesign, or expansion beyond the documented branch scope.
+
+## Checkpoint 4: convergence regression pending
+
+Exact published convergence source:
+
+`d26e4172a0386ceb56ad5c0061e72d975b42fc43`
+
+The local and GitHub-hosted automated gates passed with 4 of 4 suites and 20 of 20 tests. The production Pages build, compiled block-navigation checks, deployment, hosted HTML read-back, hosted JavaScript read-back, and exact fork-main restoration also passed.
+
+The remaining bounded real-iPhone regression must confirm:
+
+1. Safari and VoiceOver still recover usefully from the native Files picker;
+2. successful load status and the semantic reader remain understandable;
+3. Previous position, Read current position, and Next position remain in the accepted order;
+4. measure context is understandable while moving among synchronized positions;
+5. multiple complete tablature blocks remain distinct;
+6. Previous tablature block and Next tablature block move between blocks and expose correct boundary states.
+
+This test will be conducted later in Chat, not Work. No result is claimed yet.
+
+Jason's Mac recognition and desktop usability acceptance is deferred unless he agrees to participate. It is not a prerequisite for this iPhone gate.
