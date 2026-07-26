@@ -42,7 +42,7 @@ The proof established synchronized positions, semantic descriptions, understanda
 
 ### Checkpoint 4: desktop and phone semantic convergence
 
-Source status: implemented on the authorized work branch.
+Source status: implemented and pre-device hardened on the authorized work branch.
 
 The active application now:
 
@@ -52,34 +52,46 @@ The active application now:
 4. preserves non-tablature source lines outside the semantic blocks;
 5. creates synchronized positions shared by desktop and iPhone;
 6. preserves multi-digit frets, open strings, silence, continuation, technique notation, unsupported notation, and internal measure boundaries;
-7. gives both modes Previous, Read current, and Next controls in the same order;
-8. gives desktop a semantic string-by-position table;
-9. removes the active raw-character grid and separate `parseFile` path from application rendering;
-10. stops intercepting VoiceOver's Control+Option commands;
-11. preserves the accepted iPhone native-picker focus repair;
-12. retains `iphoneTabModel.js` only as a compatibility facade over the shared model.
+7. gives both modes Previous position, Read current position, and Next position controls in the accepted order;
+8. restores explicit Previous tablature block and Next tablature block jumps for multi-block files;
+9. gives desktop a semantic string-by-position table inside a named scroll region;
+10. removes the active raw-character grid and separate `parseFile` path from application rendering;
+11. stops intercepting VoiceOver's Control+Option commands;
+12. preserves the accepted iPhone native-picker focus repair;
+13. retains `iphoneTabModel.js` only as a compatibility facade over the shared model;
+14. bounds stale reader indexes while newly parsed documents reset navigation state;
+15. provides automated component coverage for equivalent block navigation in both modes.
 
-Detailed record: `docs/desktop-phone-semantic-convergence.md`.
+Detailed records:
+
+- `docs/desktop-phone-semantic-convergence.md`
+- `docs/convergence-pre-device-hardening-2026-07-26.md`
 
 ## Verification state for Checkpoint 4
 
-Completed in the available local runtime:
+Completed without GitHub-hosted execution:
 
+- repository-authority reconstruction from branch, implementation, acceptance, and known-problem records;
 - JavaScript and JSX syntax parsing;
-- production-module transpilation;
-- production-module import/export loading;
-- direct semantic-model assertions covering guitar, bass, multiple blocks, measure derivation, multi-digit frets, warnings, and descriptions.
+- production-module transpilation and import/export loading from the convergence implementation;
+- direct semantic-model assertions covering guitar, bass, multiple blocks, measure derivation, multi-digit frets, warnings, and descriptions;
+- syntax parsing and transpilation of the restored block-navigation source and tests;
+- YAML parsing of the hardened manual verification workflow;
+- confirmation that the verification workflow is read-only, manual, bounded, and does not create bot commits.
 
 Still required before Checkpoint 4 can be marked passed:
 
 1. one intentional `workflow_dispatch` run for locked dependency installation, the complete automated test suite, and the production build;
-2. inspection of any failed job before rerun;
-3. hosted preview publication through the proven protected-main procedure, only when explicitly authorized;
-4. John's real-iPhone VoiceOver regression acceptance;
-5. Jason's Mac and VoiceOver recognition and usability acceptance.
+2. inspection of any failed job before any source change or rerun;
+3. hosted preview publication through the proven protected-main procedure, only after the automated gate passes;
+4. John's real-iPhone VoiceOver regression acceptance of upload recovery, position controls, multiple blocks, measure context, and restored block jumps;
+5. continued desktop automated and browser-level inspection without assuming Jason's participation;
+6. Jason's Mac recognition and usability acceptance only if he agrees to test the mature preview.
+
+Jason is not a blocker to completing source work, automated verification, hosted preview preparation, or John's iPhone acceptance. Without his participation, the project may record desktop owner acceptance as deferred rather than fabricate it.
 
 No automated, hosted, or real-device claim should be strengthened beyond the evidence above.
 
 ## Current stop boundary
 
-Do not begin playback, teacher mode, pattern analysis, bookmarks, AI work, upstream changes, a pull request, a merge, or production expansion until the convergence checkpoint has completed its automated and owner-operated acceptance gates.
+Do not begin playback, teacher mode, pattern analysis, bookmarks, AI work, upstream changes, a pull request, a merge, or production expansion until the convergence checkpoint has completed its automated and iPhone owner-operated gates. Desktop owner acceptance remains a later collaboration gate if Jason participates.
