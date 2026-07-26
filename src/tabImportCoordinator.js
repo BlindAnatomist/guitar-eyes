@@ -2,30 +2,49 @@ import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { parseTabDocumentText } from "./iphoneTabModel";
 import { parseTabText } from "./parseFile";
 
-export function buildReaderDocuments(sourceText, selectedInstrument) {
-  const numStrings = selectedInstrument === "bass" ? 4 : 6;
-  let desktopBlocks = parseTabText(sourceText, numStrings);
+const SUPPORTED_INSTRUMENTS = ["guitar", "bass"];
 
-  try {
-    const semanticDocument = parseTabDocumentText(sourceText, selectedInstrument);
-    const semanticDesktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
+function alternateInstrument(selectedInstrument) {
+  return selectedInstrument === "bass" ? "guitar" : "bass";
+}
 
-    if (semanticDesktopBlocks.length > 0) {
-      desktopBlocks = semanticDesktopBlocks;
+export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") {
+  const requestedInstrument = SUPPORTED_INSTRUMENTS.includes(selectedInstrument)
+    ? selectedInstrument
+    : "guitar";
+  const candidates = [requestedInstrument, alternateInstrument(requestedInstrument)];
+  let semanticError = null;
+
+  for (const candidate of candidates) {
+    try {
+      const semanticDocument = parseTabDocumentText(sourceText, candidate);
+      const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
+
+      return {
+        desktopBlocks,
+        desktopSource: "semantic",
+        semanticDocument,
+        semanticError: null,
+        requestedInstrument,
+        resolvedInstrument: candidate,
+        instrumentWasDetected: candidate !== requestedInstrument,
+      };
+    } catch (error) {
+      if (candidate === requestedInstrument) {
+        semanticError = error;
+      }
     }
-
-    return {
-      desktopBlocks,
-      desktopSource: "semantic",
-      semanticDocument,
-      semanticError: null,
-    };
-  } catch (error) {
-    return {
-      desktopBlocks,
-      desktopSource: "legacy-fallback",
-      semanticDocument: null,
-      semanticError: error,
-    };
   }
+
+  const numStrings = requestedInstrument === "bass" ? 4 : 6;
+
+  return {
+    desktopBlocks: parseTabText(sourceText, numStrings),
+    desktopSource: "legacy-fallback",
+    semanticDocument: null,
+    semanticError,
+    requestedInstrument,
+    resolvedInstrument: requestedInstrument,
+    instrumentWasDetected: false,
+  };
 }
