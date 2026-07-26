@@ -3,6 +3,23 @@ import App from "./App";
 
 const originalMatchMedia = window.matchMedia;
 
+function useTouchDevice() {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: jest.fn().mockReturnValue({
+      matches: true,
+      media: "(pointer: coarse)",
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }),
+  });
+}
+
 beforeEach(() => {
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback) => window.setTimeout(callback, 0);
@@ -40,6 +57,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
+    expect(screen.getByText(/Test build: Shared semantic core repair 1/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
     ).toHaveAttribute("aria-expanded", "true");
@@ -55,25 +73,12 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
   });
 
-  test("puts iPhone controls before collapsed Mac instructions on a touch device", () => {
-    Object.defineProperty(window, "matchMedia", {
-      configurable: true,
-      writable: true,
-      value: jest.fn().mockReturnValue({
-        matches: true,
-        media: "(pointer: coarse)",
-        onchange: null,
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      }),
-    });
-
+  test("puts the instrument and upload workflow before collapsed Mac instructions on a touch device", () => {
+    useTouchDevice();
     render(<App />);
 
     const iphoneMode = screen.getByRole("radio", { name: "iPhone semantic reader" });
+    const instrument = screen.getByLabelText("Choose Instrument:");
     const upload = screen.getByLabelText("Upload .txt file:");
     const instructionsButton = screen.getByRole("button", {
       name: "Open Mac keyboard instructions",
@@ -83,26 +88,17 @@ describe("Guitar Eyes application shell", () => {
     expect(instructionsButton).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByText(/Welcome to Guitar Eyes for Mac!/i)).not.toBeInTheDocument();
     expect(
+      instrument.compareDocumentPosition(upload) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
       upload.compareDocumentPosition(instructionsButton) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
 
   test("recovers focus to the persistent iPhone reader heading after Safari returns from file selection", async () => {
-    Object.defineProperty(window, "matchMedia", {
-      configurable: true,
-      writable: true,
-      value: jest.fn().mockReturnValue({
-        matches: true,
-        media: "(pointer: coarse)",
-        addListener: jest.fn(),
-        removeListener: jest.fn(),
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        dispatchEvent: jest.fn(),
-      }),
-    });
-
+    useTouchDevice();
     render(<App />);
+
     const file = new File(
       [
         "e|--0--2--3--2--0-----|\n",
@@ -129,5 +125,30 @@ describe("Guitar Eyes application shell", () => {
 
     await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/Loaded 5 synchronized positions/i)).toBeInTheDocument();
+  });
+
+  test("recovers focus to the persistent error heading after Safari returns from a failed upload", async () => {
+    useTouchDevice();
+    render(<App />);
+
+    const file = new File(
+      ["This file contains no complete tablature block."],
+      "invalid-tab.txt",
+      { type: "text/plain" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+      target: { files: [file] },
+    });
+
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Tablature could not be loaded",
+    });
+
+    fireEvent.focus(window);
+
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+    expect(screen.getByText(/could not be loaded in iPhone reading mode/i)).toBeInTheDocument();
   });
 });
