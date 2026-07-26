@@ -1,3 +1,4 @@
+import { describePlayablePosition } from "./describePlayablePosition";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 
 const guitarLines = [
@@ -68,6 +69,21 @@ describe("buildReaderDocuments", () => {
     expect(result.desktopBlocks).toEqual([guitarLines]);
     expect(result.resolvedInstrument).toBe("guitar");
     expect(result.instrumentWasDetected).toBe(true);
+  });
+
+  test("does not misclassify two six-string guitar blocks as custom-tuned bass", () => {
+    const source = ["Intro", ...guitarLines, "Verse", ...guitarLines].join("\n");
+    const result = buildReaderDocuments(source, "bass");
+    const description = describePlayablePosition(result.semanticDocument, 0);
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.instrument).toBe("guitar");
+    expect(result.semanticDocument.blocks).toHaveLength(2);
+    expect(result.desktopBlocks).toEqual([guitarLines, guitarLines]);
+    expect(result.resolvedInstrument).toBe("guitar");
+    expect(result.instrumentWasDetected).toBe(true);
+    expect(description).toContain("High E string, open.");
+    expect(description).not.toMatch(/String 1, tuned/i);
   });
 
   test("retains the legacy desktop fallback when semantic parsing is unsafe", () => {
