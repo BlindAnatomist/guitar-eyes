@@ -13,11 +13,30 @@ const document = parseSixStringTabText(
   ].join("\n")
 );
 
+const multiBlockDocument = parseSixStringTabText(
+  [
+    "e|--0--|",
+    "B|-----|",
+    "G|-----|",
+    "D|-----|",
+    "A|-----|",
+    "E|-----|",
+    "",
+    "e|--3--|",
+    "B|-----|",
+    "G|-----|",
+    "D|-----|",
+    "A|-----|",
+    "E|-----|",
+  ].join("\n")
+);
+
 describe("IPhoneTabReader", () => {
   test("exposes the shared controls in Previous, Read current, Next order", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
-    const buttons = [...container.querySelectorAll(".position-controls button")];
+    const positionGroup = screen.getByRole("group", { name: "Position navigation" });
+    const buttons = [...positionGroup.querySelectorAll("button")];
     expect(buttons.map((button) => button.textContent)).toEqual([
       "Previous position",
       "Read current position",
@@ -26,6 +45,7 @@ describe("IPhoneTabReader", () => {
     expect(buttons[0]).toBeDisabled();
     expect(buttons[2]).toBeEnabled();
     expect(screen.getByText(/Measure 1, position 1 of 2\. High E string, open\./)).toBeInTheDocument();
+    expect(container.querySelector('[aria-label="Tablature block navigation"]')).not.toBeInTheDocument();
   });
 
   test("moves predictably between synchronized positions", () => {
@@ -38,6 +58,28 @@ describe("IPhoneTabReader", () => {
     );
     expect(screen.getByRole("button", { name: "Next position" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous position" })).toBeEnabled();
+  });
+
+  test("restores explicit navigation between complete tablature blocks", () => {
+    const { container } = render(<IPhoneTabReader document={multiBlockDocument} />);
+    const blockGroup = screen.getByRole("group", { name: "Tablature block navigation" });
+    const buttons = [...blockGroup.querySelectorAll("button")];
+
+    expect(buttons.map((button) => button.textContent)).toEqual([
+      "Previous tablature block",
+      "Next tablature block",
+    ]);
+    expect(buttons[0]).toBeDisabled();
+    expect(buttons[1]).toBeEnabled();
+
+    fireEvent.click(buttons[1]);
+
+    expect(container.querySelector(".position-description")).toHaveTextContent(
+      "Tablature block 2 of 2. Measure 1, position 1 of 1. High E string, fret 3."
+    );
+    expect(screen.getByText("Overall position 2 of 2")).toBeInTheDocument();
+    expect(buttons[0]).toBeEnabled();
+    expect(buttons[1]).toBeDisabled();
   });
 
   test("reads the current semantic description through a restrained live region", () => {
