@@ -6,12 +6,12 @@ import React, {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
-import Upload from "./Upload";
-import DataGrid from "./DataGrid";
-import ColumnDropdown from "./ColumnDropdown";
+import DesktopSemanticReader from "./DesktopSemanticReader";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
+import LegacyDesktopReader from "./LegacyDesktopReader";
+import Upload from "./Upload";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 import {
@@ -21,7 +21,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Shared semantic core repair 1";
+const TEST_BUILD_LABEL = "Convergence recovery from accepted semantic core";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -40,10 +40,8 @@ function messageFromError(error, fallback) {
 }
 
 function App() {
-  const [tablature, setTablature] = useState([]);
-  const [iphoneDocument, setIphoneDocument] = useState(null);
-  const [numColumns, setNumColumns] = useState(1);
-  const [isMultiColumnNav, setIsMultiColumnNav] = useState(false);
+  const [desktopBlocks, setDesktopBlocks] = useState([]);
+  const [semanticDocument, setSemanticDocument] = useState(null);
   const [isInfoOpen, setIsInfoOpen] = useState(
     () => getInitialReadingMode() === "desktop"
   );
@@ -54,8 +52,10 @@ function App() {
   const [iphoneError, setIphoneError] = useState("");
   const [desktopError, setDesktopError] = useState("");
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
-  const gridRefs = useRef([]);
+
   const iphoneHeadingRef = useRef(null);
+  const desktopHeadingRef = useRef(null);
+  const legacyDesktopHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
   const desktopFocusPendingRef = useRef(false);
   const pendingIphoneFocusTargetRef = useRef(null);
@@ -91,17 +91,6 @@ function App() {
     });
   }, [readingMode]);
 
-  useEffect(() => {
-    if (
-      readingMode === "desktop" &&
-      desktopFocusPendingRef.current &&
-      gridRefs.current.length > 0
-    ) {
-      gridRefs.current[0]?.focus();
-      desktopFocusPendingRef.current = false;
-    }
-  }, [tablature, readingMode]);
-
   useLayoutEffect(() => {
     if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
     focusPendingIphoneTargetWhenBrowserReturns();
@@ -128,24 +117,39 @@ function App() {
     };
   }, [focusPendingIphoneTargetWhenBrowserReturns]);
 
+  useEffect(() => {
+    if (readingMode !== "desktop" || !desktopFocusPendingRef.current) {
+      return;
+    }
+
+    const target = semanticDocument
+      ? desktopHeadingRef.current
+      : legacyDesktopHeadingRef.current;
+
+    if (target) {
+      target.focus({ preventScroll: true });
+      desktopFocusPendingRef.current = false;
+    }
+  }, [desktopBlocks, readingMode, semanticDocument]);
+
   const focusSoon = (ref) => {
-    window.setTimeout(() => ref.current?.focus(), 0);
+    window.setTimeout(() => ref.current?.focus({ preventScroll: true }), 0);
   };
 
   const commitIphoneOutcome = ({
     target,
-    semanticDocument = null,
+    semanticDocument: nextDocument = null,
     iphoneErrorMessage = "",
     desktopErrorMessage = "",
-    desktopBlocks = [],
+    desktopBlocks: nextDesktopBlocks = [],
     status,
     resolvedInstrument = null,
   }) => {
     pendingIphoneFocusTargetRef.current = target;
 
     flushSync(() => {
-      setTablature(desktopBlocks);
-      setIphoneDocument(semanticDocument);
+      setDesktopBlocks(nextDesktopBlocks);
+      setSemanticDocument(nextDocument);
       setIphoneError(iphoneErrorMessage);
       setDesktopError(desktopErrorMessage);
       if (resolvedInstrument) {
@@ -168,8 +172,8 @@ function App() {
       return;
     }
 
-    setTablature([]);
-    setIphoneDocument(null);
+    setDesktopBlocks([]);
+    setSemanticDocument(null);
     setIphoneError(message);
     setDesktopError(message);
     setStatusMessage(status);
@@ -186,12 +190,13 @@ function App() {
 
   const handleFileUpload = async (file) => {
     pendingIphoneFocusTargetRef.current = null;
+    desktopFocusPendingRef.current = false;
     setIsReadingFile(true);
     setStatusMessage("Reading the selected tablature file.");
     setIphoneError("");
     setDesktopError("");
-    setIphoneDocument(null);
-    setTablature([]);
+    setSemanticDocument(null);
+    setDesktopBlocks([]);
 
     if (!file) {
       finishUnreadableUpload(
@@ -250,44 +255,41 @@ function App() {
     }
 
     const {
-      desktopBlocks,
-      semanticDocument,
+      desktopBlocks: nextDesktopBlocks,
+      semanticDocument: nextDocument,
       semanticError,
       resolvedInstrument,
       instrumentWasDetected,
     } = readerDocuments;
 
     const detectedPrefix = instrumentWasDetected
-      ? `Detected ${semanticDocument?.instrumentLabel ?? resolvedInstrument}. `
+      ? `Detected ${nextDocument?.instrumentLabel ?? resolvedInstrument}. `
       : "";
 
-    if (semanticDocument) {
-      const successStatus = `${detectedPrefix}Loaded ${semanticDocument.positions.length} synchronized positions in iPhone reading mode.`;
+    if (nextDocument) {
+      const iphoneSuccessStatus = `${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in iPhone reading mode.`;
 
       if (readingMode === "iphone") {
         commitIphoneOutcome({
           target: "reader",
-          semanticDocument,
-          desktopBlocks,
-          status: successStatus,
+          semanticDocument: nextDocument,
+          desktopBlocks: nextDesktopBlocks,
+          status: iphoneSuccessStatus,
           resolvedInstrument,
         });
         return;
       }
 
-      setTablature(desktopBlocks);
-      setIphoneDocument(semanticDocument);
+      setDesktopBlocks(nextDesktopBlocks);
+      setSemanticDocument(nextDocument);
       setIphoneError("");
       setDesktopError("");
       setSelectedInstrument(resolvedInstrument);
       setIsReadingFile(false);
       setStatusMessage(
-        `${detectedPrefix}Loaded ${desktopBlocks.length} tablature ${
-          desktopBlocks.length === 1 ? "block" : "blocks"
-        } in desktop grid mode.`
+        `${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in desktop semantic reader mode.`
       );
       desktopFocusPendingRef.current = true;
-      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
       return;
     }
 
@@ -300,26 +302,25 @@ function App() {
       commitIphoneOutcome({
         target: "error",
         iphoneErrorMessage: semanticMessage,
-        desktopBlocks,
+        desktopBlocks: nextDesktopBlocks,
         status: "The file could not be loaded in iPhone reading mode.",
       });
       return;
     }
 
-    setTablature(desktopBlocks);
-    setIphoneDocument(null);
+    setDesktopBlocks(nextDesktopBlocks);
+    setSemanticDocument(null);
     setIphoneError(semanticMessage);
     setDesktopError("");
     setIsReadingFile(false);
 
-    if (desktopBlocks?.length > 0) {
+    if (nextDesktopBlocks?.length > 0) {
       setStatusMessage(
-        `Loaded ${desktopBlocks.length} tablature ${
-          desktopBlocks.length === 1 ? "block" : "blocks"
-        } in desktop grid mode using the compatibility parser.`
+        `Loaded ${nextDesktopBlocks.length} tablature ${
+          nextDesktopBlocks.length === 1 ? "block" : "blocks"
+        } in desktop compatibility grid mode.`
       );
       desktopFocusPendingRef.current = true;
-      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
     } else {
       setDesktopError("No tablature blocks could be prepared for desktop grid mode.");
       setStatusMessage("The file could not be loaded in desktop grid mode.");
@@ -332,7 +333,7 @@ function App() {
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {
-      if (iphoneDocument) {
+      if (semanticDocument) {
         pendingIphoneFocusTargetRef.current = "reader";
         setIphoneFocusRequest((current) => current + 1);
       } else if (iphoneError) {
@@ -343,25 +344,10 @@ function App() {
     }
 
     pendingIphoneFocusTargetRef.current = null;
-    if (tablature.length > 0) {
-      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
+    if (semanticDocument || desktopBlocks.length > 0) {
+      desktopFocusPendingRef.current = true;
     } else if (desktopError) {
       focusSoon(errorHeadingRef);
-    }
-  };
-
-  const handleDropdownChange = (value) => setNumColumns(value);
-  const handleCheckboxChange = () => setIsMultiColumnNav(!isMultiColumnNav);
-  const toggleInfoSection = () => setIsInfoOpen(!isInfoOpen);
-  const handleInstrumentChange = (instrument) => setSelectedInstrument(instrument);
-
-  const handleKeyDown = (event, gridIndex) => {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      const nextIndex = event.shiftKey
-        ? (gridIndex - 1 + gridRefs.current.length) % gridRefs.current.length
-        : (gridIndex + 1) % gridRefs.current.length;
-      gridRefs.current[nextIndex]?.focus();
     }
   };
 
@@ -374,8 +360,8 @@ function App() {
         Guitarist
       </h1>
       <p className="extension-note">
-        This branch preserves Jason Washburn&apos;s desktop reader and uses one semantic
-        foundation for desktop and iPhone access.
+        This branch preserves Jason Washburn&apos;s desktop reader and uses one accepted
+        semantic foundation for desktop and iPhone access.
       </p>
       <p className="test-build-label">Test build: {TEST_BUILD_LABEL}.</p>
 
@@ -405,7 +391,7 @@ function App() {
 
       <InstrumentDropdown
         selectedInstrument={selectedInstrument}
-        onSelectInstrument={handleInstrumentChange}
+        onSelectInstrument={setSelectedInstrument}
       />
       <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
 
@@ -427,13 +413,13 @@ function App() {
       )}
 
       <div hidden={readingMode !== "iphone"}>
-        <IPhoneTabReader document={iphoneDocument} ref={iphoneHeadingRef} />
+        <IPhoneTabReader document={semanticDocument} ref={iphoneHeadingRef} />
       </div>
 
       <section className="desktop-instructions-control">
         <button
           type="button"
-          onClick={toggleInfoSection}
+          onClick={() => setIsInfoOpen((current) => !current)}
           aria-expanded={isInfoOpen}
           aria-controls="desktop-instructions"
         >
@@ -446,39 +432,17 @@ function App() {
         )}
       </section>
 
-      <section hidden={readingMode !== "desktop"} aria-label="Desktop grid reader">
-        <div>
-          <input
-            id="multi-column"
-            type="checkbox"
-            checked={isMultiColumnNav}
-            onChange={handleCheckboxChange}
+      <div hidden={readingMode !== "desktop"}>
+        {semanticDocument ? (
+          <DesktopSemanticReader document={semanticDocument} ref={desktopHeadingRef} />
+        ) : (
+          <LegacyDesktopReader
+            tablature={desktopBlocks}
+            selectedInstrument={selectedInstrument}
+            ref={legacyDesktopHeadingRef}
           />
-          <label htmlFor="multi-column">Multi-Column Navigation</label>
-        </div>
-        <ColumnDropdown
-          value={numColumns}
-          numOptions={tablature.length > 0 ? tablature[0][0].length : 1}
-          onChange={handleDropdownChange}
-        />
-        {tablature.map((subarray, index) => (
-          <div
-            key={index}
-            ref={(element) => (gridRefs.current[index] = element)}
-            tabIndex={index === 0 ? 0 : -1}
-            onKeyDown={(event) => handleKeyDown(event, index)}
-          >
-            <h2>Tablature {index + 1}</h2>
-            <DataGrid
-              data={subarray}
-              numColumns={numColumns}
-              isMultiColumnNav={isMultiColumnNav}
-              setNumColumns={setNumColumns}
-              selectedInstrument={selectedInstrument}
-            />
-          </div>
-        ))}
-      </section>
+        )}
+      </div>
     </main>
   );
 }
