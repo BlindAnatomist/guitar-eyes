@@ -14,13 +14,13 @@ Current recovery branch: `work/convergence-from-accepted-semantic-core`
 
 Accepted semantic foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
 
-Verified recovery source: `72159d25958fffd941c95351c6781cf579e1d622`
+Verified and hosted recovery source: `72159d25958fffd941c95351c6781cf579e1d622`
 
 Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-Fork `main` remains reserved as an exact upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
+Fork `main` is identical to the authoritative upstream commit. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
-Documentation-only commits after the verified source do not replace the verified implementation identity. Publication must explicitly check out `72159d25958fffd941c95351c6781cf579e1d622`.
+Documentation-only commits after the verified source do not replace the implementation identity.
 
 ## Invalidated convergence line
 
@@ -28,7 +28,7 @@ The July 26 preview built from `d26e4172a0386ceb56ad5c0061e72d975b42fc43` remain
 
 That source was on a diverged line 120 commits behind the accepted rhythm-and-measure foundation. Its passing tests verified a thinner replacement contract and did not prove preservation of accepted behavior.
 
-The owner’s real-iPhone test exposed the lost contracts:
+The owner's real-iPhone test exposed the lost contracts:
 
 1. movement controls repeated complete playing instructions;
 2. ordinary unplayed strings were announced;
@@ -51,9 +51,11 @@ Before changing implementation, deployment, accessibility, testing, or repositor
 9. `docs/convergence-lineage-recovery-2026-07-26.md`;
 10. `docs/convergence-recovery-source-checkpoint-1.md`;
 11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
-12. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
+13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
+14. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
-Do not rely on chat memory, branch names, or recently modified files when exact ancestry and accepted evidence exist.
+Do not rely on chat memory, branch names, or recent modification dates when exact ancestry and accepted evidence exist.
 
 ## Architectural authority
 
@@ -113,35 +115,58 @@ The desktop interface provides:
 
 Unsafe semantic input routes to a clearly labeled compatibility grid. Its raw cells remain outside the ordinary Tab sequence, VoiceOver modifier commands remain untouched, and plain-arrow movement is available only after the grid itself is focused.
 
-Detailed source record:
-
-- `docs/convergence-recovery-source-checkpoint-1.md`.
-
 ## Passed local execution gate
 
-The exact source `72159d25958fffd941c95351c6781cf579e1d622` passed one read-only execution gate under Node `20.20.2`.
+The exact source `72159d25958fffd941c95351c6781cf579e1d622` passed one read-only execution gate under Node `20.20.2`:
 
-Results:
-
-1. accepted foundation ancestry: passed;
-2. locked `npm ci --no-audit --no-fund`: passed after one permitted environment-only npm-cache retry;
+1. accepted-foundation ancestry: passed;
+2. locked installation: passed after one permitted environment-only npm-cache retry;
 3. automated suites: 17 passed, 17 total;
 4. automated tests: 81 passed, 81 total;
 5. production build: passed;
 6. compiled-artifact contract checks: passed;
 7. final checkout: clean.
 
-Generated assets:
-
-- `main.aed9412c.js`;
-- `7.eaf0ef0f.chunk.js`;
-- `main.6939fd57.css`.
-
-The compiled application contains the recovery build identity, both interface headings, accepted position and block controls, duration and measure construction, open-string speech construction, and the original spatial-source disclosure.
-
-Detailed execution record:
+Detailed record:
 
 - `docs/convergence-recovery-local-execution-gate-2026-07-26.md`.
+
+## Passed publication and hosted read-back
+
+Valid preview:
+
+`https://blindanatomist.github.io/guitar-eyes/`
+
+The exact verified source was published through the proven temporary-main procedure.
+
+The first temporary publisher run, `30221814145`, failed before installation because a one-commit shallow checkout could not prove accepted-foundation ancestry. The deployment was skipped, `main` was restored and independently confirmed clean, and no source repair was made.
+
+The corrected publisher used full checkout history and deployed the exact verified source. A separate read-back-only workflow did not rebuild or redeploy; it inspected the live site.
+
+Read-back evidence:
+
+- trigger commit: `6560da70517e582374cdfdf156dfbf8f9049d836`;
+- workflow run: `30222035574`;
+- job: `89846005803`;
+- result: success;
+- live HTML: HTTP 200;
+- exact recovery title and first heading: present;
+- every referenced repository asset: HTTP 200;
+- one primary `main.*.js` bundle: present;
+- position controls, block controls, both reader identities, original spatial-source disclosure, rhythm construction, measure construction, and open-string construction: present in the live bundle.
+
+After read-back, fork `main` was restored to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+
+Independent comparison:
+
+- status: identical;
+- ahead: 0;
+- behind: 0;
+- changed files: 0.
+
+Detailed record:
+
+- `docs/convergence-recovery-publication-result-2026-07-26.md`.
 
 ## Current checkpoint verdict
 
@@ -152,32 +177,34 @@ Passed:
 3. rhythm duration checkpoint 1;
 4. measure recognition checkpoint 1;
 5. convergence recovery source checkpoint 1;
-6. convergence recovery local execution gate.
+6. convergence recovery local execution gate;
+7. corrected Pages publication;
+8. hosted artifact and live-bundle read-back;
+9. final fork-main restoration.
 
 Still open:
 
-1. corrected hosted preview publication;
-2. hosted artifact and live-bundle read-back;
-3. immediate restoration and independent comparison of fork `main` after temporary publication;
-4. one bounded real-iPhone Safari and VoiceOver regression;
-5. desktop owner acceptance only if Jason agrees to participate.
+1. one bounded real-iPhone Safari and VoiceOver regression;
+2. desktop owner acceptance only if Jason agrees to participate.
 
 ## Next bounded task
 
-Publish the exact verified source `72159d25958fffd941c95351c6781cf579e1d622` through the already proven protected-main procedure.
+John performs the real-device test on his iPhone in Chat.
 
-The publication checkpoint must:
+The test should cover:
 
-1. explicitly check out the exact verified source rather than a later documentation head;
-2. use the passing locked installation, complete suite, and production build as prerequisites;
-3. build for `/guitar-eyes`;
-4. publish one corrected Pages artifact;
-5. inspect the hosted HTML and bundle for recovery identity and accepted contracts;
-6. restore fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3`;
-7. require identical, zero ahead, zero behind, and zero changed files;
-8. stop before owner-operated testing.
+1. opening the valid recovery preview in Safari with VoiceOver;
+2. selecting iPhone semantic reader;
+3. uploading a controlled multi-block guitar file containing aligned measure bars and rhythm values;
+4. confirming focus returns to the successful load result or iPhone reader rather than Safari Page Menu;
+5. confirming Previous position, Read current position, Next position order;
+6. confirming Previous and Next move without announcing full playing instructions;
+7. confirming Read current announces measure, position, duration, and only the strings that are played or explicitly muted;
+8. confirming ordinary unplayed strings are omitted;
+9. confirming open strings are spoken;
+10. confirming Previous and Next tablature block move quietly and enforce first/last boundaries.
 
-No additional source redesign is authorized before publication. The current stable Pages address still serves the invalidated preview and must not be tested.
+Do not begin another implementation or publication cycle unless this real-device test identifies a defect.
 
 ## Scope boundaries
 
@@ -193,4 +220,4 @@ Do not begin:
 - upstream modification;
 - paid services or GitHub overages.
 
-John performs real-device testing only on his iPhone. Jason is not assumed to participate.
+Jason is not assumed to participate.
