@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "created": "2026-07-26",
+  "project": "Guitar Eyes",
+  "policy": {
+    "committedMaterial": "Original, public-domain, or clearly licensed only",
+    "commercialSiteTabs": "External or user-provided; never bulk-scraped into the repository",
+    "privateAcceptanceFiles": "Not committed without explicit permission"
+  },
+  "fixtures": [
+    {
+      "path": "ascii-webpage-mixed-content.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "metadata",
+        "tuning declaration",
+        "capo",
+        "tempo",
+        "section headings",
+        "chord line",
+        "lyric-like prose",
+        "two six-string blocks"
+      ],
+      "currentExpectation": "Semantic guitar import succeeds; non-tab lines are ignored with parsing notes; two blocks are preserved"
+    },
+    {
+      "path": "ascii-rhythm-line.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "W H Q E S duration legend",
+        "rhythm line",
+        "count line",
+        "one six-string block"
+      ],
+      "currentExpectation": "Notes are imported; rhythm line is not yet mapped to semantic durations"
+    },
+    {
+      "path": "ascii-techniques-and-annotations.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "drop tuning",
+        "palm mute annotation",
+        "let ring annotation",
+        "hammer-on",
+        "pull-off",
+        "ascending slide",
+        "descending slide",
+        "bend",
+        "bend release",
+        "vibrato",
+        "tap",
+        "muted note"
+      ],
+      "currentExpectation": "Recognized inline techniques are preserved; annotation lines are ignored; full performance semantics remain future work"
+    },
+    {
+      "path": "ascii-bass-with-metadata.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "four-string bass",
+        "metadata",
+        "tempo",
+        "count line",
+        "two blocks"
+      ],
+      "currentExpectation": "Automatic bass detection succeeds; two blocks are preserved"
+    },
+    {
+      "path": "musicxml-minimal-guitar-tab.musicxml",
+      "family": "musicxml",
+      "provenance": "Project-authored MusicXML 4.0 specimen using original notes",
+      "license": "CC0-1.0",
+      "features": [
+        "standard six-string tuning",
+        "one measure",
+        "4/4 time",
+        "quarter eighth and half durations",
+        "explicit string and fret technical data"
+      ],
+      "currentExpectation": "Recognized by future format preflight; structured import not yet implemented"
+    }
+  ],
+  "externalSources": [
+    {
+      "name": "MusicXML 4.0 tablature tutorial",
+      "url": "https://www.w3.org/2021/06/musicxml40/tutorial/tablature/",
+      "use": "Primary structured-format reference"
+    },
+    {
+      "name": "PDMX no-license-conflict subset",
+      "url": "https://zenodo.org/records/15571083",
+      "use": "Potential public-domain MusicXML fixture source after per-file filtering"
+    },
+    {
+      "name": "alphaTab format importers",
+      "url": "https://www.alphatab.net/docs/category/formats/",
+      "use": "Candidate browser-compatible importer for Guitar Pro and MusicXML"
+    },
+    {
+      "name": "Power Tab Editor",
+      "url": "https://github.com/powertab/powertabeditor",
+      "use": "Format reference and potential licensed test fixtures"
+    },
+    {
+      "name": "TuxGuitar file format help",
+      "url": "https://www.tuxguitar.app/files/1.6.3/desktop/help/file_formats.html",
+      "use": "Conversion and format-coverage reference"
+    }
+  ]
+}
