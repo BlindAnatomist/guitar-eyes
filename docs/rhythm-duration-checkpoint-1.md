@@ -56,16 +56,18 @@ Result:
 7. the downloaded deployed artifact was inspected directly;
 8. fork `main` was restored and confirmed identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-## Remaining real-iPhone gate
+## Real-iPhone result
 
-Upload `ascii-rhythm-line.txt` in iPhone Safari with VoiceOver and confirm:
+Status: passed.
 
-1. focus returns to `iPhone tablature reader`;
-2. `Read current position` announces the duration before the string-and-fret instructions;
-3. position 1 is a quarter note;
-4. position 2 is an eighth note;
-5. position 4 is a half note;
-6. position 7 is a sixteenth note;
-7. Previous and Next position remain quiet and continue to move correctly.
+The owner uploaded `ascii-rhythm-line.txt` in iPhone Safari with VoiceOver and confirmed:
 
-No desktop or laptop acceptance testing is assigned to the owner.
+1. focus returned correctly to the iPhone tablature reader;
+2. `Read current position` announced the duration before the string-and-fret instructions;
+3. quarter, eighth, half, and sixteenth-note values were understandable and matched the tested positions;
+4. the resulting spoken instructions made musical sense;
+5. Previous and Next position remained quiet and continued to move correctly.
+
+This completes Rhythm Duration Checkpoint 1 on the real target device.
+
+No desktop or laptop acceptance testing was assigned to the owner.
