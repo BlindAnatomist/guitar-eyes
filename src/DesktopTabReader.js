@@ -4,6 +4,7 @@ import {
   describePosition,
   describeStringState,
 } from "./tablatureModel";
+import { describeNavigationLocation } from "./navigationAnnouncements";
 
 const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,7 +38,7 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
       Math.min(nextIndex, document.positions.length - 1)
     );
     setCurrentIndex(boundedIndex);
-    announce(describePosition(document, boundedIndex));
+    announce(describeNavigationLocation(document, boundedIndex));
   };
 
   const moveToBlock = (direction) => {
@@ -96,7 +97,7 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
         role="group"
         tabIndex="0"
         aria-label="Position keyboard navigator"
-        aria-describedby="desktop-keyboard-help desktop-current-position-description"
+        aria-describedby="desktop-keyboard-help"
         onKeyDown={handleNavigatorKeyDown}
       >
         <p id="desktop-keyboard-help">
@@ -110,7 +111,6 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
         className="position-controls"
         role="group"
         aria-label="Position navigation"
-        aria-describedby="desktop-current-position-description"
       >
         <button
           type="button"
@@ -140,7 +140,6 @@ const DesktopTabReader = forwardRef(function DesktopTabReader({ document }, head
           className="position-controls block-controls"
           role="group"
           aria-label="Tablature block navigation"
-          aria-describedby="desktop-current-position-description"
         >
           <button
             type="button"
