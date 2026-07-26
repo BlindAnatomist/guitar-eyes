@@ -28,7 +28,8 @@ Before changing implementation, accessibility behavior, repository administratio
 9. `docs/convergence-lineage-recovery-2026-07-26.md`;
 10. `docs/convergence-recovery-source-checkpoint-1.md`;
 11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
-12. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
+13. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
 
@@ -72,6 +73,14 @@ The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
 - clean final checkout.
 
 This does not yet establish hosted or real-device acceptance. The current Pages address still serves the invalidated convergence preview until a corrected build is deliberately published.
+
+## Publication rule
+
+The corrected preview must use the proven temporary-main procedure recorded in `docs/convergence-recovery-publication-preflight-2026-07-26.md`.
+
+The temporary workflow must explicitly check out `72159d25958fffd941c95351c6781cf579e1d622`, build for `/guitar-eyes`, verify the compiled recovery identity, deploy through the authorized `main` context, complete hosted read-back, and restore fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+
+Do not repeat the complete test suite in the publication workflow. The exact source has already passed the 17-suite, 81-test authenticated execution gate. Publication requires locked installation, Pages build, compiled checks, deployment, read-back, and restoration.
 
 ## Zero-dollar automation
 
