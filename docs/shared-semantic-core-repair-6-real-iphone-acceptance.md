@@ -25,8 +25,8 @@ The import coordinator tried the selected instrument first. The bass parser acce
 3. A run qualifies as bass only when its length is divisible by four.
 4. The selected instrument is used only when the document is structurally plausible for that instrument.
 5. Two six-line guitar blocks therefore bypass the Bass candidate and resolve to Guitar.
-6. The selector should update automatically from Bass to Guitar.
-7. Standard guitar positions should use High E, B, G, D, A, and Low E string identities.
+6. The selector updates automatically from Bass to Guitar.
+7. Standard guitar positions use High E, B, G, D, A, and Low E string identities.
 
 ## Regression coverage
 
@@ -54,14 +54,18 @@ Result:
 6. the exact deployed artifact was inspected;
 7. fork `main` was restored and confirmed identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-## Remaining real-iPhone gate
+## Real-iPhone result
 
-With the selector still on Bass, upload `shared-core-two-block-guitar.txt` and confirm:
+Status: passed.
 
-1. the selector changes automatically to Guitar;
-2. focus returns to `iPhone tablature reader`;
-3. the reader reports two blocks;
-4. Read current position uses ordinary guitar names, not numbered custom-tuning names;
-5. Previous and Next tablature block still work correctly.
+With the selector still on Bass, the owner uploaded `shared-core-two-block-guitar.txt` in iPhone Safari with VoiceOver and confirmed:
 
-No desktop or laptop acceptance testing is assigned to the owner.
+1. the selector changed automatically to Guitar;
+2. focus returned correctly to the iPhone tablature reader;
+3. the reader preserved and reported two tablature blocks;
+4. Read current position used ordinary guitar string names rather than numbered custom-tuning descriptions;
+5. Previous and Next tablature block worked correctly.
+
+This completes the shared semantic core acceptance gate for clean four-string bass and clean multi-block six-string guitar on the real target device.
+
+No desktop or laptop acceptance testing was assigned to the owner.
