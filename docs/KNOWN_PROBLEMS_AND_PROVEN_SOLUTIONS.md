@@ -176,6 +176,70 @@ A temporary deployment workaround is incomplete until repository authority is re
 
 ---
 
+## GE-004 — Navigation controls repeat full playing instructions
+
+State: `candidate`
+
+### Symptoms
+
+On the real iPhone convergence preview, the accepted control order remained intact and movement worked, but VoiceOver repeated the full string and fret instructions when the owner encountered or activated:
+
+- Previous position;
+- Next position;
+- Previous tablature block;
+- Next tablature block.
+
+Only `Read current position` should announce what strings, frets, open strings, silence, or notation the musician should play. Movement controls should move and, at most, announce concise location.
+
+### Cause
+
+Two separate mechanisms exposed the fingering description through navigation:
+
+1. the shared movement handler sent `describePosition`, including full playing instructions, to the live region after every position or block move;
+2. the position and block navigation groups referenced the full current-position description through `aria-describedby`, so VoiceOver could repeat the instructions when navigating onto the controls even before activation.
+
+The desktop keyboard navigator also included the full current-position description in its `aria-describedby` relationship.
+
+### Failed-do-not-repeat approaches
+
+1. Do not treat all semantic information as equally appropriate for every control event.
+2. Do not reuse the full instructional description as a movement announcement.
+3. Do not attach a dynamic fingering paragraph to a navigation group merely because it provides context.
+4. Do not accept correct control order and correct movement as sufficient when the speech contract is wrong.
+5. Do not rely only on tests that verify visible text changes; live-region content and accessible descriptions must be tested separately.
+
+### Candidate solution
+
+1. Maintain a dedicated location-only formatter containing block, measure, position-within-measure, and overall position.
+2. Use that formatter for Previous, Next, keyboard movement, Home, End, and block jumps.
+3. Reserve the full `describePosition` playing instructions for `Read current position` and the visible current-position paragraph.
+4. Remove the full fingering paragraph from `aria-describedby` on position and block navigation groups.
+5. Describe the desktop keyboard navigator only with its static keyboard help.
+6. Add tests requiring movement live regions to contain no `string`, `fret`, or `open` instruction while requiring `Read current position` to provide the full description.
+7. Require hosted real-iPhone VoiceOver acceptance before changing this entry to `local-proven`.
+
+### Evidence
+
+- Exact real-device report and repair state: `docs/real-iphone-acceptance.md`.
+- Shared location formatter: `src/navigationAnnouncements.js`.
+- iPhone implementation and regression tests: `src/IPhoneTabReader.js` and `src/IPhoneTabReader.test.js`.
+- Desktop implementation and regression tests: `src/DesktopTabReader.js` and `src/DesktopTabReader.test.js`.
+- Formatter tests: `src/navigationAnnouncements.test.js`.
+
+### Applies to
+
+Any interface where one control changes selection or location and a separate control deliberately reads detailed content.
+
+### Cross-repository transfer status
+
+Candidate for a general accessibility distinction between navigation feedback and content instruction.
+
+### Derived standard
+
+Movement answers “where am I now?” Reading answers “what is here?” Do not collapse those two speech acts into one announcement.
+
+---
+
 ## Cross-repository standards
 
 ### XR-VOICEOVER-FOCUS-001
