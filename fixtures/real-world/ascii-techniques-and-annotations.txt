@@ -1,0 +1,18 @@
+GUITAR EYES FORMAT SPECIMEN 03
+Original project-authored material
+Tuning: Drop D
+
+PM----|          let ring----------------|
+
+e|----------------5h7p5----7~------------|
+B|----------5/7---------7b9r7-------------|
+G|------4h6--------------------7\6--------|
+D|--0h2-----------------------------x-x---|
+A|--0-------------------------------x-x---|
+D|--0-----------t12------------------0----|
+
+Annotation notes:
+- PM means palm mute.
+- h hammer-on, p pull-off, / ascending slide, \ descending slide.
+- b bend, r release, ~ vibrato, t tap, x muted note.
+- A future fixture will add harmonics such as <12> after the tokenizer has an explicit policy.
