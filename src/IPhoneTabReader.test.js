@@ -18,7 +18,7 @@ const multiBlockDocument = parseTabDocumentText(
 );
 
 describe("IPhoneTabReader", () => {
-  test("orders the primary current-position action before quiet navigation", () => {
+  test("centers the current-position action between quiet navigation controls", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
     const read = screen.getByRole("button", { name: "Read current position" });
@@ -38,10 +38,10 @@ describe("IPhoneTabReader", () => {
     expect(screen.getByRole("heading", { name: "Current position" })).toBeInTheDocument();
     expect(description).toHaveTextContent("Position 1 of 2. High E string, open.");
     expect(
-      read.compareDocumentPosition(previous) & Node.DOCUMENT_POSITION_FOLLOWING
+      previous.compareDocumentPosition(read) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      previous.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+      read.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
       next.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
