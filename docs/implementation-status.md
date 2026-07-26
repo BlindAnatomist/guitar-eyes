@@ -1,6 +1,6 @@
-# Guitar Eyes iPhone Extension Status
+# Guitar Eyes Implementation Status
 
-Last updated: July 24, 2026
+Last updated: July 26, 2026
 
 ## Repository authority
 
@@ -10,137 +10,143 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Audit and proof branch: `work/iphone-voiceover-tablature-audit`
+Current development branch: `work/real-world-tab-format-corpus`
 
 Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-Final authority verification: fork `main` is identical to the authoritative upstream commit, with zero commits ahead, zero behind, and no changed files.
+Fork `main` is preserved as an exact upstream-tracking branch. Jason Washburn's repository remains untouched. No pull request has been opened and no development work has been merged into `main`.
 
 ## Required continuity reading
 
-Before proposing repository administration, deployment repair, accessibility architecture, playback, teacher mode, or future AI work, inspect:
+Before changing implementation, deployment, accessibility, testing, or repository administration, inspect:
 
-1. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md` for the governing problem-and-solution register;
-2. `docs/solved-problems-and-reusable-procedures.md` for previously solved deployment and repository procedures;
-3. `docs/iphone-voiceover-tablature-audit.md` for the source and accessibility audit;
-4. `docs/proof-automated-results.md` for bounded-proof verification;
-5. `docs/real-iphone-acceptance.md` for exact real-device evidence;
-6. `docs/hosted-preview-status.md` and `docs/temporary-publisher-result.md` for publication state.
+1. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
+2. `docs/solved-problems-and-reusable-procedures.md`;
+3. `docs/shared-semantic-core-plan.md`;
+4. `docs/shared-semantic-core-implementation.md`;
+5. `docs/real-world-tab-format-corpus-checkpoint-1.md`;
+6. `docs/rhythm-duration-checkpoint-1.md`;
+7. `docs/measure-recognition-checkpoint-1.md`.
 
 Do not rely on chat memory alone or rediscover a procedure already recorded in the repository.
 
-## Architectural vision
+## Architectural state
 
-The long-term objective is to evolve Guitar Eyes from an accessible tablature reader into an accessible guitar teaching platform.
+Guitar Eyes is now one application moving toward one musical engine with two interfaces:
 
-The semantic tablature model is the authoritative representation of the music. Accessibility, playback, lesson generation, pattern recognition, and future AI capabilities must consume the same semantic model rather than maintaining separate representations.
+1. Jason's desktop grid reader preserves spatial keyboard navigation and visible tablature rows.
+2. The iPhone semantic reader presents the same music as synchronized, sequential positions for Safari and VoiceOver.
+3. Supported guitar and bass ASCII inputs are parsed into one shared semantic document.
+4. Jason's desktop rows are projected from that document without redesigning his interface.
+5. Legacy desktop parsing remains only as a compatibility fallback when semantic parsing is unsafe.
 
-Near-term architectural direction:
+The semantic document is the authority for instrument identity, blocks, strings, positions, duration, and explicit measures. Playback, teaching, looping, pattern recognition, and later AI must consume this same model rather than create separate musical representations.
 
-1. semantic parser and accessible navigation;
-2. teacher mode using the semantic model;
-3. playback from the semantic model;
-4. rule-based recognition of repeated measures, riffs, chord shapes, and variations without AI;
-5. user-defined lesson sections and bookmarks;
-6. optional AI analysis that produces reusable lesson metadata and recommended learning order from parsed music.
+## Accepted shared-core capabilities
 
-AI should enhance instruction rather than becoming a requirement for core reading, navigation, playback, looping, or deterministic pattern recognition.
+Real-iPhone Safari and VoiceOver acceptance has passed for:
 
-## Current checkpoint
+1. clean six-string guitar;
+2. clean four-string bass;
+3. multiple guitar tablature blocks;
+4. automatic guitar and bass detection in both directions;
+5. automatic correction of the instrument selector;
+6. durable picker-return focus after successful uploads;
+7. durable picker-return focus after failed uploads;
+8. normal guitar and bass string naming;
+9. quiet Previous and Next position movement;
+10. dedicated Read current position speech;
+11. actionable speech that omits ordinary unplayed strings;
+12. block navigation for multi-block files;
+13. W, H, Q, E, and S duration mapping and speech;
+14. explicit measure recognition from aligned shared barlines;
+15. measure and position-within-measure speech;
+16. the accepted control order: Previous position, Read current position, Next position.
 
-Checkpoint 3: Bounded iPhone semantic-reader proof implemented, automated, hosted, and accepted on the real target iPhone.
+Human acceptance testing is performed only on the owner's iPhone. Desktop preservation is protected through automated contracts. A later desktop experience check may be performed by Jason or another desktop screen-reader user when a meaningful release candidate exists.
 
-1. GitHub recognizes `BlindAnatomist/guitar-eyes` as a fork.
-2. Fork `main` is identical to the authoritative upstream commit.
-3. Jason Washburn's upstream repository has not been modified.
-4. No pull request has been opened.
-5. The source audit is recorded in `docs/iphone-voiceover-tablature-audit.md`.
-6. Proof automation results are recorded in `docs/proof-automated-results.md`.
-7. Hosted publication succeeded at the bounded preview address.
-8. Real-iPhone Safari and VoiceOver acceptance passed and is recorded in `docs/real-iphone-acceptance.md`.
-9. Known failures, rejected approaches, and proven repairs are recorded in `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`.
+## Real-world format corpus
 
-Checkpoint 3 verdict: Pass.
+The repository contains project-authored, reproducible specimens for:
 
-## Implemented bounded proof
+1. copied webpage-style ASCII text with metadata and multiple blocks;
+2. W/H/Q/E/S rhythm lines;
+3. technique-heavy ASCII notation;
+4. metadata-rich four-string bass;
+5. explicit two-measure ASCII rhythm tab;
+6. minimal MusicXML guitar tablature.
 
-The audit branch now:
+The upload preflight recognizes:
 
-1. preserves Jason's desktop grid reader;
-2. adds a separate iPhone semantic reader mode;
-3. accepts one clean plain-text six-string tablature block;
-4. constructs synchronized musical positions rather than splitting only into raw characters;
-5. distinguishes fretted notes, open strings, silent strings, technique notation, and unsupported material;
-6. provides Previous position, Next position, and Read current position controls;
-7. provides semantic vertical descriptions;
-8. avoids placing every dash and separator in the iPhone VoiceOver swipe order;
-9. exposes understandable upload and parse errors;
-10. repairs the multi-column checkbox label association;
-11. places iPhone workflow controls before collapsed Mac instructions on coarse-pointer devices;
-12. uses restrained live announcements and deliberate post-upload focus;
-13. recovers focus after Safari returns from the native iOS Files picker;
-14. includes a known clean six-string test fixture.
+1. ASCII text;
+2. MusicXML and compressed MusicXML;
+3. Guitar Pro;
+4. PowerTab;
+5. TuxGuitar;
+6. TablEdit;
+7. unknown material.
 
-## Automated verification
+Only ASCII text is parsed today. Known structured formats receive accurate recognized-but-not-yet-supported messages instead of being misread as text.
 
-Environment:
+Commercial or community tablature sites are not bulk-scraped or used as undocumented runtime dependencies. Future intake may accept user-provided downloaded files, pasted text, or page links for private normalization.
 
-- Node `v20.20.2`
-- npm `10.8.2`
+## Rhythm and measure model
 
-Final repair-source results:
+The shared semantic model now stores:
 
-1. `npm ci` passed.
-2. All 14 automated tests passed.
-3. The production build passed.
-4. GitHub Pages publication passed.
-5. The hosted preview was available for real-device testing.
-6. Fork `main` was restored and compared as identical to upstream after temporary publication.
+1. duration symbols and normalized quarter-note units;
+2. column-aligned or exact sequential rhythm mapping;
+3. unmapped rhythm warnings when assignment would require guessing;
+4. explicit measure numbers and counts;
+5. position numbers and counts within each measure;
+6. closing barline columns;
+7. complete measure-duration totals when every playable position has a mapped duration.
 
-Inherited Create React App, dependency deprecation, and vulnerability warnings remain recorded for later treatment. They do not currently prevent this bounded proof from building or running.
+Shared barlines are removed from semantic navigation but remain visible in Jason's desktop rows. Misaligned barlines do not generate invented measures.
 
-## Hosted preview
+## Verification state
 
-Preview URL:
+The latest measure checkpoint passed:
 
-`https://blindanatomist.github.io/guitar-eyes/`
+1. the complete inherited automated test suite;
+2. production build;
+3. compiled-artifact checks;
+4. GitHub Pages artifact upload and deployment;
+5. direct inspection of the downloaded Pages artifact;
+6. real-iPhone Safari and VoiceOver acceptance.
 
-GitHub's `github-pages` environment permits only `main`, so direct publication from the audit branch was rejected. Publication was completed with the proven controlled temporary-main procedure:
+Latest verified source checkpoint: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
 
-1. a temporary workflow commit was placed on fork `main`;
-2. that workflow checked out, tested, built, and published the work branch;
-3. the work branch received a permanent publication-result record;
-4. `main` was restored to the exact upstream commit;
-5. GitHub comparison confirmed complete restoration.
+Latest verification workflow: `30192049347`
 
-## Real-iPhone acceptance
+Preview:
 
-Tester: John Darrin Washburn.
+`https://blindanatomist.github.io/guitar-eyes/?build=measure-recognition-checkpoint-1`
 
-Device: iPhone Safari with VoiceOver.
+After publication, fork `main` was restored and independently confirmed identical to upstream commit `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 
-Accepted results:
+## Current checkpoint verdict
 
-1. Jason's title and the iPhone extension explanation are encountered before the iPhone workflow.
-2. The iPhone semantic reader is selected by default on the target touch device.
-3. Upload and instrument controls precede the collapsed Mac keyboard instructions.
-4. The clean six-string fixture parses as five synchronized positions.
-5. The semantic reader output is understandable.
-6. After Safari returns from the native Files picker, VoiceOver focus recovers into the application instead of remaining on Page Menu.
-7. The successful result announces: `Loaded five synchronized positions in iPhone reader mode.`
+Shared semantic core, real-world ASCII corpus foundation, rhythm duration checkpoint 1, and measure recognition checkpoint 1: passed.
 
-The native-picker focus repair is now `local-proven`, and the reusable cross-repository pattern is recorded as `XR-IOS-PICKER-FOCUS-001`.
+## Best next development step
 
-## Scope boundary and next authorization
+Expand structural understanding without changing the accepted reader controls:
 
-This closes the bounded iPhone proof only.
+1. recognize section headings and preserve names such as Intro, Verse, Chorus, and Bridge on blocks and measures;
+2. recognize time-signature metadata when explicitly present;
+3. validate complete measure duration against an explicit time signature without inventing missing rhythm;
+4. add measure-level navigation only after the semantic structure is trustworthy and a clear iPhone interaction contract is designed.
 
-It does not authorize:
+Structured MusicXML import is the strongest later route for exact measure, duration, tuning, string, and fret data. Guitar Pro and related binary formats should be evaluated through a browser-compatible importer such as alphaTab rather than implemented independently from scratch.
+
+## Scope boundaries
+
+This status does not authorize:
 
 1. modification of `Phlypper/guitar-eyes`;
-2. a pull request;
-3. merging the work branch into fork `main`;
-4. redesign of Jason's desktop reader;
-5. playback, teacher mode, pattern analysis, bookmarks, or AI implementation.
-
-Any next phase should begin from this accepted semantic and accessibility foundation, reconstruct repository authority, and receive a separately bounded objective.
+2. a pull request or merge;
+3. replacement of Jason's desktop interaction design;
+4. production publication;
+5. paid services or bulk commercial-site scraping;
+6. owner-operated desktop or laptop testing.
