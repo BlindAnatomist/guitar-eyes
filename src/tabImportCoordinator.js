@@ -1,6 +1,7 @@
 import { applyAsciiRhythmToDocument } from "./asciiRhythm";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { parseTabDocumentText, TabParseError } from "./iphoneTabModel";
+import { applyExplicitMeasuresToDocument } from "./measureModel";
 import { parseTabText } from "./parseFile";
 
 const SUPPORTED_INSTRUMENTS = ["guitar", "bass"];
@@ -63,7 +64,8 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
   for (const candidate of structurallyPlausibleCandidates) {
     try {
       const parsedDocument = parseTabDocumentText(sourceText, candidate);
-      const semanticDocument = applyAsciiRhythmToDocument(sourceText, parsedDocument);
+      const rhythmDocument = applyAsciiRhythmToDocument(sourceText, parsedDocument);
+      const semanticDocument = applyExplicitMeasuresToDocument(rhythmDocument);
       const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
       return {
