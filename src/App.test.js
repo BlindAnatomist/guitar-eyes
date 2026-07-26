@@ -54,7 +54,7 @@ describe("Guitar Eyes application shell", () => {
 
     expect(screen.getByRole("radio", { name: "Desktop grid reader" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "iPhone semantic reader" })).not.toBeChecked();
-    expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
+    expect(screen.getByLabelText("Upload tablature file:")).toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(screen.getByText(/Test build: Shared semantic core repair 1/i)).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe("Guitar Eyes application shell", () => {
 
     expect(screen.getByRole("radio", { name: "iPhone semantic reader" })).toBeChecked();
     expect(screen.getByRole("radio", { name: "Desktop grid reader" })).not.toBeChecked();
-    expect(screen.getByLabelText("Upload .txt file:")).toBeInTheDocument();
+    expect(screen.getByLabelText("Upload tablature file:")).toBeInTheDocument();
   });
 
   test("puts the instrument and upload workflow before collapsed Mac instructions on a touch device", () => {
@@ -79,7 +79,7 @@ describe("Guitar Eyes application shell", () => {
 
     const iphoneMode = screen.getByRole("radio", { name: "iPhone semantic reader" });
     const instrument = screen.getByLabelText("Choose Instrument:");
-    const upload = screen.getByLabelText("Upload .txt file:");
+    const upload = screen.getByLabelText("Upload tablature file:");
     const instructionsButton = screen.getByRole("button", {
       name: "Open Mac keyboard instructions",
     });
@@ -112,7 +112,7 @@ describe("Guitar Eyes application shell", () => {
       { type: "text/plain" }
     );
 
-    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [file] },
     });
 
@@ -137,7 +137,7 @@ describe("Guitar Eyes application shell", () => {
       { type: "text/plain" }
     );
 
-    fireEvent.change(screen.getByLabelText("Upload .txt file:"), {
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [file] },
     });
 
@@ -150,5 +150,41 @@ describe("Guitar Eyes application shell", () => {
 
     await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/could not be loaded in iPhone reading mode/i)).toBeInTheDocument();
+  });
+
+  test("recognizes MusicXML without pretending that structured import exists", async () => {
+    useTouchDevice();
+    render(<App />);
+
+    const file = new File(
+      [
+        '<?xml version="1.0"?>\n',
+        '<score-partwise version="4.0">\n',
+        '<part id="P1"><measure number="1"><note><notations><technical>',
+        '<string>6</string><fret>3</fret>',
+        '</technical></notations></note></measure></part>\n',
+        '</score-partwise>\n',
+      ],
+      "structured-guitar.musicxml",
+      { type: "application/xml" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [file] },
+    });
+
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Tablature could not be loaded",
+    });
+
+    expect(screen.getByText(/MusicXML tablature was recognized/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not yet import MusicXML/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "iPhone tablature reader" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.focus(window);
+    await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 });
