@@ -8,7 +8,7 @@ Branch: `work/convergence-from-accepted-semantic-core`
 
 Accepted foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
 
-Implementation source before this final record: `fcb55ad76caf1c0a6c84df4f5e0acceed03b9214`
+Implementation source before this final record: `f7b743e7e1033b498a6d1fb82d9e81ecd3c4584c`
 
 Status: source implementation complete and statically verified; dependency installation, automated execution, production build, hosted publication, and real-device regression remain unverified
 
@@ -34,7 +34,7 @@ The inherited contracts continue to require:
 1. Previous position, Read current position, Next position in the accepted order;
 2. quiet Previous and Next movement;
 3. quiet tablature-block movement;
-4. Read current position as the only control that writes the complete playing instruction to the live region;
+4. Read current position as the only semantic-reader action that writes the complete playing instruction to the live region;
 5. omission of ordinary unplayed strings from spoken playing instructions;
 6. continued speech for open strings, frets, explicit mute notation, techniques, and supported duration;
 7. W, H, Q, E, and S duration mapping and speech;
@@ -54,9 +54,9 @@ The desktop reader provides:
 3. duration in column headings when available;
 4. measure and position context;
 5. Previous position, Read current position, Next position in the same order as iPhone;
-6. quiet movement and explicit Read current speech;
+6. quiet movement and Read current position as the sole complete content-speech action;
 7. quiet Previous and Next tablature-block controls for multi-block files;
-8. a plain-key keyboard navigator using Left Arrow, Right Arrow, Home, End, and Enter;
+8. a plain-key keyboard navigator using Left Arrow, Right Arrow, Home, and End for movement only;
 9. no interception of VoiceOver Control+Option commands;
 10. a collapsed Original spatial source layout disclosure for each block;
 11. a named horizontally scrollable semantic-table region;
@@ -78,9 +78,10 @@ The fallback now:
 2. keeps raw cells out of the ordinary Tab sequence;
 3. leaves VoiceOver Control+Option commands untouched;
 4. offers optional plain-arrow movement after the grid itself is focused;
-5. retains multi-column grouping and an explicit speech action;
+5. retains multi-column grouping and an explicit legacy group-speech action;
 6. removes the previous document-level Escape-listener leak;
-7. no longer traps Tab between raw grid wrappers.
+7. no longer traps Tab between raw grid wrappers;
+8. memoizes derived grid data so the effect dependency remains stable under Create React App linting.
 
 The compatibility fallback is not the primary reader for supported semantic files and is not a second musical authority.
 
@@ -103,10 +104,10 @@ New tests cover:
 
 1. accepted duration and measure data reaching the desktop reader;
 2. switching between desktop and iPhone without reparsing or weakening speech;
-3. exact iPhone and desktop control order;
+3. exact inherited iPhone markup and exact iPhone and desktop control order;
 4. absence of ordinary `silent` speech in complete playing descriptions;
 5. quiet desktop position movement;
-6. explicit desktop Read current speech;
+6. Read current position as the only semantic desktop content-speech action;
 7. desktop block jumps using document-global indexes;
 8. preservation of original source rows on demand;
 9. non-interception of VoiceOver modifier commands;
