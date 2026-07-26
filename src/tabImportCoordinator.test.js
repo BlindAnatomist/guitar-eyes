@@ -1,4 +1,4 @@
-import { describePlayablePosition } from "./describePlayablePosition";
+import { describePlayablePosition } from "./positionDescription";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 
 const guitarLines = [
