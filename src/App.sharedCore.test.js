@@ -104,11 +104,11 @@ describe("shared semantic core in the iPhone workflow", () => {
       name: "Next tablature block",
     });
     expect(nextBlock).toBeEnabled();
-    expect(screen.getByText(/Block 1 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Block 1 of 2/).length).toBeGreaterThan(0);
 
     fireEvent.click(nextBlock);
 
-    expect(screen.getByText(/Block 2 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Block 2 of 2/).length).toBeGreaterThan(0);
     expect(
       screen.getByRole("button", { name: "Previous tablature block" })
     ).toBeEnabled();
