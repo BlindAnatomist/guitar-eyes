@@ -6,7 +6,7 @@ Repository: `BlindAnatomist/guitar-eyes`
 
 Branch: `work/iphone-voiceover-tablature-audit`
 
-Status: source hardening complete; locked dependency test/build, hosted publication, and real-device acceptance remain open
+Status: source hardening, locked dependency test/build, and hosted publication complete; real-device acceptance remains open
 
 ## Authority and limits
 
@@ -74,4 +74,23 @@ This evidence does not replace the locked dependency, React Testing Library, pro
 5. Continue desktop automated and browser-level inspection without Jason.
 6. Ask Jason for final Mac recognition and usability acceptance only after the preview is mature and only if he agrees to participate.
 
-The next mandatory human gate is John's iPhone regression after a passing automated build and stable preview. Jason is not currently a blocker to source completion or iPhone acceptance.
+## Completed verification and publication
+
+The automated and hosted steps above completed on July 26, 2026:
+
+- exact verified and published source: `d26e4172a0386ceb56ad5c0061e72d975b42fc43`;
+- local suites and tests: 4 of 4 suites and 20 of 20 tests passed;
+- local production build: passed;
+- GitHub Actions run: `30217532641`, first attempt, success;
+- GitHub-hosted suites and tests: 4 of 4 suites and 20 of 20 tests passed;
+- GitHub-hosted production build and compiled convergence identity checks: passed;
+- Pages publication: passed at `https://blindanatomist.github.io/guitar-eyes/`;
+- live HTML and exact main JavaScript asset: HTTP 200;
+- live asset contains `Previous tablature block` and `Next tablature block`;
+- fork `main` restored to `60c2e5de0887b1bcdd426d932632946edd07d3c3` and compared as identical, zero ahead, zero behind, and zero changed files;
+- upstream remained untouched;
+- GitHub Actions reruns: none.
+
+Full evidence is in `docs/convergence-verification-preview-2026-07-26.md`.
+
+The next mandatory human gate is John's iPhone regression against the stable preview. Jason is not currently a blocker to source completion or iPhone acceptance, and his desktop acceptance remains deferred unless he agrees to participate.
