@@ -1,307 +1,193 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Table, Tbody, Tr, Td } from "@chakra-ui/react";
+
+function combineAdjacentDigits(line) {
+  const characters = Array.isArray(line) ? line : [...String(line ?? "")];
+  const combined = [];
+
+  for (let index = 0; index < characters.length; index += 1) {
+    const character = characters[index];
+
+    if (!/[0-9]/.test(character)) {
+      combined.push(character);
+      continue;
+    }
+
+    let digits = character;
+    while (index + 1 < characters.length && /[0-9]/.test(characters[index + 1])) {
+      index += 1;
+      digits += characters[index];
+    }
+    combined.push(digits);
+  }
+
+  return combined;
+}
+
+function buildGridData(data, selectedInstrument, isMultiColumnNav, numColumns, groupIndex) {
+  const numRows = selectedInstrument === "bass" ? 4 : 6;
+  const rows = data.slice(0, numRows).map((line) => combineAdjacentDigits(line));
+
+  if (!isMultiColumnNav || rows.length === 0) {
+    return rows;
+  }
+
+  const width = Math.max(1, Number(numColumns) || 1);
+  const start = groupIndex * width;
+  const end = start + width;
+  return rows.map((row) => row.slice(start, end));
+}
 
 function DataGrid({ data, numColumns, isMultiColumnNav, setNumColumns, selectedInstrument }) {
   const tableRef = useRef(null);
   const cells = useRef([]);
   const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
-  const synthRef = useRef(window.speechSynthesis);
+
+  const fullWidth = useMemo(() => {
+    const rows = data.slice(0, selectedInstrument === "bass" ? 4 : 6);
+    return Math.max(1, ...rows.map((line) => combineAdjacentDigits(line).length));
+  }, [data, selectedInstrument]);
+
+  const width = Math.max(1, Math.min(Number(numColumns) || 1, fullWidth));
+  const groupCount = Math.max(1, Math.ceil(fullWidth / width));
+  const gridData = buildGridData(
+    data,
+    selectedInstrument,
+    isMultiColumnNav,
+    width,
+    currentGroupIndex
+  );
+  const renderedColumnCount = Math.max(1, ...gridData.map((row) => row.length));
 
   useEffect(() => {
-    cells.current = Array.from(tableRef.current.querySelectorAll("td"));
-  }, [data]);
+    cells.current = Array.from(tableRef.current?.querySelectorAll("td") ?? []);
+  }, [gridData]);
 
-  const handleKeyDown = (e) => {
-    if (isMultiColumnNav) {
-      handleMultiColumnNavKeyDown(e);
-    } else {
-      handleSingleColumnNavKeyDown(e);
-    }
+  useEffect(() => {
+    setCurrentGroupIndex((current) => Math.min(current, groupCount - 1));
+  }, [groupCount]);
+
+  useEffect(() => {
+    return () => window.speechSynthesis?.cancel();
+  }, []);
+
+  const focusCell = (row, column) => {
+    const target = cells.current[row * renderedColumnCount + column];
+    target?.focus();
   };
 
-  const handleSingleColumnNavKeyDown = (e) => {
-    if (e.key === "ArrowUp" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateSingleColumnVertical(-1);
-    } else if (e.key === "ArrowDown" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateSingleColumnVertical(1);
-    } else if (e.key === "ArrowLeft" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateSingleColumnHorizontal(-1);
-    } else if (e.key === "ArrowRight" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateSingleColumnHorizontal(1);
-    } else if (e.key === "Tab") {
-      handleTabKey(e);
-    }
-  };
-
-  const handleMultiColumnNavKeyDown = (e) => {
-    if (e.key === "ArrowUp" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateMultiColumnVertical(-1);
-    } else if (e.key === "ArrowDown" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateMultiColumnVertical(1);
-    } else if (e.key === "ArrowLeft" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateMultiColumnHorizontal(-1);
-    } else if (e.key === "ArrowRight" && e.ctrlKey && e.altKey) {
-      e.preventDefault();
-      navigateMultiColumnHorizontal(1);
-    } else if (e.key === "ArrowLeft" && e.ctrlKey && e.metaKey && e.shiftKey) {
-      e.preventDefault();
-      navigateMultiColumnGroup(-1);
-    } else if (e.key === "ArrowRight" && e.ctrlKey && e.metaKey && e.shiftKey) {
-      e.preventDefault();
-      navigateMultiColumnGroup(1);
-    } else if (e.key === "=" && e.ctrlKey && e.metaKey && e.shiftKey) {
-      e.preventDefault();
-      extendMultiColumnGroup(1);
-    } else if (e.key === "-" && e.ctrlKey && e.metaKey && e.shiftKey) {
-      e.preventDefault();
-      extendMultiColumnGroup(-1);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      readMultiColumnGroupContents();
-    } else if (e.key === "Tab") {
-      handleTabKey(e);
-    }
-  };
-
-  const navigateSingleColumnVertical = (direction) => {
-    const currentCell = document.activeElement;
-    const currentIndex = cells.current.indexOf(currentCell);
-    const numRows = data.length;
-    const numColumnsInGroup = Math.min(numColumns, data[0].length);
-
-    const targetIndex = (currentIndex + direction * numColumnsInGroup + numRows * numColumnsInGroup) % (numRows * numColumnsInGroup);
-    const targetCell = cells.current[targetIndex];
-    if (targetCell) {
-      targetCell.focus();
-    }
-  };
-
-  const navigateSingleColumnHorizontal = (direction) => {
-    const currentCell = document.activeElement;
-    const currentIndex = cells.current.indexOf(currentCell);
-    const numColumnsInGroup = Math.min(numColumns, data[0].length);
-
-    const targetIndex = (currentIndex + direction + numColumnsInGroup) % numColumnsInGroup === 0
-      ? currentIndex - numColumnsInGroup + direction
-      : currentIndex + direction;
-
-    const targetCell = cells.current[targetIndex];
-    if (targetCell) {
-      targetCell.focus();
-    }
-  };
-
-  const navigateMultiColumnVertical = (direction) => {
-    const currentCell = document.activeElement;
-    const currentIndex = cells.current.indexOf(currentCell);
-    const numColumnsInGroup = Math.min(numColumns, data[0].length);
-
-    const currentRow = Math.floor(currentIndex / numColumnsInGroup);
-    const currentColumn = currentIndex % numColumnsInGroup;
-
-    const newRow = (currentRow + direction + data.length) % data.length;
-    const targetIndex = newRow * numColumnsInGroup + currentColumn;
-    const targetCell = cells.current[targetIndex];
-
-    if (targetCell) {
-      targetCell.focus();
-    }
-  };
-
-  const navigateMultiColumnHorizontal = (direction) => {
-    const currentCell = document.activeElement;
-    const currentIndex = cells.current.indexOf(currentCell);
-    const numColumnsInGroup = Math.min(numColumns, data[0].length);
-
-    const currentRow = Math.floor(currentIndex / numColumnsInGroup);
-    const newColumn = (currentIndex % numColumnsInGroup + direction + numColumnsInGroup) % numColumnsInGroup;
-    const targetIndex = currentRow * numColumnsInGroup + newColumn;
-    const targetCell = cells.current[targetIndex];
-
-    if (targetCell) {
-      targetCell.focus();
-    }
-  };
-
-  const navigateMultiColumnGroup = (direction) => {
-    const numColumnsInGroup = Math.min(numColumns, data[0].length);
-    const numGroups = Math.ceil(data[0].length / numColumnsInGroup);
-
-    const newGroupIndex = (currentGroupIndex + direction + numGroups) % numGroups;
-    const targetIndex = newGroupIndex * numColumnsInGroup * data.length; // Adjusted to target the correct group
-    const targetCell = cells.current[targetIndex];
-    if (targetCell) {
-      targetCell.focus();
+  const moveWithinGrid = (event, rowDelta, columnDelta) => {
+    if (cells.current.length === 0 || gridData.length === 0) {
+      return;
     }
 
-    setCurrentGroupIndex(newGroupIndex);
+    event.preventDefault();
+    const currentIndex = Math.max(0, cells.current.indexOf(document.activeElement));
+    const currentRow = Math.floor(currentIndex / renderedColumnCount);
+    const currentColumn = currentIndex % renderedColumnCount;
+    const nextRow = (currentRow + rowDelta + gridData.length) % gridData.length;
+    const nextColumn =
+      (currentColumn + columnDelta + renderedColumnCount) % renderedColumnCount;
+    focusCell(nextRow, nextColumn);
   };
 
-  const handleTabKey = (e) => {
-    const currentIndex = cells.current.findIndex(
-      (cell) => cell === document.activeElement
-    );
-    const isShiftPressed = e.shiftKey;
-    if (isShiftPressed) {
-      if (currentIndex === 0) {
-        e.preventDefault();
-        tableRef.current.focus();
-      }
-    } else {
-      if (currentIndex === cells.current.length - 1) {
-        e.preventDefault();
-        tableRef.current.focus();
+  const readCurrentGroup = () => {
+    if (!window.speechSynthesis || gridData.length === 0) {
+      return;
+    }
+
+    const contents = [];
+    for (let column = 0; column < renderedColumnCount; column += 1) {
+      contents.push(`Column ${column + 1}`);
+      for (let row = 0; row < gridData.length; row += 1) {
+        contents.push(String(gridData[row][column] ?? "blank"));
       }
     }
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(contents.join(". ")));
   };
 
-  const combineAdjacentDigits = (line) => {
-    const combinedLine = [];
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      window.speechSynthesis?.cancel();
+      return;
+    }
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
+    if (event.ctrlKey && event.metaKey && event.shiftKey) {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        const direction = event.key === "ArrowLeft" ? -1 : 1;
+        setCurrentGroupIndex(
+          (current) => (current + direction + groupCount) % groupCount
+        );
+        return;
+      }
 
-      if (/[0-9]/.test(char)) {
-        let combinedDigits = char;
-        let nextChar = line[i + 1];
+      if (event.key === "=" || event.key === "+") {
+        event.preventDefault();
+        setNumColumns(Math.min(fullWidth, width + 1));
+        return;
+      }
 
-        while (/[0-9]/.test(nextChar)) {
-          combinedDigits += nextChar;
-          i++;
-          nextChar = line[i + 1];
+      if (event.key === "-") {
+        event.preventDefault();
+        setNumColumns(Math.max(1, width - 1));
+        return;
+      }
+    }
+
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+
+    switch (event.key) {
+      case "ArrowUp":
+        moveWithinGrid(event, -1, 0);
+        break;
+      case "ArrowDown":
+        moveWithinGrid(event, 1, 0);
+        break;
+      case "ArrowLeft":
+        moveWithinGrid(event, 0, -1);
+        break;
+      case "ArrowRight":
+        moveWithinGrid(event, 0, 1);
+        break;
+      case "Enter":
+        if (isMultiColumnNav) {
+          event.preventDefault();
+          readCurrentGroup();
         }
-
-        const parsedNumber = parseInt(combinedDigits);
-        if (parsedNumber >= 10 && parsedNumber <= 22) {
-          combinedLine.push(parsedNumber.toString());
-        } else {
-          combinedLine.push(combinedDigits);
-        }
-      } else {
-        combinedLine.push(char);
-      }
+        break;
+      default:
+        break;
     }
-
-    return combinedLine;
-  };
-
-  const getGridData = () => {
-    const numRows = selectedInstrument === "bass" ? 4 : 6;
-    const dataToDisplay = data.slice(0, numRows);
-
-    if (isMultiColumnNav && numColumns) {
-      const gridData = [];
-      const rows = dataToDisplay.length;
-      const start = currentGroupIndex * numColumns;
-      const end = Math.min(start + numColumns, dataToDisplay[0].length);
-
-      for (let i = 0; i < rows; i++) {
-        const line = dataToDisplay[i];
-        const gridRow = [];
-
-        for (let j = start; j < end; j++) {
-          const char = line[j];
-          if (/[0-9]/.test(char)) {
-            let combinedDigits = char;
-            let nextChar = line[j + 1];
-
-            while (j + 1 < end && /[0-9]/.test(nextChar)) {
-              combinedDigits += nextChar;
-              j++;
-              nextChar = line[j + 1];
-            }
-
-            const parsedNumber = parseInt(combinedDigits);
-            if (parsedNumber >= 10 && parsedNumber <= 22) {
-              gridRow.push(parsedNumber.toString());
-            } else {
-              gridRow.push(combinedDigits);
-            }
-          } else {
-            gridRow.push(char);
-          }
-        }
-
-        gridData.push(gridRow);
-      }
-
-      return gridData;
-    } else {
-      return dataToDisplay.map((line) => combineAdjacentDigits(line));
-    }
-  };
-
-  const extendMultiColumnGroup = (direction) => {
-    const updatedNumColumns = numColumns + direction;
-    setNumColumns(updatedNumColumns);
-  };
-
-  const readMultiColumnGroupContents = () => {
-    const groupContents = [];
-    const gridData = getGridData();
-
-    for (let col = 0; col < gridData[0].length; col++) {
-      groupContents.push(`Column ${col + 1}`);
-      for (let row = 0; row < gridData.length; row++) {
-        const line = gridData[row][col];
-        const combinedLine = combineAdjacentDigits(line);
-        groupContents.push(...combinedLine);
-      }
-    }
-
-    let currentIndex = 0;
-    let isReading = true;
-    const utterance = new SpeechSynthesisUtterance();
-
-    utterance.onend = () => {
-      currentIndex++;
-      if (isReading && currentIndex < groupContents.length) {
-        utterance.text = groupContents[currentIndex];
-        synthRef.current.speak(utterance);
-      }
-    };
-
-    utterance.text = groupContents[currentIndex];
-    synthRef.current.speak(utterance);
-
-    const stopReading = () => {
-      isReading = false;
-      synthRef.current.cancel();
-    };
-
-    // Listen for the 'Escape' key to stop reading
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        stopReading();
-      }
-    });
   };
 
   return (
-    <Table variant="striped" colorScheme="teal" onKeyDown={handleKeyDown} tabIndex={0} ref={tableRef} role="grid">
+    <Table
+      variant="striped"
+      colorScheme="teal"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      ref={tableRef}
+      role="grid"
+      aria-label="Legacy tablature grid"
+    >
       <Tbody>
-        {getGridData().map((gridRow, rowIndex) => (
+        {gridData.map((gridRow, rowIndex) => (
           <Tr key={rowIndex} role="row">
-            {gridRow.map((line, lineIndex) => {
-              const combinedLine = combineAdjacentDigits(line, isMultiColumnNav);
-
-              return (
-                <React.Fragment key={lineIndex}>
-                  {combinedLine.map((char, colIndex) => (
-                    <Td key={colIndex} tabIndex={0} role="gridcell">
-                      <span>{char}</span>
-                    </Td>
-                  ))}
-                </React.Fragment>
-              );
-            })}
+            {Array.from({ length: renderedColumnCount }, (_, columnIndex) => (
+              <Td
+                key={columnIndex}
+                tabIndex={-1}
+                role="gridcell"
+                aria-label={String(gridRow[columnIndex] ?? "blank")}
+              >
+                <span>{gridRow[columnIndex] ?? ""}</span>
+              </Td>
+            ))}
           </Tr>
         ))}
       </Tbody>
