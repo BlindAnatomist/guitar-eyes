@@ -74,6 +74,20 @@
       "currentExpectation": "Automatic bass detection succeeds; two blocks are preserved"
     },
     {
+      "path": "ascii-two-measures-rhythm.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "two explicit measures",
+        "shared vertical barlines",
+        "three playable positions per measure",
+        "quarter quarter half rhythm in each measure",
+        "complete four-quarter-note duration totals"
+      ],
+      "currentExpectation": "Shared barlines become two semantic measures; barlines do not become musical positions; each measure totals four quarter-note units; desktop rows remain unchanged"
+    },
+    {
       "path": "musicxml-minimal-guitar-tab.musicxml",
       "family": "musicxml",
       "provenance": "Project-authored MusicXML 4.0 specimen using original notes",
