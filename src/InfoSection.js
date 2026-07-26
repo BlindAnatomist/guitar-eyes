@@ -25,8 +25,10 @@ const InfoSection = () => (
     <h3>Reading controls</h3>
     <p>
       Previous position, Read current position, and Next position are available in both
-      reading modes. The current description identifies the tablature block and the
-      position within its measure when that context is present.
+      reading modes. When a file contains more than one complete tablature block,
+      Previous tablature block and Next tablature block jump directly to the first
+      position of the neighboring block. The current description identifies the block
+      and the position within its measure when that context is present.
     </p>
   </>
 );
