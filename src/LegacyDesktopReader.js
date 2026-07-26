@@ -9,13 +9,14 @@ const LegacyDesktopReader = forwardRef(function LegacyDesktopReader(
   const [numColumns, setNumColumns] = useState(1);
   const [isMultiColumnNav, setIsMultiColumnNav] = useState(false);
   const gridRefs = useRef([]);
+  const hasTablature = tablature.length > 0;
 
   useEffect(() => {
     gridRefs.current = gridRefs.current.slice(0, tablature.length);
   }, [tablature]);
 
   const handleKeyDown = (event, gridIndex) => {
-    if (event.key !== "Tab") {
+    if (event.key !== "Tab" || gridRefs.current.length === 0) {
       return;
     }
 
@@ -26,18 +27,19 @@ const LegacyDesktopReader = forwardRef(function LegacyDesktopReader(
     gridRefs.current[nextIndex]?.focus();
   };
 
-  const numOptions = tablature.length > 0 && tablature[0]?.[0]?.length
+  const numOptions = hasTablature && tablature[0]?.[0]?.length
     ? tablature[0][0].length
     : 1;
 
   return (
     <section className="legacy-desktop-reader" aria-labelledby="legacy-desktop-reader-heading">
       <h2 id="legacy-desktop-reader-heading" ref={headingRef} tabIndex="-1">
-        Desktop compatibility grid
+        Desktop grid reader
       </h2>
       <p>
-        This file could not be represented safely by the shared semantic document. The
-        original Guitar Eyes grid remains available as a compatibility fallback.
+        {hasTablature
+          ? "This file could not be represented safely by the shared semantic document. The original Guitar Eyes grid remains available as a compatibility fallback."
+          : "Upload a tablature file to open the shared semantic desktop reader. Files that cannot yet be interpreted safely remain available through the original compatibility grid."}
       </p>
 
       <div>
