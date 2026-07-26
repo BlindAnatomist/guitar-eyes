@@ -16,6 +16,8 @@ import { readTextFile, TabParseError } from "./iphoneTabModel";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 import "./App.css";
 
+const TEST_BUILD_LABEL = "Shared semantic core repair 1";
+
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return "desktop";
@@ -51,12 +53,12 @@ function App() {
   const iphoneHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
   const desktopFocusPendingRef = useRef(false);
-  const iphoneFocusPendingRef = useRef(false);
+  const pendingIphoneFocusTargetRef = useRef(null);
   const iphoneFocusFrameRef = useRef(null);
 
-  const focusIphoneReaderWhenBrowserReturns = useCallback(() => {
+  const focusPendingIphoneTargetWhenBrowserReturns = useCallback(() => {
     if (
-      !iphoneFocusPendingRef.current ||
+      !pendingIphoneFocusTargetRef.current ||
       readingMode !== "iphone" ||
       document.visibilityState === "hidden"
     ) {
@@ -69,12 +71,16 @@ function App() {
 
     iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
       iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
-        const heading = iphoneHeadingRef.current;
-        if (!heading) return;
+        const target =
+          pendingIphoneFocusTargetRef.current === "reader"
+            ? iphoneHeadingRef.current
+            : errorHeadingRef.current;
 
-        heading.focus({ preventScroll: true });
-        if (document.activeElement === heading) {
-          iphoneFocusPendingRef.current = false;
+        if (!target) return;
+
+        target.focus({ preventScroll: true });
+        if (document.activeElement === target) {
+          pendingIphoneFocusTargetRef.current = null;
         }
       });
     });
@@ -93,14 +99,13 @@ function App() {
 
   useLayoutEffect(() => {
     if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
-    iphoneFocusPendingRef.current = true;
-    focusIphoneReaderWhenBrowserReturns();
-  }, [focusIphoneReaderWhenBrowserReturns, iphoneFocusRequest, readingMode]);
+    focusPendingIphoneTargetWhenBrowserReturns();
+  }, [focusPendingIphoneTargetWhenBrowserReturns, iphoneFocusRequest, readingMode]);
 
   useEffect(() => {
     const recoverPendingIphoneFocus = () => {
       if (document.visibilityState === "visible") {
-        focusIphoneReaderWhenBrowserReturns();
+        focusPendingIphoneTargetWhenBrowserReturns();
       }
     };
 
@@ -116,26 +121,71 @@ function App() {
         window.cancelAnimationFrame(iphoneFocusFrameRef.current);
       }
     };
-  }, [focusIphoneReaderWhenBrowserReturns]);
+  }, [focusPendingIphoneTargetWhenBrowserReturns]);
 
   const focusSoon = (ref) => {
     window.setTimeout(() => ref.current?.focus(), 0);
   };
 
+  const commitIphoneOutcome = ({
+    target,
+    semanticDocument = null,
+    iphoneErrorMessage = "",
+    desktopErrorMessage = "",
+    desktopBlocks = [],
+    status,
+    resolvedInstrument = null,
+  }) => {
+    pendingIphoneFocusTargetRef.current = target;
+
+    flushSync(() => {
+      setTablature(desktopBlocks);
+      setIphoneDocument(semanticDocument);
+      setIphoneError(iphoneErrorMessage);
+      setDesktopError(desktopErrorMessage);
+      if (resolvedInstrument) {
+        setSelectedInstrument(resolvedInstrument);
+      }
+      setIsReadingFile(false);
+      setStatusMessage(status);
+      setIphoneFocusRequest((current) => current + 1);
+    });
+  };
+
+  const finishUnreadableUpload = (message, status) => {
+    if (readingMode === "iphone") {
+      commitIphoneOutcome({
+        target: "error",
+        iphoneErrorMessage: message,
+        desktopErrorMessage: message,
+        status,
+      });
+      return;
+    }
+
+    setTablature([]);
+    setIphoneDocument(null);
+    setIphoneError(message);
+    setDesktopError(message);
+    setStatusMessage(status);
+    setIsReadingFile(false);
+    focusSoon(errorHeadingRef);
+  };
+
   const handleFileUpload = async (file) => {
+    pendingIphoneFocusTargetRef.current = null;
     setIsReadingFile(true);
     setStatusMessage("Reading the selected tablature file.");
     setIphoneError("");
     setDesktopError("");
     setIphoneDocument(null);
+    setTablature([]);
 
     if (!file?.name?.toLowerCase().endsWith(".txt")) {
-      const message = "Choose a plain-text file whose name ends in .txt.";
-      setIphoneError(message);
-      setDesktopError(message);
-      setStatusMessage("The selected file was not accepted.");
-      setIsReadingFile(false);
-      focusSoon(errorHeadingRef);
+      finishUnreadableUpload(
+        "Choose a plain-text file whose name ends in .txt.",
+        "The selected file was not accepted."
+      );
       return;
     }
 
@@ -144,16 +194,10 @@ function App() {
     try {
       sourceText = await readTextFile(file);
     } catch (error) {
-      const message = messageFromError(
-        error,
+      finishUnreadableUpload(
+        messageFromError(error, "The selected file could not be read."),
         "The selected file could not be read."
       );
-      setTablature([]);
-      setIphoneError(message);
-      setDesktopError(message);
-      setStatusMessage("The selected file could not be read.");
-      setIsReadingFile(false);
-      focusSoon(errorHeadingRef);
       return;
     }
 
@@ -162,16 +206,13 @@ function App() {
     try {
       readerDocuments = buildReaderDocuments(sourceText, selectedInstrument);
     } catch (error) {
-      const message = messageFromError(
-        error,
-        "The file could not be prepared for the Guitar Eyes readers."
+      finishUnreadableUpload(
+        messageFromError(
+          error,
+          "The file could not be prepared for the Guitar Eyes readers."
+        ),
+        "The selected file could not be prepared."
       );
-      setTablature([]);
-      setIphoneError(message);
-      setDesktopError(message);
-      setStatusMessage("The selected file could not be prepared.");
-      setIsReadingFile(false);
-      focusSoon(errorHeadingRef);
       return;
     }
 
@@ -179,47 +220,70 @@ function App() {
       desktopBlocks,
       semanticDocument,
       semanticError,
+      resolvedInstrument,
+      instrumentWasDetected,
     } = readerDocuments;
 
-    setTablature(desktopBlocks);
-    setDesktopError("");
+    const detectedPrefix = instrumentWasDetected
+      ? `Detected ${semanticDocument?.instrumentLabel ?? resolvedInstrument}. `
+      : "";
 
-    if (semanticError) {
-      setIphoneError(
-        messageFromError(
-          semanticError,
-          "The file could not be parsed for iPhone reading mode."
-        )
+    if (semanticDocument) {
+      const successStatus = `${detectedPrefix}Loaded ${semanticDocument.positions.length} synchronized positions in iPhone reading mode.`;
+
+      if (readingMode === "iphone") {
+        commitIphoneOutcome({
+          target: "reader",
+          semanticDocument,
+          desktopBlocks,
+          status: successStatus,
+          resolvedInstrument,
+        });
+        return;
+      }
+
+      setTablature(desktopBlocks);
+      setIphoneDocument(semanticDocument);
+      setIphoneError("");
+      setDesktopError("");
+      setSelectedInstrument(resolvedInstrument);
+      setIsReadingFile(false);
+      setStatusMessage(
+        `${detectedPrefix}Loaded ${desktopBlocks.length} tablature ${
+          desktopBlocks.length === 1 ? "block" : "blocks"
+        } in desktop grid mode.`
       );
+      desktopFocusPendingRef.current = true;
+      window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
+      return;
     }
 
-    if (readingMode === "iphone" && semanticDocument) {
-      iphoneFocusPendingRef.current = true;
-      flushSync(() => {
-        setIphoneDocument(semanticDocument);
-        setIsReadingFile(false);
-        setStatusMessage(
-          `Loaded ${semanticDocument.positions.length} synchronized positions in iPhone reading mode.`
-        );
-        setIphoneFocusRequest((current) => current + 1);
+    const semanticMessage = messageFromError(
+      semanticError,
+      "The file could not be parsed for iPhone reading mode."
+    );
+
+    if (readingMode === "iphone") {
+      commitIphoneOutcome({
+        target: "error",
+        iphoneErrorMessage: semanticMessage,
+        desktopBlocks,
+        status: "The file could not be loaded in iPhone reading mode.",
       });
       return;
     }
 
-    setIphoneDocument(semanticDocument);
+    setTablature(desktopBlocks);
+    setIphoneDocument(null);
+    setIphoneError(semanticMessage);
+    setDesktopError("");
     setIsReadingFile(false);
-
-    if (readingMode === "iphone") {
-      setStatusMessage("The file could not be loaded in iPhone reading mode.");
-      focusSoon(errorHeadingRef);
-      return;
-    }
 
     if (desktopBlocks?.length > 0) {
       setStatusMessage(
         `Loaded ${desktopBlocks.length} tablature ${
           desktopBlocks.length === 1 ? "block" : "blocks"
-        } in desktop grid mode.`
+        } in desktop grid mode using the compatibility parser.`
       );
       desktopFocusPendingRef.current = true;
       window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
@@ -236,13 +300,16 @@ function App() {
 
     if (nextMode === "iphone") {
       if (iphoneDocument) {
-        iphoneFocusPendingRef.current = true;
+        pendingIphoneFocusTargetRef.current = "reader";
         setIphoneFocusRequest((current) => current + 1);
-      } else if (iphoneError) focusSoon(errorHeadingRef);
+      } else if (iphoneError) {
+        pendingIphoneFocusTargetRef.current = "error";
+        setIphoneFocusRequest((current) => current + 1);
+      }
       return;
     }
 
-    iphoneFocusPendingRef.current = false;
+    pendingIphoneFocusTargetRef.current = null;
     if (tablature.length > 0) {
       window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
     } else if (desktopError) {
@@ -274,9 +341,10 @@ function App() {
         Guitarist
       </h1>
       <p className="extension-note">
-        This branch preserves Jason Washburn's desktop reader and begins a shared
-        semantic foundation for desktop and iPhone access.
+        This branch preserves Jason Washburn&apos;s desktop reader and uses one semantic
+        foundation for desktop and iPhone access.
       </p>
+      <p className="test-build-label">Test build: {TEST_BUILD_LABEL}.</p>
 
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>
@@ -290,8 +358,8 @@ function App() {
         </label>
       </fieldset>
 
-      <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
       <InstrumentDropdown selectedInstrument={selectedInstrument} onSelectInstrument={handleInstrumentChange} />
+      <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
 
       <div className="status-message" aria-live="polite" aria-atomic="true">{statusMessage}</div>
 
