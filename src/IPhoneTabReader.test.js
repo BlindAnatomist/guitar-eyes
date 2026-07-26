@@ -18,31 +18,45 @@ const multiBlockDocument = parseTabDocumentText(
 );
 
 describe("IPhoneTabReader", () => {
-  test("exposes the three position controls for one block", () => {
-    render(<IPhoneTabReader document={document} />);
+  test("exposes quiet navigation controls and one dedicated current-position description", () => {
+    const { container } = render(<IPhoneTabReader document={document} />);
 
-    expect(screen.getByRole("button", { name: "Previous position" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Next position" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Read current position" })).toBeEnabled();
+    const previous = screen.getByRole("button", { name: "Previous position" });
+    const next = screen.getByRole("button", { name: "Next position" });
+    const read = screen.getByRole("button", { name: "Read current position" });
+    const description = container.querySelector(".position-description");
+
+    expect(previous).toBeDisabled();
+    expect(next).toBeEnabled();
+    expect(read).toBeEnabled();
+    expect(previous).not.toHaveAttribute("aria-describedby");
+    expect(next).not.toHaveAttribute("aria-describedby");
+    expect(read).not.toHaveAttribute("aria-describedby");
     expect(
       screen.queryByRole("button", { name: "Next tablature block" })
     ).not.toBeInTheDocument();
-    expect(screen.getByText(/Position 1 of 2\. High E string, open\./)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Current position" })).toBeInTheDocument();
+    expect(description).toHaveTextContent("Position 1 of 2. High E string, open.");
+    expect(
+      next.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
-  test("moves predictably between synchronized positions", () => {
+  test("moves predictably without speaking the musical description automatically", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
+    const liveRegion = container.querySelector('[aria-live="polite"]');
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
 
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Position 2 of 2. High E string, fret 3."
     );
+    expect(liveRegion).toBeEmptyDOMElement();
     expect(screen.getByRole("button", { name: "Next position" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous position" })).toBeEnabled();
   });
 
-  test("reads the current semantic description through a restrained live region", () => {
+  test("reads the current semantic description only through the dedicated control", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
@@ -51,16 +65,19 @@ describe("IPhoneTabReader", () => {
     expect(liveRegion).toHaveTextContent("Position 1 of 2. High E string, open.");
   });
 
-  test("jumps between semantic tablature blocks without changing reader modes", () => {
+  test("jumps between blocks quietly and keeps block controls independent of the description", () => {
     const { container } = render(<IPhoneTabReader document={multiBlockDocument} />);
 
     const previousBlock = screen.getByRole("button", {
       name: "Previous tablature block",
     });
     const nextBlock = screen.getByRole("button", { name: "Next tablature block" });
+    const liveRegion = container.querySelector('[aria-live="polite"]');
 
     expect(previousBlock).toBeDisabled();
     expect(nextBlock).toBeEnabled();
+    expect(previousBlock).not.toHaveAttribute("aria-describedby");
+    expect(nextBlock).not.toHaveAttribute("aria-describedby");
 
     fireEvent.click(nextBlock);
 
@@ -68,6 +85,7 @@ describe("IPhoneTabReader", () => {
       "Block 2 of 2. Position 1 of 2 in this block."
     );
     expect(screen.getByText(/Overall position 3 of 4/)).toBeInTheDocument();
+    expect(liveRegion).toBeEmptyDOMElement();
     expect(previousBlock).toBeEnabled();
     expect(nextBlock).toBeDisabled();
   });
