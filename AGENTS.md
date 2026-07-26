@@ -7,8 +7,8 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - Preserve `Phlypper/guitar-eyes` completely untouched.
 - Preserve fork `main` as a clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - The accepted iPhone, rhythm, measure, and shared-core foundation is commit `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
-- The verified convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
-- Documentation-only commits after that source do not replace its implementation identity. Any publication workflow must explicitly check out `72159d25958fffd941c95351c6781cf579e1d622`.
+- The verified and hosted convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
+- Documentation-only commits after that source do not replace its implementation identity.
 - Perform convergence recovery only on `work/convergence-from-accepted-semantic-core` unless the owner explicitly authorizes another branch.
 - Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature repair there.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
@@ -29,7 +29,8 @@ Before changing implementation, accessibility behavior, repository administratio
 10. `docs/convergence-recovery-source-checkpoint-1.md`;
 11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
 12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
-13. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
+14. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
 
@@ -60,7 +61,7 @@ Desktop and iPhone may present that document differently, but neither may create
 
 Do not restore active interception of VoiceOver Control+Option commands. Do not expose every dash and separator as an ordinary navigation stop merely to preserve visual source layout.
 
-## Verification state
+## Verification and publication state
 
 The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
 
@@ -70,17 +71,20 @@ The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
 - 81 of 81 automated tests;
 - production build;
 - compiled-artifact checks;
-- clean final checkout.
+- clean final checkout;
+- Pages publication through the authorized temporary-main context;
+- hosted HTML and asset read-back;
+- live-bundle contract checks;
+- immediate restoration of fork `main` to `60c2e5de0887b1bcdd426d932632946edd07d3c3`;
+- independent confirmation that `main` is identical, zero ahead, zero behind, and zero changed files.
 
-This does not yet establish hosted or real-device acceptance. The current Pages address still serves the invalidated convergence preview until a corrected build is deliberately published.
+The valid recovery preview is:
 
-## Publication rule
+`https://blindanatomist.github.io/guitar-eyes/`
 
-The corrected preview must use the proven temporary-main procedure recorded in `docs/convergence-recovery-publication-preflight-2026-07-26.md`.
+The next required gate is one bounded real-iPhone Safari and VoiceOver regression. Do not perform another implementation, build, or publication cycle before that test unless the hosted candidate itself proves defective.
 
-The temporary workflow must explicitly check out `72159d25958fffd941c95351c6781cf579e1d622`, build for `/guitar-eyes`, verify the compiled recovery identity, deploy through the authorized `main` context, complete hosted read-back, and restore fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
-
-Do not repeat the complete test suite in the publication workflow. The exact source has already passed the 17-suite, 81-test authenticated execution gate. Publication requires locked installation, Pages build, compiled checks, deployment, read-back, and restoration.
+Jason Washburn is not part of the active testing plan unless he agrees to participate.
 
 ## Zero-dollar automation
 
