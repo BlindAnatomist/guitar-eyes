@@ -9,13 +9,14 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - The accepted iPhone, rhythm, measure, and shared-core foundation is commit `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
 - The verified, hosted, and real-iPhone-accepted convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
 - Documentation-only commits after that source do not replace its implementation identity.
-- Perform convergence recovery only on `work/convergence-from-accepted-semantic-core` unless the owner explicitly authorizes another branch.
+- Preserve `work/convergence-from-accepted-semantic-core` as the accepted convergence and planning record.
+- Perform the next implementation phase only on `work/tablature-intake-expansion` unless the owner explicitly authorizes another branch.
 - Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature repair there.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 
 ## Required continuity reading
 
-Before changing implementation, accessibility behavior, repository administration, GitHub Pages, workflows, playback, teacher mode, or future AI work, read:
+Before changing implementation, accessibility behavior, repository administration, GitHub Pages, workflows, importers, playback, teacher mode, or future AI work, read:
 
 1. `docs/implementation-status.md`;
 2. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
@@ -31,9 +32,10 @@ Before changing implementation, accessibility behavior, repository administratio
 12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
 13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
 14. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
-15. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+15. `docs/tablature-intake-expansion-plan-2026-07-26.md`;
+16. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
-Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
+Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, workflow, or format-import procedure that is already recorded.
 
 ## Accepted behavior is authoritative
 
@@ -52,13 +54,13 @@ The accepted semantic foundation includes:
 - continued speech for open strings, frets, explicit mute notation, techniques, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure.
 
-Do not weaken or replace those contracts while improving desktop presentation.
+Do not weaken or replace those contracts while expanding file intake.
 
-## Convergence architecture
+## Semantic architecture
 
-The semantic tablature document is the authority for instrument identity, blocks, strings, synchronized positions, durations, and measures.
+The semantic tablature document is the authority for instrument identity, blocks, strings, synchronized positions, durations, measures, techniques, warnings, and preserved unsupported material.
 
-Desktop and iPhone may present that document differently, but neither may create a second musical interpretation. Desktop convergence must begin from the accepted semantic core and preserve Jason Washburn's recognizable spatial desktop concept unless the owner separately authorizes a redesign.
+Desktop and iPhone may present that document differently, but neither may create a second musical interpretation. Every supported importer must normalize into the same document rather than add format-specific musical logic to either reader.
 
 Do not restore active interception of VoiceOver Control+Option commands. Do not expose every dash and separator as an ordinary navigation stop merely to preserve visual source layout.
 
@@ -88,6 +90,22 @@ Convergence recovery checkpoint 1 is passed. Do not begin another convergence re
 
 Jason Washburn's desktop acceptance remains optional and deferred unless he agrees to participate. His absence is not an active blocker.
 
+## Next-phase authority: tablature intake expansion
+
+The earlier teacher-mode recommendation was premature and has been removed.
+
+The next authorized direction is broader tablature intake:
+
+1. audit and expand real-world ASCII compatibility;
+2. implement actual uncompressed MusicXML import;
+3. add compressed MusicXML without duplicating the importer;
+4. evaluate and implement a verified structured Guitar Pro route;
+5. address PowerTab, TuxGuitar, and TablEdit through direct licensed import, deterministic conversion, or continued honest non-support.
+
+Recognizing a file extension is not reading the format. Do not claim support until the source is normalized into the semantic document, both readers consume it, automated and build gates pass, and John completes a bounded real-iPhone acceptance test.
+
+Do not begin teacher mode, playback, looping, bookmarks, pattern analysis, or AI work while these intake checkpoints are active.
+
 ## Zero-dollar automation
 
 No paid GitHub usage is authorized. Do not weaken the account's $0 Actions hard stop, use a paid runner, or ask the owner to authorize overages.
@@ -100,8 +118,8 @@ For a failed Actions run, inspect the failed job and logs before acting. Rerun o
 
 Automated DOM tests are necessary but do not replace bounded real-iPhone Safari and VoiceOver acceptance. Record the owner's exact observation without strengthening or rewriting it.
 
-A published preview from the diverged convergence line is not accepted merely because its build and tests passed. Structural verification cannot override a real-device regression or an incorrect source lineage.
+A published preview is not accepted merely because its build and tests passed. Structural verification cannot override a real-device regression, an incorrect source lineage, or an importer that silently guesses at unsupported notation.
 
 ## Scope boundary
 
-This recovery authorizes only restoration of the accepted semantic foundation and careful desktop-phone convergence. It does not authorize playback, teacher mode, pattern analysis, bookmarks, AI implementation, upstream changes, a pull request, a merge, or production expansion.
+The authorized next phase is tablature intake expansion only. It does not authorize playback, teacher mode, looping, pattern analysis, bookmarks, AI implementation, upstream changes, a pull request, a merge, paid services, commercial scraping, or production expansion.
