@@ -12,16 +12,15 @@ const InfoSection = () => (
     <h3>Position navigation</h3>
     <p>
       Tab to the Position keyboard navigator. With that control focused, use Left and
-      Right Arrow to move one synchronized position, Home and End to jump to the first or
-      last position, and Enter to read the current position. These plain-key commands are
-      handled only inside the navigator. Guitar Eyes does not intercept VoiceOver
-      Control+Option commands.
+      Right Arrow to move one synchronized position and Home and End to jump to the first
+      or last position. These plain-key commands are handled only inside the navigator.
+      Guitar Eyes does not intercept VoiceOver Control+Option commands.
     </p>
 
     <h3>Reading controls</h3>
     <p>
       Previous position and Next position move quietly. Read current position is the only
-      control that announces the complete playing instruction. When a file contains more
+      action that announces the complete playing instruction. When a file contains more
       than one tablature block, Previous tablature block and Next tablature block jump
       quietly between blocks.
     </p>
