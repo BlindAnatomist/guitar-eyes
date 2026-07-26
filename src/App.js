@@ -7,17 +7,13 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import Upload from "./Upload";
-import { parseFile } from "./parseFile";
 import DataGrid from "./DataGrid";
 import ColumnDropdown from "./ColumnDropdown";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
-import {
-  parseSixStringTabText,
-  readTextFile,
-  TabParseError,
-} from "./iphoneTabModel";
+import { readTextFile, TabParseError } from "./iphoneTabModel";
+import { buildReaderDocuments } from "./tabImportCoordinator";
 import "./App.css";
 
 function getInitialReadingMode() {
@@ -143,49 +139,74 @@ function App() {
       return;
     }
 
-    const numStrings = selectedInstrument === "guitar" ? 6 : 4;
-    let desktopResult = null;
-    let mobileResult = null;
+    let sourceText;
 
     try {
-      desktopResult = await parseFile(file, numStrings);
-      setTablature(desktopResult);
+      sourceText = await readTextFile(file);
     } catch (error) {
+      const message = messageFromError(
+        error,
+        "The selected file could not be read."
+      );
       setTablature([]);
-      setDesktopError(
-        messageFromError(error, "The file could not be opened in desktop grid mode.")
-      );
+      setIphoneError(message);
+      setDesktopError(message);
+      setStatusMessage("The selected file could not be read.");
+      setIsReadingFile(false);
+      focusSoon(errorHeadingRef);
+      return;
     }
 
-    if (selectedInstrument !== "guitar") {
+    let readerDocuments;
+
+    try {
+      readerDocuments = buildReaderDocuments(sourceText, selectedInstrument);
+    } catch (error) {
+      const message = messageFromError(
+        error,
+        "The file could not be prepared for the Guitar Eyes readers."
+      );
+      setTablature([]);
+      setIphoneError(message);
+      setDesktopError(message);
+      setStatusMessage("The selected file could not be prepared.");
+      setIsReadingFile(false);
+      focusSoon(errorHeadingRef);
+      return;
+    }
+
+    const {
+      desktopBlocks,
+      semanticDocument,
+      semanticError,
+    } = readerDocuments;
+
+    setTablature(desktopBlocks);
+    setDesktopError("");
+
+    if (semanticError) {
       setIphoneError(
-        "The iPhone proof currently supports one six-string guitar block. Jason's existing four-string bass reader remains available in Desktop grid mode."
+        messageFromError(
+          semanticError,
+          "The file could not be parsed for iPhone reading mode."
+        )
       );
-    } else {
-      try {
-        const sourceText = await readTextFile(file);
-        mobileResult = parseSixStringTabText(sourceText);
-      } catch (error) {
-        setIphoneError(
-          messageFromError(error, "The file could not be parsed for iPhone reading mode.")
-        );
-      }
     }
 
-    if (readingMode === "iphone" && mobileResult) {
+    if (readingMode === "iphone" && semanticDocument) {
       iphoneFocusPendingRef.current = true;
       flushSync(() => {
-        setIphoneDocument(mobileResult);
+        setIphoneDocument(semanticDocument);
         setIsReadingFile(false);
         setStatusMessage(
-          `Loaded ${mobileResult.positions.length} synchronized positions in iPhone reading mode.`
+          `Loaded ${semanticDocument.positions.length} synchronized positions in iPhone reading mode.`
         );
         setIphoneFocusRequest((current) => current + 1);
       });
       return;
     }
 
-    setIphoneDocument(mobileResult);
+    setIphoneDocument(semanticDocument);
     setIsReadingFile(false);
 
     if (readingMode === "iphone") {
@@ -194,15 +215,16 @@ function App() {
       return;
     }
 
-    if (desktopResult?.length > 0) {
+    if (desktopBlocks?.length > 0) {
       setStatusMessage(
-        `Loaded ${desktopResult.length} tablature ${
-          desktopResult.length === 1 ? "block" : "blocks"
+        `Loaded ${desktopBlocks.length} tablature ${
+          desktopBlocks.length === 1 ? "block" : "blocks"
         } in desktop grid mode.`
       );
       desktopFocusPendingRef.current = true;
       window.setTimeout(() => gridRefs.current[0]?.focus(), 0);
     } else {
+      setDesktopError("No tablature blocks could be prepared for desktop grid mode.");
       setStatusMessage("The file could not be loaded in desktop grid mode.");
       focusSoon(errorHeadingRef);
     }
@@ -252,8 +274,8 @@ function App() {
         Guitarist
       </h1>
       <p className="extension-note">
-        This branch preserves Jason Washburn's desktop reader and adds a bounded iPhone
-        Safari and VoiceOver proof.
+        This branch preserves Jason Washburn's desktop reader and begins a shared
+        semantic foundation for desktop and iPhone access.
       </p>
 
       <fieldset className="mode-selector">
