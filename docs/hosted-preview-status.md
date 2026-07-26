@@ -1,43 +1,53 @@
 # Hosted Preview Status
 
+Last updated: July 26, 2026
+
 Repository: `BlindAnatomist/guitar-eyes`
 
 Working branch: `work/iphone-voiceover-tablature-audit`
 
 Preview: `https://blindanatomist.github.io/guitar-eyes/`
 
+Published convergence source: `d26e4172a0386ceb56ad5c0061e72d975b42fc43`
+
 ## Repository authority
 
-- Preserve `Phlypper/guitar-eyes` untouched.
-- Preserve fork `main` as clean upstream tracking after every temporary publication.
-- Upstream authority commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
-- Do not open a pull request.
+- `Phlypper/guitar-eyes` remained untouched at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+- Fork `main` was restored to the same commit after publication.
+- Final main comparison: identical, zero ahead, zero behind, zero changed files.
+- No pull request or merge was opened.
 
-## Current acceptance state
+## Current hosted state
 
-- Initial iPhone order and collapsed desktop instructions: accepted on the real iPhone.
-- Six-string parsing: accepted for the controlled fixture.
-- Five-position semantic reader output: understandable and accepted as functioning.
-- File-picker focus recovery: failed twice because VoiceOver returned to Safari Page Menu.
+GitHub Actions run `30217532641` passed on its first attempt:
 
-## Current repair head
+- exact-source checkout: passed;
+- locked dependency installation: passed;
+- test suites: 4 passed, 4 total;
+- tests: 20 passed, 20 total;
+- production Pages build: passed;
+- compiled convergence identity check: passed;
+- Pages deployment: passed.
 
-Exact candidate branch head before this status update:
+Hosted read-back established:
 
-`11476550b4bbda1c86b2b00d9c3840ea51d94529`
+- preview HTML: HTTP 200;
+- page title: `Guitar Eyes accessible tablature reader`;
+- exact built main asset: `/guitar-eyes/static/js/main.10ddd4a1.js`;
+- main asset: HTTP 200;
+- every asset referenced by the HTML returned HTTP 200;
+- live asset contains `Previous position`, `Read current position`, and `Next position`;
+- live asset contains `Previous tablature block` and `Next tablature block`;
+- live asset contains both the iPhone and desktop semantic-reader material.
 
-The candidate retains a pending reader-focus request until Safari signals return from the native Files picker through window focus, pageshow, or document visibility. It then waits for the browser to restore web content before focusing the persistent reader heading.
+The live bundle filename matches the successful publisher's build log, so the prior proof build was not mistaken for the convergence preview.
 
-## Publication gate
+Full evidence: `docs/convergence-verification-preview-2026-07-26.md`.
 
-Status: pending.
+## Acceptance state
 
-The bounded temporary-main publisher may be used solely to obtain GitHub-hosted install, test, build, and Pages evidence for the exact candidate. After the workflow result, restore `main` to `60c2e5de0887b1bcdd426d932632946edd07d3c3` and compare it with that commit.
+The earlier bounded iPhone proof remains accepted, including native Files-picker focus recovery. The published convergence build now requires one real-iPhone Safari and VoiceOver regression pass covering the preserved upload recovery plus shared position, measure, multi-block, and block-jump behavior.
 
-Do not ask the owner to retest until:
+Do not treat the convergence checkpoint as fully accepted until John completes that bounded test in Chat.
 
-1. automated tests pass;
-2. the production build passes;
-3. Pages publishes the exact candidate successfully;
-4. the hosted page is verified;
-5. fork `main` is restored and independently confirmed identical to upstream.
+Jason's desktop acceptance is deferred unless he agrees to participate.
