@@ -7,6 +7,8 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - Preserve `Phlypper/guitar-eyes` completely untouched.
 - Preserve fork `main` as a clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - The accepted iPhone, rhythm, measure, and shared-core foundation is commit `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
+- The verified convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
+- Documentation-only commits after that source do not replace its implementation identity. Any publication workflow must explicitly check out `72159d25958fffd941c95351c6781cf579e1d622`.
 - Perform convergence recovery only on `work/convergence-from-accepted-semantic-core` unless the owner explicitly authorizes another branch.
 - Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature repair there.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
@@ -25,7 +27,8 @@ Before changing implementation, accessibility behavior, repository administratio
 8. `docs/measure-recognition-checkpoint-1.md`;
 9. `docs/convergence-lineage-recovery-2026-07-26.md`;
 10. `docs/convergence-recovery-source-checkpoint-1.md`;
-11. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
+12. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
 
@@ -55,6 +58,20 @@ The semantic tablature document is the authority for instrument identity, blocks
 Desktop and iPhone may present that document differently, but neither may create a second musical interpretation. Desktop convergence must begin from the accepted semantic core and preserve Jason Washburn's recognizable spatial desktop concept unless the owner separately authorizes a redesign.
 
 Do not restore active interception of VoiceOver Control+Option commands. Do not expose every dash and separator as an ordinary navigation stop merely to preserve visual source layout.
+
+## Verification state
+
+The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
+
+- accepted-foundation ancestry;
+- locked installation under Node 20;
+- 17 of 17 automated suites;
+- 81 of 81 automated tests;
+- production build;
+- compiled-artifact checks;
+- clean final checkout.
+
+This does not yet establish hosted or real-device acceptance. The current Pages address still serves the invalidated convergence preview until a corrected build is deliberately published.
 
 ## Zero-dollar automation
 
