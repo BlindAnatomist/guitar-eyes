@@ -95,23 +95,47 @@ Accepted behaviors:
 
 This acceptance applies only to the bounded proof and does not authorize a pull request, upstream change, production redesign, or expansion beyond the documented branch scope.
 
-## Checkpoint 4: convergence regression pending
+## Checkpoint 4: convergence regression
 
-Exact published convergence source:
+Exact published convergence source initially tested:
 
 `d26e4172a0386ceb56ad5c0061e72d975b42fc43`
 
 The local and GitHub-hosted automated gates passed with 4 of 4 suites and 20 of 20 tests. The production Pages build, compiled block-navigation checks, deployment, hosted HTML read-back, hosted JavaScript read-back, and exact fork-main restoration also passed.
 
-The remaining bounded real-iPhone regression must confirm:
+### First real-iPhone convergence pass
 
-1. Safari and VoiceOver still recover usefully from the native Files picker;
-2. successful load status and the semantic reader remain understandable;
-3. Previous position, Read current position, and Next position remain in the accepted order;
-4. measure context is understandable while moving among synchronized positions;
-5. multiple complete tablature blocks remain distinct;
-6. Previous tablature block and Next tablature block move between blocks and expose correct boundary states.
+The owner confirmed:
 
-This test will be conducted later in Chat, not Work. No result is claimed yet.
+1. the controlled multi-block upload succeeded;
+2. Safari and VoiceOver returned usefully from the native Files picker;
+3. the control order remained Previous position, Read current position, Next position;
+4. position and tablature-block controls moved through the document.
 
-Jason's Mac recognition and desktop usability acceptance is deferred unless he agrees to participate. It is not a prerequisite for this iPhone gate.
+The pass then exposed a regression and did not pass acceptance:
+
+- Previous position and Next position repeated the full string and fret instructions;
+- Previous tablature block and Next tablature block also repeated the full playing instructions;
+- only Read current position should announce what strings and frets to play;
+- movement controls may announce concise block, measure, and position location, but must not instruct the user what to play.
+
+### Confirmed source cause
+
+Two independent mechanisms produced the excessive speech:
+
+1. every movement called the full `describePosition` fingering description through the live region;
+2. the position and block navigation groups used the full current-position description as `aria-describedby`, allowing VoiceOver to repeat playing instructions merely when encountering their controls.
+
+### Repair candidate
+
+The work branch now separates movement location from playing instructions:
+
+1. Previous, Next, keyboard movement, and block jumps announce only block, measure, and overall position location;
+2. Read current position remains the only navigation control that announces strings, frets, open strings, silence, and notation;
+3. position and block control groups no longer inherit the full fingering description;
+4. the desktop keyboard navigator is described only by its keyboard help;
+5. automated tests prohibit string, fret, or open-string terms in movement announcements and require full instructions from Read current.
+
+This repair still requires locked installation, complete automated tests, production build, hosted publication, and a bounded real-iPhone retest. The failed behavior must not be marked intermittent or accepted.
+
+Jason's Mac recognition and desktop usability acceptance remains deferred unless he agrees to participate. It is not a prerequisite for this iPhone repair gate.
