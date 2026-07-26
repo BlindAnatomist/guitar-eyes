@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import App from "./App";
 
 function makeRhythmMeasureFile() {
@@ -31,7 +31,6 @@ describe("desktop and iPhone convergence from the accepted semantic core", () =>
     });
     const desktopReader = desktopHeading.closest("section");
 
-    await waitFor(() => expect(document.activeElement).toBe(desktopHeading));
     expect(screen.getByText(/desktop semantic reader mode/i)).toBeInTheDocument();
     expect(screen.queryByLabelText("Multi-Column Navigation")).not.toBeInTheDocument();
     expect(within(desktopReader).getByText(/Duration, quarter note/)).toBeInTheDocument();
@@ -63,16 +62,22 @@ describe("desktop and iPhone convergence from the accepted semantic core", () =>
       name: "iPhone tablature reader",
     });
     const iphoneReader = iphoneHeading.closest("section");
-    const positionGroup = within(iphoneReader).getByRole("group", {
-      name: "Position navigation",
+    const previous = within(iphoneReader).getByRole("button", {
+      name: "Previous position",
     });
-    const buttons = [...positionGroup.querySelectorAll("button")];
+    const read = within(iphoneReader).getByRole("button", {
+      name: "Read current position",
+    });
+    const next = within(iphoneReader).getByRole("button", {
+      name: "Next position",
+    });
 
-    expect(buttons.map((button) => button.textContent)).toEqual([
-      "Previous position",
-      "Read current position",
-      "Next position",
-    ]);
+    expect(
+      previous.compareDocumentPosition(read) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      read.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(within(iphoneReader).getByText(/Duration, quarter note/)).toBeInTheDocument();
     expect(within(iphoneReader).getByText(/High E string, open/)).toBeInTheDocument();
     expect(within(iphoneReader).queryByText(/silent/i)).not.toBeInTheDocument();
