@@ -7,7 +7,7 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - Preserve `Phlypper/guitar-eyes` completely untouched.
 - Preserve fork `main` as a clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - The accepted iPhone, rhythm, measure, and shared-core foundation is commit `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
-- The verified and hosted convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
+- The verified, hosted, and real-iPhone-accepted convergence-recovery implementation source is commit `72159d25958fffd941c95351c6781cf579e1d622`.
 - Documentation-only commits after that source do not replace its implementation identity.
 - Perform convergence recovery only on `work/convergence-from-accepted-semantic-core` unless the owner explicitly authorizes another branch.
 - Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature repair there.
@@ -30,7 +30,8 @@ Before changing implementation, accessibility behavior, repository administratio
 11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
 12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
 13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
-14. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+14. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
+15. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, or workflow procedure that is already recorded.
 
@@ -61,7 +62,7 @@ Desktop and iPhone may present that document differently, but neither may create
 
 Do not restore active interception of VoiceOver Control+Option commands. Do not expose every dash and separator as an ordinary navigation stop merely to preserve visual source layout.
 
-## Verification and publication state
+## Verification, publication, and acceptance state
 
 The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
 
@@ -76,15 +77,16 @@ The exact source `72159d25958fffd941c95351c6781cf579e1d622` has passed:
 - hosted HTML and asset read-back;
 - live-bundle contract checks;
 - immediate restoration of fork `main` to `60c2e5de0887b1bcdd426d932632946edd07d3c3`;
-- independent confirmation that `main` is identical, zero ahead, zero behind, and zero changed files.
+- independent confirmation that `main` is identical, zero ahead, zero behind, and zero changed files;
+- real-iPhone Safari and VoiceOver acceptance of focus recovery, quiet movement controls, dedicated playing-instruction speech, rhythm, measure, open-string, omitted-unplayed-string, and multi-block behavior.
 
-The valid recovery preview is:
+The valid accepted recovery preview is:
 
 `https://blindanatomist.github.io/guitar-eyes/`
 
-The next required gate is one bounded real-iPhone Safari and VoiceOver regression. Do not perform another implementation, build, or publication cycle before that test unless the hosted candidate itself proves defective.
+Convergence recovery checkpoint 1 is passed. Do not begin another convergence repair, build, or publication cycle unless a new defect is reported.
 
-Jason Washburn is not part of the active testing plan unless he agrees to participate.
+Jason Washburn's desktop acceptance remains optional and deferred unless he agrees to participate. His absence is not an active blocker.
 
 ## Zero-dollar automation
 
