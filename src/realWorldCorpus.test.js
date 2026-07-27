@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { describePlayablePosition } from "./positionDescription";
-import { buildReaderDocuments } from "./tabImportCoordinator";
+import {
+  buildMusicXmlReaderDocuments,
+  buildReaderDocuments,
+} from "./tabImportCoordinator";
 import { detectTabFileFormat } from "./tabFormatDetector";
 
 function fixture(name) {
@@ -145,15 +148,50 @@ describe("real-world tablature format corpus", () => {
     expect(result.semanticDocument).toBeNull();
   });
 
-  test("recognizes the structured MusicXML target without sending it to ASCII parsing", () => {
+  test("detects and imports the minimal uncompressed MusicXML fixture", () => {
     const source = fixture("musicxml-minimal-guitar-tab.musicxml");
     const format = detectTabFileFormat("musicxml-minimal-guitar-tab.musicxml", source);
+    const result = buildMusicXmlReaderDocuments(source);
 
     expect(format).toMatchObject({
       id: "musicxml",
       label: "MusicXML tablature",
-      support: "planned",
+      support: "supported",
       isText: true,
     });
+    expect(result.semanticDocument).toMatchObject({
+      sourceFormat: "musicxml",
+      instrument: "guitar",
+      stringCount: 6,
+    });
+    expect(result.semanticDocument.positions).toHaveLength(4);
+    expect(result.semanticDocument.positions.map((position) => position.duration.name)).toEqual([
+      "quarter note",
+      "eighth note",
+      "eighth note",
+      "half note",
+    ]);
+    expect(result.semanticDocument.measures[0].totalQuarterNoteUnits).toBe(4);
+    expect(describePlayablePosition(result.semanticDocument, 0)).toContain(
+      "Low E string, fret 3."
+    );
+  });
+
+  test("imports the MusicXML chord, rest, technique, and two-measure fixture", () => {
+    const result = buildMusicXmlReaderDocuments(
+      fixture("musicxml-chord-rest-two-measures.musicxml")
+    );
+
+    expect(result.semanticDocument.positions).toHaveLength(6);
+    expect(result.semanticDocument.measures.map((measure) => measure.totalQuarterNoteUnits)).toEqual([
+      4,
+      4,
+    ]);
+    expect(result.semanticDocument.positions[1].isRest).toBe(true);
+    expect(describePlayablePosition(result.semanticDocument, 1)).toContain("Rest.");
+    expect(describePlayablePosition(result.semanticDocument, 3)).toContain(
+      "hammer-on notation preserved"
+    );
+    expect(result.desktopBlocks[0]).toHaveLength(6);
   });
 });
