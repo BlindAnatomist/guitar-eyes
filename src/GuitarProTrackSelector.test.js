@@ -57,16 +57,24 @@ describe("GuitarProTrackSelector", () => {
     const lead = screen.getByRole("radio", { name: /Lead Guitar/i });
     const bass = screen.getByRole("radio", { name: /Bass/i });
     const load = screen.getByRole("button", { name: "Load selected track" });
+    const emptySummary = screen.getByText("No track selected.");
 
     expect(lead).not.toBeChecked();
     expect(bass).not.toBeChecked();
     expect(load).toBeDisabled();
+    expect(emptySummary.nextElementSibling).toBe(load);
 
     fireEvent.click(bass);
     expect(bass).toBeChecked();
     expect(load).toBeEnabled();
-    fireEvent.click(load);
 
+    const selectedSummary = screen.getByText(
+      "Selected track details: Bass. four-string bass. Tuning high to low: G2, D2, A1, E1. 4 measures."
+    );
+    expect(selectedSummary).not.toHaveAttribute("aria-live");
+    expect(selectedSummary.nextElementSibling).toBe(load);
+
+    fireEvent.click(load);
     expect(onSubmit).toHaveBeenCalledWith({ trackIndex: 1, staffIndex: 0 });
   });
 
