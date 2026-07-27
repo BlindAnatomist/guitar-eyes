@@ -103,8 +103,7 @@ jobs:
           old_block = text[start:end]
           assert 'Checkpoint 3A has direct project evidence for Guitar Pro 7 only' in old_block
           assert '"UNTESTED_GUITAR_PRO_VERSION"' in old_block
-          replacement = '  const versionEvidence = validateVersionEvidence(intermediate);'
-          text = text[:start] + replacement + text[end:]
+          text = text[:start] + '  const versionEvidence = validateVersionEvidence(intermediate);' + text[end:]
 
           block_version = '    sourceVersion: intermediate.sourceVersion,\n    sourceTrackIndex:'
           assert text.count(block_version) == 1
@@ -122,15 +121,17 @@ jobs:
               1,
           )
 
-          assert 'guitar-pro-7' not in text
-          assert text.count('GUITAR_PRO_SOURCE_FORMAT') == 9
           path.write_text(text, encoding='utf-8')
 
-      - name: Show and constrain patch
+      - name: Verify and constrain generated normalizer patch
         run: |
           git diff -- src/guitarProNormalizer.js
           test "$(git status --short | wc -l)" -eq 1
           test "$(git status --short | awk '{print $2}')" = "src/guitarProNormalizer.js"
+          test "$(grep -o 'GUITAR_PRO_SOURCE_FORMAT' src/guitarProNormalizer.js | wc -l)" -eq 9
+          ! grep -F 'guitar-pro-7' src/guitarProNormalizer.js
+          grep -F 'const versionEvidence = validateVersionEvidence(intermediate);' src/guitarProNormalizer.js >/dev/null
+          test "$(grep -F '    versionEvidence,' src/guitarProNormalizer.js | wc -l)" -eq 2
 
       - name: Commit exact normalizer refactor
         run: |
