@@ -12,10 +12,11 @@ const InfoSection = () => (
 
     <h3>Supported file intake</h3>
     <p>
-      Guitar Eyes currently imports supported .txt and .tab ASCII tablature and
-      uncompressed .musicxml or .xml guitar tablature containing explicit string and fret
-      data. Compressed MusicXML, Guitar Pro, PowerTab, TuxGuitar, and TablEdit files are
-      recognized but are not yet imported.
+      Accepted support currently includes selected .txt and .tab ASCII tablature and
+      uncompressed .musicxml or .xml six-string guitar tablature containing explicit
+      string and fret data. This unhosted branch also contains a project-authored Guitar
+      Pro 7 dependency and normalization proof. That proof is not yet general Guitar Pro
+      support and must not be treated as a published feature.
     </p>
 
     <h3>Position navigation</h3>
@@ -38,18 +39,18 @@ const InfoSection = () => (
     <p>
       The Semantic tablature overview is a standard table. Use ordinary VoiceOver table
       navigation to move vertically among strings and horizontally among synchronized
-      positions. ASCII files retain their original spatial rows. MusicXML files provide a
-      normalized MusicXML spatial layout derived from the structured string, fret,
-      measure, chord, rest, and duration data.
+      positions. ASCII files retain their original spatial rows. Structured imports
+      provide an honestly labeled normalized spatial layout derived from their source
+      tuning, measures, strings, frets, chords, rests, and durations.
     </p>
 
     <h3>Compatibility and unsupported formats</h3>
     <p>
       When an ASCII text file cannot yet be interpreted safely by the shared semantic
       model, the original Guitar Eyes grid remains available as a compatibility fallback
-      rather than inventing musical meaning. Recognized unsupported formats and
-      unsupported string counts produce an explicit message instead of a misleading
-      reader result.
+      rather than inventing musical meaning. Compressed MusicXML, Guitar Pro versions
+      outside the internal proof, PowerTab, TuxGuitar, TablEdit, and unsupported string
+      counts produce explicit messages instead of misleading reader results.
     </p>
   </>
 );
