@@ -3,10 +3,19 @@ import React from "react";
 const InfoSection = () => (
   <>
     <p>
-      Welcome to Guitar Eyes for Mac. Supported guitar and bass text files are parsed
-      once into the same synchronized musical document used by the iPhone reader. The
-      desktop view preserves strings as rows and musical positions as columns while
-      retaining rhythm, measures, open strings, frets, and supported notation.
+      Welcome to Guitar Eyes for Mac. Supported ASCII guitar and bass files and
+      uncompressed MusicXML guitar tablature are imported into the same synchronized
+      musical document used by the iPhone reader. The desktop view preserves strings as
+      rows and musical positions as columns while retaining rhythm, measures, rests,
+      open strings, frets, chords, and supported notation.
+    </p>
+
+    <h3>Supported file intake</h3>
+    <p>
+      Guitar Eyes currently imports supported .txt and .tab ASCII tablature and
+      uncompressed .musicxml or .xml guitar tablature containing explicit string and fret
+      data. Compressed MusicXML, Guitar Pro, PowerTab, TuxGuitar, and TablEdit files are
+      recognized but are not yet imported.
     </p>
 
     <h3>Position navigation</h3>
@@ -29,16 +38,18 @@ const InfoSection = () => (
     <p>
       The Semantic tablature overview is a standard table. Use ordinary VoiceOver table
       navigation to move vertically among strings and horizontally among synchronized
-      positions. The original source rows remain available in a collapsed Original
-      spatial source layout disclosure for comparison without forcing every dash into the
-      ordinary navigation path.
+      positions. ASCII files retain their original spatial rows. MusicXML files provide a
+      normalized MusicXML spatial layout derived from the structured string, fret,
+      measure, chord, rest, and duration data.
     </p>
 
-    <h3>Compatibility fallback</h3>
+    <h3>Compatibility and unsupported formats</h3>
     <p>
-      When a text file cannot yet be interpreted safely by the shared semantic model, the
-      original Guitar Eyes grid remains available as a compatibility fallback rather than
-      inventing musical meaning.
+      When an ASCII text file cannot yet be interpreted safely by the shared semantic
+      model, the original Guitar Eyes grid remains available as a compatibility fallback
+      rather than inventing musical meaning. Recognized unsupported formats and
+      unsupported string counts produce an explicit message instead of a misleading
+      reader result.
     </p>
   </>
 );
