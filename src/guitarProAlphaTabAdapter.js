@@ -93,11 +93,22 @@ function trackToIntermediate(track) {
 
 export function alphaTabScoreToGuitarProIntermediate(
   score,
-  { sourceVersion = "GP7" } = {}
+  { versionEvidence } = {}
 ) {
   return {
     schemaVersion: 1,
-    sourceVersion,
+    sourceVersion: String(versionEvidence?.sourceVersion || ""),
+    versionEvidence: versionEvidence
+      ? {
+          schemaVersion: Number(versionEvidence.schemaVersion),
+          archiveFamily: String(versionEvidence.archiveFamily),
+          rootVersion: String(versionEvidence.rootVersion),
+          gpVersion: String(versionEvidence.gpVersion),
+          encodingDescription: String(versionEvidence.encodingDescription),
+          sourceVersion: String(versionEvidence.sourceVersion),
+          entryCount: Number(versionEvidence.entryCount),
+        }
+      : null,
     title: String(score?.title || score?.subTitle || "Guitar Pro tablature"),
     tracks: Array.from(score?.tracks || [], trackToIntermediate),
   };
