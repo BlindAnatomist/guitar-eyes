@@ -13,7 +13,7 @@ const FORMAT_DEFINITIONS = {
   musicxml: {
     id: "musicxml",
     label: "MusicXML tablature",
-    support: "planned",
+    support: "supported",
     isText: true,
   },
   "compressed-musicxml": {
@@ -113,10 +113,8 @@ export function shouldReadTabFileAsText(format) {
 
 export function unsupportedTabFormatMessage(format) {
   switch (format?.id) {
-    case "musicxml":
-      return "MusicXML tablature was recognized. Guitar Eyes does not yet import MusicXML, but this structured format is now part of the planned import corpus.";
     case "compressed-musicxml":
-      return "Compressed MusicXML was recognized. Guitar Eyes does not yet import .mxl files, but this structured format is now part of the planned import corpus.";
+      return "Compressed MusicXML was recognized. Guitar Eyes does not yet import .mxl files; uncompressed .musicxml or .xml tablature is supported first.";
     case "guitar-pro":
       return "A Guitar Pro tablature file was recognized. Guitar Eyes does not yet import Guitar Pro files; support is planned through a verified structured importer.";
     case "powertab":
@@ -126,6 +124,6 @@ export function unsupportedTabFormatMessage(format) {
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; support is part of the structured-import plan.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature or as a recognized structured tablature format.";
+      return "Guitar Eyes could not identify this file as supported ASCII tablature or supported uncompressed MusicXML tablature.";
   }
 }
