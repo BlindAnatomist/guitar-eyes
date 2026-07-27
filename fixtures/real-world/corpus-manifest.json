@@ -1,6 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "created": "2026-07-26",
+  "updated": "2026-07-26",
   "project": "Guitar Eyes",
   "policy": {
     "committedMaterial": "Original, public-domain, or clearly licensed only",
@@ -57,7 +58,7 @@
         "tap",
         "muted note"
       ],
-      "currentExpectation": "Recognized inline techniques are preserved; annotation lines are ignored; full performance semantics remain future work"
+      "currentExpectation": "Recognized techniques are preserved; deterministic transition symbols attach to notes without creating separate positions; full performance semantics remain future work"
     },
     {
       "path": "ascii-bass-with-metadata.txt",
@@ -88,6 +89,101 @@
       "currentExpectation": "Shared barlines become two semantic measures; barlines do not become musical positions; each measure totals four quarter-note units; desktop rows remain unchanged"
     },
     {
+      "path": "ascii-octave-qualified-standard.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "octave-qualified tuning labels",
+        "standard six-string tuning",
+        "metadata before the block"
+      ],
+      "currentExpectation": "Semantic guitar import succeeds; octave metadata and original labels are preserved"
+    },
+    {
+      "path": "ascii-unicode-accidentals.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "Unicode sharp labels",
+        "octave-qualified custom tuning",
+        "strict high-to-low pitch order"
+      ],
+      "currentExpectation": "Unicode accidentals normalize to ASCII pitch identities; custom tuning imports with an explicit warning"
+    },
+    {
+      "path": "ascii-unsafe-octave-order.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored adversarial specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "duplicate octave pitch",
+        "unsafe tuning order"
+      ],
+      "currentExpectation": "Safe rejection with UNSAFE_TUNING_ORDER; no semantic document"
+    },
+    {
+      "path": "ascii-misordered-standard-labels.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored adversarial specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "standard pitch multiset",
+        "misordered string labels"
+      ],
+      "currentExpectation": "Safe rejection with UNSAFE_TUNING_ORDER; the count alone must not authorize parsing"
+    },
+    {
+      "path": "ascii-seven-string-guitar.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "seven-string guitar",
+        "octave-qualified tuning"
+      ],
+      "currentExpectation": "Recognized ASCII with unsupported string count; no six-string reinterpretation"
+    },
+    {
+      "path": "ascii-five-string-bass.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored structural specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "five-string bass",
+        "octave-qualified tuning"
+      ],
+      "currentExpectation": "Recognized ASCII with unsupported string count; no four-string reinterpretation"
+    },
+    {
+      "path": "ascii-ghost-harmonic-repeat-techniques.txt",
+      "family": "ascii-text",
+      "provenance": "Project-authored adversarial specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "parenthesized fret",
+        "angle-bracket fret",
+        "repeat punctuation",
+        "internal barlines",
+        "hammer-on and pull-off chain",
+        "five rhythm symbols"
+      ],
+      "currentExpectation": "Five playable positions only; unsupported punctuation is preserved and warned; transition symbols attach to target notes; rhythm maps to the five positions"
+    },
+    {
+      "path": "ascii-pipe-delimited-nontab.txt",
+      "family": "non-tab-text",
+      "provenance": "Project-authored adversarial specimen",
+      "license": "CC0-1.0",
+      "features": [
+        "six pipe-delimited rows",
+        "leading A-G letters",
+        "no playable notation"
+      ],
+      "currentExpectation": "Content detection remains unknown and does not misclassify the table as ASCII tablature"
+    },
+    {
       "path": "musicxml-minimal-guitar-tab.musicxml",
       "family": "musicxml",
       "provenance": "Project-authored MusicXML 4.0 specimen using original notes",
@@ -99,7 +195,7 @@
         "quarter eighth and half durations",
         "explicit string and fret technical data"
       ],
-      "currentExpectation": "Recognized by format preflight; structured import not yet implemented"
+      "currentExpectation": "Recognized by format preflight; structured import is reserved for MusicXML checkpoint 2"
     }
   ],
   "externalSources": [
