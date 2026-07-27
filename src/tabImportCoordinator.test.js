@@ -1,5 +1,14 @@
+import fs from "fs";
+import path from "path";
 import { describePlayablePosition } from "./positionDescription";
 import { buildReaderDocuments } from "./tabImportCoordinator";
+
+function fixture(name) {
+  return fs.readFileSync(
+    path.join(process.cwd(), "fixtures", "real-world", name),
+    "utf8"
+  );
+}
 
 const guitarLines = [
   "e|--0--2--|",
@@ -28,6 +37,7 @@ describe("buildReaderDocuments", () => {
     expect(result.semanticDocument.positions.length).toBeGreaterThan(0);
     expect(result.resolvedInstrument).toBe("guitar");
     expect(result.instrumentWasDetected).toBe(false);
+    expect(result.supportOutcome).toBe("supported");
   });
 
   test("uses one multi-block guitar document for both reader projections", () => {
@@ -84,6 +94,62 @@ describe("buildReaderDocuments", () => {
     expect(result.instrumentWasDetected).toBe(true);
     expect(description).toContain("High E string, open.");
     expect(description).not.toMatch(/String 1, tuned/i);
+  });
+
+  test("normalizes octave-qualified and Unicode accidental labels semantically", () => {
+    const octaveResult = buildReaderDocuments(
+      fixture("ascii-octave-qualified-standard.txt"),
+      "guitar"
+    );
+    const unicodeResult = buildReaderDocuments(
+      fixture("ascii-unicode-accidentals.txt"),
+      "guitar"
+    );
+
+    expect(octaveResult).toMatchObject({
+      desktopSource: "semantic",
+      resolvedInstrument: "guitar",
+      supportOutcome: "supported",
+    });
+    expect(octaveResult.semanticDocument.strings[0]).toMatchObject({
+      tuning: "E",
+      octave: 4,
+      rawLabel: "E4",
+    });
+    expect(unicodeResult.desktopSource).toBe("semantic");
+    expect(unicodeResult.semanticDocument.strings[0]).toMatchObject({
+      tuning: "F#",
+      octave: 4,
+      rawLabel: "F♯4",
+    });
+    expect(unicodeResult.semanticDocument.warnings.join(" ")).toMatch(
+      /custom six-string guitar tuning/i
+    );
+  });
+
+  test.each([
+    ["ascii-seven-string-guitar.txt", "guitar", "7-string"],
+    ["ascii-five-string-bass.txt", "bass", "5-string"],
+  ])("recognizes but does not guess unsupported string count in %s", (name, selected, label) => {
+    const result = buildReaderDocuments(fixture(name), selected);
+
+    expect(result.desktopSource).toBe("legacy-fallback");
+    expect(result.semanticDocument).toBeNull();
+    expect(result.semanticError.code).toBe("UNSUPPORTED_STRING_COUNT");
+    expect(result.semanticError.message).toContain(label);
+    expect(result.supportOutcome).toBe("recognized-unsupported");
+  });
+
+  test.each([
+    "ascii-unsafe-octave-order.txt",
+    "ascii-misordered-standard-labels.txt",
+  ])("rejects unsafe tuning evidence in %s", (name) => {
+    const result = buildReaderDocuments(fixture(name), "guitar");
+
+    expect(result.desktopSource).toBe("legacy-fallback");
+    expect(result.semanticDocument).toBeNull();
+    expect(result.semanticError.code).toBe("UNSAFE_TUNING_ORDER");
+    expect(result.supportOutcome).toBe("unsafe-fallback");
   });
 
   test("retains the legacy desktop fallback when semantic parsing is unsafe", () => {
