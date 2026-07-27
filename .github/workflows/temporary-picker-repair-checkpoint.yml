@@ -1,0 +1,110 @@
+name: Temporary iPhone MusicXML picker repair
+
+on:
+  push:
+    branches:
+      - work/tablature-intake-expansion
+
+concurrency:
+  group: temporary-guitar-eyes-picker-repair
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  verify:
+    name: Verify unrestricted file picker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact picker repair source
+        uses: actions/checkout@v4
+        with:
+          ref: c4dfa2a9de362984f05220edf734fb57997e3c2b
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Confirm exact source and MusicXML ancestry
+        run: |
+          test "$(git rev-parse HEAD)" = "c4dfa2a9de362984f05220edf734fb57997e3c2b"
+          git merge-base --is-ancestor 715547a123b2a6e862a8020858df96cb34c63526 HEAD
+          ! grep -q 'accept=' src/Upload.js
+          grep -F 'checks the selected file after selection' src/Upload.js >/dev/null
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        env:
+          npm_config_cache: /tmp/guitar-eyes-picker-repair-cache
+        run: npm ci --no-audit --no-fund
+
+      - name: Run complete automated suite
+        id: tests
+        env:
+          CI: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/picker-repair-tests.log
+          test_exit=${PIPESTATUS[0]}
+          echo "exit_code=$test_exit" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload test log on failure
+        if: steps.tests.outputs.exit_code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: picker-repair-test-log
+          path: /tmp/picker-repair-tests.log
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Enforce test result and expected count
+        run: |
+          test "${{ steps.tests.outputs.exit_code }}" = "0"
+          grep -Eq 'Test Suites:[[:space:]]+20 passed,[[:space:]]+20 total' /tmp/picker-repair-tests.log
+          grep -Eq 'Tests:[[:space:]]+117 passed,[[:space:]]+117 total' /tmp/picker-repair-tests.log
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Verify compiled unrestricted-picker contract
+        run: |
+          grep -R -F 'checks the selected file after selection' build >/dev/null
+          grep -R -F 'file-upload-help' build >/dev/null
+          ! grep -R -F '.txt,.tab,.musicxml,.xml,.mxl' build >/dev/null
+          grep -R -F 'MusicXML tablature' build >/dev/null
+          grep -R -F 'Compressed MusicXML was recognized' build >/dev/null
+
+      - name: Record success status
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/picker-repair\",\"description\":\"20 suites, 117 tests, build and unrestricted picker passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+
+      - name: Record failure status
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/picker-repair\",\"description\":\"Inspect the bounded picker repair gate\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
