@@ -22,16 +22,17 @@ jobs:
       - name: Check out exact picker repair source
         uses: actions/checkout@v4
         with:
-          ref: c4dfa2a9de362984f05220edf734fb57997e3c2b
+          ref: 9f171e6c00c1a8265e66f35d55fa0c9aea7f7fc7
           fetch-depth: 0
           persist-credentials: false
 
       - name: Confirm exact source and MusicXML ancestry
         run: |
-          test "$(git rev-parse HEAD)" = "c4dfa2a9de362984f05220edf734fb57997e3c2b"
+          test "$(git rev-parse HEAD)" = "9f171e6c00c1a8265e66f35d55fa0c9aea7f7fc7"
           git merge-base --is-ancestor 715547a123b2a6e862a8020858df96cb34c63526 HEAD
           ! grep -q 'accept=' src/Upload.js
           grep -F 'checks the selected file after selection' src/Upload.js >/dev/null
+          grep -F 'Test build MusicXML intake checkpoint 2' public/index.html >/dev/null
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -61,7 +62,7 @@ jobs:
         if: steps.tests.outputs.exit_code != '0'
         uses: actions/upload-artifact@v4
         with:
-          name: picker-repair-test-log
+          name: picker-repair-test-log-corrected
           path: /tmp/picker-repair-tests.log
           if-no-files-found: error
           retention-days: 1
@@ -82,6 +83,7 @@ jobs:
           ! grep -R -F '.txt,.tab,.musicxml,.xml,.mxl' build >/dev/null
           grep -R -F 'MusicXML tablature' build >/dev/null
           grep -R -F 'Compressed MusicXML was recognized' build >/dev/null
+          grep -F '<title>Test build MusicXML intake checkpoint 2</title>' build/index.html >/dev/null
 
       - name: Record success status
         if: success()
