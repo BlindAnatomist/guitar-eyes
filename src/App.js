@@ -21,7 +21,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Convergence recovery from accepted semantic core";
+const TEST_BUILD_LABEL = "Tablature intake expansion checkpoint 1";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -260,6 +260,7 @@ function App() {
       semanticError,
       resolvedInstrument,
       instrumentWasDetected,
+      supportOutcome,
     } = readerDocuments;
 
     const detectedPrefix = instrumentWasDetected
@@ -297,6 +298,14 @@ function App() {
       semanticError,
       "The file could not be parsed for iPhone reading mode."
     );
+
+    if (supportOutcome === "recognized-unsupported") {
+      finishUnreadableUpload(
+        semanticMessage,
+        "Recognized ASCII tablature with a string count that is not yet supported."
+      );
+      return;
+    }
 
     if (readingMode === "iphone") {
       commitIphoneOutcome({
