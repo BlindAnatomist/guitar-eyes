@@ -133,6 +133,16 @@ export function buildGuitarProTrackInventory(
     intermediate.tracks,
     "The Guitar Pro decoder did not return a track list."
   );
+  const declaredTrackCount = intermediate.versionEvidence?.declaredTrackCount;
+  if (
+    Number.isInteger(declaredTrackCount) &&
+    tracks.length !== declaredTrackCount
+  ) {
+    throw new GuitarProTrackInventoryError(
+      `The Guitar Pro archive declares ${declaredTrackCount} tracks, but the decoder returned ${tracks.length}. The file was not loaded because silently dropping a track is unsafe.`,
+      "GUITAR_PRO_TRACK_COUNT_MISMATCH"
+    );
+  }
   if (tracks.length > limits.maxTracks) {
     throw new GuitarProTrackInventoryError(
       `The Guitar Pro file contains ${tracks.length} tracks; the inventory limit is ${limits.maxTracks}.`,
