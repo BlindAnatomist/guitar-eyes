@@ -1,3 +1,16 @@
+function formatList(items) {
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+function techniquePhrase(techniques) {
+  if (!techniques || techniques.length === 0) return "";
+  return `, with ${formatList(
+    techniques.map((technique) => technique.name)
+  )} notation preserved but not yet interpreted`;
+}
+
 export function describePlayablePosition(document, positionIndex) {
   const position = document?.positions?.[positionIndex];
 
@@ -17,19 +30,18 @@ export function describePlayablePosition(document, positionIndex) {
 
     switch (state.type) {
       case "fret":
-        playableDescriptions.push(`${string.spokenName}, fret ${state.fret}.`);
+        playableDescriptions.push(
+          `${string.spokenName}, fret ${state.fret}${techniquePhrase(state.techniques)}.`
+        );
         break;
       case "open":
-        playableDescriptions.push(`${string.spokenName}, open.`);
+        playableDescriptions.push(
+          `${string.spokenName}, open${techniquePhrase(state.techniques)}.`
+        );
         break;
       case "technique":
         playableDescriptions.push(
           `${string.spokenName}, ${state.name} notation preserved but not yet interpreted.`
-        );
-        break;
-      case "unsupported":
-        playableDescriptions.push(
-          `${string.spokenName}, notation at this position cannot yet be interpreted.`
         );
         break;
       case "continuation":
