@@ -65,7 +65,7 @@ jobs:
           test -s fixtures/real-world/guitar-pro-7-proof.gp
           test -s fixtures/real-world/guitar-pro-7-proof.gp.sha256
           test -s fixtures/real-world/guitar-pro-7-proof.atex
-          sha256sum -c fixtures/real-world/guitar-pro-7-proof.gp.sha256
+          (cd fixtures/real-world && sha256sum -c guitar-pro-7-proof.gp.sha256)
           bytes=$(stat -c %s fixtures/real-world/guitar-pro-7-proof.gp)
           test "$bytes" -le $((5 * 1024 * 1024))
           grep -F 'Guitar Eyes project-authored fixture' fixtures/real-world/guitar-pro-7-proof.atex >/dev/null
@@ -109,7 +109,6 @@ jobs:
         run: |
           from pathlib import Path
           import json
-          import re
 
           build = Path('build')
           html = (build / 'index.html').read_text(encoding='utf-8')
@@ -209,7 +208,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          generated=$(cut -d= -f2 /tmp/gp7-generated-commit.txt)
           curl --fail-with-body -sS \
             -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
