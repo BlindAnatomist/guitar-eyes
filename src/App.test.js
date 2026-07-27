@@ -1,7 +1,16 @@
+import fs from "fs";
+import path from "path";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 
 const originalMatchMedia = window.matchMedia;
+
+function fixture(name) {
+  return fs.readFileSync(
+    path.join(process.cwd(), "fixtures", "real-world", name),
+    "utf8"
+  );
+}
 
 function useTouchDevice() {
   Object.defineProperty(window, "matchMedia", {
@@ -58,7 +67,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText(/Test build: Tablature intake expansion checkpoint 1/i)
+      screen.getByText(/Test build: MusicXML intake checkpoint 2/i)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
@@ -97,7 +106,7 @@ describe("Guitar Eyes application shell", () => {
     ).toBeTruthy();
   });
 
-  test("recovers focus to the persistent iPhone reader heading after Safari returns from file selection", async () => {
+  test("recovers focus to the persistent iPhone reader heading after Safari returns from ASCII file selection", async () => {
     useTouchDevice();
     render(<App />);
 
@@ -158,15 +167,7 @@ describe("Guitar Eyes application shell", () => {
     render(<App />);
 
     const file = new File(
-      [
-        "E4|--0--|\n",
-        "B3|--0--|\n",
-        "G3|--0--|\n",
-        "D3|--0--|\n",
-        "A2|--0--|\n",
-        "E2|--0--|\n",
-        "B1|--0--|\n",
-      ],
+      [fixture("ascii-seven-string-guitar.txt")],
       "seven-string.tab",
       { type: "text/plain" }
     );
@@ -187,19 +188,12 @@ describe("Guitar Eyes application shell", () => {
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
-  test("recognizes MusicXML without pretending that structured import exists", async () => {
+  test("imports MusicXML into the iPhone reader and recovers picker-return focus", async () => {
     useTouchDevice();
     render(<App />);
 
     const file = new File(
-      [
-        '<?xml version="1.0"?>\n',
-        '<score-partwise version="4.0">\n',
-        '<part id="P1"><measure number="1"><note><notations><technical>',
-        '<string>6</string><fret>3</fret>',
-        '</technical></notations></note></measure></part>\n',
-        '</score-partwise>\n',
-      ],
+      [fixture("musicxml-minimal-guitar-tab.musicxml")],
       "structured-guitar.musicxml",
       { type: "application/xml" }
     );
@@ -210,16 +204,77 @@ describe("Guitar Eyes application shell", () => {
 
     const heading = await screen.findByRole("heading", {
       level: 2,
-      name: "Tablature could not be loaded",
+      name: "iPhone tablature reader",
     });
 
-    expect(screen.getByText(/MusicXML tablature was recognized/i)).toBeInTheDocument();
-    expect(screen.getByText(/does not yet import MusicXML/i)).toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { level: 2, name: "iPhone tablature reader" })
-    ).not.toBeInTheDocument();
+      screen.getByText(/Imported MusicXML tablature\. Loaded 4 synchronized positions/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Low E string, fret 3/i)).toBeInTheDocument();
+    expect(screen.getByText(/Duration, quarter note/i)).toBeInTheDocument();
 
     fireEvent.focus(window);
     await waitFor(() => expect(document.activeElement).toBe(heading));
+  });
+
+  test("imports MusicXML into the desktop semantic reader without switching modes", async () => {
+    render(<App />);
+
+    const file = new File(
+      [fixture("musicxml-chord-rest-two-measures.musicxml")],
+      "chord-rest.musicxml",
+      { type: "application/xml" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [file] },
+    });
+
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Desktop tablature reader",
+    });
+
+    expect(
+      screen.getByText(/Imported MusicXML tablature\. Loaded 6 synchronized positions/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Rest\./i)).toBeInTheDocument();
+    expect(screen.getAllByRole("table")).toHaveLength(1);
+    await waitFor(() => expect(document.activeElement).toBe(heading));
+  });
+
+  test("rejects non-tablature MusicXML and keeps compressed MusicXML unsupported", async () => {
+    useTouchDevice();
+    render(<App />);
+
+    const nonTabXml = new File(
+      [
+        '<?xml version="1.0"?>',
+        '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>',
+        '<part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes>',
+        '<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note>',
+        '</measure></part></score-partwise>',
+      ].join(""),
+      "piano.xml",
+      { type: "application/xml" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [nonTabXml] },
+    });
+
+    expect(
+      await screen.findByText(/No MusicXML part contains explicit tablature string and fret data/i)
+    ).toBeInTheDocument();
+
+    const compressed = new File(["binary"], "score.mxl", {
+      type: "application/vnd.recordare.musicxml",
+    });
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [compressed] },
+    });
+
+    expect(await screen.findByText(/Compressed MusicXML was recognized/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not yet import \.mxl/i)).toBeInTheDocument();
   });
 });
