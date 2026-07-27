@@ -95,16 +95,16 @@ jobs:
           '''
           text = text.replace(marker, validator + marker, 1)
 
-          old_check = '''  if (intermediate.sourceVersion !== "GP7") {
-            throw new GuitarProImportError(
-              `Checkpoint 3A has direct project evidence for Guitar Pro 7 only; the decoder reported ${intermediate.sourceVersion || "an unknown version"}.`,
-              "UNTESTED_GUITAR_PRO_VERSION"
-            );
-          }
-
-          '''
-          assert text.count(old_check) == 1
-          text = text.replace(old_check, '  const versionEvidence = validateVersionEvidence(intermediate);\n\n', 1)
+          start_marker = '  if (intermediate.sourceVersion !== "GP7") {'
+          end_marker = '\n\n  const { tracks } = countAndValidateResources(intermediate, limits);'
+          assert text.count(start_marker) == 1
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old_block = text[start:end]
+          assert 'Checkpoint 3A has direct project evidence for Guitar Pro 7 only' in old_block
+          assert '"UNTESTED_GUITAR_PRO_VERSION"' in old_block
+          replacement = '  const versionEvidence = validateVersionEvidence(intermediate);'
+          text = text[:start] + replacement + text[end:]
 
           block_version = '    sourceVersion: intermediate.sourceVersion,\n    sourceTrackIndex:'
           assert text.count(block_version) == 1
