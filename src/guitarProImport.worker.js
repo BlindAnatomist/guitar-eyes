@@ -8,7 +8,7 @@ function workerError(error) {
   };
 }
 
-self.onmessage = async (event) => {
+globalThis.onmessage = async (event) => {
   const { requestId, bytes, sourceVersion = "GP7" } = event.data || {};
 
   try {
@@ -28,8 +28,8 @@ self.onmessage = async (event) => {
       sourceVersion,
     });
 
-    self.postMessage({ requestId, ok: true, intermediate });
+    globalThis.postMessage({ requestId, ok: true, intermediate });
   } catch (error) {
-    self.postMessage({ requestId, ok: false, error: workerError(error) });
+    globalThis.postMessage({ requestId, ok: false, error: workerError(error) });
   }
 };
