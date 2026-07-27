@@ -1,3 +1,5 @@
+/* global globalThis */
+
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 
 function workerError(error) {
