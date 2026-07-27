@@ -13,7 +13,10 @@ import IPhoneTabReader from "./IPhoneTabReader";
 import LegacyDesktopReader from "./LegacyDesktopReader";
 import Upload from "./Upload";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
-import { buildReaderDocuments } from "./tabImportCoordinator";
+import {
+  buildMusicXmlReaderDocuments,
+  buildReaderDocuments,
+} from "./tabImportCoordinator";
 import {
   detectTabFileFormat,
   shouldReadTabFileAsText,
@@ -21,7 +24,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Tablature intake expansion checkpoint 1";
+const TEST_BUILD_LABEL = "MusicXML intake checkpoint 2";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -227,7 +230,7 @@ function App() {
 
     const detectedFormat = detectTabFileFormat(file.name, sourceText);
 
-    if (detectedFormat.id !== "ascii-text") {
+    if (!['ascii-text', 'musicxml'].includes(detectedFormat.id)) {
       if (detectedFormat.support === "planned") {
         finishRecognizedUnsupportedFormat(detectedFormat);
       } else {
@@ -242,14 +245,19 @@ function App() {
     let readerDocuments;
 
     try {
-      readerDocuments = buildReaderDocuments(sourceText, selectedInstrument);
+      readerDocuments =
+        detectedFormat.id === "musicxml"
+          ? buildMusicXmlReaderDocuments(sourceText)
+          : buildReaderDocuments(sourceText, selectedInstrument);
     } catch (error) {
+      const formatLabel =
+        detectedFormat.id === "musicxml" ? "MusicXML tablature" : "tablature";
       finishUnreadableUpload(
         messageFromError(
           error,
-          "The file could not be prepared for the Guitar Eyes readers."
+          `The ${formatLabel} could not be prepared for the Guitar Eyes readers.`
         ),
-        "The selected file could not be prepared."
+        `The selected ${formatLabel} could not be imported.`
       );
       return;
     }
@@ -261,14 +269,18 @@ function App() {
       resolvedInstrument,
       instrumentWasDetected,
       supportOutcome,
+      sourceFormat,
+      sourceFormatLabel,
     } = readerDocuments;
 
     const detectedPrefix = instrumentWasDetected
       ? `Detected ${nextDocument?.instrumentLabel ?? resolvedInstrument}. `
       : "";
+    const formatPrefix =
+      sourceFormat === "musicxml" ? `Imported ${sourceFormatLabel}. ` : "";
 
     if (nextDocument) {
-      const iphoneSuccessStatus = `${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in iPhone reading mode.`;
+      const iphoneSuccessStatus = `${formatPrefix}${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in iPhone reading mode.`;
 
       if (readingMode === "iphone") {
         commitIphoneOutcome({
@@ -288,7 +300,7 @@ function App() {
       setSelectedInstrument(resolvedInstrument);
       setIsReadingFile(false);
       setStatusMessage(
-        `${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in desktop semantic reader mode.`
+        `${formatPrefix}${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in desktop semantic reader mode.`
       );
       desktopFocusPendingRef.current = true;
       return;
@@ -296,7 +308,7 @@ function App() {
 
     const semanticMessage = messageFromError(
       semanticError,
-      "The file could not be parsed for iPhone reading mode."
+      "The file could not be parsed for semantic reading."
     );
 
     if (supportOutcome === "recognized-unsupported") {
