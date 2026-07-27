@@ -66,6 +66,35 @@ jobs:
           )
           '''
           text = text[:start] + replacement + text[end:]
+
+          start_marker = 'old_version_test = textwrap.dedent(\n'
+          end_marker = 'write(path, text)\n\n# Application proof fixture.'
+          assert text.count(start_marker) == 1
+          assert text.count(end_marker) == 1
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          replacement = '''test_start = text.index('  test("rejects untested Guitar Pro versions", () => {')
+          test_end = text.index('\\n\\n  test("rejects multiple active voices instead of selecting the first"', test_start)
+          old_test = text[test_start:test_end]
+          assert 'sourceVersion: "GP8"' in old_test
+          new_test = textwrap.dedent(
+              '''\\
+                test("rejects GP7 until direct project evidence is accepted", () => {
+                  expectErrorCode(
+                    () =>
+                      normalizeGuitarProIntermediate(
+                        intermediate([track()], {
+                          sourceVersion: "GP7",
+                          versionEvidence: GP7_VERSION_EVIDENCE,
+                        })
+                      ),
+                    "UNTESTED_GUITAR_PRO_VERSION"
+                  );
+                });'''
+          )
+          text = text[:test_start] + new_test + text[test_end:]
+          '''
+          text = text[:start] + replacement + text[end:]
           path.write_text(text, encoding='utf-8')
 
       - name: Apply shared archive correction
