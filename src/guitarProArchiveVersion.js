@@ -195,6 +195,32 @@ function tagText(xml, tag) {
   return match ? match[1].trim() : null;
 }
 
+function declaredTrackCount(gpifXml) {
+  const trackIds = tagText(gpifXml, "Tracks");
+  if (trackIds === null) {
+    throw new GuitarProArchiveError(
+      "The Guitar Pro GPIF track declaration is missing.",
+      "MISSING_GUITAR_PRO_TRACK_EVIDENCE"
+    );
+  }
+
+  const ids = trackIds.split(/\s+/).filter(Boolean);
+  if (ids.length === 0) {
+    throw new GuitarProArchiveError(
+      "The Guitar Pro GPIF does not declare any tracks.",
+      "MISSING_GUITAR_PRO_TRACK_EVIDENCE"
+    );
+  }
+  if (new Set(ids).size !== ids.length) {
+    throw new GuitarProArchiveError(
+      "The Guitar Pro GPIF track declaration contains duplicate identifiers.",
+      "CONTRADICTORY_GUITAR_PRO_TRACK_EVIDENCE"
+    );
+  }
+
+  return ids.length;
+}
+
 function classifyVersionEvidence(rootVersion, gpVersion, encodingDescription) {
   if (rootVersion !== "7.0") {
     throw new GuitarProArchiveError(
@@ -259,5 +285,6 @@ export async function inspectGuitarProArchiveVersion(
     encodingDescription,
     sourceVersion,
     entryCount: entries.length,
+    declaredTrackCount: declaredTrackCount(gpifXml),
   };
 }
