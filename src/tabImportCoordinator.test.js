@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { describePlayablePosition } from "./positionDescription";
-import { buildReaderDocuments } from "./tabImportCoordinator";
+import {
+  buildMusicXmlReaderDocuments,
+  buildReaderDocuments,
+} from "./tabImportCoordinator";
 
 function fixture(name) {
   return fs.readFileSync(
@@ -38,6 +41,7 @@ describe("buildReaderDocuments", () => {
     expect(result.resolvedInstrument).toBe("guitar");
     expect(result.instrumentWasDetected).toBe(false);
     expect(result.supportOutcome).toBe("supported");
+    expect(result.sourceFormat).toBe("ascii-text");
   });
 
   test("uses one multi-block guitar document for both reader projections", () => {
@@ -160,5 +164,53 @@ describe("buildReaderDocuments", () => {
     expect(result.semanticDocument).toBeNull();
     expect(result.semanticError.code).toBe("INCOMPLETE_TABLATURE_BLOCK");
     expect(result.desktopBlocks.length).toBeGreaterThan(0);
+  });
+});
+
+describe("buildMusicXmlReaderDocuments", () => {
+  test("projects one imported MusicXML document into both readers", () => {
+    const result = buildMusicXmlReaderDocuments(
+      fixture("musicxml-minimal-guitar-tab.musicxml")
+    );
+
+    expect(result).toMatchObject({
+      desktopSource: "semantic",
+      semanticError: null,
+      requestedInstrument: "guitar",
+      resolvedInstrument: "guitar",
+      instrumentWasDetected: false,
+      supportOutcome: "supported",
+      sourceFormat: "musicxml",
+      sourceFormatLabel: "MusicXML tablature",
+    });
+    expect(result.semanticDocument.sourceFormat).toBe("musicxml");
+    expect(result.semanticDocument.positions).toHaveLength(4);
+    expect(result.desktopBlocks).toHaveLength(1);
+    expect(result.desktopBlocks[0]).toHaveLength(6);
+    expect(result.desktopBlocks[0][0]).toMatch(/^E4\|/);
+    expect(result.desktopBlocks[0][5]).toMatch(/^E2\|/);
+    expect(describePlayablePosition(result.semanticDocument, 0)).toContain(
+      "Low E string, fret 3."
+    );
+  });
+
+  test("preserves MusicXML chords, rests, measures, and durations in one document", () => {
+    const result = buildMusicXmlReaderDocuments(
+      fixture("musicxml-chord-rest-two-measures.musicxml")
+    );
+
+    expect(result.semanticDocument.positions).toHaveLength(6);
+    expect(result.semanticDocument.measures).toHaveLength(2);
+    expect(result.semanticDocument.measures.map((measure) => measure.totalQuarterNoteUnits)).toEqual([
+      4,
+      4,
+    ]);
+    expect(result.semanticDocument.positions[0].strings[0]).toMatchObject({ type: "open" });
+    expect(result.semanticDocument.positions[0].strings[1]).toMatchObject({
+      type: "fret",
+      fret: 1,
+    });
+    expect(result.semanticDocument.positions[1].isRest).toBe(true);
+    expect(describePlayablePosition(result.semanticDocument, 1)).toContain("Rest.");
   });
 });
