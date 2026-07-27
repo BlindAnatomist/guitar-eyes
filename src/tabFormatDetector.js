@@ -122,7 +122,7 @@ export function unsupportedTabFormatMessage(format) {
     case "compressed-musicxml":
       return "Compressed MusicXML was recognized. Guitar Eyes does not yet import .mxl files; uncompressed .musicxml or .xml tablature is supported first.";
     case "guitar-pro-proof":
-      return "A Guitar Pro .gp archive was recognized. This branch contains an unhosted project-fixture proof only; general Guitar Pro 7 or 8 support has not yet been accepted.";
+      return "A Guitar Pro .gp archive was recognized. This branch contains an unhosted project-fixture proof only; general Guitar Pro shared-archive support has not yet been accepted.";
     case "guitar-pro-legacy":
       return "A Guitar Pro tablature file was recognized. Guitar Eyes does not yet import this Guitar Pro version; direct support requires an original, public-domain, or clearly licensed fixture and version-specific evidence.";
     case "powertab":

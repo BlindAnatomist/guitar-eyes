@@ -1,5 +1,15 @@
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 
+const GP8_VERSION_EVIDENCE = Object.freeze({
+  schemaVersion: 1,
+  archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+  rootVersion: "7.0",
+  gpVersion: "8.1.3",
+  encodingDescription: "GP8",
+  sourceVersion: "GP8",
+  entryCount: 6,
+});
+
 function makeBeat(overrides = {}) {
   return {
     absoluteDisplayStart: 0,
@@ -48,7 +58,7 @@ function makeScore(beat = makeBeat({ notes: [makeNote()] })) {
     alternateEndings: 0,
   };
   return {
-    title: "Original GP7 proof",
+    title: "Original shared archive proof",
     tracks: [
       {
         name: "Guitar",
@@ -72,12 +82,13 @@ function makeScore(beat = makeBeat({ notes: [makeNote()] })) {
 
 describe("alphaTabScoreToGuitarProIntermediate", () => {
   test("extracts only serializable score, track, staff, bar, voice, beat, and note fields", () => {
-    const result = alphaTabScoreToGuitarProIntermediate(makeScore());
+    const result = alphaTabScoreToGuitarProIntermediate(makeScore(), { versionEvidence: GP8_VERSION_EVIDENCE });
 
     expect(result).toEqual({
       schemaVersion: 1,
-      sourceVersion: "GP7",
-      title: "Original GP7 proof",
+      sourceVersion: "GP8",
+      versionEvidence: GP8_VERSION_EVIDENCE,
+      title: "Original shared archive proof",
       tracks: [
         {
           name: "Guitar",
@@ -152,7 +163,7 @@ describe("alphaTabScoreToGuitarProIntermediate", () => {
       ],
     });
 
-    const result = alphaTabScoreToGuitarProIntermediate(makeScore(beat));
+    const result = alphaTabScoreToGuitarProIntermediate(makeScore(beat), { versionEvidence: GP8_VERSION_EVIDENCE });
     const extractedBeat = result.tracks[0].staves[0].bars[0].voices[0].beats[0];
 
     expect(extractedBeat.techniques).toEqual(["tap", "slap", "pop"]);
@@ -180,7 +191,7 @@ describe("alphaTabScoreToGuitarProIntermediate", () => {
       ],
     });
 
-    const result = alphaTabScoreToGuitarProIntermediate(makeScore(beat));
+    const result = alphaTabScoreToGuitarProIntermediate(makeScore(beat), { versionEvidence: GP8_VERSION_EVIDENCE });
     const extractedBeat = result.tracks[0].staves[0].bars[0].voices[0].beats[0];
 
     expect(extractedBeat.graceType).toBe("unsupported");
@@ -193,7 +204,7 @@ describe("alphaTabScoreToGuitarProIntermediate", () => {
     score.tracks[0].staves[0].track = score.tracks[0];
     score.tracks[0].staves[0].bars[0].staff = score.tracks[0].staves[0];
 
-    const result = alphaTabScoreToGuitarProIntermediate(score);
+    const result = alphaTabScoreToGuitarProIntermediate(score, { versionEvidence: GP8_VERSION_EVIDENCE });
 
     expect(result.tracks[0]).not.toHaveProperty("score");
     expect(result.tracks[0].staves[0]).not.toHaveProperty("track");

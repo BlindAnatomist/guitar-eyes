@@ -162,39 +162,35 @@ The July 27 structured-format evaluation concluded:
 5. alphaTab note string 1 is the lowest string; Guitar Eyes stores strings high to low, so normalization must reverse that orientation deliberately.
 6. MPL-2.0 permits use as an unchanged dependency with notices and corresponding-source information.
 7. An upstream alphaTab GP5 fixture was rejected because it contains a commercial-song transcription.
-8. The first fixture must be generated from project-authored alphaTex and exported as an original GP7 `.gp` file.
+8. The first fixture is generated from project-authored alphaTex. Its root archive marker is 7.0, while its internal GPIF evidence identifies GP8 semantics; it must therefore be treated as a shared-archive GP8 specimen rather than a clean GP7 file.
 9. PowerTab, TuxGuitar, TablEdit, Guitar Pro 2, compressed MusicXML, and unsupported string-count families require separate future routes.
 
 Detailed record:
 
 - `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
 
-## Current bounded checkpoint: Guitar Pro 7 proof 3A
+## Current bounded checkpoint: Guitar Pro shared-archive proof 3B
 
-Implement a source, dependency, fixture, and normalization proof for project-authored Guitar Pro 7 `.gp` files.
+Correct the proof identity and require archive-derived version evidence before normalization.
 
-Checkpoint 3A must:
+Checkpoint 3B must:
 
-1. pin `@coderline/alphatab` exactly at `1.8.4`;
-2. add MPL-2.0 notices without modifying or vendoring alphaTab source;
-3. create original alphaTex and a deterministic GP7 fixture;
-4. load alphaTab only after Guitar Pro detection;
-5. parse in a dedicated worker with timeout, cancellation, termination, byte limits, and complexity limits;
-6. transfer a small serializable intermediate representation rather than the alphaTab score model;
-7. normalize one unambiguous four-string or six-string non-percussion staff into the existing semantic document;
-8. preserve source-order measures, exact duration, notes, open strings, dead notes, chord onsets, timed rests, tuning, and supported techniques;
-9. reject multiple supported tracks, conflicting voices, missing coordinates, unsupported string counts, ambiguous timing, grace timing outside the model, corrupt archives, and limit violations;
-10. avoid silent first-track, first-voice, longest-note, or nearest-string selection;
-11. verify all inherited tests plus new importer tests;
-12. inspect production chunks and reject eager alphaTab loading, fonts, soundfonts, renderer workers, playback worklets, or audio assets;
-13. stop before publication and real-iPhone testing.
+1. retain exact `@coderline/alphatab` version `1.8.4` and its MPL-2.0 notice;
+2. inspect `VERSION` and `Content/score.gpif` before alphaTab normalization;
+3. identify the current project-authored fixture as GP8 semantic material inside the shared 7.0 `.gp` archive family;
+4. reject missing, malformed, duplicate, contradictory, encrypted, oversized, or unsupported version evidence;
+5. reject GP7 as untested until a genuine, clearly licensed GP7 specimen is obtained and verified;
+6. keep alphaTab lazy-loaded in a dedicated bounded worker;
+7. transfer only the Guitar Eyes-owned serializable intermediate representation;
+8. preserve the existing timing, tuning, notes, chords, rests, techniques, measures, and desktop/iPhone projections;
+9. retain the prohibition on silent track or voice selection;
+10. verify all inherited tests, archive-evidence tests, the production build, and emitted asset isolation;
+11. stop before publication and real-iPhone testing.
 
-During checkpoint 3A, project-tested import support is GP7 `.gp` only. GP3, GP4, GP5, GP6, GP8, and GP2 remain recognized but unsupported until each has an original, public-domain, or clearly licensed fixture and direct evidence.
-
-This checkpoint does not authorize playback, teacher mode, looping, bookmarks, pattern analysis, AI implementation, commercial scraping, a pull request, merge, upstream change, or production publication.
+The current branch contains an unhosted proof only. GP3, GP4, GP5, GP6, GP7, GP2, PowerTab, TuxGuitar, TablEdit, compressed MusicXML, playback, teacher mode, AI work, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
 
 ## Testing responsibility
 
 Dependency work, fixture generation, source implementation, automated tests, builds, and artifact inspection proceed without John.
 
-John is needed only after a stable hosted GP7 candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
+John is needed only after a stable hosted shared-archive candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.

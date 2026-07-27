@@ -1,12 +1,23 @@
-import { buildGuitarPro7ProofReaderDocuments } from "./guitarProReaderDocuments";
+import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
 import { describePlayablePosition } from "./positionDescription";
 
 const STANDARD_GUITAR = [64, 59, 55, 50, 45, 40];
 
+const GP8_VERSION_EVIDENCE = Object.freeze({
+  schemaVersion: 1,
+  archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+  rootVersion: "7.0",
+  gpVersion: "8.1.3",
+  encodingDescription: "GP8",
+  sourceVersion: "GP8",
+  entryCount: 6,
+});
+
 function proofIntermediate() {
   return {
     schemaVersion: 1,
-    sourceVersion: "GP7",
+    sourceVersion: "GP8",
+    versionEvidence: GP8_VERSION_EVIDENCE,
     title: "Reader proof",
     tracks: [
       {
@@ -60,13 +71,13 @@ function proofIntermediate() {
   };
 }
 
-describe("buildGuitarPro7ProofReaderDocuments", () => {
+describe("buildGuitarProArchiveProofReaderDocuments", () => {
   test("decodes once and projects one semantic document into both readers", async () => {
     const file = { name: "proof.gp", size: 4, arrayBuffer: jest.fn() };
     const workerFactory = jest.fn(() => ({ postMessage: jest.fn() }));
     const decode = jest.fn(async () => proofIntermediate());
 
-    const result = await buildGuitarPro7ProofReaderDocuments(file, {
+    const result = await buildGuitarProArchiveProofReaderDocuments(file, {
       workerFactory,
       decode,
     });
@@ -80,8 +91,8 @@ describe("buildGuitarPro7ProofReaderDocuments", () => {
       resolvedInstrument: "guitar",
       instrumentWasDetected: false,
       supportOutcome: "checkpoint-proof",
-      sourceFormat: "guitar-pro-7",
-      sourceFormatLabel: "Guitar Pro 7 tablature",
+      sourceFormat: "guitar-pro-archive",
+      sourceFormatLabel: "Guitar Pro archive tablature",
     });
     expect(result.semanticDocument.positions).toHaveLength(1);
     expect(result.desktopBlocks).toHaveLength(1);
@@ -94,15 +105,15 @@ describe("buildGuitarPro7ProofReaderDocuments", () => {
   });
 
   test("propagates worker failures without constructing a partial reader document", async () => {
-    const failure = Object.assign(new Error("Corrupt GP7 archive"), {
-      code: "CORRUPT_GP7_ARCHIVE",
+    const failure = Object.assign(new Error("Corrupt Guitar Pro archive"), {
+      code: "CORRUPT_GUITAR_PRO_ARCHIVE",
     });
     const decode = jest.fn(async () => {
       throw failure;
     });
 
     await expect(
-      buildGuitarPro7ProofReaderDocuments(
+      buildGuitarProArchiveProofReaderDocuments(
         { name: "broken.gp", size: 3, arrayBuffer: jest.fn() },
         {
           workerFactory: jest.fn(),
@@ -117,7 +128,7 @@ describe("buildGuitarPro7ProofReaderDocuments", () => {
     ambiguous.tracks.push({ ...ambiguous.tracks[0], name: "Second Guitar" });
 
     await expect(
-      buildGuitarPro7ProofReaderDocuments(
+      buildGuitarProArchiveProofReaderDocuments(
         { name: "two-guitars.gp", size: 3, arrayBuffer: jest.fn() },
         {
           workerFactory: jest.fn(),

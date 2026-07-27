@@ -7,9 +7,9 @@ describe("checkpoint build identity", () => {
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
-    const title = "<title>Test build Guitar Pro 7 proof 3A</title>";
+    const title = "<title>Test build Guitar Pro shared-archive proof 3B</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Guitar Pro 7 proof 3A.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Pro shared-archive proof 3B.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);

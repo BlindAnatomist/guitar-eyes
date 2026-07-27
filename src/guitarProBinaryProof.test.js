@@ -1,8 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { TextDecoder, TextEncoder } from "util";
+import { inflateRawSync } from "zlib";
 import * as alphaTab from "@coderline/alphatab";
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
+import { inspectGuitarProArchiveVersion } from "./guitarProArchiveVersion";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
 import { describePlayablePosition } from "./positionDescription";
 
@@ -10,6 +12,10 @@ function fixture(name) {
   return fs.readFileSync(
     path.join(process.cwd(), "fixtures", "real-world", name)
   );
+}
+
+async function inflateRaw(bytes) {
+  return new Uint8Array(inflateRawSync(Buffer.from(bytes)));
 }
 
 beforeAll(() => {
@@ -21,23 +27,27 @@ beforeAll(() => {
   }
 });
 
-describe("project-authored Guitar Pro 7 binary proof", () => {
-  test("decodes and normalizes the generated GP7 fixture through alphaTab", () => {
-    const bytes = fixture("guitar-pro-7-proof.gp");
+describe("project-authored Guitar Pro shared-archive binary proof", () => {
+  test("decodes and normalizes the generated GP8-semantic shared archive through alphaTab", async () => {
+    const bytes = fixture("guitar-pro-shared-archive-proof.gp");
+    const versionEvidence = await inspectGuitarProArchiveVersion(
+      new Uint8Array(bytes),
+      { inflateRaw }
+    );
     const settings = new alphaTab.Settings();
     const score = alphaTab.importer.ScoreLoader.loadScoreFromBytes(
       new Uint8Array(bytes),
       settings
     );
     const intermediate = alphaTabScoreToGuitarProIntermediate(score, {
-      sourceVersion: "GP7",
+      versionEvidence,
     });
     const document = normalizeGuitarProIntermediate(intermediate);
 
-    expect(score.title).toBe("Guitar Eyes GP7 Proof");
+    expect(score.title).toBe("Guitar Eyes Shared Archive Proof");
     expect(document).toMatchObject({
-      sourceFormat: "guitar-pro-7",
-      sourceVersion: "GP7",
+      sourceFormat: "guitar-pro-archive",
+      sourceVersion: "GP8",
       instrument: "guitar",
       stringCount: 6,
       sourceTrackName: "Proof Guitar",

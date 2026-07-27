@@ -1,11 +1,18 @@
 import fs from "fs";
 import path from "path";
+import { TextDecoder } from "util";
 import { deflateRawSync, inflateRawSync } from "zlib";
 import {
   GUITAR_PRO_ARCHIVE_LIMITS,
   GuitarProArchiveError,
   inspectGuitarProArchiveVersion,
 } from "./guitarProArchiveVersion";
+
+beforeAll(() => {
+  if (typeof global.TextDecoder === "undefined") {
+    global.TextDecoder = TextDecoder;
+  }
+});
 
 function fixture(name) {
   return fs.readFileSync(
@@ -131,13 +138,13 @@ function expectArchiveCode(promise, code) {
 describe("inspectGuitarProArchiveVersion", () => {
   test("identifies the generated project fixture as GP8 semantic evidence inside the shared 7.0 archive", async () => {
     const result = await inspectGuitarProArchiveVersion(
-      fixture("guitar-pro-7-proof.gp"),
+      fixture("guitar-pro-shared-archive-proof.gp"),
       { inflateRaw }
     );
 
     expect(result).toEqual({
       schemaVersion: 1,
-      archiveFamily: "GP7_PLUS_ZIP",
+      archiveFamily: "GUITAR_PRO_SHARED_ZIP",
       rootVersion: "7.0",
       gpVersion: "8.1.3",
       encodingDescription: "GP8",

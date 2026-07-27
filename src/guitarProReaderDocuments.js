@@ -1,17 +1,17 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
-import { decodeGuitarPro7ProofFile } from "./guitarProWorkerClient";
+import { decodeGuitarProArchiveProofFile } from "./guitarProWorkerClient";
 
 async function loadBrowserWorkerFactory() {
   const module = await import("./guitarProBrowserWorkerFactory");
   return module.createGuitarProBrowserWorker;
 }
 
-export async function buildGuitarPro7ProofReaderDocuments(
+export async function buildGuitarProArchiveProofReaderDocuments(
   file,
   {
     workerFactory = null,
-    decode = decodeGuitarPro7ProofFile,
+    decode = decodeGuitarProArchiveProofFile,
     normalize = normalizeGuitarProIntermediate,
   } = {}
 ) {
@@ -31,7 +31,7 @@ export async function buildGuitarPro7ProofReaderDocuments(
     resolvedInstrument: semanticDocument.instrument,
     instrumentWasDetected: false,
     supportOutcome: "checkpoint-proof",
-    sourceFormat: "guitar-pro-7",
-    sourceFormatLabel: "Guitar Pro 7 tablature",
+    sourceFormat: "guitar-pro-archive",
+    sourceFormatLabel: "Guitar Pro archive tablature",
   };
 }

@@ -8,6 +8,26 @@ import { describePlayablePosition } from "./positionDescription";
 const STANDARD_GUITAR = [64, 59, 55, 50, 45, 40];
 const STANDARD_BASS = [43, 38, 33, 28];
 
+const GP8_VERSION_EVIDENCE = Object.freeze({
+  schemaVersion: 1,
+  archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+  rootVersion: "7.0",
+  gpVersion: "8.1.3",
+  encodingDescription: "GP8",
+  sourceVersion: "GP8",
+  entryCount: 6,
+});
+
+const GP7_VERSION_EVIDENCE = Object.freeze({
+  schemaVersion: 1,
+  archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+  rootVersion: "7.0",
+  gpVersion: "7.5.0",
+  encodingDescription: "GP7",
+  sourceVersion: "GP7",
+  entryCount: 2,
+});
+
 function note(stringNumberLowToHigh, fret, extra = {}) {
   return {
     stringNumberLowToHigh,
@@ -85,8 +105,9 @@ function track(name = "Proof guitar", staffValue = staff(), extra = {}) {
 function intermediate(tracks = [track()], extra = {}) {
   return {
     schemaVersion: 1,
-    sourceVersion: "GP7",
-    title: "Guitar Eyes GP7 Proof",
+    sourceVersion: "GP8",
+    versionEvidence: GP8_VERSION_EVIDENCE,
+    title: "Guitar Eyes Shared Archive Proof",
     tracks,
     ...extra,
   };
@@ -103,14 +124,14 @@ function expectErrorCode(callback, code) {
 }
 
 describe("normalizeGuitarProIntermediate", () => {
-  test("normalizes a standard six-string GP7 track into the accepted reader document", () => {
+  test("normalizes a standard six-string GP8-semantic shared-archive track into the accepted reader document", () => {
     const document = normalizeGuitarProIntermediate(intermediate());
 
     expect(document).toMatchObject({
       type: "tablature-document",
-      sourceFormat: "guitar-pro-7",
-      sourceVersion: "GP7",
-      title: "Guitar Eyes GP7 Proof",
+      sourceFormat: "guitar-pro-archive",
+      sourceVersion: "GP8",
+      title: "Guitar Eyes Shared Archive Proof",
       instrument: "guitar",
       instrumentLabel: "six-string guitar",
       stringCount: 6,
@@ -301,9 +322,15 @@ describe("normalizeGuitarProIntermediate", () => {
     );
   });
 
-  test("rejects untested Guitar Pro versions", () => {
+  test("rejects GP7 until direct project evidence is accepted", () => {
     expectErrorCode(
-      () => normalizeGuitarProIntermediate(intermediate([track()], { sourceVersion: "GP8" })),
+      () =>
+        normalizeGuitarProIntermediate(
+          intermediate([track()], {
+            sourceVersion: "GP7",
+            versionEvidence: GP7_VERSION_EVIDENCE,
+          })
+        ),
       "UNTESTED_GUITAR_PRO_VERSION"
     );
   });

@@ -17,7 +17,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "generate:gp7-proof": "node scripts/generate-guitar-pro-7-proof.mjs",
+    "generate:guitar-pro-archive-proof": "node scripts/generate-guitar-pro-shared-archive-proof.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

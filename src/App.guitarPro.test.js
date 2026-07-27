@@ -1,13 +1,23 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
-import { buildGuitarPro7ProofReaderDocuments } from "./guitarProReaderDocuments";
+import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
 
 jest.mock("./guitarProReaderDocuments", () => ({
-  buildGuitarPro7ProofReaderDocuments: jest.fn(),
+  buildGuitarProArchiveProofReaderDocuments: jest.fn(),
 }));
 
 const originalMatchMedia = window.matchMedia;
+
+const GP8_VERSION_EVIDENCE = Object.freeze({
+  schemaVersion: 1,
+  archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+  rootVersion: "7.0",
+  gpVersion: "8.1.3",
+  encodingDescription: "GP8",
+  sourceVersion: "GP8",
+  entryCount: 6,
+});
 
 function useTouchDevice() {
   Object.defineProperty(window, "matchMedia", {
@@ -29,7 +39,8 @@ function useTouchDevice() {
 function proofDocument() {
   return normalizeGuitarProIntermediate({
     schemaVersion: 1,
-    sourceVersion: "GP7",
+    sourceVersion: "GP8",
+    versionEvidence: GP8_VERSION_EVIDENCE,
     title: "Application GP proof",
     tracks: [
       {
@@ -94,13 +105,13 @@ function proofReaderDocuments() {
     resolvedInstrument: "guitar",
     instrumentWasDetected: false,
     supportOutcome: "checkpoint-proof",
-    sourceFormat: "guitar-pro-7",
-    sourceFormatLabel: "Guitar Pro 7 tablature",
+    sourceFormat: "guitar-pro-archive",
+    sourceFormatLabel: "Guitar Pro archive tablature",
   };
 }
 
 beforeEach(() => {
-  buildGuitarPro7ProofReaderDocuments.mockReset();
+  buildGuitarProArchiveProofReaderDocuments.mockReset();
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback) => window.setTimeout(callback, 0);
   }
@@ -124,10 +135,10 @@ afterEach(() => {
 describe("Guitar Pro checkpoint application path", () => {
   test("loads a GP proof into the iPhone reader and preserves picker-return focus", async () => {
     useTouchDevice();
-    buildGuitarPro7ProofReaderDocuments.mockResolvedValue(proofReaderDocuments());
+    buildGuitarProArchiveProofReaderDocuments.mockResolvedValue(proofReaderDocuments());
     render(<App />);
 
-    const file = new File([new Uint8Array([1, 2, 3])], "guitar-pro-7-proof.gp", {
+    const file = new File([new Uint8Array([1, 2, 3])], "guitar-pro-shared-archive-proof.gp", {
       type: "application/octet-stream",
     });
     fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
@@ -139,9 +150,9 @@ describe("Guitar Pro checkpoint application path", () => {
       name: "iPhone tablature reader",
     });
 
-    expect(buildGuitarPro7ProofReaderDocuments).toHaveBeenCalledWith(file);
+    expect(buildGuitarProArchiveProofReaderDocuments).toHaveBeenCalledWith(file);
     expect(
-      screen.getByText(/Imported Guitar Pro 7 tablature\. Loaded 1 synchronized position/i)
+      screen.getByText(/Imported Guitar Pro archive tablature\. Loaded 1 synchronized position/i)
     ).toBeInTheDocument();
     expect(screen.getByText(/Low E string, fret 3/i)).toBeInTheDocument();
 
@@ -151,9 +162,9 @@ describe("Guitar Pro checkpoint application path", () => {
 
   test("routes GP decoder failure through the durable iPhone upload error", async () => {
     useTouchDevice();
-    buildGuitarPro7ProofReaderDocuments.mockRejectedValue(
-      Object.assign(new Error("The GP7 archive is corrupt."), {
-        code: "CORRUPT_GP7_ARCHIVE",
+    buildGuitarProArchiveProofReaderDocuments.mockRejectedValue(
+      Object.assign(new Error("The Guitar Pro archive is corrupt."), {
+        code: "CORRUPT_GUITAR_PRO_ARCHIVE",
       })
     );
     render(<App />);
@@ -170,7 +181,7 @@ describe("Guitar Pro checkpoint application path", () => {
       name: "Tablature could not be loaded",
     });
 
-    expect(screen.getByText("The GP7 archive is corrupt.")).toBeInTheDocument();
+    expect(screen.getByText("The Guitar Pro archive is corrupt.")).toBeInTheDocument();
     expect(
       screen.getByText(/selected Guitar Pro checkpoint file could not be imported/i)
     ).toBeInTheDocument();
@@ -179,7 +190,7 @@ describe("Guitar Pro checkpoint application path", () => {
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
-  test("keeps GP5 recognized but unsupported and never calls the GP7 proof decoder", async () => {
+  test("keeps GP5 recognized but unsupported and never calls the Guitar Pro archive proof decoder", async () => {
     useTouchDevice();
     render(<App />);
 
@@ -193,6 +204,6 @@ describe("Guitar Pro checkpoint application path", () => {
     expect(
       await screen.findByText(/does not yet import this Guitar Pro version/i)
     ).toBeInTheDocument();
-    expect(buildGuitarPro7ProofReaderDocuments).not.toHaveBeenCalled();
+    expect(buildGuitarProArchiveProofReaderDocuments).not.toHaveBeenCalled();
   });
 });

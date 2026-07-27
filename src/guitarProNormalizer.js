@@ -446,7 +446,7 @@ function validateVersionEvidence(intermediate) {
   if (
     !evidence ||
     evidence.schemaVersion !== 1 ||
-    evidence.archiveFamily !== "GP7_PLUS_ZIP" ||
+    evidence.archiveFamily !== "GUITAR_PRO_SHARED_ZIP" ||
     evidence.rootVersion !== "7.0" ||
     evidence.sourceVersion !== intermediate.sourceVersion
   ) {

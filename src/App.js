@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import DesktopSemanticReader from "./DesktopSemanticReader";
-import { buildGuitarPro7ProofReaderDocuments } from "./guitarProReaderDocuments";
+import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
@@ -25,7 +25,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Guitar Pro 7 proof 3A";
+const TEST_BUILD_LABEL = "Guitar Pro shared-archive proof 3B";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -216,7 +216,7 @@ function App() {
 
     if (initialFormat.id === "guitar-pro-proof") {
       try {
-        readerDocuments = await buildGuitarPro7ProofReaderDocuments(file);
+        readerDocuments = await buildGuitarProArchiveProofReaderDocuments(file);
       } catch (error) {
         finishUnreadableUpload(
           messageFromError(

@@ -220,7 +220,7 @@ function classifyVersionEvidence(rootVersion, gpVersion, encodingDescription) {
   }
   if (gpMajor !== "7" && gpMajor !== "8") {
     throw new GuitarProArchiveError(
-      `Guitar Pro semantic version ${gpVersion} is outside the tested GP7-plus archive family.`,
+      `Guitar Pro semantic version ${gpVersion} is outside the shared .gp archive family.`,
       "UNTESTED_GUITAR_PRO_VERSION"
     );
   }
@@ -253,7 +253,7 @@ export async function inspectGuitarProArchiveVersion(
 
   return {
     schemaVersion: 1,
-    archiveFamily: "GP7_PLUS_ZIP",
+    archiveFamily: "GUITAR_PRO_SHARED_ZIP",
     rootVersion,
     gpVersion,
     encodingDescription,
