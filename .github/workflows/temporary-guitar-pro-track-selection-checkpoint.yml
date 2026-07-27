@@ -30,6 +30,9 @@ jobs:
           git merge-base --is-ancestor fd3c1ee162d1be42bd45945227006521748284af HEAD
           test -z "$(git status --short)"
 
+      - name: Prepare track selection checkpoint script
+        run: python scripts/temporary_prepare_guitar_pro_track_selection_checkpoint.py
+
       - name: Apply track selection checkpoint
         id: edit
         shell: bash
@@ -190,6 +193,7 @@ jobs:
       - name: Commit verified checkpoint
         run: |
           rm -f scripts/temporary_guitar_pro_track_selection_checkpoint.py
+          rm -f scripts/temporary_prepare_guitar_pro_track_selection_checkpoint.py
           rm -f .github/workflows/temporary-guitar-pro-track-selection-checkpoint.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
