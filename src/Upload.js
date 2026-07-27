@@ -15,6 +15,7 @@ function Upload({ onFileUpload, disabled = false }) {
       <input
         id="file-upload"
         type="file"
+        aria-describedby="file-upload-help"
         disabled={disabled}
         onChange={handleFileChange}
       />
