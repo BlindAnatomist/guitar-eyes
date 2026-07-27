@@ -1,8 +1,17 @@
+import fs from "fs";
+import path from "path";
 import {
   detectTabFileFormat,
   shouldReadTabFileAsText,
   unsupportedTabFormatMessage,
 } from "./tabFormatDetector";
+
+function fixture(name) {
+  return fs.readFileSync(
+    path.join(process.cwd(), "fixtures", "real-world", name),
+    "utf8"
+  );
+}
 
 const asciiGuitar = [
   "Title and copied webpage text",
@@ -37,6 +46,30 @@ describe("detectTabFileFormat", () => {
       support: "supported",
       isText: true,
     });
+  });
+
+  test("recognizes octave-qualified and Unicode accidental ASCII content", () => {
+    expect(
+      detectTabFileFormat(
+        "octave-labels.data",
+        fixture("ascii-octave-qualified-standard.txt")
+      ).id
+    ).toBe("ascii-text");
+    expect(
+      detectTabFileFormat(
+        "unicode-labels.data",
+        fixture("ascii-unicode-accidentals.txt")
+      ).id
+    ).toBe("ascii-text");
+  });
+
+  test("does not mistake pipe-delimited prose for ASCII tablature", () => {
+    expect(
+      detectTabFileFormat(
+        "table.data",
+        fixture("ascii-pipe-delimited-nontab.txt")
+      ).id
+    ).toBe("unknown");
   });
 
   test("recognizes MusicXML by extension and by structured content", () => {
