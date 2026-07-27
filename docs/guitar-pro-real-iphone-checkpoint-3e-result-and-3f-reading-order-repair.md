@@ -14,13 +14,18 @@ John reported:
 
 > That worked the only thing that seemed to be a problem or at least annoying was when I tried to go backwards, swipe left through the buttons after I got to after I had selected the base proof and was on the upload button. I went back I swiped left because I wanted to hear what it said about the bass proof I hadn't heard everything. It was said about it yet. I just selected it and then moved to the upload button, but when I tried to go backwards, the voice focus didn't go back to the describing the base proof. It started reading the stuff about it having two tracks and I could select from two tracks, so it wasn't intuitive. It didn't move to where the focus should have gone to moving backwards through the buttons and selections, but the main part of it did work. I was able to upload that multi track file. It recognized It and then gave me my choices so I think that part of it passes. It's just again stuff with that voiceover, focus and stuff we've been over in the past with.
 
-Do not strengthen this report. It establishes:
+John then clarified:
+
+> I had not pressed upload yet. I got there and before I pressed it, I was just going backwards just to see if I could go backwards through everything I had just been through and like I said, VoiceOver went to talking about something at the beginning of the choices telling me that I had multiple choices rather than just moving backwards through what I just been through.
+
+Do not strengthen these reports. Together they establish:
 
 1. The 3E multi-track intake contract passed on John's real iPhone: the file uploaded, Guitar Eyes recognized it as multi-track, exposed the available choices, and allowed explicit selection.
-2. The remaining defect concerns backward VoiceOver review after selecting Proof Bass and reaching the `Load selected track` action.
-3. A backward swipe did not return to the selected bass description. VoiceOver instead returned to earlier general instructions about the two-track choice.
-4. The evidence does not establish a DOM-focus failure, automatic activation problem, importer failure, or incorrect track selection.
-5. The Guitar Pro intake checkpoint remains open only for this bounded reading-order defect and the final quiet-navigation and Read-current confirmation.
+2. John selected Proof Bass and moved forward to the `Load selected track` button.
+3. John had not activated `Load selected track`. He swiped left only to review the immediately preceding selected-track information.
+4. The backward swipe did not return to the selected bass description. VoiceOver instead returned to earlier general instructions about the two-track choice.
+5. The evidence establishes a backward reading-order defect before activation. It does not establish an upload failure, loading failure, automatic activation problem, importer failure, or incorrect track selection.
+6. The Guitar Pro intake checkpoint remains open only for this bounded reading-order defect and the final quiet-navigation and Read-current confirmation.
 
 ## Matching repository canon
 
