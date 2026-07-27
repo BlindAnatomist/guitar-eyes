@@ -33,6 +33,7 @@ Guitar Eyes is one musical system with one semantic tablature document and two r
 3. Every supported format must normalize into the same semantic document.
 4. Format-specific parsers may interpret source syntax but may not create separate reader logic, playback logic, or musical models.
 5. Browser-level file filtering must not prevent iPhone users from selecting a file before Guitar Eyes can validate it.
+6. A third-party decoder may exist only behind an adapter and may not become the application architecture.
 
 ## Accepted reader contracts
 
@@ -93,7 +94,7 @@ Verification:
 
 ## Passed MusicXML intake checkpoint 2
 
-Uncompressed six-string guitar MusicXML is now source-verified, hosted, and real-iPhone accepted.
+Uncompressed six-string guitar MusicXML is source-verified, hosted, and real-iPhone accepted.
 
 Accepted scope:
 
@@ -150,26 +151,50 @@ Detailed record:
 
 Recognition must not be described as reading support.
 
-## Current bounded task: next structured-format evaluation
+## Completed Guitar Pro evaluation
 
-Proceed without John through a read-only evaluation and implementation plan for Guitar Pro and related binary formats.
+The July 27 structured-format evaluation concluded:
 
-The evaluation must determine:
+1. alphaTab `1.8.4` can provide a browser-compatible low-level decoder for Guitar Pro 3 through 8.
+2. Guitar Eyes can use `ScoreLoader.loadScoreFromBytes` without using alphaTab rendering, playback, notation fonts, soundfonts, cursors, or UI controls.
+3. alphaTab's semantic model exposes the tuning, measures, beats, notes, string and fret coordinates, durations, chords, rests, and effects needed by the Guitar Eyes adapter.
+4. The package is broad and synchronous, so it must be lazy-loaded in a dedicated worker and contained by hard input, time, and complexity limits.
+5. alphaTab note string 1 is the lowest string; Guitar Eyes stores strings high to low, so normalization must reverse that orientation deliberately.
+6. MPL-2.0 permits use as an unchanged dependency with notices and corresponding-source information.
+7. An upstream alphaTab GP5 fixture was rejected because it contains a commercial-song transcription.
+8. The first fixture must be generated from project-authored alphaTex and exported as an original GP7 `.gp` file.
+9. PowerTab, TuxGuitar, TablEdit, Guitar Pro 2, compressed MusicXML, and unsupported string-count families require separate future routes.
 
-1. which Guitar Pro versions a zero-dollar browser-compatible importer can parse;
-2. whether alphaTab or another maintained dependency exposes tuning, measures, duration, notes, chords, rests, and techniques without requiring its renderer or playback engine;
-3. whether the dependency can normalize into the existing semantic document rather than introducing a second model;
-4. licensing, bundle-size, security, maintenance, deterministic-testing, and browser implications;
-5. whether PowerTab, TuxGuitar, and TablEdit can share that import route or require separate conversion paths;
-6. what original or clearly licensed fixtures are available;
-7. the exact unsupported boundary.
+Detailed record:
 
-Do not begin implementation if essential musical data would be guessed, if the dependency forces playback or rendering architecture into the reader, or if the licensing path is unsuitable.
+- `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
 
-This task does not authorize playback, teacher mode, looping, bookmarks, pattern analysis, AI implementation, commercial scraping, a pull request, merge, upstream change, or production publication.
+## Current bounded checkpoint: Guitar Pro 7 proof 3A
+
+Implement a source, dependency, fixture, and normalization proof for project-authored Guitar Pro 7 `.gp` files.
+
+Checkpoint 3A must:
+
+1. pin `@coderline/alphatab` exactly at `1.8.4`;
+2. add MPL-2.0 notices without modifying or vendoring alphaTab source;
+3. create original alphaTex and a deterministic GP7 fixture;
+4. load alphaTab only after Guitar Pro detection;
+5. parse in a dedicated worker with timeout, cancellation, termination, byte limits, and complexity limits;
+6. transfer a small serializable intermediate representation rather than the alphaTab score model;
+7. normalize one unambiguous four-string or six-string non-percussion staff into the existing semantic document;
+8. preserve source-order measures, exact duration, notes, open strings, dead notes, chord onsets, timed rests, tuning, and supported techniques;
+9. reject multiple supported tracks, conflicting voices, missing coordinates, unsupported string counts, ambiguous timing, grace timing outside the model, corrupt archives, and limit violations;
+10. avoid silent first-track, first-voice, longest-note, or nearest-string selection;
+11. verify all inherited tests plus new importer tests;
+12. inspect production chunks and reject eager alphaTab loading, fonts, soundfonts, renderer workers, playback worklets, or audio assets;
+13. stop before publication and real-iPhone testing.
+
+During checkpoint 3A, project-tested import support is GP7 `.gp` only. GP3, GP4, GP5, GP6, GP8, and GP2 remain recognized but unsupported until each has an original, public-domain, or clearly licensed fixture and direct evidence.
+
+This checkpoint does not authorize playback, teacher mode, looping, bookmarks, pattern analysis, AI implementation, commercial scraping, a pull request, merge, upstream change, or production publication.
 
 ## Testing responsibility
 
-Research, dependency evaluation, fixture design, source implementation, automated tests, and build verification proceed without John.
+Dependency work, fixture generation, source implementation, automated tests, builds, and artifact inspection proceed without John.
 
-John is needed only after a stable hosted candidate for the next format exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
+John is needed only after a stable hosted GP7 candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
