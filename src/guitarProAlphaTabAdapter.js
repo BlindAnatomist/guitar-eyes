@@ -91,6 +91,26 @@ function trackToIntermediate(track) {
   };
 }
 
+function serializeVersionEvidence(versionEvidence) {
+  if (!versionEvidence) return null;
+
+  const serialized = {
+    schemaVersion: Number(versionEvidence.schemaVersion),
+    archiveFamily: String(versionEvidence.archiveFamily),
+    rootVersion: String(versionEvidence.rootVersion),
+    gpVersion: String(versionEvidence.gpVersion),
+    encodingDescription: String(versionEvidence.encodingDescription),
+    sourceVersion: String(versionEvidence.sourceVersion),
+    entryCount: Number(versionEvidence.entryCount),
+  };
+
+  if (Number.isInteger(versionEvidence.declaredTrackCount)) {
+    serialized.declaredTrackCount = versionEvidence.declaredTrackCount;
+  }
+
+  return serialized;
+}
+
 export function alphaTabScoreToGuitarProIntermediate(
   score,
   { versionEvidence } = {}
@@ -98,17 +118,7 @@ export function alphaTabScoreToGuitarProIntermediate(
   return {
     schemaVersion: 1,
     sourceVersion: String(versionEvidence?.sourceVersion || ""),
-    versionEvidence: versionEvidence
-      ? {
-          schemaVersion: Number(versionEvidence.schemaVersion),
-          archiveFamily: String(versionEvidence.archiveFamily),
-          rootVersion: String(versionEvidence.rootVersion),
-          gpVersion: String(versionEvidence.gpVersion),
-          encodingDescription: String(versionEvidence.encodingDescription),
-          sourceVersion: String(versionEvidence.sourceVersion),
-          entryCount: Number(versionEvidence.entryCount),
-        }
-      : null,
+    versionEvidence: serializeVersionEvidence(versionEvidence),
     title: String(score?.title || score?.subTitle || "Guitar Pro tablature"),
     tracks: Array.from(score?.tracks || [], trackToIntermediate),
   };
