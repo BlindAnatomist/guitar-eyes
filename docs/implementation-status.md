@@ -22,6 +22,8 @@ Verified ASCII intake expansion source: `08f8ab16135570d0e53b829daa5c153a15751a4
 
 Verified MusicXML implementation source: `715547a123b2a6e862a8020858df96cb34c63526`
 
+Verified, hosted, and real-iPhone-accepted Guitar Pro source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+
 Fork `main` remains exactly reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
 ## Governing architecture
@@ -51,6 +53,8 @@ Every intake checkpoint must preserve:
 10. Native iPhone Files-picker focus recovery.
 11. No browser-level `accept` restriction on the upload control.
 12. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
+13. Multi-track Guitar Pro archives must expose an inventory and require explicit selection.
+14. A selected-track summary must immediately precede `Load selected track` in VoiceOver reading order.
 
 ## Passed convergence recovery checkpoint 1
 
@@ -131,6 +135,38 @@ Detailed record:
 
 - `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`
 
+## Passed Guitar Pro shared-archive checkpoint 3
+
+Exact accepted source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+
+Accepted bounded capability:
+
+1. A project-authored single-track `.gp` shared archive with GP8 semantic evidence loads automatically as six-string guitar.
+2. A project-authored two-track `.gp` shared archive exposes Proof Guitar and Proof Bass.
+3. No track is selected silently.
+4. `Load selected track` remains disabled until the owner explicitly selects a track.
+5. Explicit bass selection normalizes into the same semantic document used by desktop and iPhone.
+6. The accepted decoded intermediate is reused after selection; alphaTab is not run a second time.
+7. Archive-declared track count is cross-checked against decoder output so an incomplete one-track result cannot be accepted from a two-track archive.
+8. The separate Guitar or Bass control does not filter Guitar Pro tracks.
+9. The selected-track details occur directly before `Load selected track` in VoiceOver reading order.
+10. Guitar Pro decoding remains lazy and contains no rendering, playback, notation fonts, soundfonts, renderer workers, or audio worklets.
+
+Evidence:
+
+1. Checkpoint 3D direct binary proof passed 29 of 29 suites and 174 of 174 tests, production build, and lazy-resource inspection.
+2. Checkpoint 3E archive-integrity and explicit-selection repair passed the complete inherited and new suite, production build, Pages deployment, and exact live asset read-back.
+3. Real-iPhone 3E acceptance established multi-track recognition, explicit choices, and successful Proof Bass loading.
+4. Checkpoint 3F selected-track reading-order repair passed the complete suite, production build, Pages deployment, and exact live asset read-back.
+5. John confirmed the bounded 3F backward-swipe retest with: `That worked`.
+6. Fork `main` was restored exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3` after each temporary Pages publication.
+
+Detailed records:
+
+- `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
+- `docs/guitar-pro-real-iphone-checkpoint-3d-result-and-3e-repair.md`
+- `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`
+
 ## Current format support
 
 ### Actually imported into the semantic document
@@ -138,58 +174,33 @@ Detailed record:
 1. ASCII `.txt` and `.tab` six-string guitar.
 2. ASCII `.txt` and `.tab` four-string bass.
 3. Uncompressed `.musicxml` and `.xml` six-string guitar tablature within the accepted bounded profile.
+4. Verified project-authored `.gp` shared archives with GP8 semantic evidence, including one six-string guitar track and the accepted two-track guitar-and-bass proof.
 
 ### Recognized but not imported
 
 1. Five-string bass ASCII.
 2. Seven-string guitar ASCII.
 3. Compressed MusicXML `.mxl`.
-4. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, and `.gp`.
-5. PowerTab `.ptb` and `.pt2`.
-6. TuxGuitar `.tg`.
-7. TablEdit `.tef`.
+4. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, and `.gpx`.
+5. Unverified or arbitrary `.gp` archives outside the accepted project-authored GP8-style fixtures.
+6. PowerTab `.ptb` and `.pt2`.
+7. TuxGuitar `.tg`.
+8. TablEdit `.tef`.
 
 Recognition must not be described as reading support.
 
-## Completed Guitar Pro evaluation
+## Guitar Pro boundaries that remain unchanged
 
-The July 27 structured-format evaluation concluded:
-
-1. alphaTab `1.8.4` can provide a browser-compatible low-level decoder for Guitar Pro 3 through 8.
-2. Guitar Eyes can use `ScoreLoader.loadScoreFromBytes` without using alphaTab rendering, playback, notation fonts, soundfonts, cursors, or UI controls.
-3. alphaTab's semantic model exposes the tuning, measures, beats, notes, string and fret coordinates, durations, chords, rests, and effects needed by the Guitar Eyes adapter.
-4. The package is broad and synchronous, so it must be lazy-loaded in a dedicated worker and contained by hard input, time, and complexity limits.
-5. alphaTab note string 1 is the lowest string; Guitar Eyes stores strings high to low, so normalization must reverse that orientation deliberately.
-6. MPL-2.0 permits use as an unchanged dependency with notices and corresponding-source information.
-7. An upstream alphaTab GP5 fixture was rejected because it contains a commercial-song transcription.
-8. The first fixture is generated from project-authored alphaTex. Its root archive marker is 7.0, while its internal GPIF evidence identifies GP8 semantics; it must therefore be treated as a shared-archive GP8 specimen rather than a clean GP7 file.
-9. PowerTab, TuxGuitar, TablEdit, Guitar Pro 2, compressed MusicXML, and unsupported string-count families require separate future routes.
-
-Detailed record:
-
-- `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
-
-## Current bounded checkpoint: Guitar Pro multi-track binary proof 3D
-
-Verify the accepted track-inventory and selector contract against one project-authored `.gp` archive containing both a six-string guitar track and a four-string bass track.
-
-Checkpoint 3D must:
-
-1. export the original two-track alphaTex deterministically through pinned alphaTab 1.8.4;
-2. reload exactly two named tracks with one staff and two measures each;
-3. inspect GP8 semantic evidence from the generated archive bytes;
-4. extract the real alphaTab score into the serializable Guitar Eyes intermediate;
-5. return two supported inventory items and require selection;
-6. reuse that intermediate for explicit bass selection without another decoder call;
-7. normalize the bass track into the shared desktop and iPhone semantic document;
-8. preserve all 29 suites and 173 tests from checkpoint 3C and add direct binary coverage;
-9. preserve the lazy decoder and no-audio/no-renderer asset boundary;
-10. stop before publication and real-iPhone testing.
-
-The branch remains an unhosted proof. Playback, teacher mode, looping, bookmarks, pattern analysis, AI work, commercial scraping, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
+1. Do not claim general GP7 support.
+2. Do not claim GP3 through GP6 support without lawful verified fixtures and direct tests.
+3. Do not claim arbitrary Guitar Pro compatibility from the accepted project-authored fixtures.
+4. Do not add a renderer, player, soundfont, audio worker, or playback implementation.
+5. Do not silently select a track.
+6. Do not create a second musical model.
+7. PowerTab, TuxGuitar, TablEdit, Guitar Pro 2, and compressed MusicXML require separate future routes.
 
 ## Testing responsibility
 
 Dependency work, fixture generation, source implementation, automated tests, builds, and artifact inspection proceed without John.
 
-John is needed only after a stable hosted shared-archive candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
+John is needed only for a stable hosted candidate and a bounded real-iPhone Safari and VoiceOver acceptance checkpoint.
