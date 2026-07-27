@@ -8,10 +8,10 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
     () => (Array.isArray(inventory?.supportedItems) ? inventory.supportedItems : []),
     [inventory]
   );
-  const [selectedId, setSelectedId] = useState(supportedItems[0]?.id || "");
+  const [selectedId, setSelectedId] = useState("");
 
   useEffect(() => {
-    setSelectedId(supportedItems[0]?.id || "");
+    setSelectedId("");
   }, [supportedItems]);
 
   const selectedItem = supportedItems.find((item) => item.id === selectedId) || null;
@@ -36,13 +36,16 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
       <h2 id="guitar-pro-track-selector-heading" ref={headingRef} tabIndex="-1">
         Choose a Guitar Pro track
       </h2>
-      <p>
-        This file contains {supportedItems.length} supported tablature {supportedItems.length === 1 ? "track" : "tracks"}. Choose the one to open in Guitar Eyes.
+      <p id="guitar-pro-track-selector-instructions">
+        This file contains {supportedItems.length} supported tablature {supportedItems.length === 1 ? "track" : "tracks"}. No track is selected. Choose one explicitly before loading it. The separate Guitar or Bass control does not filter Guitar Pro tracks.
       </p>
 
       <form onSubmit={handleSubmit}>
-        <fieldset disabled={disabled}>
-          <legend>Available tablature tracks</legend>
+        <fieldset
+          disabled={disabled}
+          aria-describedby="guitar-pro-track-selector-instructions"
+        >
+          <legend>Available tablature tracks, {supportedItems.length} choices</legend>
           <div className="guitar-pro-track-options">
             {supportedItems.map((item) => (
               <label key={item.id} htmlFor={item.id}>
