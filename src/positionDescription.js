@@ -81,6 +81,11 @@ export function describePlayablePosition(document, positionIndex) {
     parts.push(`Duration, ${position.duration.name}.`);
   }
 
-  parts.push(...playableDescriptions);
+  if (position.isRest) {
+    parts.push("Rest.");
+  } else {
+    parts.push(...playableDescriptions);
+  }
+
   return parts.join(" ");
 }
