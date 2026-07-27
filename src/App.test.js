@@ -58,7 +58,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText(/Test build: Convergence recovery from accepted semantic core/i)
+      screen.getByText(/Test build: Tablature intake expansion checkpoint 1/i)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
@@ -152,6 +152,39 @@ describe("Guitar Eyes application shell", () => {
 
     await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/could not be loaded in iPhone reading mode/i)).toBeInTheDocument();
+  });
+
+  test("recognizes unsupported seven-string ASCII without showing a misleading desktop grid", async () => {
+    render(<App />);
+
+    const file = new File(
+      [
+        "E4|--0--|\n",
+        "B3|--0--|\n",
+        "G3|--0--|\n",
+        "D3|--0--|\n",
+        "A2|--0--|\n",
+        "E2|--0--|\n",
+        "B1|--0--|\n",
+      ],
+      "seven-string.tab",
+      { type: "text/plain" }
+    );
+
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [file] },
+    });
+
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Tablature could not be loaded",
+    });
+
+    expect(screen.getByText(/recognized 7-string ASCII tablature/i)).toBeInTheDocument();
+    expect(screen.getByText(/string count that is not yet supported/i)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 3, name: "Tablature 1" })).not.toBeInTheDocument();
+
+    await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
   test("recognizes MusicXML without pretending that structured import exists", async () => {
