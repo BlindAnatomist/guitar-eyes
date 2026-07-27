@@ -36,6 +36,22 @@ jobs:
         run: |
           set +e
           set -o pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/temporary_guitar_pro_shared_archive_correction.py')
+          text = path.read_text(encoding='utf-8')
+          old = '''    original = read(path)
+              changed = original
+          '''
+          new = '''    try:
+                  original = read(path)
+              except UnicodeDecodeError:
+                  continue
+              changed = original
+          '''
+          assert text.count(old) == 1
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
           python scripts/temporary_guitar_pro_shared_archive_correction.py 2>&1 | tee /tmp/shared-archive-edit.log
           code=${PIPESTATUS[0]}
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
