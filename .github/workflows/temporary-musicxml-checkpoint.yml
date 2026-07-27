@@ -15,20 +15,20 @@ permissions:
 
 jobs:
   verify:
-    name: Verify exact MusicXML intake source
+    name: Verify corrected MusicXML intake source
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Check out exact MusicXML source
         uses: actions/checkout@v4
         with:
-          ref: 200cca20b0c655131cedb5eb5bb4b343c1d63cb0
+          ref: 715547a123b2a6e862a8020858df96cb34c63526
           fetch-depth: 0
           persist-credentials: false
 
       - name: Confirm source ancestry
         run: |
-          test "$(git rev-parse HEAD)" = "200cca20b0c655131cedb5eb5bb4b343c1d63cb0"
+          test "$(git rev-parse HEAD)" = "715547a123b2a6e862a8020858df96cb34c63526"
           git merge-base --is-ancestor 08f8ab16135570d0e53b829daa5c153a15751a45 HEAD
 
       - name: Set up Node.js
@@ -59,7 +59,7 @@ jobs:
         if: steps.tests.outputs.exit_code != '0'
         uses: actions/upload-artifact@v4
         with:
-          name: musicxml-test-log
+          name: musicxml-test-log-corrected
           path: /tmp/musicxml-tests.log
           if-no-files-found: error
           retention-days: 1
