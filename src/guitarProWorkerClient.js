@@ -15,7 +15,7 @@ function requestId() {
   return `guitar-pro-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export async function decodeGuitarPro7ProofFile(
+export async function decodeGuitarProArchiveProofFile(
   file,
   {
     workerFactory = null,
@@ -119,7 +119,6 @@ export async function decodeGuitarPro7ProofFile(
     worker.postMessage(
       {
         requestId: id,
-        sourceVersion: "GP7",
         bytes,
       },
       [bytes]
