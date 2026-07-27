@@ -26,7 +26,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Guitar Pro track selection proof 3C";
+const TEST_BUILD_LABEL = "Guitar Pro multi-track binary proof 3D";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {

@@ -230,6 +230,21 @@
         "six synchronized positions"
       ],
       "currentExpectation": "Archive inspection proves GP8 semantic evidence in the shared .gp family; normalization succeeds; GP7 remains unaccepted without a genuine fixture"
+    },
+    {
+      "path": "guitar-pro-multi-track-proof.gp",
+      "family": "guitar-pro-shared-archive",
+      "provenance": "Project-authored two-track alphaTex exported by pinned alphaTab 1.8.4",
+      "license": "CC0-1.0",
+      "features": [
+        "GP8 semantic evidence in shared 7.0 archive family",
+        "six-string guitar track",
+        "four-string bass track",
+        "two measures per track",
+        "selection required",
+        "decoded intermediate reused after selection"
+      ],
+      "currentExpectation": "Direct binary decoding returns two supported inventory items; no track is silently selected; explicit bass coordinates normalize without a second decode"
     }
   ],
   "externalSources": [

@@ -169,24 +169,24 @@ Detailed record:
 
 - `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
 
-## Current bounded checkpoint: Guitar Pro track selection proof 3C
+## Current bounded checkpoint: Guitar Pro multi-track binary proof 3D
 
-Preserve the verified shared-archive GP8 evidence and add explicit track inventory and selection without decoding the file twice.
+Verify the accepted track-inventory and selector contract against one project-authored `.gp` archive containing both a six-string guitar track and a four-string bass track.
 
-Checkpoint 3C must:
+Checkpoint 3D must:
 
-1. build a serializable inventory for every decoded track and staff;
-2. report track name, staff number, percussion status, string count, tuning, measure count, support status, and support reason;
-3. continue automatically only when exactly one supported four-string bass or six-string guitar staff exists;
-4. require explicit track and staff coordinates when more than one supported staff exists;
-5. reuse the decoded intermediate after selection and never rerun alphaTab;
-6. reject invalid or unsupported selection coordinates;
-7. present supported tracks as one accessible radio group and report unsupported tracks separately;
-8. move iPhone VoiceOver focus to the selector heading after picker return and to the reader heading after submission;
-9. preserve all inherited ASCII, MusicXML, shared-archive, desktop, iPhone, speech, timing, resource, and focus tests;
+1. export the original two-track alphaTex deterministically through pinned alphaTab 1.8.4;
+2. reload exactly two named tracks with one staff and two measures each;
+3. inspect GP8 semantic evidence from the generated archive bytes;
+4. extract the real alphaTab score into the serializable Guitar Eyes intermediate;
+5. return two supported inventory items and require selection;
+6. reuse that intermediate for explicit bass selection without another decoder call;
+7. normalize the bass track into the shared desktop and iPhone semantic document;
+8. preserve all 29 suites and 173 tests from checkpoint 3C and add direct binary coverage;
+9. preserve the lazy decoder and no-audio/no-renderer asset boundary;
 10. stop before publication and real-iPhone testing.
 
-The current branch remains an unhosted proof. Playback, teacher mode, looping, bookmarks, pattern analysis, AI work, commercial scraping, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
+The branch remains an unhosted proof. Playback, teacher mode, looping, bookmarks, pattern analysis, AI work, commercial scraping, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
 
 ## Testing responsibility
 

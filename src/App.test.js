@@ -67,7 +67,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText(/Test build: Guitar Pro track selection proof 3C/i)
+      screen.getByText(/Test build: Guitar Pro multi-track binary proof 3D/i)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })

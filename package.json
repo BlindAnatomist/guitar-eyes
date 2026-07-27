@@ -18,7 +18,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "generate:guitar-pro-archive-proof": "node scripts/generate-guitar-pro-shared-archive-proof.mjs",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate:guitar-pro-multi-track-proof": "node scripts/generate-guitar-pro-multi-track-proof.mjs"
   },
   "eslintConfig": {
     "extends": [
