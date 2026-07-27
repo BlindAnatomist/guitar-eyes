@@ -1,39 +1,28 @@
-const TECHNIQUE_NAMES = {
-  h: "hammer-on",
-  H: "hammer-on",
-  p: "pull-off",
-  P: "pull-off",
-  "/": "ascending slide",
-  "\\": "descending slide",
-  b: "bend",
-  B: "bend",
-  r: "bend release",
-  R: "bend release",
-  "~": "vibrato",
-  x: "muted note",
-  X: "muted note",
-  t: "tap",
-  T: "tap",
-  s: "slide",
-  S: "slide",
-};
+import {
+  analyzeTabRunsForProfile,
+  ASCII_INSTRUMENT_PROFILES,
+  classifyTabStringLine,
+} from "./tabStringLine";
 
-const INSTRUMENTS = {
-  guitar: {
-    id: "guitar",
-    label: "six-string guitar",
-    stringCount: 6,
-    standardTuning: ["E", "B", "G", "D", "A", "E"],
-  },
-  bass: {
-    id: "bass",
-    label: "four-string bass",
-    stringCount: 4,
-    standardTuning: ["G", "D", "A", "E"],
-  },
+const TECHNIQUE_DEFINITIONS = {
+  h: { name: "hammer-on", attachment: "next" },
+  H: { name: "hammer-on", attachment: "next" },
+  p: { name: "pull-off", attachment: "next" },
+  P: { name: "pull-off", attachment: "next" },
+  "/": { name: "ascending slide", attachment: "next" },
+  "\\": { name: "descending slide", attachment: "next" },
+  s: { name: "slide", attachment: "next" },
+  S: { name: "slide", attachment: "next" },
+  t: { name: "tap", attachment: "next" },
+  T: { name: "tap", attachment: "next" },
+  b: { name: "bend", attachment: "previous" },
+  B: { name: "bend", attachment: "previous" },
+  r: { name: "bend release", attachment: "previous" },
+  R: { name: "bend release", attachment: "previous" },
+  "~": { name: "vibrato", attachment: "previous" },
+  x: { name: "muted note", createsPosition: true },
+  X: { name: "muted note", createsPosition: true },
 };
-
-const STRING_LINE_PATTERN = /^\s*([A-Ga-g](?:#|b)?)\s*\|(.*)$/;
 
 export class TabParseError extends Error {
   constructor(message, code = "TAB_PARSE_ERROR") {
@@ -59,7 +48,7 @@ export function readTextFile(file) {
 }
 
 function getInstrumentConfig(selectedInstrument) {
-  const config = INSTRUMENTS[selectedInstrument];
+  const config = ASCII_INSTRUMENT_PROFILES[selectedInstrument];
 
   if (!config) {
     throw new TabParseError(
@@ -71,23 +60,14 @@ function getInstrumentConfig(selectedInstrument) {
   return config;
 }
 
-function normalizePitch(rawPitch) {
-  const letter = rawPitch.charAt(0).toUpperCase();
-  const accidental = rawPitch.slice(1);
-  return `${letter}${accidental}`;
+function pitchForSpeech(pitch, octave = null) {
+  let spoken = pitch;
+  if (pitch.endsWith("#")) spoken = `${pitch.charAt(0)} sharp`;
+  if (pitch.endsWith("b")) spoken = `${pitch.charAt(0)} flat`;
+  return octave === null ? spoken : `${spoken} ${octave}`;
 }
 
-function pitchForSpeech(pitch) {
-  if (pitch.endsWith("#")) {
-    return `${pitch.charAt(0)} sharp`;
-  }
-  if (pitch.endsWith("b")) {
-    return `${pitch.charAt(0)} flat`;
-  }
-  return pitch;
-}
-
-function makeStringIdentity(index, tuning, config) {
+function makeStringIdentity(index, tuning, octave, config) {
   const isStandard = tuning === config.standardTuning[index];
 
   if (config.id === "guitar" && isStandard && index === 0) {
@@ -113,8 +93,41 @@ function makeStringIdentity(index, tuning, config) {
 
   return {
     shortName: `string ${index + 1}`,
-    spokenName: `String ${index + 1}, tuned ${pitchForSpeech(tuning)}`,
+    spokenName: `String ${index + 1}, tuned ${pitchForSpeech(tuning, octave)}`,
   };
+}
+
+function isPlayableToken(token) {
+  return token.type === "fret" || token.createsPosition === true;
+}
+
+function attachTechniqueTokens(tokens) {
+  const playableTokens = tokens.filter(isPlayableToken);
+
+  tokens
+    .filter((token) => token.type === "technique" && !token.createsPosition)
+    .forEach((technique) => {
+      const target =
+        technique.attachment === "next"
+          ? playableTokens.find((token) => token.startColumn > technique.startColumn)
+          : [...playableTokens]
+              .reverse()
+              .find((token) => token.endColumn <= technique.startColumn);
+
+      if (!target) return;
+      target.techniques = [
+        ...(target.techniques || []),
+        {
+          name: technique.name,
+          raw: technique.raw,
+          attachment: technique.attachment,
+          sourceColumn: technique.startColumn,
+        },
+      ];
+      technique.attachedToColumn = target.startColumn;
+    });
+
+  return tokens;
 }
 
 function tokenizeContent(content) {
@@ -125,9 +138,7 @@ function tokenizeContent(content) {
 
     if (/\d/.test(char)) {
       let end = column + 1;
-      while (end < content.length && /\d/.test(content[end])) {
-        end += 1;
-      }
+      while (end < content.length && /\d/.test(content[end])) end += 1;
 
       const raw = content.slice(column, end);
       tokens.push({
@@ -136,27 +147,37 @@ function tokenizeContent(content) {
         value: Number.parseInt(raw, 10),
         startColumn: column,
         endColumn: end,
+        createsPosition: true,
+        techniques: [],
       });
       column = end - 1;
       continue;
     }
 
-    if (char === "-" || char === " " || char === "\t") {
-      continue;
-    }
+    if (char === "-" || char === " " || char === "\t") continue;
 
-    if (TECHNIQUE_NAMES[char]) {
+    if (char === "|") {
       tokens.push({
-        type: "technique",
+        type: "barline",
         raw: char,
-        name: TECHNIQUE_NAMES[char],
         startColumn: column,
         endColumn: column + 1,
+        createsPosition: false,
       });
       continue;
     }
 
-    if (char === "|" && column === content.length - 1) {
+    const technique = TECHNIQUE_DEFINITIONS[char];
+    if (technique) {
+      tokens.push({
+        type: "technique",
+        raw: char,
+        name: technique.name,
+        attachment: technique.attachment || null,
+        startColumn: column,
+        endColumn: column + 1,
+        createsPosition: technique.createsPosition === true,
+      });
       continue;
     }
 
@@ -165,63 +186,74 @@ function tokenizeContent(content) {
       raw: char,
       startColumn: column,
       endColumn: column + 1,
+      createsPosition: false,
     });
   }
 
-  return tokens;
+  return attachTechniqueTokens(tokens);
 }
 
 function parseStringLine(entry, index, blockIndex, config) {
-  const line = typeof entry === "string" ? entry : entry.line;
-  const lineNumber = typeof entry === "string" ? index + 1 : entry.lineNumber;
-  const match = line.match(STRING_LINE_PATTERN);
+  const classified =
+    entry?.kind === "string-line"
+      ? entry
+      : classifyTabStringLine(
+          typeof entry === "string" ? entry : entry?.line,
+          typeof entry === "string" ? index + 1 : entry?.lineNumber
+        );
 
-  if (!match) {
+  if (classified.kind !== "string-line") {
+    const lineNumber = classified.lineNumber ?? index + 1;
     throw new TabParseError(
       `Line ${lineNumber} is not a supported tablature string. Each string line must begin with a tuning label followed by a vertical bar, such as E|----0----|.`,
       "INVALID_STRING_LINE"
     );
   }
 
-  const tuning = normalizePitch(match[1]);
-  const content = match[2].replace(/\r$/, "");
-  const identity = makeStringIdentity(index, tuning, config);
+  const identity = makeStringIdentity(
+    index,
+    classified.tuning,
+    classified.octave,
+    config
+  );
 
   return {
     id: `block-${blockIndex + 1}-string-${index + 1}`,
     index,
     blockIndex,
-    tuning,
-    sourceLine: line,
-    sourceLineNumber: lineNumber,
-    content,
-    tokens: tokenizeContent(content),
+    tuning: classified.tuning,
+    octave: classified.octave,
+    rawLabel: classified.rawLabel,
+    sourceLine: classified.sourceLine,
+    sourceLineNumber: classified.lineNumber,
+    content: classified.content,
+    tokens: tokenizeContent(classified.content),
     ...identity,
   };
 }
 
 function stateAtColumn(string, column) {
-  const startingToken = string.tokens.find((token) => token.startColumn === column);
+  const startingToken = string.tokens.find(
+    (token) => token.startColumn === column && isPlayableToken(token)
+  );
 
   if (startingToken) {
     if (startingToken.type === "fret") {
-      return startingToken.value === 0
-        ? { type: "open", token: startingToken }
-        : { type: "fret", token: startingToken, fret: startingToken.value };
-    }
-
-    if (startingToken.type === "technique") {
+      const base =
+        startingToken.value === 0
+          ? { type: "open", token: startingToken }
+          : { type: "fret", token: startingToken, fret: startingToken.value };
       return {
-        type: "technique",
-        token: startingToken,
-        name: startingToken.name,
+        ...base,
+        techniques: startingToken.techniques || [],
       };
     }
 
     return {
-      type: "unsupported",
+      type: "technique",
       token: startingToken,
-      raw: startingToken.raw,
+      name: startingToken.name,
+      techniques: [],
     };
   }
 
@@ -237,17 +269,20 @@ function stateAtColumn(string, column) {
       type: "continuation",
       token: spanningFret,
       fret: spanningFret.value,
+      techniques: [],
     };
   }
 
-  return { type: "silent" };
+  return { type: "silent", techniques: [] };
 }
 
 function buildBlockPositions(strings, blockIndex) {
   const eventColumns = new Set();
 
   strings.forEach((string) => {
-    string.tokens.forEach((token) => eventColumns.add(token.startColumn));
+    string.tokens
+      .filter(isPlayableToken)
+      .forEach((token) => eventColumns.add(token.startColumn));
   });
 
   const columns = [...eventColumns].sort((left, right) => left - right);
@@ -266,14 +301,8 @@ function buildBlockPositions(strings, blockIndex) {
 }
 
 function formatList(items) {
-  if (items.length === 1) {
-    return items[0];
-  }
-
-  if (items.length === 2) {
-    return `${items[0]} and ${items[1]}`;
-  }
-
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
   return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
@@ -298,58 +327,31 @@ function collectBlockWarnings(strings, blockNumber) {
     warnings.push(
       `Block ${blockNumber} contains ${unsupportedCount} notation ${
         unsupportedCount === 1 ? "symbol that was" : "symbols that were"
-      } preserved but cannot yet be interpreted.`
+      } preserved but cannot yet be interpreted. Unsupported symbols did not create musical positions.`
+    );
+  }
+
+  const unattachedTechniqueCount = strings.reduce(
+    (count, string) =>
+      count +
+      string.tokens.filter(
+        (token) =>
+          token.type === "technique" &&
+          !token.createsPosition &&
+          token.attachedToColumn === undefined
+      ).length,
+    0
+  );
+
+  if (unattachedTechniqueCount > 0) {
+    warnings.push(
+      `Block ${blockNumber} contains ${unattachedTechniqueCount} technique ${
+        unattachedTechniqueCount === 1 ? "symbol that could" : "symbols that could"
+      } not be attached to a note without guessing.`
     );
   }
 
   return { warnings, maxLineLength };
-}
-
-function locateTabBlocks(sourceText, config, { allowNonTabText }) {
-  const normalizedLines = sourceText.replace(/\r\n?/g, "\n").split("\n");
-  const blocks = [];
-  const ignoredNonTabLines = [];
-  let pending = [];
-
-  normalizedLines.forEach((line, lineIndex) => {
-    if (STRING_LINE_PATTERN.test(line)) {
-      pending.push({ line, lineNumber: lineIndex + 1 });
-
-      if (pending.length === config.stringCount) {
-        blocks.push(pending);
-        pending = [];
-      }
-      return;
-    }
-
-    if (line.trim().length > 0) {
-      if (!allowNonTabText) {
-        throw new TabParseError(
-          `Line ${lineIndex + 1} is not part of the required clean ${config.label} tablature block.`,
-          "NON_TAB_TEXT_NOT_ALLOWED"
-        );
-      }
-      ignoredNonTabLines.push(lineIndex + 1);
-    }
-  });
-
-  if (pending.length > 0) {
-    throw new TabParseError(
-      `The final ${config.label} tablature block contains ${pending.length} string ${
-        pending.length === 1 ? "line" : "lines"
-      }; ${config.stringCount} are required.`,
-      "INCOMPLETE_TABLATURE_BLOCK"
-    );
-  }
-
-  if (blocks.length === 0) {
-    throw new TabParseError(
-      `No complete ${config.label} tablature block was found.`,
-      "NO_TABLATURE_BLOCKS"
-    );
-  }
-
-  return { blocks, ignoredNonTabLines };
 }
 
 function parseDocument(sourceText, selectedInstrument, options = {}) {
@@ -360,28 +362,39 @@ function parseDocument(sourceText, selectedInstrument, options = {}) {
   const config = getInstrumentConfig(selectedInstrument);
   const allowNonTabText = options.allowNonTabText !== false;
   const requireBlockCount = options.requireBlockCount ?? null;
-  const located = locateTabBlocks(sourceText, config, { allowNonTabText });
+  const analyzed = analyzeTabRunsForProfile(sourceText, config);
 
-  if (requireBlockCount !== null && located.blocks.length !== requireBlockCount) {
+  if (!analyzed.valid) {
+    throw new TabParseError(analyzed.message, analyzed.code);
+  }
+
+  if (!allowNonTabText && analyzed.nonTabLineNumbers.length > 0) {
+    throw new TabParseError(
+      `Line ${analyzed.nonTabLineNumbers[0]} is not part of the required clean ${config.label} tablature block.`,
+      "NON_TAB_TEXT_NOT_ALLOWED"
+    );
+  }
+
+  if (requireBlockCount !== null && analyzed.blocks.length !== requireBlockCount) {
     throw new TabParseError(
       `This parser accepts exactly ${requireBlockCount} ${config.label} tablature ${
         requireBlockCount === 1 ? "block" : "blocks"
-      }. The file contains ${located.blocks.length}.`,
+      }. The file contains ${analyzed.blocks.length}.`,
       "WRONG_BLOCK_COUNT"
     );
   }
 
-  const warnings = [];
+  const warnings = [...analyzed.warnings];
 
-  if (located.ignoredNonTabLines.length > 0) {
+  if (analyzed.nonTabLineNumbers.length > 0) {
     warnings.push(
-      `${located.ignoredNonTabLines.length} non-tablature ${
-        located.ignoredNonTabLines.length === 1 ? "line was" : "lines were"
+      `${analyzed.nonTabLineNumbers.length} non-tablature ${
+        analyzed.nonTabLineNumbers.length === 1 ? "line was" : "lines were"
       } ignored while locating tablature blocks.`
     );
   }
 
-  const blocks = located.blocks.map((entries, blockIndex) => {
+  const blocks = analyzed.blocks.map((entries, blockIndex) => {
     const strings = entries.map((entry, stringIndex) =>
       parseStringLine(entry, stringIndex, blockIndex, config)
     );
@@ -389,7 +402,7 @@ function parseDocument(sourceText, selectedInstrument, options = {}) {
 
     if (positions.length === 0) {
       throw new TabParseError(
-        `Block ${blockIndex + 1} contains no frets or recognizable tablature notation.`,
+        `Block ${blockIndex + 1} contains no frets, open strings, or explicit muted notes.`,
         "NO_MUSICAL_POSITIONS"
       );
     }
@@ -407,15 +420,13 @@ function parseDocument(sourceText, selectedInstrument, options = {}) {
     };
   });
 
-  const positions = blocks
-    .flatMap((block) => block.positions)
-    .map((position, index, allPositions) => ({
-      ...position,
-      index,
-      number: index + 1,
-      total: allPositions.length,
-    }));
-
+  const allPositions = blocks.flatMap((block) => block.positions);
+  const positions = allPositions.map((position, index) => ({
+    ...position,
+    index,
+    number: index + 1,
+    total: allPositions.length,
+  }));
   const strings = blocks.flatMap((block) => block.strings);
 
   return {
@@ -427,7 +438,7 @@ function parseDocument(sourceText, selectedInstrument, options = {}) {
     blocks,
     strings,
     positions,
-    warnings,
+    warnings: [...new Set(warnings)],
   };
 }
 
@@ -451,12 +462,16 @@ export function parseFourStringBassTabText(sourceText) {
   });
 }
 
+function techniquePhrase(techniques) {
+  if (!techniques || techniques.length === 0) return "";
+  const names = techniques.map((technique) => technique.name);
+  return `, with ${formatList(names)} notation preserved but not yet interpreted`;
+}
+
 export function describePosition(document, positionIndex) {
   const position = document?.positions?.[positionIndex];
 
-  if (!position) {
-    return "No tablature position is available.";
-  }
+  if (!position) return "No tablature position is available.";
 
   const stringById = new Map(document.strings.map((string) => [string.id, string]));
   const playedDescriptions = [];
@@ -464,26 +479,22 @@ export function describePosition(document, positionIndex) {
 
   [...position.strings].reverse().forEach((state) => {
     const string = stringById.get(state.stringId);
-
-    if (!string) {
-      return;
-    }
+    if (!string) return;
 
     switch (state.type) {
       case "fret":
-        playedDescriptions.push(`${string.spokenName}, fret ${state.fret}.`);
+        playedDescriptions.push(
+          `${string.spokenName}, fret ${state.fret}${techniquePhrase(state.techniques)}.`
+        );
         break;
       case "open":
-        playedDescriptions.push(`${string.spokenName}, open.`);
+        playedDescriptions.push(
+          `${string.spokenName}, open${techniquePhrase(state.techniques)}.`
+        );
         break;
       case "technique":
         playedDescriptions.push(
           `${string.spokenName}, ${state.name} notation preserved but not yet interpreted.`
-        );
-        break;
-      case "unsupported":
-        playedDescriptions.push(
-          `${string.spokenName}, notation at this position cannot yet be interpreted.`
         );
         break;
       case "continuation":
