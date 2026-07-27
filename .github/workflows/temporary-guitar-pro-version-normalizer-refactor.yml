@@ -86,7 +86,9 @@ jobs:
             }
             if (evidence.sourceVersion !== "GP8") {
               throw new GuitarProImportError(
-                `This checkpoint has direct project evidence for GP8 semantics inside the shared .gp archive only; the archive reports ${evidence.sourceVersion || "an unknown version"}.`,
+                "This checkpoint has direct project evidence for GP8 semantics inside the shared .gp archive only; the archive reports " +
+                  (evidence.sourceVersion || "an unknown version") +
+                  ".",
                 "UNTESTED_GUITAR_PRO_VERSION"
               );
             }
