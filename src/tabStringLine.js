@@ -6,12 +6,31 @@ export const ASCII_INSTRUMENT_PROFILES = {
     label: "six-string guitar",
     stringCount: 6,
     standardTuning: ["E", "B", "G", "D", "A", "E"],
+    allowCustomTuningWithoutOctaves: true,
   },
   bass: {
     id: "bass",
     label: "four-string bass",
     stringCount: 4,
     standardTuning: ["G", "D", "A", "E"],
+    allowCustomTuningWithoutOctaves: true,
+  },
+};
+
+export const UNSUPPORTED_ASCII_INSTRUMENT_PROFILES = {
+  sevenStringGuitar: {
+    id: "seven-string-guitar",
+    label: "seven-string guitar",
+    stringCount: 7,
+    standardTuning: ["E", "B", "G", "D", "A", "E", "B"],
+    allowCustomTuningWithoutOctaves: false,
+  },
+  fiveStringBass: {
+    id: "five-string-bass",
+    label: "five-string bass",
+    stringCount: 5,
+    standardTuning: ["G", "D", "A", "E", "B"],
+    allowCustomTuningWithoutOctaves: false,
   },
 };
 
@@ -182,6 +201,14 @@ function validateTuningSegment(segment, profile) {
     };
   }
 
+  if (!exactStandard && profile.allowCustomTuningWithoutOctaves === false) {
+    return {
+      valid: false,
+      code: "UNVERIFIED_TUNING_PROFILE",
+      message: `The ${profile.stringCount}-line run does not contain enough pitch evidence to identify ${profile.label} safely.`,
+    };
+  }
+
   const warnings = [];
   if (hasSomeOctave) {
     warnings.push(
@@ -267,5 +294,6 @@ export function analyzeTabRunsForProfile(sourceText, profile) {
 }
 
 export function containsPlayableAsciiNotation(content) {
-  return /\d|[xX]/.test(String(content ?? ""));
+  const text = String(content ?? "");
+  return /\d/.test(text) || /(?:^|[^A-Za-z])x(?:$|[^A-Za-z])/i.test(text);
 }
