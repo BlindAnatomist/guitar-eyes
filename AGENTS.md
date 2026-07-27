@@ -10,7 +10,7 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - The verified, hosted, and real-iPhone-accepted convergence source is `72159d25958fffd941c95351c6781cf579e1d622`.
 - The verified ASCII intake expansion source is `08f8ab16135570d0e53b829daa5c153a15751a45`.
 - The verified uncompressed MusicXML implementation source is `715547a123b2a6e862a8020858df96cb34c63526`.
-- The hosted MusicXML preview source is `8fd5a5133269d6a277c5d9f9dd916aa5f8dd96d0`; it differs only by static preview identity.
+- The hosted MusicXML preview source is `8fd5a5133269d6a277c5d9f9dd916aa5f8dd96d0`; later picker-repair commits preserve that importer while removing browser-level file filtering.
 - Documentation-only commits after those sources do not replace their implementation identities.
 - Preserve `work/convergence-from-accepted-semantic-core` as the accepted convergence record.
 - Perform tablature-format expansion only on `work/tablature-intake-expansion` unless the owner explicitly authorizes another branch.
@@ -39,7 +39,8 @@ Before changing implementation, accessibility behavior, repository administratio
 16. `docs/ascii-intake-expansion-checkpoint-1-result-2026-07-26.md`;
 17. `docs/musicxml-intake-checkpoint-2-result-2026-07-26.md`;
 18. `docs/musicxml-intake-checkpoint-2-publication-2026-07-26.md`;
-19. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+19. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
+20. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, workflow, or format-import procedure that is already recorded.
 
@@ -59,6 +60,7 @@ Every importer and parser change must preserve:
 - omission of ordinary unplayed strings from speech;
 - continued speech for open strings, frets, explicit mute notation, attached techniques, rests, chords, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure;
+- no browser-level `accept` restriction that prevents iPhone users from selecting a file before Guitar Eyes can validate it;
 - Jason Washburn's recognizable desktop spatial concept and non-interception of VoiceOver Control+Option commands.
 
 ## Semantic architecture
@@ -75,46 +77,45 @@ Exact source `08f8ab16135570d0e53b829daa5c153a15751a45` passed 18 suites, 101 te
 
 It adds octave-qualified ASCII labels, Unicode accidental normalization, safer tuning-order validation, custom-tuning preservation, deterministic technique attachment, false-position prevention, positive five- and seven-string non-support recognition, pipe-prose false-positive prevention, and honest upload outcomes.
 
-## Verified and hosted MusicXML checkpoint
+## Accepted MusicXML checkpoint
 
-Exact implementation source `715547a123b2a6e862a8020858df96cb34c63526` passed:
+Uncompressed six-string guitar MusicXML is now source-verified, hosted, and real-iPhone accepted.
 
-- accepted ASCII ancestry;
-- locked installation;
-- 19 of 19 automated suites;
-- 115 of 115 automated tests;
-- production build;
-- corrected compiled-fragment checks.
+Evidence includes:
 
-Hosted source `8fd5a5133269d6a277c5d9f9dd916aa5f8dd96d0` was published through the temporary-main Pages procedure. Run `30229933051` passed build, deployment, live HTML and asset read-back, MusicXML bundle checks, and failure-report skip. Fork `main` was restored and independently compared as identical, zero ahead, zero behind, and zero changed files.
+- 19 of 19 suites and 115 of 115 tests for the importer implementation;
+- picker repair verification at 20 of 20 suites and 117 of 117 tests;
+- production builds and compiled checks;
+- hosted read-back of the MusicXML bundle;
+- removal of the browser-level file-extension filter;
+- successful real-iPhone selection of `.musicxml` files;
+- correct picker-return focus;
+- correct low-E, A-string, and D-string mapping;
+- correct quarter, eighth, and half-note speech;
+- simultaneous chord speech at one position;
+- timed-rest speech without a string instruction;
+- quiet Previous and Next behavior;
+- exact restoration of fork `main`.
 
-The importer supports uncompressed six-string guitar MusicXML with one unambiguous tablature part, explicit tuning, string and fret coordinates, single-voice sequential timing, chords, timed rests, measures, durations, open strings, frets, and supported technical notation through the shared desktop and iPhone semantic document.
+The accepted scope remains deliberately narrow: uncompressed `score-partwise` MusicXML, one unambiguous six-string guitar tablature part, explicit tuning, explicit string and fret data, and single-voice sequential timing.
 
-It safely rejects malformed XML, custom entities, missing or ambiguous tablature parts, missing tuning, unsafe tuning order, backup/forward timing, multiple voices, grace notes, missing tab coordinates, out-of-range strings, and duplicate string assignments at one onset.
+## Current authorized task: next structured-format evaluation
 
-## Current authorized task: real-iPhone MusicXML acceptance
+Proceed without John through a read-only evaluation and bounded implementation plan for the next format family.
 
-John now performs one bounded Safari and VoiceOver test against:
+Priority order:
 
-`https://blindanatomist.github.io/guitar-eyes/`
+1. evaluate Guitar Pro import through a browser-compatible, zero-dollar structured importer such as alphaTab;
+2. determine which Guitar Pro versions are actually supported and whether the importer can expose tuning, measures, durations, notes, chords, rests, and techniques without using its renderer or playback engine;
+3. determine whether PowerTab, TuxGuitar, and TablEdit can be imported directly or safely converted through the same path;
+4. identify licensing, bundle-size, maintenance, security, and deterministic-testing implications;
+5. design normalization into the existing semantic document;
+6. stop before implementation if any required musical data would be guessed or if the dependency would force a second reader model.
 
-The test must cover:
-
-1. native Files-picker return focus;
-2. successful MusicXML import status;
-3. Previous and Next as quiet movement controls;
-4. Read current measure, position, duration, and playing speech;
-5. MusicXML low-E string and fret mapping;
-6. a simultaneous chord onset;
-7. a timed rest;
-8. compressed `.mxl` remaining honestly unsupported if tested.
-
-Do not begin another importer or downstream feature until this real-device result is recorded.
+Do not bring John into research, dependency evaluation, fixture design, source implementation, automated testing, or build work. Bring him in only after a stable hosted candidate requires real-iPhone judgment.
 
 Do not begin:
 
-- compressed `.mxl` support;
-- Guitar Pro, PowerTab, TuxGuitar, or TablEdit implementation;
 - playback;
 - teacher mode;
 - looping;
@@ -123,8 +124,6 @@ Do not begin:
 - AI implementation;
 - commercial scraping;
 - a pull request, merge, or upstream change.
-
-Recognizing a file extension is not reading the format. Do not claim accepted MusicXML support until the hosted preview passes the bounded real-iPhone test.
 
 ## Zero-dollar automation
 
@@ -137,5 +136,3 @@ For a failed Actions run, inspect the failed job and logs before acting. Rerun o
 ## Accessibility and evidence
 
 Automated tests do not replace bounded real-iPhone Safari and VoiceOver acceptance. Record the owner's exact observation without strengthening or rewriting it.
-
-Do not bring John into source, fixture, automated, or build work. Bring him in only after a stable hosted candidate requires real-iPhone judgment.
