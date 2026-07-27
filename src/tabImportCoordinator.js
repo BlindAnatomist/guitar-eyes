@@ -2,6 +2,7 @@ import { applyAsciiRhythmToDocument } from "./asciiRhythm";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { parseTabDocumentText, TabParseError } from "./iphoneTabModel";
 import { applyExplicitMeasuresToDocument } from "./measureModel";
+import { parseMusicXmlTablature } from "./musicXmlImporter";
 import { parseTabText } from "./parseFile";
 import {
   analyzeTabRunsForProfile,
@@ -89,6 +90,8 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
         resolvedInstrument: candidate.instrument,
         instrumentWasDetected: candidate.instrument !== requestedInstrument,
         supportOutcome: "supported",
+        sourceFormat: "ascii-text",
+        sourceFormatLabel: "ASCII text tablature",
       };
     } catch (error) {
       if (candidate.instrument === requestedInstrument || semanticError === null) {
@@ -126,5 +129,25 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
       semanticError.code === "UNSUPPORTED_STRING_COUNT"
         ? "recognized-unsupported"
         : "unsafe-fallback",
+    sourceFormat: "ascii-text",
+    sourceFormatLabel: "ASCII text tablature",
+  };
+}
+
+export function buildMusicXmlReaderDocuments(sourceText) {
+  const semanticDocument = parseMusicXmlTablature(sourceText);
+  const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
+
+  return {
+    desktopBlocks,
+    desktopSource: "semantic",
+    semanticDocument,
+    semanticError: null,
+    requestedInstrument: "guitar",
+    resolvedInstrument: "guitar",
+    instrumentWasDetected: false,
+    supportOutcome: "supported",
+    sourceFormat: "musicxml",
+    sourceFormatLabel: "MusicXML tablature",
   };
 }
