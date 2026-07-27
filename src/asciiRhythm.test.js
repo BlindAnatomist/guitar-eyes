@@ -82,7 +82,7 @@ describe("ASCII rhythm extraction", () => {
     );
   });
 
-  test("does not assign a separate duration to technique-only positions", () => {
+  test("maps durations only to notes when transition symbols occupy source columns", () => {
     const source = makeTab([
       "Rhythm: Q E",
       "e|--5h7--|",
@@ -94,15 +94,16 @@ describe("ASCII rhythm extraction", () => {
     ]);
     const parsed = parseTabDocumentText(source, "guitar");
     const document = applyAsciiRhythmToDocument(source, parsed);
-    const techniquePosition = document.positions.find((position) =>
-      position.strings.some((state) => state.type === "technique")
-    );
 
+    expect(document.positions).toHaveLength(2);
     expect(document.blocks[0].rhythm.mappedCount).toBe(2);
-    expect(techniquePosition.duration).toBeUndefined();
+    expect(document.positions.map((position) => position.duration?.symbol)).toEqual([
+      "Q",
+      "E",
+    ]);
     expect(
-      document.positions.filter((position) => position.duration).map((position) => position.duration.symbol)
-    ).toEqual(["Q", "E"]);
+      document.positions[1].strings.find((state) => state.type === "fret")?.techniques
+    ).toEqual([expect.objectContaining({ name: "hammer-on" })]);
   });
 
   test("keeps strict clean-tab parsing free of rhythm metadata when no line exists", () => {
