@@ -1,3 +1,8 @@
+import {
+  collectTabStringLineRuns,
+  containsPlayableAsciiNotation,
+} from "./tabStringLine";
+
 const FORMAT_DEFINITIONS = {
   "ascii-text": {
     id: "ascii-text",
@@ -67,8 +72,6 @@ const EXTENSION_FORMATS = new Map([
   ["tef", "tabledit"],
 ]);
 
-const STRING_LINE_PATTERN = /^\s*[A-Ga-g](?:#|b)?\s*\|/;
-
 function definition(id) {
   return { ...FORMAT_DEFINITIONS[id] };
 }
@@ -80,22 +83,12 @@ function extensionFromName(fileName) {
 }
 
 function hasAsciiTabRun(sourceText) {
-  const lines = String(sourceText || "").replace(/\r\n?/g, "\n").split("\n");
-  let currentRun = 0;
-  let longestRun = 0;
-
-  lines.forEach((line) => {
-    if (STRING_LINE_PATTERN.test(line)) {
-      currentRun += 1;
-      longestRun = Math.max(longestRun, currentRun);
-    } else if (line.trim().length === 0) {
-      return;
-    } else {
-      currentRun = 0;
-    }
-  });
-
-  return longestRun >= 4;
+  const { runs } = collectTabStringLineRuns(sourceText);
+  return runs.some(
+    (run) =>
+      run.length >= 4 &&
+      run.some((entry) => containsPlayableAsciiNotation(entry.content))
+  );
 }
 
 function looksLikeMusicXml(sourceText) {
@@ -105,13 +98,8 @@ function looksLikeMusicXml(sourceText) {
 
 export function detectTabFileFormat(fileName, sourceText = "") {
   if (sourceText) {
-    if (looksLikeMusicXml(sourceText)) {
-      return definition("musicxml");
-    }
-
-    if (hasAsciiTabRun(sourceText)) {
-      return definition("ascii-text");
-    }
+    if (looksLikeMusicXml(sourceText)) return definition("musicxml");
+    if (hasAsciiTabRun(sourceText)) return definition("ascii-text");
   }
 
   const extension = extensionFromName(fileName);
