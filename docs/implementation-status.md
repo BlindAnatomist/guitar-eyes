@@ -10,225 +10,180 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Current recovery branch: `work/convergence-from-accepted-semantic-core`
-
-Accepted semantic foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
-
-Verified and hosted recovery source: `72159d25958fffd941c95351c6781cf579e1d622`
+Current implementation branch: `work/tablature-intake-expansion`
 
 Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-Fork `main` is identical to the authoritative upstream commit. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
+Accepted semantic foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
 
-Documentation-only commits after the verified source do not replace the implementation identity.
+Verified, hosted, and real-iPhone-accepted convergence source: `72159d25958fffd941c95351c6781cf579e1d622`
 
-## Invalidated convergence line
+Verified ASCII intake expansion source: `08f8ab16135570d0e53b829daa5c153a15751a45`
 
-The July 26 preview built from `d26e4172a0386ceb56ad5c0061e72d975b42fc43` remains invalidated.
+Fork `main` remains reserved as an exact upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
-That source was on a diverged line 120 commits behind the accepted rhythm-and-measure foundation. Its passing tests verified a thinner replacement contract and did not prove preservation of accepted behavior.
+Documentation-only commits after the exact implementation sources do not replace their identities.
 
-The owner's real-iPhone test exposed the lost contracts:
+## Governing architecture
 
-1. movement controls repeated complete playing instructions;
-2. ordinary unplayed strings were announced;
-3. accepted duration speech was absent.
+Guitar Eyes is one musical system with one semantic tablature document and two reader interfaces:
 
-Do not continue implementation or acceptance work on `work/iphone-voiceover-tablature-audit`. Preserve it as forensic evidence.
+1. iPhone presents synchronized musical positions sequentially for Safari and VoiceOver.
+2. Desktop presents the same document as strings by synchronized positions while retaining the original spatial source layout.
+3. Every supported format must normalize into the same semantic document.
+4. Instrument identity, tuning, blocks, strings, notes, techniques, rhythm, measures, warnings, and preserved unsupported material belong to that document.
+5. Format-specific parsers may interpret source syntax, but they may not create separate reader logic or separate musical models.
 
-## Required continuity reading
+The legacy desktop grid remains a compatibility fallback for unsafe ASCII material. Recognized but unsupported formats and string-count families must be identified honestly rather than opened as though semantic reading succeeded.
 
-Before changing implementation, deployment, accessibility, testing, or repository administration, inspect:
+## Accepted reader contracts
 
-1. `AGENTS.md`;
-2. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
-3. `docs/solved-problems-and-reusable-procedures.md`;
-4. `docs/shared-semantic-core-plan.md`;
-5. `docs/shared-semantic-core-implementation.md`;
-6. `docs/real-world-tab-format-corpus-checkpoint-1.md`;
-7. `docs/rhythm-duration-checkpoint-1.md`;
-8. `docs/measure-recognition-checkpoint-1.md`;
-9. `docs/convergence-lineage-recovery-2026-07-26.md`;
-10. `docs/convergence-recovery-source-checkpoint-1.md`;
-11. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
-12. `docs/convergence-recovery-publication-preflight-2026-07-26.md`;
-13. `docs/convergence-recovery-publication-result-2026-07-26.md`;
-14. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
-15. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+Every intake checkpoint must preserve:
 
-Do not rely on chat memory, branch names, or recent modification dates when exact ancestry and accepted evidence exist.
+1. Previous position, Read current position, Next position order.
+2. Quiet position and block movement.
+3. Read current as the only semantic-reader action that sends full playing instructions to the live region.
+4. Omission of ordinary unplayed strings.
+5. Speech for open strings, frets, explicit muted notes, attached techniques, and supported duration.
+6. W, H, Q, E, and S duration mapping.
+7. Aligned measure recognition and position-within-measure speech.
+8. Multiple tablature blocks.
+9. Automatic supported four-string bass and six-string guitar detection.
+10. Native iPhone Files-picker focus recovery after supported and failed uploads.
+11. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
 
-## Architectural authority
+## Passed convergence recovery checkpoint 1
 
-Guitar Eyes is one application with one musical engine and two interfaces:
+Exact source: `72159d25958fffd941c95351c6781cf579e1d622`
 
-1. the iPhone semantic reader presents synchronized positions sequentially for Safari and VoiceOver;
-2. the desktop reader presents the same semantic document as strings by synchronized positions;
-3. supported guitar and bass ASCII input is parsed once;
-4. instrument identity, blocks, strings, positions, rhythm, and measures belong to the shared semantic document;
-5. the original desktop grid remains only as a compatibility fallback when semantic interpretation is unsafe.
+Evidence:
 
-Playback, teaching, looping, pattern recognition, and later AI must consume this same document rather than create separate musical interpretations.
+1. 17 of 17 automated suites.
+2. 81 of 81 automated tests.
+3. Production build.
+4. Compiled-artifact checks.
+5. Corrected Pages publication.
+6. Hosted HTML and live-bundle read-back.
+7. Exact restoration of fork `main`.
+8. Real-iPhone Safari and VoiceOver acceptance.
 
-## Preserved accepted behavior
-
-The recovery source does not modify:
-
-- `src/IPhoneTabReader.js`;
-- `src/positionDescription.js`;
-- `src/iphoneTabModel.js`;
-- `src/asciiRhythm.js`;
-- `src/measureModel.js`;
-- `src/tabImportCoordinator.js`;
-- `src/tabFormatDetector.js`;
-- inherited parser, rhythm, measure, import, playing-description, and iPhone tests.
-
-Accepted regression requirements remain:
-
-1. Previous position, Read current position, Next position in that order;
-2. quiet position and block movement;
-3. Read current position as the only semantic-reader action that sends the complete playing instruction to the live region;
-4. omission of ordinary unplayed strings from playing speech;
-5. continued speech for open strings, frets, explicit mute notation, techniques, and supported durations;
-6. W, H, Q, E, and S duration mapping and speech;
-7. explicit aligned-barline measure recognition;
-8. measure and position-within-measure speech;
-9. automatic guitar and bass detection;
-10. successful and failed iOS Files-picker focus recovery.
-
-## Convergence recovery implementation
-
-Supported semantic files now use `DesktopSemanticReader`, which consumes the accepted semantic document already used by iPhone.
-
-The desktop interface provides:
-
-1. strings as rows and synchronized positions as columns;
-2. duration and measure context;
-3. the accepted Previous, Read current, Next order;
-4. quiet movement and dedicated Read current speech;
-5. quiet multi-block navigation using document-global indexes;
-6. plain-key movement using Left Arrow, Right Arrow, Home, and End;
-7. no interception of VoiceOver Control+Option commands;
-8. named semantic-table regions;
-9. highlighted current-position columns;
-10. original spatial source rows in collapsed disclosures;
-11. focus on the desktop reader heading after a successful upload.
-
-Unsafe semantic input routes to a clearly labeled compatibility grid. Its raw cells remain outside the ordinary Tab sequence, VoiceOver modifier commands remain untouched, and plain-arrow movement is available only after the grid itself is focused.
-
-## Passed local execution gate
-
-The exact source `72159d25958fffd941c95351c6781cf579e1d622` passed one read-only execution gate under Node `20.20.2`:
-
-1. accepted-foundation ancestry: passed;
-2. locked installation: passed after one permitted environment-only npm-cache retry;
-3. automated suites: 17 passed, 17 total;
-4. automated tests: 81 passed, 81 total;
-5. production build: passed;
-6. compiled-artifact contract checks: passed;
-7. final checkout: clean.
-
-Detailed record:
-
-- `docs/convergence-recovery-local-execution-gate-2026-07-26.md`.
-
-## Passed publication and hosted read-back
-
-Valid preview:
+Valid accepted convergence preview:
 
 `https://blindanatomist.github.io/guitar-eyes/`
 
-The exact verified source was published through the proven temporary-main procedure.
+Jason Washburn's optional desktop acceptance remains deferred unless he agrees to participate. His absence is not an active blocker.
 
-The first temporary publisher run, `30221814145`, failed before installation because a one-commit shallow checkout could not prove accepted-foundation ancestry. The deployment was skipped, `main` was restored and independently confirmed clean, and no source repair was made.
+Detailed records:
 
-The corrected publisher used full checkout history and deployed the exact verified source. A separate read-back-only workflow did not rebuild or redeploy; it inspected the live site.
+- `docs/convergence-recovery-source-checkpoint-1.md`
+- `docs/convergence-recovery-local-execution-gate-2026-07-26.md`
+- `docs/convergence-recovery-publication-result-2026-07-26.md`
+- `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`
 
-Read-back evidence:
+## Passed ASCII intake expansion checkpoint 1
 
-- trigger commit: `6560da70517e582374cdfdf156dfbf8f9049d836`;
-- workflow run: `30222035574`;
-- job: `89846005803`;
-- result: success;
-- live HTML: HTTP 200;
-- exact recovery title and first heading: present;
-- every referenced repository asset: HTTP 200;
-- one primary `main.*.js` bundle: present;
-- position controls, block controls, both reader identities, original spatial-source disclosure, rhythm construction, measure construction, and open-string construction: present in the live bundle.
+Exact source: `08f8ab16135570d0e53b829daa5c153a15751a45`
 
-After read-back, fork `main` was restored to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+Implemented capability:
 
-Independent comparison:
+1. Shared string-line analysis for detection, instrument analysis, and parsing.
+2. Optional octave suffixes such as `E4` and `B3`.
+3. Unicode sharp and flat normalization while preserving source labels.
+4. High-to-low validation for fully octave-qualified strings.
+5. Rejection of duplicate octave pitches and misordered standard tuning labels.
+6. Supported custom four-string and six-string tuning with explicit warnings.
+7. Positions created only by frets, open strings, and explicit muted notes.
+8. Deterministic attachment of transition techniques to notes.
+9. Unsupported punctuation preserved and warned without creating false positions.
+10. Positive recognition of five-string bass and seven-string guitar as unsupported.
+11. No reclassification of a truncated supported document as another instrument family.
+12. Prevention of pipe-delimited prose false positives.
+13. Honest supported, recognized-unsupported, unsafe-fallback, planned-format, and unknown upload outcomes.
+14. Expanded CC0 real-world and adversarial fixture corpus.
 
-- status: identical;
-- ahead: 0;
-- behind: 0;
-- changed files: 0.
+Verification evidence:
+
+1. Accepted convergence ancestry: passed.
+2. Locked installation: passed.
+3. Automated suites: 18 passed, 18 total.
+4. Automated tests: 101 passed, 101 total.
+5. Production build: passed.
+6. Corrected compiled-fragment verification: passed.
+7. Temporary checkpoint workflow: removed.
+
+Important run history:
+
+- `30227571812`: initial source exposed four intake defects; no blind rerun occurred.
+- `30227720078`: diagnostic log captured the exact failures.
+- `30227993598`: exact corrected source passed all 101 tests and production build; only an invalid fully interpolated literal check failed.
+- `30228133370`: build-only correction verified the actual compiled fragments successfully.
+
+This checkpoint was not published. It does not yet require owner-operated iPhone testing.
 
 Detailed record:
 
-- `docs/convergence-recovery-publication-result-2026-07-26.md`.
+- `docs/ascii-intake-expansion-checkpoint-1-result-2026-07-26.md`
 
-## Passed real-iPhone Safari and VoiceOver acceptance
+## Current format support
 
-John tested the corrected hosted recovery preview on his iPhone with Safari and VoiceOver using a controlled multi-block guitar fixture containing aligned measures and rhythm values.
+### Actually imported into the semantic document
 
-Authoritative owner report:
+1. ASCII `.txt` and `.tab` six-string guitar.
+2. ASCII `.txt` and `.tab` four-string bass.
+3. Multiple complete blocks.
+4. Metadata and prose around blocks.
+5. Standard and safely preserved custom tuning.
+6. ASCII and Unicode accidentals.
+7. Optional octave-qualified string labels.
+8. Multi-digit frets, open strings, explicit muted notes, and supported attached techniques.
+9. W, H, Q, E, and S rhythm lines.
+10. Aligned explicit measures.
 
-> Everything worked. Focus worked well. It read what it was supposed to. The Next and Previous buttons just said what they did. They did not read what was supposed to be played. It was good. It passed.
+### Recognized but not imported
 
-The test confirms useful Files-picker return focus, quiet movement controls, dedicated playing-instruction speech, and preservation of the tested rhythm, measure, open-string, omitted-unplayed-string, and multi-block contracts.
+1. Five-string bass ASCII.
+2. Seven-string guitar ASCII.
+3. MusicXML and `.xml`.
+4. Compressed MusicXML `.mxl`.
+5. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, and `.gp`.
+6. PowerTab `.ptb` and `.pt2`.
+7. TuxGuitar `.tg`.
+8. TablEdit `.tef`.
 
-Detailed record:
+Recognition must not be described as reading support.
 
-- `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`.
+## Current bounded checkpoint: uncompressed MusicXML import
 
-## Current checkpoint verdict
+The next implementation target is actual MusicXML guitar tablature import into the existing semantic document.
 
-Convergence recovery checkpoint 1: passed.
+Checkpoint 2 must:
 
-Passed evidence:
+1. accept uncompressed XML only;
+2. require explicit tablature string and fret technical data;
+3. select a guitar tablature part safely when a score contains multiple parts;
+4. import tuning, measures, durations, notes, rests, and chords;
+5. map MusicXML string numbering into the semantic high-to-low order deliberately;
+6. preserve unsupported structured notation with warnings rather than inventing meaning;
+7. reject non-tablature or ambiguous MusicXML clearly;
+8. provide one semantic document to both desktop and iPhone;
+9. inherit all 101 tests and add structured-import tests;
+10. stop before publication and real-iPhone testing until source, automated, build, and artifact gates pass.
 
-1. accepted shared semantic core;
-2. real-world ASCII corpus foundation;
-3. rhythm duration checkpoint 1;
-4. measure recognition checkpoint 1;
-5. convergence recovery source checkpoint 1;
-6. locked local execution gate;
-7. 17 of 17 automated suites;
-8. 81 of 81 automated tests;
-9. successful production build;
-10. corrected Pages publication;
-11. hosted artifact and live-bundle read-back;
-12. exact fork-main restoration;
-13. real-iPhone Safari and VoiceOver acceptance.
+This checkpoint does not authorize:
 
-The only uncompleted convergence evidence is optional desktop owner acceptance. Jason Washburn has not agreed to participate and is not an active blocker.
-
-## Next decision boundary
-
-Do not begin another repair, publication, or implementation cycle for convergence unless a new defect is reported.
-
-The owner may next choose among:
-
-1. pause with convergence recovery checkpoint 1 preserved as the current accepted state;
-2. request a later desktop experience review if Jason agrees to participate;
-3. authorize a separately scoped next phase such as teacher mode or playback after reviewing priorities.
-
-No next phase is implied or automatically authorized by this checkpoint.
-
-## Scope boundaries
-
-Do not begin:
-
+- compressed `.mxl`;
+- Guitar Pro or other binary importers;
 - playback;
 - teacher mode;
-- pattern analysis;
+- looping;
 - bookmarks;
+- pattern analysis;
 - AI implementation;
-- a pull request;
-- a merge;
-- upstream modification;
-- paid services or GitHub overages.
+- commercial scraping;
+- a pull request, merge, upstream change, or production publication.
 
-Jason is not assumed to participate.
+## Testing responsibility
+
+Source inspection, fixtures, implementation, automated tests, and build verification proceed without John.
+
+John is needed only after a stable hosted MusicXML candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
