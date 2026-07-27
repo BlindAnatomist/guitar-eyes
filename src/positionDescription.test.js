@@ -67,6 +67,27 @@ describe("describePlayablePosition", () => {
     );
   });
 
+  test("announces deterministic technique relationships on the target note", () => {
+    const document = parseSixStringTabText(
+      makeTab([
+        "e|--5h7p5--|",
+        "B|---------|",
+        "G|---------|",
+        "D|---------|",
+        "A|---------|",
+        "E|---------|",
+      ])
+    );
+
+    expect(document.positions).toHaveLength(3);
+    expect(describePlayablePosition(document, 1)).toContain(
+      "High E string, fret 7, with hammer-on notation preserved but not yet interpreted."
+    );
+    expect(describePlayablePosition(document, 2)).toContain(
+      "High E string, fret 5, with pull-off notation preserved but not yet interpreted."
+    );
+  });
+
   test("announces a mapped duration through the existing current-position action", () => {
     const source = makeTab([
       "Rhythm: Q",
