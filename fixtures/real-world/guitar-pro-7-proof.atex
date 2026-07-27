@@ -1,0 +1,11 @@
+// Guitar Eyes project-authored fixture.
+// CC0-1.0. No commercial or community tablature source was used.
+\title "Guitar Eyes GP7 Proof"
+\artist "Guitar Eyes project-authored fixture"
+\track "Proof Guitar" "Proof"
+\staff {tabs}
+\tuning (E4 B3 G3 D3 A2 E2) {label "Standard guitar"}
+\ts 4 4
+.
+:4 (0.1 1.2) r 0.3 2.4 |
+:2 0.5 3.6 |
