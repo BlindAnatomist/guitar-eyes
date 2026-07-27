@@ -1,7 +1,7 @@
 /* global globalThis */
 
-import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 import { inspectGuitarProArchiveVersion } from "./guitarProArchiveVersion";
+import { decodeGuitarProScoreWithIntegrity } from "./guitarProDecodeIntegrity";
 
 function workerError(error) {
   return {
@@ -24,12 +24,7 @@ globalThis.onmessage = async (event) => {
     const rawBytes = new Uint8Array(bytes);
     const versionEvidence = await inspectGuitarProArchiveVersion(rawBytes);
     const alphaTab = await import("@coderline/alphatab");
-    const settings = new alphaTab.Settings();
-    const score = alphaTab.importer.ScoreLoader.loadScoreFromBytes(
-      rawBytes,
-      settings
-    );
-    const intermediate = alphaTabScoreToGuitarProIntermediate(score, {
+    const intermediate = decodeGuitarProScoreWithIntegrity(alphaTab, rawBytes, {
       versionEvidence,
     });
 
