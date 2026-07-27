@@ -30,16 +30,13 @@ jobs:
           git merge-base --is-ancestor 2b37a725148f12f2279690d5b6e0bc9bf5de0519 HEAD
           test -z "$(git status --short)"
 
-      - name: Prepare temporary correction script
-        run: python scripts/temporary_prepare_guitar_pro_shared_archive_correction.py
-
       - name: Apply shared archive correction
         id: edit
         shell: bash
         run: |
           set +e
           set -o pipefail
-          python scripts/temporary_guitar_pro_shared_archive_correction.py 2>&1 | tee /tmp/shared-archive-edit.log
+          python scripts/temporary_guitar_pro_shared_archive_correction_v2.py 2>&1 | tee /tmp/shared-archive-edit.log
           code=${PIPESTATUS[0]}
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
           exit 0
@@ -111,6 +108,7 @@ jobs:
         run: |
           rm -f scripts/temporary_guitar_pro_shared_archive_correction.py
           rm -f scripts/temporary_prepare_guitar_pro_shared_archive_correction.py
+          rm -f scripts/temporary_guitar_pro_shared_archive_correction_v2.py
           rm -f .github/workflows/temporary-guitar-pro-version-inventory.yml
           rm -f .github/workflows/temporary-guitar-pro-shared-archive-correction.yml
           git config user.name "github-actions[bot]"
