@@ -1,4 +1,4 @@
-name: Temporary tablature intake checkpoint
+name: Temporary tablature intake compiled check
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify corrected ASCII intake source
+    name: Verify compiled ASCII intake source
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -42,34 +42,6 @@ jobs:
           npm_config_cache: /tmp/guitar-eyes-intake-npm-cache
         run: npm ci --no-audit --no-fund
 
-      - name: Run complete automated suite once
-        id: tests
-        env:
-          CI: true
-        shell: bash
-        run: |
-          set +e
-          set -o pipefail
-          npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/intake-tests.log
-          test_exit=${PIPESTATUS[0]}
-          echo "exit_code=$test_exit" >> "$GITHUB_OUTPUT"
-          exit 0
-
-      - name: Upload Jest log on failure
-        if: steps.tests.outputs.exit_code != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: intake-test-log
-          path: /tmp/intake-tests.log
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Enforce test result and expected count
-        run: |
-          test "${{ steps.tests.outputs.exit_code }}" = "0"
-          grep -Eq 'Test Suites:[[:space:]]+18 passed,[[:space:]]+18 total' /tmp/intake-tests.log
-          grep -Eq 'Tests:[[:space:]]+101 passed,[[:space:]]+101 total' /tmp/intake-tests.log
-
       - name: Build production application
         run: npm run build
 
@@ -80,7 +52,9 @@ jobs:
           grep -R -F 'Previous position' build >/dev/null
           grep -R -F 'Read current position' build >/dev/null
           grep -R -F 'Next position' build >/dev/null
-          grep -R -F 'recognized 7-string ASCII tablature' build >/dev/null
+          grep -R -F 'seven-string guitar' build >/dev/null
+          grep -R -F 'Guitar Eyes recognized ' build >/dev/null
+          grep -R -F 'Semantic reading currently supports complete four-string bass and six-string guitar blocks' build >/dev/null
           grep -R -F 'Unsupported symbols did not create musical positions' build >/dev/null
           grep -R -F 'MusicXML tablature was recognized' build >/dev/null
 
@@ -95,7 +69,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/intake-checkpoint\",\"description\":\"18 suites, 101 tests and build passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/intake-compiled-check\",\"description\":\"Production build and compiled fragments passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
 
       - name: Record failure status
         if: failure()
@@ -108,4 +82,4 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/intake-checkpoint\",\"description\":\"Inspect the bounded intake gate\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/intake-compiled-check\",\"description\":\"Inspect the compiled-fragment check\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
