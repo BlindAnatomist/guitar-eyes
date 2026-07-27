@@ -31,11 +31,14 @@ function track(name, staves, extra = {}) {
   };
 }
 
-function intermediate(tracks) {
+function intermediate(tracks, declaredTrackCount = null) {
   return {
     schemaVersion: 1,
     sourceVersion: "GP8",
-    versionEvidence: GP8_VERSION_EVIDENCE,
+    versionEvidence: {
+      ...GP8_VERSION_EVIDENCE,
+      ...(Number.isInteger(declaredTrackCount) ? { declaredTrackCount } : {}),
+    },
     title: "Inventory proof",
     tracks,
   };
@@ -89,7 +92,7 @@ describe("buildGuitarProTrackInventory", () => {
       intermediate([
         track("Guitar", [staff([64, 59, 55, 50, 45, 40])]),
         track("Bass", [staff([43, 38, 33, 28])]),
-      ])
+      ], 2)
     );
 
     expect(inventory.supportedCount).toBe(2);
@@ -99,6 +102,19 @@ describe("buildGuitarProTrackInventory", () => {
       "Guitar. six-string guitar. Tuning high to low: E4, B3, G3, D3, A2, E2. 2 measures.",
       "Bass. four-string bass. Tuning high to low: G2, D2, A1, E1. 2 measures.",
     ]);
+  });
+
+  test("rejects an incomplete decoder inventory that contradicts the archive", () => {
+    expectCode(
+      () =>
+        buildGuitarProTrackInventory(
+          intermediate(
+            [track("Guitar", [staff([64, 59, 55, 50, 45, 40])])],
+            2
+          )
+        ),
+      "GUITAR_PRO_TRACK_COUNT_MISMATCH"
+    );
   });
 
   test("reports percussion, unsupported strings, and empty measures without hiding them", () => {
