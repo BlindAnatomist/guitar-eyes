@@ -1,0 +1,232 @@
+name: Temporary Guitar Pro 7 proof checkpoint
+
+on:
+  push:
+    branches:
+      - work/tablature-intake-expansion
+
+concurrency:
+  group: temporary-guitar-pro-7-proof
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  statuses: write
+
+jobs:
+  verify:
+    if: github.event.head_commit.message != 'Generate deterministic GP7 proof artifacts [generated-gp7]'
+    name: Generate and verify exact GP7 proof
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out checkpoint branch
+        uses: actions/checkout@v4
+        with:
+          ref: work/tablature-intake-expansion
+          fetch-depth: 0
+
+      - name: Confirm source ancestry and clean checkout
+        run: |
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git merge-base --is-ancestor 0a322813cdd13494d2daab8ae45ae1e8bd70951c HEAD
+          test -z "$(git status --short)"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install exact dependency and update lockfile
+        env:
+          npm_config_cache: /tmp/guitar-eyes-gp7-npm-cache
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Verify pinned alphaTab dependency
+        run: |
+          node -e "const p=require('./package.json'); if(p.dependencies['@coderline/alphatab']!=='1.8.4') process.exit(1)"
+          npm ls @coderline/alphatab --depth=0
+          node - <<'NODE'
+          const lock = require('./package-lock.json');
+          const root = lock.packages[''];
+          const pkg = lock.packages['node_modules/@coderline/alphatab'];
+          if (root.dependencies['@coderline/alphatab'] !== '1.8.4') throw new Error('root lock dependency is not exact 1.8.4');
+          if (!pkg || pkg.version !== '1.8.4') throw new Error('installed lock package is not 1.8.4');
+          if (!pkg.integrity) throw new Error('alphaTab lock entry has no integrity value');
+          NODE
+
+      - name: Generate deterministic project-authored GP7 fixture
+        run: npm run generate:gp7-proof | tee /tmp/gp7-generation.json
+
+      - name: Verify generated fixture provenance and size
+        run: |
+          test -s fixtures/real-world/guitar-pro-7-proof.gp
+          test -s fixtures/real-world/guitar-pro-7-proof.gp.sha256
+          test -s fixtures/real-world/guitar-pro-7-proof.atex
+          sha256sum -c fixtures/real-world/guitar-pro-7-proof.gp.sha256
+          bytes=$(stat -c %s fixtures/real-world/guitar-pro-7-proof.gp)
+          test "$bytes" -le $((5 * 1024 * 1024))
+          grep -F 'Guitar Eyes project-authored fixture' fixtures/real-world/guitar-pro-7-proof.atex >/dev/null
+          grep -F 'CC0-1.0' fixtures/real-world/guitar-pro-7-proof.atex >/dev/null
+
+      - name: Run complete inherited and GP7 proof suite once
+        id: tests
+        env:
+          CI: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/gp7-tests.log
+          test_exit=${PIPESTATUS[0]}
+          echo "exit_code=$test_exit" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload diagnostic logs on test failure
+        if: steps.tests.outputs.exit_code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: gp7-proof-test-diagnostics
+          path: |
+            /tmp/gp7-tests.log
+            /tmp/gp7-generation.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Enforce test result and expected count
+        run: |
+          test "${{ steps.tests.outputs.exit_code }}" = "0"
+          grep -Eq 'Test Suites:[[:space:]]+26 passed,[[:space:]]+26 total' /tmp/gp7-tests.log
+          grep -Eq 'Tests:[[:space:]]+153 passed,[[:space:]]+153 total' /tmp/gp7-tests.log
+
+      - name: Build production application
+        run: npm run build
+
+      - name: Inspect main bundle, lazy worker chunks, and emitted assets
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          import re
+
+          build = Path('build')
+          html = (build / 'index.html').read_text(encoding='utf-8')
+          assert '<title>Test build Guitar Pro 7 proof 3A</title>' in html
+          assert 'Test build: Guitar Pro 7 proof 3A.' in html
+
+          js_files = sorted((build / 'static' / 'js').glob('*.js'))
+          main_files = [p for p in js_files if p.name.startswith('main.')]
+          assert len(main_files) == 1, main_files
+          main = main_files[0]
+          main_text = main.read_text(encoding='utf-8', errors='ignore')
+
+          for phrase in [
+              'Guitar Pro 7 proof 3A',
+              'Guitar Pro 7 tablature',
+              'Previous position',
+              'Read current position',
+              'Next position',
+              'Normalized Guitar Pro spatial layout',
+              'guitar-eyes-gp7-import',
+          ]:
+              assert phrase in main_text, f'main bundle missing application contract {phrase!r}'
+
+          for forbidden in [
+              'class ScoreLoader',
+              'Guitar Pro 7-8',
+              'No score.gpif found in zip archive',
+              'alphaSynth',
+          ]:
+              assert forbidden not in main_text, f'alphaTab was eagerly included in main: {forbidden!r}'
+
+          lazy_matches = []
+          for path in js_files:
+              if path == main:
+                  continue
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              if any(marker in text for marker in ['Guitar Pro 7-8', 'No score.gpif found in zip archive', 'ScoreLoader']):
+                  lazy_matches.append(path)
+
+          assert lazy_matches, 'no lazy alphaTab decoder chunk was found'
+          lazy_bytes = sum(path.stat().st_size for path in lazy_matches)
+          assert lazy_bytes <= 5 * 1024 * 1024, f'lazy decoder chunks total {lazy_bytes} bytes'
+
+          forbidden_assets = []
+          for path in build.rglob('*'):
+              if not path.is_file():
+                  continue
+              lowered = path.as_posix().lower()
+              if any(token in lowered for token in [
+                  'bravura', 'soundfont', '.sf2', '.sf3', '.woff', '.woff2',
+                  'alphatab.worker', 'alphatab.worklet', 'audio-worklet', 'synth.worker'
+              ]):
+                  forbidden_assets.append(path.as_posix())
+          assert not forbidden_assets, forbidden_assets
+
+          report = {
+              'main_js': main.name,
+              'main_bytes': main.stat().st_size,
+              'lazy_decoder_chunks': [path.name for path in lazy_matches],
+              'lazy_decoder_bytes': lazy_bytes,
+              'all_js_assets': [path.name for path in js_files],
+              'all_build_files': [path.relative_to(build).as_posix() for path in build.rglob('*') if path.is_file()],
+          }
+          Path('/tmp/gp7-build-report.json').write_text(json.dumps(report, indent=2, sort_keys=True), encoding='utf-8')
+          print(json.dumps(report, indent=2, sort_keys=True))
+
+      - name: Upload build inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gp7-proof-build-report
+          path: |
+            /tmp/gp7-build-report.json
+            /tmp/gp7-generation.json
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Require only generated proof artifacts and lockfile changed
+        run: |
+          git status --short
+          test -n "$(git status --short)"
+          unexpected=$(git status --short | awk '{print $2}' | grep -Ev '^(package-lock.json|fixtures/real-world/guitar-pro-7-proof.gp|fixtures/real-world/guitar-pro-7-proof.gp.sha256)$' || true)
+          test -z "$unexpected"
+
+      - name: Commit deterministic proof artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json fixtures/real-world/guitar-pro-7-proof.gp fixtures/real-world/guitar-pro-7-proof.gp.sha256
+          git commit -m 'Generate deterministic GP7 proof artifacts [generated-gp7]'
+          git push origin HEAD:work/tablature-intake-expansion
+          echo "GENERATED_COMMIT=$(git rev-parse HEAD)" | tee /tmp/gp7-generated-commit.txt
+
+      - name: Record success status
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          generated=$(cut -d= -f2 /tmp/gp7-generated-commit.txt)
+          curl --fail-with-body -sS \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/gp7-proof\",\"description\":\"26 suites, 153 tests, deterministic GP7 and lazy worker passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+
+      - name: Record failure status
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS \
+            -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/gp7-proof\",\"description\":\"Inspect bounded GP7 proof failure before changing source\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
