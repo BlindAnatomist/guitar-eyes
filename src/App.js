@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import DesktopSemanticReader from "./DesktopSemanticReader";
+import { buildGuitarPro7ProofReaderDocuments } from "./guitarProReaderDocuments";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
@@ -24,7 +25,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "MusicXML intake checkpoint 2";
+const TEST_BUILD_LABEL = "Guitar Pro 7 proof 3A";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -210,56 +211,70 @@ function App() {
     }
 
     const initialFormat = detectTabFileFormat(file.name);
-
-    if (!shouldReadTabFileAsText(initialFormat)) {
-      finishRecognizedUnsupportedFormat(initialFormat);
-      return;
-    }
-
-    let sourceText;
-
-    try {
-      sourceText = await readTextFile(file);
-    } catch (error) {
-      finishUnreadableUpload(
-        messageFromError(error, "The selected file could not be read."),
-        "The selected file could not be read."
-      );
-      return;
-    }
-
-    const detectedFormat = detectTabFileFormat(file.name, sourceText);
-
-    if (!['ascii-text', 'musicxml'].includes(detectedFormat.id)) {
-      if (detectedFormat.support === "planned") {
-        finishRecognizedUnsupportedFormat(detectedFormat);
-      } else {
-        finishUnreadableUpload(
-          unsupportedTabFormatMessage(detectedFormat),
-          "The selected file format could not be identified."
-        );
-      }
-      return;
-    }
-
+    let detectedFormat = initialFormat;
     let readerDocuments;
 
-    try {
-      readerDocuments =
-        detectedFormat.id === "musicxml"
-          ? buildMusicXmlReaderDocuments(sourceText)
-          : buildReaderDocuments(sourceText, selectedInstrument);
-    } catch (error) {
-      const formatLabel =
-        detectedFormat.id === "musicxml" ? "MusicXML tablature" : "tablature";
-      finishUnreadableUpload(
-        messageFromError(
-          error,
-          `The ${formatLabel} could not be prepared for the Guitar Eyes readers.`
-        ),
-        `The selected ${formatLabel} could not be imported.`
-      );
-      return;
+    if (initialFormat.id === "guitar-pro-proof") {
+      try {
+        readerDocuments = await buildGuitarPro7ProofReaderDocuments(file);
+      } catch (error) {
+        finishUnreadableUpload(
+          messageFromError(
+            error,
+            "The Guitar Pro checkpoint file could not be prepared for the Guitar Eyes readers."
+          ),
+          "The selected Guitar Pro checkpoint file could not be imported."
+        );
+        return;
+      }
+    } else {
+      if (!shouldReadTabFileAsText(initialFormat)) {
+        finishRecognizedUnsupportedFormat(initialFormat);
+        return;
+      }
+
+      let sourceText;
+      try {
+        sourceText = await readTextFile(file);
+      } catch (error) {
+        finishUnreadableUpload(
+          messageFromError(error, "The selected file could not be read."),
+          "The selected file could not be read."
+        );
+        return;
+      }
+
+      detectedFormat = detectTabFileFormat(file.name, sourceText);
+
+      if (!["ascii-text", "musicxml"].includes(detectedFormat.id)) {
+        if (detectedFormat.support === "planned") {
+          finishRecognizedUnsupportedFormat(detectedFormat);
+        } else {
+          finishUnreadableUpload(
+            unsupportedTabFormatMessage(detectedFormat),
+            "The selected file format could not be identified."
+          );
+        }
+        return;
+      }
+
+      try {
+        readerDocuments =
+          detectedFormat.id === "musicxml"
+            ? buildMusicXmlReaderDocuments(sourceText)
+            : buildReaderDocuments(sourceText, selectedInstrument);
+      } catch (error) {
+        const formatLabel =
+          detectedFormat.id === "musicxml" ? "MusicXML tablature" : "tablature";
+        finishUnreadableUpload(
+          messageFromError(
+            error,
+            `The ${formatLabel} could not be prepared for the Guitar Eyes readers.`
+          ),
+          `The selected ${formatLabel} could not be imported.`
+        );
+        return;
+      }
     }
 
     const {
@@ -277,7 +292,7 @@ function App() {
       ? `Detected ${nextDocument?.instrumentLabel ?? resolvedInstrument}. `
       : "";
     const formatPrefix =
-      sourceFormat === "musicxml" ? `Imported ${sourceFormatLabel}. ` : "";
+      sourceFormat === "ascii-text" ? "" : `Imported ${sourceFormatLabel}. `;
 
     if (nextDocument) {
       const iphoneSuccessStatus = `${formatPrefix}${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in iPhone reading mode.`;
