@@ -30,5 +30,22 @@ new_focus = (
 text = text[:focus_start] + new_focus + text[focus_end:]'''
 text = text[:start] + replacement + text[end:]
 
+reset_marker = 'text = insert_after_once(\n    text,\n    "    setDesktopBlocks([]);\\n",'
+start = text.index(reset_marker)
+end = text.index('\ntext = replace_once(', start)
+replacement = '''upload_reset = (
+    '    setIphoneError("");\\n'
+    '    setDesktopError("");\\n'
+    '    setSemanticDocument(null);\\n'
+    '    setDesktopBlocks([]);'
+)
+text = replace_once(
+    text,
+    upload_reset,
+    upload_reset + '\\n    setGuitarProSelectionSession(null);',
+    "App reset selector on upload",
+)'''
+text = text[:start] + replacement + text[end:]
+
 path.write_text(text, encoding="utf-8")
 print("track selection checkpoint script prepared")
