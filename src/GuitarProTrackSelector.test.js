@@ -42,20 +42,30 @@ const inventory = {
 };
 
 describe("GuitarProTrackSelector", () => {
-  test("exposes supported tracks as one radio group and submits the explicit selection", () => {
+  test("requires an explicit radio choice before submission", () => {
     const onSubmit = jest.fn();
     render(<GuitarProTrackSelector inventory={inventory} onSubmit={onSubmit} />);
 
     expect(
       screen.getByRole("heading", { level: 2, name: "Choose a Guitar Pro track" })
     ).toBeInTheDocument();
+    expect(screen.getByText(/This file contains 2 supported tablature tracks/i)).toHaveTextContent(
+      /No track is selected/i
+    );
+    expect(screen.getByText(/separate Guitar or Bass control does not filter/i)).toBeInTheDocument();
+
     const lead = screen.getByRole("radio", { name: /Lead Guitar/i });
     const bass = screen.getByRole("radio", { name: /Bass/i });
-    expect(lead).toBeChecked();
+    const load = screen.getByRole("button", { name: "Load selected track" });
+
+    expect(lead).not.toBeChecked();
     expect(bass).not.toBeChecked();
+    expect(load).toBeDisabled();
 
     fireEvent.click(bass);
-    fireEvent.click(screen.getByRole("button", { name: "Load selected track" }));
+    expect(bass).toBeChecked();
+    expect(load).toBeEnabled();
+    fireEvent.click(load);
 
     expect(onSubmit).toHaveBeenCalledWith({ trackIndex: 1, staffIndex: 0 });
   });
