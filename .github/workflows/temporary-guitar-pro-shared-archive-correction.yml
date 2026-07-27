@@ -1,0 +1,383 @@
+name: Temporary Guitar Pro shared archive correction
+
+on:
+  push:
+    branches:
+      - work/tablature-intake-expansion
+
+concurrency:
+  group: temporary-guitar-pro-shared-archive-correction
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  statuses: write
+
+jobs:
+  correct:
+    if: github.event.head_commit.message != 'Complete Guitar Pro shared archive identity correction [generated-shared-archive]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: work/tablature-intake-expansion
+          fetch-depth: 0
+
+      - name: Confirm corrected normalizer ancestry and clean checkout
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor 2b37a725148f12f2279690d5b6e0bc9bf5de0519 HEAD
+          test -z "$(git status --short)"
+
+      - name: Rename proof source and apply identity correction
+        shell: python
+        run: |
+          from pathlib import Path
+          import subprocess
+
+          def mv(old, new):
+              assert Path(old).exists(), old
+              assert not Path(new).exists(), new
+              subprocess.run(['git', 'mv', old, new], check=True)
+
+          def replace(path, old, new, expected=None):
+              file = Path(path)
+              text = file.read_text(encoding='utf-8')
+              count = text.count(old)
+              if expected is not None:
+                  assert count == expected, (path, old, count, expected)
+              elif count == 0:
+                  return 0
+              file.write_text(text.replace(old, new), encoding='utf-8')
+              return count
+
+          mv('scripts/generate-guitar-pro-7-proof.mjs', 'scripts/generate-guitar-pro-shared-archive-proof.mjs')
+          mv('fixtures/real-world/guitar-pro-7-proof.atex', 'fixtures/real-world/guitar-pro-shared-archive-proof.atex')
+          mv('fixtures/real-world/guitar-pro-7-proof.gp', 'fixtures/real-world/guitar-pro-shared-archive-proof.gp')
+          mv('fixtures/real-world/guitar-pro-7-proof.gp.sha256', 'fixtures/real-world/guitar-pro-shared-archive-proof.gp.sha256')
+
+          text_roots = [Path('src'), Path('public'), Path('scripts'), Path('fixtures')]
+          text_files = []
+          for root in text_roots:
+              if not root.exists():
+                  continue
+              for path in root.rglob('*'):
+                  if path.is_file() and path.suffix not in {'.gp', '.png', '.jpg', '.jpeg', '.gif'}:
+                      text_files.append(path)
+          text_files.extend([Path('package.json'), Path('docs/implementation-status.md')])
+
+          global_replacements = [
+              ('decodeGuitarPro7ProofFile', 'decodeGuitarProArchiveProofFile'),
+              ('buildGuitarPro7ProofReaderDocuments', 'buildGuitarProArchiveProofReaderDocuments'),
+              ('guitar-eyes-gp7-import', 'guitar-eyes-guitar-pro-import'),
+              ('guitar-pro-7-proof', 'guitar-pro-shared-archive-proof'),
+              ('generate:gp7-proof', 'generate:guitar-pro-archive-proof'),
+              ('generate-guitar-pro-7-proof.mjs', 'generate-guitar-pro-shared-archive-proof.mjs'),
+              ('Guitar Pro 7 proof 3A', 'Guitar Pro shared-archive proof 3B'),
+              ('Guitar Pro 7 tablature', 'Guitar Pro archive tablature'),
+              ('guitar-pro-7', 'guitar-pro-archive'),
+              ('CORRUPT_GP7_ARCHIVE', 'CORRUPT_GUITAR_PRO_ARCHIVE'),
+              ('The GP7 archive is corrupt.', 'The Guitar Pro archive is corrupt.'),
+              ('Corrupt GP7 archive', 'Corrupt Guitar Pro archive'),
+              ('GP7 proof decoder', 'Guitar Pro archive proof decoder'),
+              ('GUITAR_PRO_SHARED_ZIP', 'GUITAR_PRO_SHARED_ZIP'),
+              ('GP7_PLUS_ZIP', 'GUITAR_PRO_SHARED_ZIP'),
+              ('Guitar Eyes GP7 Proof', 'Guitar Eyes Shared Archive Proof'),
+              ('Original GP7 proof', 'Original shared archive proof'),
+              ('generated GP7 fixture', 'generated shared-archive fixture'),
+              ('GP7 fixture', 'shared-archive fixture'),
+              ('GP7 track', 'GP8-semantic shared-archive track'),
+              ('alphaTab GP7 export', 'alphaTab shared-archive export'),
+              ('generated GP7 proof', 'generated shared-archive proof'),
+              ('GP7 proof', 'shared-archive proof'),
+          ]
+          for path in text_files:
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              changed = text
+              for old, new in global_replacements:
+                  changed = changed.replace(old, new)
+              if changed != text:
+                  path.write_text(changed, encoding='utf-8')
+
+          evidence = '''    versionEvidence: {
+                schemaVersion: 1,
+                archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+                rootVersion: "7.0",
+                gpVersion: "8.1.3",
+                encodingDescription: "GP8",
+                sourceVersion: "GP8",
+                entryCount: 6,
+              },
+          '''
+
+          replace(
+              'src/guitarProNormalizer.test.js',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP7",
+              title: "Guitar Eyes Shared Archive Proof",
+              tracks,
+          ''',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP8",
+          ''' + evidence + '''    title: "Guitar Eyes Shared Archive Proof",
+              tracks,
+          ''',
+              1,
+          )
+          replace(
+              'src/guitarProNormalizer.test.js',
+              '''      () => normalizeGuitarProIntermediate(intermediate([track()], { sourceVersion: "GP8" })),
+                "UNTESTED_GUITAR_PRO_VERSION"
+          ''',
+              '''      () =>
+                  normalizeGuitarProIntermediate(
+                    intermediate([track()], {
+                      sourceVersion: "GP7",
+                      versionEvidence: {
+                        schemaVersion: 1,
+                        archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+                        rootVersion: "7.0",
+                        gpVersion: "7.5.0",
+                        encodingDescription: "GP7",
+                        sourceVersion: "GP7",
+                        entryCount: 2,
+                      },
+                    })
+                  ),
+                "UNTESTED_GUITAR_PRO_VERSION"
+          ''',
+              1,
+          )
+
+          replace(
+              'src/App.guitarPro.test.js',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP7",
+              title: "Application GP proof",
+          ''',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP8",
+          ''' + evidence + '''    title: "Application GP proof",
+          ''',
+              1,
+          )
+          replace(
+              'src/guitarProReaderDocuments.test.js',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP7",
+              title: "Reader proof",
+          ''',
+              '''    schemaVersion: 1,
+              sourceVersion: "GP8",
+          ''' + evidence + '''    title: "Reader proof",
+          ''',
+              1,
+          )
+
+          adapter = Path('src/guitarProAlphaTabAdapter.test.js')
+          text = adapter.read_text(encoding='utf-8')
+          import_line = 'import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";\n\n'
+          assert text.count(import_line) == 1
+          evidence_const = '''const VERSION_EVIDENCE = Object.freeze({
+            schemaVersion: 1,
+            archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+            rootVersion: "7.0",
+            gpVersion: "8.1.3",
+            encodingDescription: "GP8",
+            sourceVersion: "GP8",
+            entryCount: 6,
+          });
+
+          '''
+          text = text.replace(import_line, import_line + evidence_const, 1)
+          text = text.replace(
+              'alphaTabScoreToGuitarProIntermediate(makeScore())',
+              'alphaTabScoreToGuitarProIntermediate(makeScore(), { versionEvidence: VERSION_EVIDENCE })',
+          )
+          text = text.replace(
+              'alphaTabScoreToGuitarProIntermediate(makeScore(beat))',
+              'alphaTabScoreToGuitarProIntermediate(makeScore(beat), { versionEvidence: VERSION_EVIDENCE })',
+          )
+          text = text.replace(
+              '      sourceVersion: "GP7",\n      title:',
+              '      sourceVersion: "GP8",\n      versionEvidence: VERSION_EVIDENCE,\n      title:',
+          )
+          assert 'sourceVersion: "GP7"' not in text
+          adapter.write_text(text, encoding='utf-8')
+
+          binary = Path('src/guitarProBinaryProof.test.js')
+          text = binary.read_text(encoding='utf-8')
+          import_anchor = 'import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";\n'
+          assert text.count(import_anchor) == 1
+          text = text.replace(
+              import_anchor,
+              import_anchor + 'import { inspectGuitarProArchiveVersion } from "./guitarProArchiveVersion";\n',
+              1,
+          )
+          text = text.replace(
+              '  test("decodes and normalizes the generated shared-archive fixture through alphaTab", () => {',
+              '  test("decodes and normalizes the generated GP8-semantic shared archive through alphaTab", async () => {',
+              1,
+          )
+          text = text.replace(
+              '    const settings = new alphaTab.Settings();',
+              '    const versionEvidence = await inspectGuitarProArchiveVersion(new Uint8Array(bytes));\n    const settings = new alphaTab.Settings();',
+              1,
+          )
+          text = text.replace(
+              '''    const intermediate = alphaTabScoreToGuitarProIntermediate(score, {
+                sourceVersion: "GP7",
+              });
+          ''',
+              '''    const intermediate = alphaTabScoreToGuitarProIntermediate(score, {
+                versionEvidence,
+              });
+          ''',
+              1,
+          )
+          text = text.replace('      sourceVersion: "GP7",', '      sourceVersion: "GP8",', 1)
+          binary.write_text(text, encoding='utf-8')
+
+          replace(
+              'src/guitarProWorkerClient.test.js',
+              '    expect(worker.message.sourceVersion).toBe("GP7");',
+              '    expect(worker.message).not.toHaveProperty("sourceVersion");',
+              1,
+          )
+          replace(
+              'src/guitarProWorkerClient.test.js',
+              '    const expected = { schemaVersion: 1, sourceVersion: "GP7", tracks: [] };',
+              '    const expected = { schemaVersion: 1, sourceVersion: "GP8", tracks: [] };',
+              1,
+          )
+
+          package = Path('package.json')
+          package_text = package.read_text(encoding='utf-8')
+          assert 'generate:guitar-pro-archive-proof' in package_text
+          assert 'generate-guitar-pro-shared-archive-proof.mjs' in package_text
+
+          generator = Path('scripts/generate-guitar-pro-shared-archive-proof.mjs')
+          generator_text = generator.read_text(encoding='utf-8')
+          generator_text = generator_text.replace('guitar-pro-shared-archive-proof.gp\n', 'guitar-pro-shared-archive-proof.gp\n')
+          generator.write_text(generator_text, encoding='utf-8')
+
+          implementation = Path('docs/implementation-status.md')
+          implementation_text = implementation.read_text(encoding='utf-8')
+          implementation_text = implementation_text.replace(
+              'During checkpoint 3A, project-tested import support is GP7 `.gp` only. GP3, GP4, GP5, GP6, GP8, and GP2 remain recognized but unsupported until each has an original, public-domain, or clearly licensed fixture and direct evidence.',
+              'The current project-authored `.gp` fixture has GP8 semantic evidence inside the shared 7.0 archive family. GP7 remains recognized but unaccepted until a genuine GP7 specimen is obtained and verified. GP3, GP4, GP5, GP6, GP2, PowerTab, TuxGuitar, and TablEdit remain outside this checkpoint.',
+          )
+          implementation_text = implementation_text.replace(
+              'John is needed only after a stable hosted GP7 candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.',
+              'John is needed only after a stable hosted shared-archive candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.',
+          )
+          implementation.write_text(implementation_text, encoding='utf-8')
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install exact dependencies and regenerate proof
+        env:
+          npm_config_cache: /tmp/guitar-eyes-shared-archive-npm-cache
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm run generate:guitar-pro-archive-proof
+          (cd fixtures/real-world && sha256sum -c guitar-pro-shared-archive-proof.gp.sha256)
+
+      - name: Run complete test suite
+        id: tests
+        env:
+          CI: true
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/shared-archive-tests.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload test diagnostics on failure
+        if: steps.tests.outputs.exit_code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: guitar-pro-shared-archive-test-diagnostics
+          path: /tmp/shared-archive-tests.log
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Enforce tests
+        run: test "${{ steps.tests.outputs.exit_code }}" = "0"
+
+      - name: Build production application
+        run: npm run build | tee /tmp/shared-archive-build.log
+
+      - name: Reject stale permanent identities
+        shell: bash
+        run: |
+          ! grep -RInE 'decodeGuitarPro7ProofFile|buildGuitarPro7ProofReaderDocuments|guitar-eyes-gp7-import|guitar-pro-7-proof|generate:gp7-proof|generate-guitar-pro-7-proof|Guitar Pro 7 tablature|sourceFormat: "guitar-pro-7"|CORRUPT_GP7_ARCHIVE' src public scripts fixtures package.json docs/implementation-status.md
+          ! grep -RIn 'sourceVersion: "GP7"' src \
+            --exclude='guitarProArchiveVersion.test.js' \
+            --exclude='guitarProNormalizer.test.js'
+          grep -RIn 'sourceVersion: "GP7"' src/guitarProNormalizer.test.js >/dev/null
+          grep -F 'sourceVersion: "GP8"' src/guitarProBinaryProof.test.js >/dev/null
+          grep -F 'GUITAR_PRO_SHARED_ZIP' src/guitarProArchiveVersion.js >/dev/null
+          grep -F 'guitar-eyes-guitar-pro-import' src/guitarProBrowserWorkerFactory.js >/dev/null
+          grep -F 'Test build: Guitar Pro shared-archive proof 3B.' public/index.html >/dev/null
+
+      - name: Constrain changed paths
+        shell: python
+        run: |
+          import subprocess
+          paths = []
+          raw = subprocess.check_output(['git', 'status', '--porcelain=v1', '--untracked-files=all'], text=True)
+          for line in raw.splitlines():
+              path = line[3:]
+              if ' -> ' in path:
+                  path = path.split(' -> ', 1)[1]
+              paths.append(path)
+          forbidden = [p for p in paths if p.startswith('.github/workflows/') and not p.endswith('temporary-guitar-pro-shared-archive-correction.yml')]
+          assert not forbidden, forbidden
+          assert 'src/guitarProNormalizer.js' not in paths, 'accepted normalizer changed unexpectedly'
+          print('\n'.join(paths))
+
+      - name: Remove temporary workflows and commit verified correction
+        run: |
+          rm -f .github/workflows/temporary-guitar-pro-version-inventory.yml
+          rm -f .github/workflows/temporary-guitar-pro-shared-archive-correction.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m 'Complete Guitar Pro shared archive identity correction [generated-shared-archive]'
+          git push origin HEAD:work/tablature-intake-expansion
+
+      - name: Record success status
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/shared-archive-correction\",\"description\":\"Identity correction, tests, generation and build passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+
+      - name: Record failure status
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/shared-archive-correction\",\"description\":\"Inspect bounded shared-archive correction failure\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
