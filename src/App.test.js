@@ -238,9 +238,11 @@ describe("Guitar Eyes application shell", () => {
     expect(
       screen.getByText(/Imported MusicXML tablature\. Loaded 6 synchronized positions/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/Rest\./i)).toBeInTheDocument();
     expect(screen.getAllByRole("table")).toHaveLength(1);
     await waitFor(() => expect(document.activeElement).toBe(heading));
+
+    fireEvent.click(screen.getByRole("button", { name: "Next position" }));
+    expect(screen.getByText(/Duration, quarter note\. Rest\./i)).toBeInTheDocument();
   });
 
   test("rejects non-tablature MusicXML and keeps compressed MusicXML unsupported", async () => {
