@@ -18,6 +18,9 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
   const unsupportedItems = Array.isArray(inventory?.items)
     ? inventory.items.filter((item) => !item.supported)
     : [];
+  const selectedTrackSummary = selectedItem
+    ? `Selected track details: ${selectedItem.selectionLabel}`
+    : "No track selected.";
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -62,6 +65,12 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
             ))}
           </div>
         </fieldset>
+        <p
+          id="guitar-pro-selected-track-summary"
+          className="guitar-pro-selected-track-summary"
+        >
+          {selectedTrackSummary}
+        </p>
         <button type="submit" disabled={disabled || !selectedItem}>
           Load selected track
         </button>
