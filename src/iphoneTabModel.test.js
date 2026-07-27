@@ -81,42 +81,77 @@ describe("parseSixStringTabText", () => {
     expect(document.warnings[0]).toMatch(/unequal lengths/i);
   });
 
-  test("preserves recognized technique notation without pretending to interpret it", () => {
+  test("attaches deterministic transition techniques without adding extra positions", () => {
     const document = parseSixStringTabText(
       makeTab([
-        "e|--5h7--|",
-        "B|-------|",
-        "G|-------|",
-        "D|-------|",
-        "A|-------|",
-        "E|-------|",
+        "e|--5h7p5--|",
+        "B|---------|",
+        "G|---------|",
+        "D|---------|",
+        "A|---------|",
+        "E|---------|",
       ])
     );
 
-    expect(document.positions.map((position) => position.sourceColumn)).toEqual([2, 3, 4]);
+    expect(document.positions.map((position) => position.sourceColumn)).toEqual([2, 4, 6]);
     expect(describePosition(document, 1)).toContain(
-      "hammer-on notation preserved but not yet interpreted"
+      "High E string, fret 7, with hammer-on notation preserved but not yet interpreted."
+    );
+    expect(describePosition(document, 2)).toContain(
+      "High E string, fret 5, with pull-off notation preserved but not yet interpreted."
     );
   });
 
-  test("reports unsupported notation instead of silently deleting it", () => {
+  test("preserves unsupported notation without creating a false musical position", () => {
     const document = parseSixStringTabText(
       makeTab([
-        "e|--?--|",
-        "B|-----|",
-        "G|-----|",
-        "D|-----|",
-        "A|-----|",
-        "E|-----|",
+        "e|--3?--|",
+        "B|------|",
+        "G|------|",
+        "D|------|",
+        "A|------|",
+        "E|------|",
       ])
     );
 
-    expect(document.warnings).toContain(
-      "Block 1 contains 1 notation symbol that was preserved but cannot yet be interpreted."
+    expect(document.positions.map((position) => position.sourceColumn)).toEqual([2]);
+    expect(document.warnings.join(" ")).toMatch(
+      /1 notation symbol.*preserved.*Unsupported symbols did not create musical positions/i
     );
-    expect(describePosition(document, 0)).toContain(
-      "notation at this position cannot yet be interpreted"
+    expect(document.strings[0].tokens).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "unsupported", raw: "?", createsPosition: false }),
+      ])
     );
+    expect(describePosition(document, 0)).toContain("High E string, fret 3.");
+    expect(describePosition(document, 0)).not.toMatch(/cannot yet be interpreted/i);
+  });
+
+  test("normalizes octave-qualified labels while preserving their source form", () => {
+    const document = parseSixStringTabText(
+      makeTab([
+        "E4|--0--|",
+        "B3|-----|",
+        "G3|-----|",
+        "D3|-----|",
+        "A2|-----|",
+        "E2|-----|",
+      ])
+    );
+
+    expect(document.strings[0]).toMatchObject({
+      tuning: "E",
+      octave: 4,
+      rawLabel: "E4",
+      sourceLine: "E4|--0--|",
+      spokenName: "High E string",
+    });
+    expect(document.strings[5]).toMatchObject({
+      tuning: "E",
+      octave: 2,
+      rawLabel: "E2",
+      spokenName: "Low E string",
+    });
   });
 
   test("keeps the clean one-block wrapper strict", () => {
