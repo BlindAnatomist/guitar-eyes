@@ -22,8 +22,14 @@ const FORMAT_DEFINITIONS = {
     support: "planned",
     isText: false,
   },
-  "guitar-pro": {
-    id: "guitar-pro",
+  "guitar-pro-proof": {
+    id: "guitar-pro-proof",
+    label: "Guitar Pro .gp checkpoint file",
+    support: "checkpoint-proof",
+    isText: false,
+  },
+  "guitar-pro-legacy": {
+    id: "guitar-pro-legacy",
     label: "Guitar Pro tablature",
     support: "planned",
     isText: false,
@@ -60,12 +66,12 @@ const EXTENSION_FORMATS = new Map([
   ["musicxml", "musicxml"],
   ["xml", "musicxml"],
   ["mxl", "compressed-musicxml"],
-  ["gtp", "guitar-pro"],
-  ["gp3", "guitar-pro"],
-  ["gp4", "guitar-pro"],
-  ["gp5", "guitar-pro"],
-  ["gpx", "guitar-pro"],
-  ["gp", "guitar-pro"],
+  ["gp", "guitar-pro-proof"],
+  ["gtp", "guitar-pro-legacy"],
+  ["gp3", "guitar-pro-legacy"],
+  ["gp4", "guitar-pro-legacy"],
+  ["gp5", "guitar-pro-legacy"],
+  ["gpx", "guitar-pro-legacy"],
   ["ptb", "powertab"],
   ["pt2", "powertab"],
   ["tg", "tuxguitar"],
@@ -115,15 +121,17 @@ export function unsupportedTabFormatMessage(format) {
   switch (format?.id) {
     case "compressed-musicxml":
       return "Compressed MusicXML was recognized. Guitar Eyes does not yet import .mxl files; uncompressed .musicxml or .xml tablature is supported first.";
-    case "guitar-pro":
-      return "A Guitar Pro tablature file was recognized. Guitar Eyes does not yet import Guitar Pro files; support is planned through a verified structured importer.";
+    case "guitar-pro-proof":
+      return "A Guitar Pro .gp archive was recognized. This branch contains an unhosted project-fixture proof only; general Guitar Pro 7 or 8 support has not yet been accepted.";
+    case "guitar-pro-legacy":
+      return "A Guitar Pro tablature file was recognized. Guitar Eyes does not yet import this Guitar Pro version; direct support requires an original, public-domain, or clearly licensed fixture and version-specific evidence.";
     case "powertab":
-      return "A PowerTab file was recognized. Guitar Eyes does not yet import PowerTab files; support is planned through a verified structured importer.";
+      return "A PowerTab file was recognized. Guitar Eyes does not yet import PowerTab files; support requires a separately verified parser or owner-performed conversion.";
     case "tuxguitar":
-      return "A TuxGuitar file was recognized. Guitar Eyes does not yet import .tg files; support is part of the structured-import plan.";
+      return "A TuxGuitar file was recognized. Guitar Eyes does not yet import .tg files; TuxGuitar remains an external conversion route rather than a browser dependency.";
     case "tabledit":
-      return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; support is part of the structured-import plan.";
+      return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature or supported uncompressed MusicXML tablature.";
+      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported uncompressed MusicXML tablature, or an authorized checkpoint fixture.";
   }
 }
