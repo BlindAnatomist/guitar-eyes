@@ -8,13 +8,6 @@ export class GuitarProWorkerError extends Error {
   }
 }
 
-function defaultWorkerFactory() {
-  return new Worker(new URL("./guitarProImport.worker.js", import.meta.url), {
-    type: "module",
-    name: "guitar-eyes-gp7-import",
-  });
-}
-
 function requestId() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -25,7 +18,7 @@ function requestId() {
 export async function decodeGuitarPro7ProofFile(
   file,
   {
-    workerFactory = defaultWorkerFactory,
+    workerFactory = null,
     timeoutMs = GUITAR_PRO_LIMITS.workerTimeoutMs,
     maxFileBytes = GUITAR_PRO_LIMITS.maxFileBytes,
   } = {}
@@ -52,6 +45,12 @@ export async function decodeGuitarPro7ProofFile(
     throw new GuitarProWorkerError(
       "The Guitar Pro worker timeout is invalid.",
       "INVALID_GUITAR_PRO_TIMEOUT"
+    );
+  }
+  if (typeof workerFactory !== "function") {
+    throw new GuitarProWorkerError(
+      "The Guitar Pro decoder worker factory is unavailable.",
+      "GUITAR_PRO_WORKER_UNAVAILABLE"
     );
   }
 
