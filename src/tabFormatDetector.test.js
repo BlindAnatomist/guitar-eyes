@@ -72,16 +72,31 @@ describe("detectTabFileFormat", () => {
     ).toBe("unknown");
   });
 
-  test("recognizes MusicXML by extension and by structured content", () => {
-    expect(detectTabFileFormat("score.musicxml").id).toBe("musicxml");
-    expect(detectTabFileFormat("score.txt", musicXml).id).toBe("musicxml");
-    expect(unsupportedTabFormatMessage(detectTabFileFormat("score.musicxml"))).toMatch(
-      /does not yet import MusicXML/i
-    );
+  test("recognizes uncompressed MusicXML as supported by extension and content", () => {
+    expect(detectTabFileFormat("score.musicxml")).toMatchObject({
+      id: "musicxml",
+      support: "supported",
+      isText: true,
+    });
+    expect(detectTabFileFormat("score.txt", musicXml)).toMatchObject({
+      id: "musicxml",
+      support: "supported",
+      isText: true,
+    });
+    expect(shouldReadTabFileAsText(detectTabFileFormat("score.xml"))).toBe(true);
+  });
+
+  test("keeps compressed MusicXML recognized but unsupported", () => {
+    const format = detectTabFileFormat("score.mxl");
+    expect(format).toMatchObject({
+      id: "compressed-musicxml",
+      support: "planned",
+      isText: false,
+    });
+    expect(unsupportedTabFormatMessage(format)).toMatch(/does not yet import \.mxl/i);
   });
 
   test.each([
-    ["song.mxl", "compressed-musicxml"],
     ["song.gp5", "guitar-pro"],
     ["song.gpx", "guitar-pro"],
     ["song.gp", "guitar-pro"],
