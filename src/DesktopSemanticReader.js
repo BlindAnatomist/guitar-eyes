@@ -43,6 +43,10 @@ function positionColumnLabel(position) {
     parts.push(position.duration.name);
   }
 
+  if (position.isRest) {
+    parts.push("rest");
+  }
+
   return parts.join(", ");
 }
 
@@ -248,7 +252,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
             </h4>
 
             <details className="source-layout-disclosure">
-              <summary>Original spatial source layout</summary>
+              <summary>{block.sourceLayoutLabel || "Original spatial source layout"}</summary>
               <pre className="source-layout">{sourceLayoutForBlock(block)}</pre>
             </details>
 
