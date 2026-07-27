@@ -8,6 +8,7 @@ import {
   ASCII_INSTRUMENT_PROFILES,
   collectTabStringLineRuns,
   containsPlayableAsciiNotation,
+  UNSUPPORTED_ASCII_INSTRUMENT_PROFILES,
 } from "./tabStringLine";
 
 const SUPPORTED_INSTRUMENTS = ["guitar", "bass"];
@@ -40,22 +41,27 @@ function supportedCandidateAnalyses(sourceText, requestedInstrument) {
 
 function unsupportedStringCountError(sourceText) {
   const collected = collectTabStringLineRuns(sourceText);
-  const playableRuns = collected.runs.filter((run) =>
+  const hasPlayableRun = collected.runs.some((run) =>
     run.some((entry) => containsPlayableAsciiNotation(entry.content))
   );
-  const unsupportedLengths = [
-    ...new Set(
-      playableRuns
-        .map((run) => run.length)
-        .filter((length) => length > 0 && length % 4 !== 0 && length % 6 !== 0)
-    ),
-  ];
 
-  if (unsupportedLengths.length === 0) return null;
+  if (!hasPlayableRun) return null;
 
-  const labels = unsupportedLengths.map((length) => `${length}-string`).join(" and ");
+  const matches = Object.values(UNSUPPORTED_ASCII_INSTRUMENT_PROFILES)
+    .map((profile) => ({
+      profile,
+      analysis: analyzeTabRunsForProfile(sourceText, profile),
+    }))
+    .filter((candidate) => candidate.analysis.valid)
+    .sort((left, right) => right.analysis.confidence - left.analysis.confidence);
+
+  if (matches.length === 0) return null;
+
+  const stringCounts = [...new Set(matches.map(({ profile }) => profile.stringCount))];
+  const labels = stringCounts.map((count) => `${count}-string`).join(" and ");
+
   return new TabParseError(
-    `Guitar Eyes recognized ${labels} ASCII tablature. Semantic reading currently supports complete four-string bass and six-string guitar blocks; this string count was preserved but not guessed into another instrument.`,
+    `Guitar Eyes recognized ${labels} ASCII tablature. Semantic reading currently supports complete four-string bass and six-string guitar blocks; this verified string-count family was preserved but not guessed into another instrument.`,
     "UNSUPPORTED_STRING_COUNT"
   );
 }
