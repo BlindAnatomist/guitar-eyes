@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "created": "2026-07-26",
   "updated": "2026-07-26",
   "project": "Guitar Eyes",
@@ -189,13 +189,30 @@
       "provenance": "Project-authored MusicXML 4.0 specimen using original notes",
       "license": "CC0-1.0",
       "features": [
+        "official bottom-to-top staff-tuning line order",
         "standard six-string tuning",
         "one measure",
-        "4/4 time",
+        "4/4 duration total",
         "quarter eighth and half durations",
         "explicit string and fret technical data"
       ],
-      "currentExpectation": "Recognized by format preflight; structured import is reserved for MusicXML checkpoint 2"
+      "currentExpectation": "Uncompressed MusicXML import succeeds; string numbering maps to high-to-low semantic order; one four-quarter-note measure and four synchronized positions are preserved"
+    },
+    {
+      "path": "musicxml-chord-rest-two-measures.musicxml",
+      "family": "musicxml",
+      "provenance": "Project-authored MusicXML 4.0 specimen using original notes",
+      "license": "CC0-1.0",
+      "features": [
+        "standard six-string tuning",
+        "two measures",
+        "two complete 4/4 duration totals",
+        "two-note chord onset",
+        "timed rest",
+        "hammer-on technical notation",
+        "explicit string and fret technical data"
+      ],
+      "currentExpectation": "Uncompressed MusicXML import succeeds; chord notes share one synchronized onset; the rest remains a timed position; measures, durations, technique metadata, and normalized desktop rows are preserved"
     }
   ],
   "externalSources": [
