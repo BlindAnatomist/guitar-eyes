@@ -1,7 +1,19 @@
+import fs from "fs";
+import path from "path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import DesktopSemanticReader from "./DesktopSemanticReader";
 import { parseTabDocumentText } from "./iphoneTabModel";
-import { buildReaderDocuments } from "./tabImportCoordinator";
+import {
+  buildMusicXmlReaderDocuments,
+  buildReaderDocuments,
+} from "./tabImportCoordinator";
+
+function fixture(name) {
+  return fs.readFileSync(
+    path.join(process.cwd(), "fixtures", "real-world", name),
+    "utf8"
+  );
+}
 
 const measureDocument = buildReaderDocuments(
   [
@@ -35,6 +47,10 @@ const multiBlockDocument = parseTabDocumentText(
   ].join("\n"),
   "guitar"
 );
+
+const musicXmlDocument = buildMusicXmlReaderDocuments(
+  fixture("musicxml-chord-rest-two-measures.musicxml")
+).semanticDocument;
 
 describe("DesktopSemanticReader", () => {
   test("uses the accepted actionable description without speaking ordinary unplayed strings", () => {
@@ -124,5 +140,23 @@ describe("DesktopSemanticReader", () => {
     expect(liveRegion).toBeEmptyDOMElement();
     expect(screen.getByRole("button", { name: "Previous tablature block" })).toBeEnabled();
     expect(nextBlock).toBeDisabled();
+  });
+
+  test("labels normalized MusicXML rows honestly and marks rest columns", () => {
+    const { container } = render(<DesktopSemanticReader document={musicXmlDocument} />);
+
+    expect(screen.getByText("Normalized MusicXML spatial layout")).toBeInTheDocument();
+    expect(container.querySelector("pre.source-layout")).toHaveTextContent(/^E4\|/);
+    expect(
+      screen.getByRole("columnheader", {
+        name: "Measure 1, position 2, quarter note, rest",
+      })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Next position" }));
+    expect(container.querySelector(".position-description")).toHaveTextContent(
+      "Duration, quarter note. Rest."
+    );
+    expect(container.querySelector('[aria-live="polite"]')).toBeEmptyDOMElement();
   });
 });
