@@ -19,7 +19,7 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 
 ## Required continuity reading
 
-Before changing implementation, accessibility behavior, repository administration, GitHub Pages, workflows, importers, playback, teacher mode, or future AI work, read:
+Before changing implementation, accessibility behavior, repository administration, GitHub Pages, workflows, importers, dependencies, playback, teacher mode, or future AI work, read:
 
 1. `docs/implementation-status.md`;
 2. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
@@ -40,9 +40,10 @@ Before changing implementation, accessibility behavior, repository administratio
 17. `docs/musicxml-intake-checkpoint-2-result-2026-07-26.md`;
 18. `docs/musicxml-intake-checkpoint-2-publication-2026-07-26.md`;
 19. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
-20. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+20. `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`;
+21. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
-Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, workflow, or format-import procedure that is already recorded.
+Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, workflow, format-import, licensing, or dependency procedure that is already recorded.
 
 ## Accepted reader behavior is authoritative
 
@@ -71,6 +72,8 @@ Desktop and iPhone may present that document differently, but neither may create
 
 A punctuation mark or technique character must not become a musical position merely because it occupies a source column. Frets, open strings, explicit muted notes, and structured timed rests may create positions. Deterministic techniques may attach to notes. Unsupported material must remain preserved and warned without manufacturing steps.
 
+A third-party parser may decode a source format, but its model must not escape the importer boundary. Guitar Eyes must convert the decoded data into a small serializable intermediate representation and then into the accepted semantic document. The third-party renderer, player, cursor, notation UI, fonts, soundfonts, audio workers, and playback model are outside scope.
+
 ## Passed ASCII intake checkpoint
 
 Exact source `08f8ab16135570d0e53b829daa5c153a15751a45` passed 18 suites, 101 tests, production build, and corrected compiled-fragment checks.
@@ -79,7 +82,7 @@ It adds octave-qualified ASCII labels, Unicode accidental normalization, safer t
 
 ## Accepted MusicXML checkpoint
 
-Uncompressed six-string guitar MusicXML is now source-verified, hosted, and real-iPhone accepted.
+Uncompressed six-string guitar MusicXML is source-verified, hosted, and real-iPhone accepted.
 
 Evidence includes:
 
@@ -99,31 +102,59 @@ Evidence includes:
 
 The accepted scope remains deliberately narrow: uncompressed `score-partwise` MusicXML, one unambiguous six-string guitar tablature part, explicit tuning, explicit string and fret data, and single-voice sequential timing.
 
-## Current authorized task: next structured-format evaluation
+## Evaluated Guitar Pro route
 
-Proceed without John through a read-only evaluation and bounded implementation plan for the next format family.
+The July 27 evaluation authorizes `@coderline/alphatab` version `1.8.4` only as a lazy low-level decoder behind a strict Guitar Eyes adapter.
 
-Priority order:
+alphaTab may be used to decode project-authorized Guitar Pro bytes into its score model. Guitar Eyes must immediately extract only the required serializable musical data and discard that model.
 
-1. evaluate Guitar Pro import through a browser-compatible, zero-dollar structured importer such as alphaTab;
-2. determine which Guitar Pro versions are actually supported and whether the importer can expose tuning, measures, durations, notes, chords, rests, and techniques without using its renderer or playback engine;
-3. determine whether PowerTab, TuxGuitar, and TablEdit can be imported directly or safely converted through the same path;
-4. identify licensing, bundle-size, maintenance, security, and deterministic-testing implications;
-5. design normalization into the existing semantic document;
-6. stop before implementation if any required musical data would be guessed or if the dependency would force a second reader model.
+Do not initialize or ship alphaTab rendering, playback, alphaSynth, cursors, notation fonts, soundfonts, audio worklets, or UI controls.
 
-Do not bring John into research, dependency evaluation, fixture design, source implementation, automated testing, or build work. Bring him in only after a stable hosted candidate requires real-iPhone judgment.
+The advertised upstream importer range is Guitar Pro 3 through 8. Project-tested support must remain narrower than advertised support. A Guitar Pro version may not be described as supported until Guitar Eyes has an original, public-domain, or clearly licensed fixture and exact automated evidence for it.
 
-Do not begin:
+PowerTab, TuxGuitar, TablEdit, compressed MusicXML, Guitar Pro 2, and unsupported string-count families remain outside the current checkpoint.
 
-- playback;
-- teacher mode;
-- looping;
-- bookmarks;
-- pattern analysis;
-- AI implementation;
-- commercial scraping;
-- a pull request, merge, or upstream change.
+## Current authorized checkpoint: Guitar Pro 7 proof 3A
+
+Implement one bounded Guitar Pro 7 dependency-and-normalization proof.
+
+The proof may:
+
+1. pin `@coderline/alphatab` exactly at `1.8.4`;
+2. add an MPL-2.0 third-party notice and corresponding-source reference;
+3. create one tiny original alphaTex score and export it through alphaTab into a project-authored CC0 `.gp` fixture;
+4. load alphaTab only after Guitar Eyes identifies a Guitar Pro file;
+5. decode in a dedicated Web Worker with timeout, cancellation, and termination;
+6. transfer only a small serializable intermediate representation back to the application;
+7. normalize exactly one unambiguous non-percussion four-string or six-string staff into the existing semantic document;
+8. preserve source-order measures, exact durations, fretted notes, open strings, dead notes, chord onsets, timed rests, and a small deterministic technique set;
+9. preserve repeats and unsupported effects as metadata or warnings without expanding playback order;
+10. add exact byte, track, staff, bar, voice, beat, note, and timeout limits as tested constants;
+11. add tests for corrupt archives, oversized input, unsupported string counts, multiple supported tracks, conflicting voices, missing fret/string data, and resource-limit failures;
+12. verify that the initial application bundle does not eagerly contain alphaTab;
+13. inspect the lazy worker chunk and reject any emitted font, soundfont, playback, renderer-worker, or audio-worklet assets;
+14. preserve all inherited ASCII, MusicXML, desktop, iPhone, speech, and focus contracts;
+15. stop before publication and real-iPhone testing.
+
+The proof must reject rather than guess when:
+
+- more than one supported candidate track exists;
+- more than one active voice cannot be merged with identical onset and duration;
+- a note lacks usable string or fret identity;
+- timing cannot be represented exactly in quarter-note units;
+- grace timing would require a new semantic timing model;
+- the file exceeds resource limits;
+- the instrument, string count, or source version is outside the project-tested boundary.
+
+Do not silently select track zero, the first voice, the longest note, or the nearest string.
+
+During checkpoint 3A, `.gp` means project-tested Guitar Pro 7 only. Continue to recognize `.gp3`, `.gp4`, `.gp5`, `.gpx`, GP8 `.gp`, `.gtp`, `.ptb`, `.pt2`, `.tg`, and `.tef` without claiming import support.
+
+## Fixture and copyright policy
+
+Do not copy arbitrary alphaTab test files into Guitar Eyes. At least one reviewed upstream GP5 fixture contains a transcription of a commercial song and is unsuitable regardless of the alphaTab source-code license.
+
+The checkpoint fixture must be generated from original Guitar Eyes alphaTex, with both the source text and generated `.gp` file recorded as project-authored CC0 material.
 
 ## Zero-dollar automation
 
@@ -136,3 +167,5 @@ For a failed Actions run, inspect the failed job and logs before acting. Rerun o
 ## Accessibility and evidence
 
 Automated tests do not replace bounded real-iPhone Safari and VoiceOver acceptance. Record the owner's exact observation without strengthening or rewriting it.
+
+Do not bring John into dependency setup, fixture generation, source implementation, automated testing, build verification, or artifact inspection. Bring him in only after a stable hosted Guitar Pro candidate requires real-iPhone judgment.
