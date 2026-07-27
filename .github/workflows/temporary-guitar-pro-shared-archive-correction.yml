@@ -53,6 +53,9 @@ jobs:
       - name: Enforce edit result
         run: test "${{ steps.edit.outputs.exit_code }}" = "0"
 
+      - name: Install Node test environment support
+        run: python scripts/temporary_guitar_pro_test_environment_fix.py
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -109,6 +112,7 @@ jobs:
           rm -f scripts/temporary_guitar_pro_shared_archive_correction.py
           rm -f scripts/temporary_prepare_guitar_pro_shared_archive_correction.py
           rm -f scripts/temporary_guitar_pro_shared_archive_correction_v2.py
+          rm -f scripts/temporary_guitar_pro_test_environment_fix.py
           rm -f .github/workflows/temporary-guitar-pro-version-inventory.yml
           rm -f .github/workflows/temporary-guitar-pro-shared-archive-correction.yml
           git config user.name "github-actions[bot]"
