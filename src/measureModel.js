@@ -32,9 +32,9 @@ function removeSharedBarlineTokens(strings, sharedBarlineColumns) {
     tokens: string.tokens.filter(
       (token) =>
         !(
-          token.type === "unsupported" &&
-          token.raw === "|" &&
-          shared.has(token.startColumn)
+          shared.has(token.startColumn) &&
+          (token.type === "barline" ||
+            (token.type === "unsupported" && token.raw === "|"))
         )
     ),
   }));
@@ -53,7 +53,7 @@ function correctedUnsupportedWarning(strings, blockNumber) {
 
   return `Block ${blockNumber} contains ${count} notation ${
     count === 1 ? "symbol that was" : "symbols that were"
-  } preserved but cannot yet be interpreted.`;
+  } preserved but cannot yet be interpreted. Unsupported symbols did not create musical positions.`;
 }
 
 function buildMeasures(block, positions, sharedBarlineColumns) {
