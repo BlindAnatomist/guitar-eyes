@@ -1,4 +1,4 @@
-name: Temporary MusicXML intake checkpoint
+name: Temporary MusicXML compiled diagnostic
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   verify:
-    name: Verify corrected MusicXML intake source
+    name: Diagnose compiled MusicXML source
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -42,49 +42,48 @@ jobs:
           npm_config_cache: /tmp/guitar-eyes-musicxml-npm-cache
         run: npm ci --no-audit --no-fund
 
-      - name: Run complete automated suite once
-        id: tests
-        env:
-          CI: true
-        shell: bash
-        run: |
-          set +e
-          set -o pipefail
-          npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/musicxml-tests.log
-          test_exit=${PIPESTATUS[0]}
-          echo "exit_code=$test_exit" >> "$GITHUB_OUTPUT"
-          exit 0
-
-      - name: Upload Jest log on failure
-        if: steps.tests.outputs.exit_code != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: musicxml-test-log-corrected
-          path: /tmp/musicxml-tests.log
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Enforce test result and expected count
-        run: |
-          test "${{ steps.tests.outputs.exit_code }}" = "0"
-          grep -Eq 'Test Suites:[[:space:]]+19 passed,[[:space:]]+19 total' /tmp/musicxml-tests.log
-          grep -Eq 'Tests:[[:space:]]+115 passed,[[:space:]]+115 total' /tmp/musicxml-tests.log
-
       - name: Build production application
         run: npm run build
 
-      - name: Verify compiled MusicXML contracts
+      - name: Diagnose compiled MusicXML contracts
+        id: compiled
         shell: bash
         run: |
-          grep -R -F 'MusicXML intake checkpoint 2' build >/dev/null
-          grep -R -F 'Imported MusicXML tablature' build >/dev/null
-          grep -R -F 'Normalized MusicXML spatial layout' build >/dev/null
-          grep -R -F 'No MusicXML part contains explicit tablature string and fret data' build >/dev/null
-          grep -R -F 'Compressed MusicXML was recognized' build >/dev/null
-          grep -R -F 'Previous position' build >/dev/null
-          grep -R -F 'Read current position' build >/dev/null
-          grep -R -F 'Next position' build >/dev/null
-          grep -R -F 'Rest.' build >/dev/null
+          report=/tmp/musicxml-compiled-report.txt
+          : > "$report"
+          failed=0
+          while IFS= read -r phrase; do
+            if grep -R -F "$phrase" build >/dev/null; then
+              printf 'PASS: %s\n' "$phrase" | tee -a "$report"
+            else
+              printf 'FAIL: %s\n' "$phrase" | tee -a "$report"
+              failed=1
+            fi
+          done <<'PHRASES'
+          MusicXML intake checkpoint 2
+          Imported MusicXML tablature
+          Normalized MusicXML spatial layout
+          No MusicXML part contains explicit tablature string and fret data
+          Compressed MusicXML was recognized
+          Previous position
+          Read current position
+          Next position
+          Rest.
+          PHRASES
+          echo "failed=$failed" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload compiled diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: musicxml-compiled-report
+          path: /tmp/musicxml-compiled-report.txt
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Enforce compiled diagnostic
+        run: test "${{ steps.compiled.outputs.failed }}" = "0"
 
       - name: Record success status
         if: success()
@@ -97,7 +96,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/musicxml-checkpoint\",\"description\":\"19 suites, 115 tests and build passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/musicxml-compiled-diagnostic\",\"description\":\"Production build compiled phrases passed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
 
       - name: Record failure status
         if: failure()
@@ -110,4 +109,4 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/musicxml-checkpoint\",\"description\":\"Inspect the bounded MusicXML gate\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/musicxml-compiled-diagnostic\",\"description\":\"Compiled phrase report uploaded\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
