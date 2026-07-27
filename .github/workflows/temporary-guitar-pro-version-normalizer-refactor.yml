@@ -129,8 +129,10 @@ jobs:
               1,
           )
 
+          assert text.count('"guitar-pro-7"') == 1
+          text = text.replace('"guitar-pro-7"', 'GUITAR_PRO_SOURCE_FORMAT', 1)
           assert text.count('guitar-pro-7') == 0
-          assert text.count('GUITAR_PRO_SOURCE_FORMAT') == 8
+          assert text.count('GUITAR_PRO_SOURCE_FORMAT') == 9
           assert text.count('    versionEvidence,') == 2
           assert text.count('function validateVersionEvidence(intermediate)') == 1
           path.write_text(text, encoding='utf-8')
