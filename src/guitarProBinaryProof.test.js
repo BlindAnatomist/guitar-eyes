@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { TextDecoder, TextEncoder } from "util";
 import * as alphaTab from "@coderline/alphatab";
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
@@ -10,6 +11,15 @@ function fixture(name) {
     path.join(process.cwd(), "fixtures", "real-world", name)
   );
 }
+
+beforeAll(() => {
+  if (typeof global.TextDecoder === "undefined") {
+    global.TextDecoder = TextDecoder;
+  }
+  if (typeof global.TextEncoder === "undefined") {
+    global.TextEncoder = TextEncoder;
+  }
+});
 
 describe("project-authored Guitar Pro 7 binary proof", () => {
   test("decodes and normalizes the generated GP7 fixture through alphaTab", () => {
