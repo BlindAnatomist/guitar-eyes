@@ -106,14 +106,15 @@ function buildZip(entries) {
   return new Uint8Array(Buffer.concat([...localParts, central, eocd]));
 }
 
-function gpif(gpVersion = "8.1.3", encoding = "GP8") {
-  return `<GPIF><GPVersion>${gpVersion}</GPVersion><Encoding><EncodingDescription>${encoding}</EncodingDescription></Encoding></GPIF>`;
+function gpif(gpVersion = "8.1.3", encoding = "GP8", tracks = "0") {
+  return `<GPIF><GPVersion>${gpVersion}</GPVersion><Encoding><EncodingDescription>${encoding}</EncodingDescription></Encoding><MasterTrack><Tracks>${tracks}</Tracks></MasterTrack></GPIF>`;
 }
 
 function archive({
   rootVersion = "7.0",
   gpVersion = "8.1.3",
   encoding = "GP8",
+  tracks = "0",
   extras = [],
   method = 8,
 } = {}) {
@@ -121,7 +122,7 @@ function archive({
     { name: "VERSION", content: rootVersion, method },
     {
       name: "Content/score.gpif",
-      content: gpif(gpVersion, encoding),
+      content: gpif(gpVersion, encoding, tracks),
       method,
     },
     ...extras,
@@ -150,6 +151,19 @@ describe("inspectGuitarProArchiveVersion", () => {
       encodingDescription: "GP8",
       sourceVersion: "GP8",
       entryCount: 6,
+      declaredTrackCount: 1,
+    });
+  });
+
+  test("reads the project-authored two-track declaration directly from score.gpif", async () => {
+    await expect(
+      inspectGuitarProArchiveVersion(
+        fixture("guitar-pro-multi-track-proof.gp"),
+        { inflateRaw }
+      )
+    ).resolves.toMatchObject({
+      sourceVersion: "GP8",
+      declaredTrackCount: 2,
     });
   });
 
@@ -159,14 +173,14 @@ describe("inspectGuitarProArchiveVersion", () => {
         archive({ gpVersion: "7.5.0", encoding: "GP7" }),
         { inflateRaw }
       )
-    ).resolves.toMatchObject({ sourceVersion: "GP7" });
+    ).resolves.toMatchObject({ sourceVersion: "GP7", declaredTrackCount: 1 });
 
     await expect(
       inspectGuitarProArchiveVersion(
         archive({ gpVersion: "8.1.3", encoding: "GP8" }),
         { inflateRaw }
       )
-    ).resolves.toMatchObject({ sourceVersion: "GP8" });
+    ).resolves.toMatchObject({ sourceVersion: "GP8", declaredTrackCount: 1 });
   });
 
   test("supports stored evidence entries as well as raw DEFLATE", async () => {
@@ -176,6 +190,7 @@ describe("inspectGuitarProArchiveVersion", () => {
     );
 
     expect(result.sourceVersion).toBe("GP8");
+    expect(result.declaredTrackCount).toBe(1);
   });
 
   test("rejects contradictory GPIF evidence", async () => {
@@ -206,6 +221,24 @@ describe("inspectGuitarProArchiveVersion", () => {
         { inflateRaw }
       ),
       "MISSING_GUITAR_PRO_VERSION_EVIDENCE"
+    );
+  });
+
+  test("rejects missing, empty, or duplicate track declarations", async () => {
+    await expectArchiveCode(
+      inspectGuitarProArchiveVersion(
+        archive({ tracks: "" }),
+        { inflateRaw }
+      ),
+      "MISSING_GUITAR_PRO_TRACK_EVIDENCE"
+    );
+
+    await expectArchiveCode(
+      inspectGuitarProArchiveVersion(
+        archive({ tracks: "0 0" }),
+        { inflateRaw }
+      ),
+      "CONTRADICTORY_GUITAR_PRO_TRACK_EVIDENCE"
     );
   });
 
