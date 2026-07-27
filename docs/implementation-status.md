@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Last updated: July 26, 2026
+Last updated: July 27, 2026
 
 ## Repository authority
 
@@ -20,21 +20,19 @@ Verified, hosted, and real-iPhone-accepted convergence source: `72159d25958fffd9
 
 Verified ASCII intake expansion source: `08f8ab16135570d0e53b829daa5c153a15751a45`
 
-Fork `main` remains reserved as an exact upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
+Verified MusicXML implementation source: `715547a123b2a6e862a8020858df96cb34c63526`
 
-Documentation-only commits after the exact implementation sources do not replace their identities.
+Fork `main` remains exactly reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
 ## Governing architecture
 
 Guitar Eyes is one musical system with one semantic tablature document and two reader interfaces:
 
 1. iPhone presents synchronized musical positions sequentially for Safari and VoiceOver.
-2. Desktop presents the same document as strings by synchronized positions while retaining the original spatial source layout.
+2. Desktop presents the same document as strings by synchronized positions while preserving a spatial overview.
 3. Every supported format must normalize into the same semantic document.
-4. Instrument identity, tuning, blocks, strings, notes, techniques, rhythm, measures, warnings, and preserved unsupported material belong to that document.
-5. Format-specific parsers may interpret source syntax, but they may not create separate reader logic or separate musical models.
-
-The legacy desktop grid remains a compatibility fallback for unsafe ASCII material. Recognized but unsupported formats and string-count families must be identified honestly rather than opened as though semantic reading succeeded.
+4. Format-specific parsers may interpret source syntax but may not create separate reader logic, playback logic, or musical models.
+5. Browser-level file filtering must not prevent iPhone users from selecting a file before Guitar Eyes can validate it.
 
 ## Accepted reader contracts
 
@@ -42,15 +40,16 @@ Every intake checkpoint must preserve:
 
 1. Previous position, Read current position, Next position order.
 2. Quiet position and block movement.
-3. Read current as the only semantic-reader action that sends full playing instructions to the live region.
+3. Read current as the only action that announces the full playing instruction.
 4. Omission of ordinary unplayed strings.
-5. Speech for open strings, frets, explicit muted notes, attached techniques, and supported duration.
-6. W, H, Q, E, and S duration mapping.
-7. Aligned measure recognition and position-within-measure speech.
+5. Speech for open strings, frets, explicit muted notes, attached techniques, chords, rests, and supported duration.
+6. W, H, Q, E, and S duration mapping for supported ASCII.
+7. Measure and position-within-measure speech.
 8. Multiple tablature blocks.
 9. Automatic supported four-string bass and six-string guitar detection.
-10. Native iPhone Files-picker focus recovery after supported and failed uploads.
-11. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
+10. Native iPhone Files-picker focus recovery.
+11. No browser-level `accept` restriction on the upload control.
+12. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
 
 ## Passed convergence recovery checkpoint 1
 
@@ -60,69 +59,76 @@ Evidence:
 
 1. 17 of 17 automated suites.
 2. 81 of 81 automated tests.
-3. Production build.
-4. Compiled-artifact checks.
-5. Corrected Pages publication.
-6. Hosted HTML and live-bundle read-back.
-7. Exact restoration of fork `main`.
-8. Real-iPhone Safari and VoiceOver acceptance.
-
-Valid accepted convergence preview:
-
-`https://blindanatomist.github.io/guitar-eyes/`
+3. Production build and compiled-artifact checks.
+4. Corrected Pages publication and hosted read-back.
+5. Exact restoration of fork `main`.
+6. Real-iPhone Safari and VoiceOver acceptance.
 
 Jason Washburn's optional desktop acceptance remains deferred unless he agrees to participate. His absence is not an active blocker.
-
-Detailed records:
-
-- `docs/convergence-recovery-source-checkpoint-1.md`
-- `docs/convergence-recovery-local-execution-gate-2026-07-26.md`
-- `docs/convergence-recovery-publication-result-2026-07-26.md`
-- `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`
 
 ## Passed ASCII intake expansion checkpoint 1
 
 Exact source: `08f8ab16135570d0e53b829daa5c153a15751a45`
 
-Implemented capability:
+Accepted capability:
 
-1. Shared string-line analysis for detection, instrument analysis, and parsing.
-2. Optional octave suffixes such as `E4` and `B3`.
-3. Unicode sharp and flat normalization while preserving source labels.
-4. High-to-low validation for fully octave-qualified strings.
-5. Rejection of duplicate octave pitches and misordered standard tuning labels.
-6. Supported custom four-string and six-string tuning with explicit warnings.
-7. Positions created only by frets, open strings, and explicit muted notes.
-8. Deterministic attachment of transition techniques to notes.
-9. Unsupported punctuation preserved and warned without creating false positions.
-10. Positive recognition of five-string bass and seven-string guitar as unsupported.
-11. No reclassification of a truncated supported document as another instrument family.
-12. Prevention of pipe-delimited prose false positives.
-13. Honest supported, recognized-unsupported, unsafe-fallback, planned-format, and unknown upload outcomes.
-14. Expanded CC0 real-world and adversarial fixture corpus.
+1. Six-string guitar and four-string bass ASCII.
+2. Multiple blocks and surrounding metadata.
+3. Optional octave labels.
+4. ASCII and Unicode accidentals.
+5. Safely preserved custom tuning.
+6. Multi-digit frets, open strings, explicit muted notes, and deterministic attached techniques.
+7. W, H, Q, E, and S rhythm lines.
+8. Aligned explicit measures.
+9. Prevention of false positions from unsupported punctuation.
+10. Positive recognition, but not import, of five-string bass and seven-string guitar.
+11. Prevention of pipe-delimited prose false positives.
+
+Verification:
+
+- 18 of 18 suites;
+- 101 of 101 tests;
+- production build;
+- compiled-fragment checks.
+
+## Passed MusicXML intake checkpoint 2
+
+Uncompressed six-string guitar MusicXML is now source-verified, hosted, and real-iPhone accepted.
+
+Accepted scope:
+
+1. `score-partwise` XML.
+2. One unambiguous six-string guitar tablature part.
+3. Explicit six-string staff tuning.
+4. Explicit string and fret technical data.
+5. Single-voice sequential timing.
+6. Measures and duration.
+7. Open and fretted notes.
+8. Simultaneous chord onsets.
+9. Timed rests.
+10. Supported technical notation.
+11. One shared semantic document for desktop and iPhone.
+
+Safe rejection covers malformed XML, custom entities, missing or ambiguous tablature parts, missing tuning, unsafe tuning order, backup or forward timing, multiple voices, grace notes, missing coordinates, out-of-range strings, and duplicate string assignments at one onset.
 
 Verification evidence:
 
-1. Accepted convergence ancestry: passed.
-2. Locked installation: passed.
-3. Automated suites: 18 passed, 18 total.
-4. Automated tests: 101 passed, 101 total.
-5. Production build: passed.
-6. Corrected compiled-fragment verification: passed.
-7. Temporary checkpoint workflow: removed.
-
-Important run history:
-
-- `30227571812`: initial source exposed four intake defects; no blind rerun occurred.
-- `30227720078`: diagnostic log captured the exact failures.
-- `30227993598`: exact corrected source passed all 101 tests and production build; only an invalid fully interpolated literal check failed.
-- `30228133370`: build-only correction verified the actual compiled fragments successfully.
-
-This checkpoint was not published. It does not yet require owner-operated iPhone testing.
+1. 19 of 19 suites and 115 of 115 tests for the importer implementation.
+2. 20 of 20 suites and 117 of 117 tests after the iPhone picker repair.
+3. Production build and compiled checks.
+4. Hosted publication and bundle read-back.
+5. Picker-repair hosted read-back through run `30230820831`.
+6. Exact restoration of fork `main`.
+7. Real-iPhone file selection after removal of the browser `accept` restriction.
+8. Correct picker-return focus.
+9. Correct four-position note and duration test.
+10. Correct simultaneous high-E-open and B-string-fret-1 chord instruction.
+11. Correct timed-rest instruction without a string.
+12. Quiet Previous and Next behavior.
 
 Detailed record:
 
-- `docs/ascii-intake-expansion-checkpoint-1-result-2026-07-26.md`
+- `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`
 
 ## Current format support
 
@@ -130,60 +136,40 @@ Detailed record:
 
 1. ASCII `.txt` and `.tab` six-string guitar.
 2. ASCII `.txt` and `.tab` four-string bass.
-3. Multiple complete blocks.
-4. Metadata and prose around blocks.
-5. Standard and safely preserved custom tuning.
-6. ASCII and Unicode accidentals.
-7. Optional octave-qualified string labels.
-8. Multi-digit frets, open strings, explicit muted notes, and supported attached techniques.
-9. W, H, Q, E, and S rhythm lines.
-10. Aligned explicit measures.
+3. Uncompressed `.musicxml` and `.xml` six-string guitar tablature within the accepted bounded profile.
 
 ### Recognized but not imported
 
 1. Five-string bass ASCII.
 2. Seven-string guitar ASCII.
-3. MusicXML and `.xml`.
-4. Compressed MusicXML `.mxl`.
-5. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, and `.gp`.
-6. PowerTab `.ptb` and `.pt2`.
-7. TuxGuitar `.tg`.
-8. TablEdit `.tef`.
+3. Compressed MusicXML `.mxl`.
+4. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, and `.gp`.
+5. PowerTab `.ptb` and `.pt2`.
+6. TuxGuitar `.tg`.
+7. TablEdit `.tef`.
 
 Recognition must not be described as reading support.
 
-## Current bounded checkpoint: uncompressed MusicXML import
+## Current bounded task: next structured-format evaluation
 
-The next implementation target is actual MusicXML guitar tablature import into the existing semantic document.
+Proceed without John through a read-only evaluation and implementation plan for Guitar Pro and related binary formats.
 
-Checkpoint 2 must:
+The evaluation must determine:
 
-1. accept uncompressed XML only;
-2. require explicit tablature string and fret technical data;
-3. select a guitar tablature part safely when a score contains multiple parts;
-4. import tuning, measures, durations, notes, rests, and chords;
-5. map MusicXML string numbering into the semantic high-to-low order deliberately;
-6. preserve unsupported structured notation with warnings rather than inventing meaning;
-7. reject non-tablature or ambiguous MusicXML clearly;
-8. provide one semantic document to both desktop and iPhone;
-9. inherit all 101 tests and add structured-import tests;
-10. stop before publication and real-iPhone testing until source, automated, build, and artifact gates pass.
+1. which Guitar Pro versions a zero-dollar browser-compatible importer can parse;
+2. whether alphaTab or another maintained dependency exposes tuning, measures, duration, notes, chords, rests, and techniques without requiring its renderer or playback engine;
+3. whether the dependency can normalize into the existing semantic document rather than introducing a second model;
+4. licensing, bundle-size, security, maintenance, deterministic-testing, and browser implications;
+5. whether PowerTab, TuxGuitar, and TablEdit can share that import route or require separate conversion paths;
+6. what original or clearly licensed fixtures are available;
+7. the exact unsupported boundary.
 
-This checkpoint does not authorize:
+Do not begin implementation if essential musical data would be guessed, if the dependency forces playback or rendering architecture into the reader, or if the licensing path is unsuitable.
 
-- compressed `.mxl`;
-- Guitar Pro or other binary importers;
-- playback;
-- teacher mode;
-- looping;
-- bookmarks;
-- pattern analysis;
-- AI implementation;
-- commercial scraping;
-- a pull request, merge, upstream change, or production publication.
+This task does not authorize playback, teacher mode, looping, bookmarks, pattern analysis, AI implementation, commercial scraping, a pull request, merge, upstream change, or production publication.
 
 ## Testing responsibility
 
-Source inspection, fixtures, implementation, automated tests, and build verification proceed without John.
+Research, dependency evaluation, fixture design, source implementation, automated tests, and build verification proceed without John.
 
-John is needed only after a stable hosted MusicXML candidate exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
+John is needed only after a stable hosted candidate for the next format exists and a bounded real-iPhone Safari and VoiceOver test is necessary.
