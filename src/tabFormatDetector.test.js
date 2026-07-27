@@ -96,15 +96,29 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/does not yet import \.mxl/i);
   });
 
+  test("recognizes .gp only as an internal checkpoint proof", () => {
+    const format = detectTabFileFormat("proof.gp");
+
+    expect(format).toMatchObject({
+      id: "guitar-pro-proof",
+      support: "checkpoint-proof",
+      isText: false,
+    });
+    expect(shouldReadTabFileAsText(format)).toBe(false);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/unhosted project-fixture proof/i);
+  });
+
   test.each([
-    ["song.gp5", "guitar-pro"],
-    ["song.gpx", "guitar-pro"],
-    ["song.gp", "guitar-pro"],
+    ["song.gtp", "guitar-pro-legacy"],
+    ["song.gp3", "guitar-pro-legacy"],
+    ["song.gp4", "guitar-pro-legacy"],
+    ["song.gp5", "guitar-pro-legacy"],
+    ["song.gpx", "guitar-pro-legacy"],
     ["song.ptb", "powertab"],
     ["song.pt2", "powertab"],
     ["song.tg", "tuxguitar"],
     ["song.tef", "tabledit"],
-  ])("recognizes %s as %s", (fileName, expectedId) => {
+  ])("recognizes %s as unsupported %s", (fileName, expectedId) => {
     const format = detectTabFileFormat(fileName);
     expect(format.id).toBe(expectedId);
     expect(format.support).toBe("planned");
