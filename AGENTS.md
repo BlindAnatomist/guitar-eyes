@@ -9,7 +9,8 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - The accepted iPhone, rhythm, measure, and shared-core foundation is `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
 - The verified, hosted, and real-iPhone-accepted convergence source is `72159d25958fffd941c95351c6781cf579e1d622`.
 - The verified ASCII intake expansion source is `08f8ab16135570d0e53b829daa5c153a15751a45`.
-- The verified uncompressed MusicXML intake source is `715547a123b2a6e862a8020858df96cb34c63526`.
+- The verified uncompressed MusicXML implementation source is `715547a123b2a6e862a8020858df96cb34c63526`.
+- The hosted MusicXML preview source is `8fd5a5133269d6a277c5d9f9dd916aa5f8dd96d0`; it differs only by static preview identity.
 - Documentation-only commits after those sources do not replace their implementation identities.
 - Preserve `work/convergence-from-accepted-semantic-core` as the accepted convergence record.
 - Perform tablature-format expansion only on `work/tablature-intake-expansion` unless the owner explicitly authorizes another branch.
@@ -37,7 +38,8 @@ Before changing implementation, accessibility behavior, repository administratio
 15. `docs/tablature-intake-expansion-checkpoint-1-audit.md`;
 16. `docs/ascii-intake-expansion-checkpoint-1-result-2026-07-26.md`;
 17. `docs/musicxml-intake-checkpoint-2-result-2026-07-26.md`;
-18. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+18. `docs/musicxml-intake-checkpoint-2-publication-2026-07-26.md`;
+19. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a repository, deployment, accessibility, workflow, or format-import procedure that is already recorded.
 
@@ -73,9 +75,9 @@ Exact source `08f8ab16135570d0e53b829daa5c153a15751a45` passed 18 suites, 101 te
 
 It adds octave-qualified ASCII labels, Unicode accidental normalization, safer tuning-order validation, custom-tuning preservation, deterministic technique attachment, false-position prevention, positive five- and seven-string non-support recognition, pipe-prose false-positive prevention, and honest upload outcomes.
 
-## Passed MusicXML source checkpoint
+## Verified and hosted MusicXML checkpoint
 
-Exact source `715547a123b2a6e862a8020858df96cb34c63526` passed:
+Exact implementation source `715547a123b2a6e862a8020858df96cb34c63526` passed:
 
 - accepted ASCII ancestry;
 - locked installation;
@@ -84,20 +86,30 @@ Exact source `715547a123b2a6e862a8020858df96cb34c63526` passed:
 - production build;
 - corrected compiled-fragment checks.
 
-It imports uncompressed six-string guitar MusicXML with one unambiguous tablature part, explicit tuning, string and fret coordinates, single-voice sequential timing, chords, timed rests, measures, durations, open strings, frets, and supported technical notation into the shared semantic document.
+Hosted source `8fd5a5133269d6a277c5d9f9dd916aa5f8dd96d0` was published through the temporary-main Pages procedure. Run `30229933051` passed build, deployment, live HTML and asset read-back, MusicXML bundle checks, and failure-report skip. Fork `main` was restored and independently compared as identical, zero ahead, zero behind, and zero changed files.
+
+The importer supports uncompressed six-string guitar MusicXML with one unambiguous tablature part, explicit tuning, string and fret coordinates, single-voice sequential timing, chords, timed rests, measures, durations, open strings, frets, and supported technical notation through the shared desktop and iPhone semantic document.
 
 It safely rejects malformed XML, custom entities, missing or ambiguous tablature parts, missing tuning, unsafe tuning order, backup/forward timing, multiple voices, grace notes, missing tab coordinates, out-of-range strings, and duplicate string assignments at one onset.
 
-This source has not yet been published or accepted on the real iPhone.
+## Current authorized task: real-iPhone MusicXML acceptance
 
-## Current authorized task: publication and iPhone acceptance
+John now performs one bounded Safari and VoiceOver test against:
 
-The next task is limited to:
+`https://blindanatomist.github.io/guitar-eyes/`
 
-1. publishing exact source `715547a123b2a6e862a8020858df96cb34c63526` through the proven temporary-main procedure;
-2. reading back the live HTML and primary bundle for MusicXML identity and reader contracts;
-3. restoring fork `main` exactly to `60c2e5de0887b1bcdd426d932632946edd07d3c3`;
-4. asking John for one bounded real-iPhone Safari and VoiceOver test using the project-authored MusicXML fixtures.
+The test must cover:
+
+1. native Files-picker return focus;
+2. successful MusicXML import status;
+3. Previous and Next as quiet movement controls;
+4. Read current measure, position, duration, and playing speech;
+5. MusicXML low-E string and fret mapping;
+6. a simultaneous chord onset;
+7. a timed rest;
+8. compressed `.mxl` remaining honestly unsupported if tested.
+
+Do not begin another importer or downstream feature until this real-device result is recorded.
 
 Do not begin:
 
@@ -112,7 +124,7 @@ Do not begin:
 - commercial scraping;
 - a pull request, merge, or upstream change.
 
-Recognizing a file extension is not reading the format. Do not claim hosted MusicXML support until the exact source is published, read back, and accepted through the bounded real-iPhone test.
+Recognizing a file extension is not reading the format. Do not claim accepted MusicXML support until the hosted preview passes the bounded real-iPhone test.
 
 ## Zero-dollar automation
 
