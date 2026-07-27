@@ -8,7 +8,9 @@ Branch: `work/tablature-intake-expansion`
 
 Accepted hosted 3E source before this repair: `0ebd9dd5e40906d79083fcaa8ac679944d5933e0`
 
-## Owner's exact real-iPhone result
+Accepted hosted and real-iPhone 3F source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+
+## Owner's exact real-iPhone 3E result
 
 John reported:
 
@@ -24,8 +26,7 @@ Do not strengthen these reports. Together they establish:
 2. John selected Proof Bass and moved forward to the `Load selected track` button.
 3. John had not activated `Load selected track`. He swiped left only to review the immediately preceding selected-track information.
 4. The backward swipe did not return to the selected bass description. VoiceOver instead returned to earlier general instructions about the two-track choice.
-5. The evidence establishes a backward reading-order defect before activation. It does not establish an upload failure, loading failure, automatic activation problem, importer failure, or incorrect track selection.
-6. The Guitar Pro intake checkpoint remains open only for this bounded reading-order defect and the final quiet-navigation and Read-current confirmation.
+5. The evidence established a backward reading-order defect before activation. It did not establish an upload failure, loading failure, automatic activation problem, importer failure, or incorrect track selection.
 
 ## Matching repository canon
 
@@ -49,10 +50,34 @@ The repair follows:
 7. Add a regression proving that the selected-track summary is the immediate previous element before the load button.
 8. Require a unique hosted 3F identity and bounded real-iPhone backward-swipe retest.
 
+## Hosted verification
+
+Exact source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+
+The single bounded 3F checkpoint passed:
+
+1. complete inherited and new automated tests;
+2. production build;
+3. lazy Guitar Pro decoder separation;
+4. no notation-font, soundfont, renderer-worker, audio-worklet, or playback expansion;
+5. GitHub Pages deployment;
+6. exact live HTML, manifest, main-bundle, and lazy-asset read-back;
+7. restoration of fork `main` to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+
+## Owner's exact 3F acceptance
+
+John reported:
+
+> That worked
+
+Do not strengthen this result beyond the bounded test. It establishes that, after selecting Proof Bass and reaching `Load selected track` without activating it, the repaired backward-swipe path returned to the selected-track details as intended.
+
 ## Acceptance state
 
-State: `candidate`
+State: `local-proven`
 
 Checkpoint 3E core multi-track intake: accepted on real iPhone.
 
-Checkpoint 3F selected-track backward reading order: automated test, production build, hosted read-back, and bounded real-iPhone acceptance remain required.
+Checkpoint 3F selected-track backward reading order: accepted on real iPhone.
+
+The Guitar Pro shared-archive checkpoint is closed for the verified project-authored GP8-style single-track and two-track fixtures. This does not establish general GP7 support, GP3 through GP6 support, arbitrary Guitar Pro compatibility, playback, rendering, or any other deferred format.
