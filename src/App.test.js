@@ -249,17 +249,16 @@ describe("Guitar Eyes application shell", () => {
     useTouchDevice();
     render(<App />);
 
-    const nonTabXml = new File(
-      [
-        '<?xml version="1.0"?>',
-        '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>',
-        '<part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes>',
-        '<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note>',
-        '</measure></part></score-partwise>',
-      ].join(""),
-      "piano.xml",
-      { type: "application/xml" }
-    );
+    const nonTabXmlText = [
+      '<?xml version="1.0"?>',
+      '<score-partwise version="4.0"><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>',
+      '<part id="P1"><measure number="1"><attributes><divisions>4</divisions></attributes>',
+      '<note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><type>quarter</type></note>',
+      '</measure></part></score-partwise>',
+    ].join("");
+    const nonTabXml = new File([nonTabXmlText], "piano.xml", {
+      type: "application/xml",
+    });
 
     fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [nonTabXml] },
