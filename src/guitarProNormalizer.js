@@ -1,5 +1,7 @@
 import { GUITAR_PRO_LIMITS } from "./guitarProLimits";
 
+const GUITAR_PRO_SOURCE_FORMAT = "guitar-pro-archive";
+
 const SUPPORTED_STRING_COUNTS = new Set([4, 6]);
 const STANDARD_GUITAR_MIDI = [64, 59, 55, 50, 45, 40];
 const STANDARD_BASS_MIDI = [43, 38, 33, 28];
@@ -149,7 +151,7 @@ function durationFromBeat(beat, context) {
 
   return {
     name,
-    source: "guitar-pro-7",
+    source: GUITAR_PRO_SOURCE_FORMAT,
     denominator,
     dots,
     tupletNumerator,
@@ -224,7 +226,7 @@ function buildStrings(tuningMidiHighToLow) {
       sourceLineNumber: null,
       content: "",
       tokens: [],
-      sourceFormat: "guitar-pro-7",
+      sourceFormat: GUITAR_PRO_SOURCE_FORMAT,
     };
   });
 }
@@ -383,7 +385,7 @@ function normalizeTechniques(values, warnings, context) {
     const name = String(value || "").trim().toLowerCase();
     if (!name) return;
     if (SUPPORTED_TECHNIQUES.has(name)) {
-      normalized.push({ name, source: "guitar-pro-7" });
+      normalized.push({ name, source: GUITAR_PRO_SOURCE_FORMAT });
     } else {
       warnings.push(`${context} preserves unsupported Guitar Pro technique ${name} without interpreting it.`);
     }
@@ -439,6 +441,42 @@ function normalizedSourceLine(string, positions) {
   return `${string.rawLabel}|${parts.join("-")}|`;
 }
 
+function validateVersionEvidence(intermediate) {
+  const evidence = intermediate.versionEvidence;
+  if (
+    !evidence ||
+    evidence.schemaVersion !== 1 ||
+    evidence.archiveFamily !== "GP7_PLUS_ZIP" ||
+    evidence.rootVersion !== "7.0" ||
+    evidence.sourceVersion !== intermediate.sourceVersion
+  ) {
+    throw new GuitarProImportError(
+      "The Guitar Pro decoder returned missing or inconsistent archive-version evidence.",
+      "INVALID_GUITAR_PRO_VERSION_EVIDENCE"
+    );
+  }
+
+  const gpMajor = /^([0-9]+)(?:\.|$)/.exec(evidence.gpVersion || "")?.[1] || null;
+  const encodingMajor = /^GP([0-9]+)$/i.exec(evidence.encodingDescription || "")?.[1] || null;
+  const sourceMajor = /^GP([0-9]+)$/i.exec(evidence.sourceVersion || "")?.[1] || null;
+  if (!gpMajor || gpMajor !== encodingMajor || gpMajor !== sourceMajor) {
+    throw new GuitarProImportError(
+      "The Guitar Pro archive-version markers contradict one another.",
+      "CONTRADICTORY_GUITAR_PRO_VERSION_EVIDENCE"
+    );
+  }
+  if (evidence.sourceVersion !== "GP8") {
+    throw new GuitarProImportError(
+      "This checkpoint has direct project evidence for GP8 semantics inside the shared .gp archive only; the archive reports " +
+        (evidence.sourceVersion || "an unknown version") +
+        ".",
+      "UNTESTED_GUITAR_PRO_VERSION"
+    );
+  }
+
+  return evidence;
+}
+
 export function normalizeGuitarProIntermediate(
   intermediate,
   { limits = GUITAR_PRO_LIMITS } = {}
@@ -449,12 +487,7 @@ export function normalizeGuitarProIntermediate(
       "INVALID_GUITAR_PRO_INTERMEDIATE"
     );
   }
-  if (intermediate.sourceVersion !== "GP7") {
-    throw new GuitarProImportError(
-      `Checkpoint 3A has direct project evidence for Guitar Pro 7 only; the decoder reported ${intermediate.sourceVersion || "an unknown version"}.`,
-      "UNTESTED_GUITAR_PRO_VERSION"
-    );
-  }
+  const versionEvidence = validateVersionEvidence(intermediate);
 
   const { tracks } = countAndValidateResources(intermediate, limits);
   const candidate = selectCandidateStaff(tracks);
@@ -575,7 +608,7 @@ export function normalizeGuitarProIntermediate(
             type: "technique",
             name: "muted note",
             techniques,
-            source: { format: "guitar-pro-7", measureNumber, beatIndex, noteIndex },
+            source: { format: GUITAR_PRO_SOURCE_FORMAT, measureNumber, beatIndex, noteIndex },
           };
           return;
         }
@@ -586,13 +619,13 @@ export function normalizeGuitarProIntermediate(
           type: fret === 0 ? "open" : "fret",
           ...(fret === 0 ? {} : { fret }),
           techniques,
-          source: { format: "guitar-pro-7", measureNumber, beatIndex, noteIndex },
+          source: { format: GUITAR_PRO_SOURCE_FORMAT, measureNumber, beatIndex, noteIndex },
         };
       });
 
       const position = {
         id: `guitar-pro-measure-${measureNumber}-position-${beatIndex + 1}`,
-        sourceFormat: "guitar-pro-7",
+        sourceFormat: GUITAR_PRO_SOURCE_FORMAT,
         sourceMeasureNumber: String(bar.sourceNumber ?? measureNumber),
         sourceBeatIndex: beatIndex,
         sourceStartTicks: startTicks,
@@ -699,8 +732,9 @@ export function normalizeGuitarProIntermediate(
     type: "tablature-block",
     index: 0,
     number: 1,
-    sourceFormat: "guitar-pro-7",
+    sourceFormat: GUITAR_PRO_SOURCE_FORMAT,
     sourceVersion: intermediate.sourceVersion,
+    versionEvidence,
     sourceTrackIndex: candidate.trackIndex,
     sourceStaffIndex: candidate.staffIndex,
     sourceTrackName: trackName,
@@ -713,8 +747,9 @@ export function normalizeGuitarProIntermediate(
 
   return {
     type: "tablature-document",
-    sourceFormat: "guitar-pro-7",
+    sourceFormat: GUITAR_PRO_SOURCE_FORMAT,
     sourceVersion: intermediate.sourceVersion,
+    versionEvidence,
     title: String(intermediate.title || trackName || "Guitar Pro tablature").trim(),
     instrument,
     instrumentLabel: stringCount === 4 ? "four-string bass" : "six-string guitar",
