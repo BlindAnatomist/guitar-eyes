@@ -15,20 +15,20 @@ permissions:
 
 jobs:
   verify:
-    name: Diagnose exact ASCII intake source
+    name: Verify corrected ASCII intake source
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - name: Check out exact intake source
         uses: actions/checkout@v4
         with:
-          ref: 6e1fb1622bcef7a2e8150056d39c6fdd25f275be
+          ref: 08f8ab16135570d0e53b829daa5c153a15751a45
           fetch-depth: 0
           persist-credentials: false
 
       - name: Confirm source ancestry
         run: |
-          test "$(git rev-parse HEAD)" = "6e1fb1622bcef7a2e8150056d39c6fdd25f275be"
+          test "$(git rev-parse HEAD)" = "08f8ab16135570d0e53b829daa5c153a15751a45"
           git merge-base --is-ancestor 72159d25958fffd941c95351c6781cf579e1d622 HEAD
 
       - name: Set up Node.js
@@ -42,7 +42,7 @@ jobs:
           npm_config_cache: /tmp/guitar-eyes-intake-npm-cache
         run: npm ci --no-audit --no-fund
 
-      - name: Capture complete automated suite output
+      - name: Run complete automated suite once
         id: tests
         env:
           CI: true
@@ -55,8 +55,8 @@ jobs:
           echo "exit_code=$test_exit" >> "$GITHUB_OUTPUT"
           exit 0
 
-      - name: Upload diagnostic Jest log
-        if: always()
+      - name: Upload Jest log on failure
+        if: steps.tests.outputs.exit_code != '0'
         uses: actions/upload-artifact@v4
         with:
           name: intake-test-log
@@ -108,4 +108,4 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/intake-checkpoint\",\"description\":\"Diagnostic Jest log uploaded\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/intake-checkpoint\",\"description\":\"Inspect the bounded intake gate\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
