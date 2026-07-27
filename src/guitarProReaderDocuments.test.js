@@ -2,6 +2,7 @@ import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocu
 import { describePlayablePosition } from "./positionDescription";
 
 const STANDARD_GUITAR = [64, 59, 55, 50, 45, 40];
+const STANDARD_BASS = [43, 38, 33, 28];
 
 const GP8_VERSION_EVIDENCE = Object.freeze({
   schemaVersion: 1,
@@ -13,51 +14,43 @@ const GP8_VERSION_EVIDENCE = Object.freeze({
   entryCount: 6,
 });
 
-function proofIntermediate() {
+function proofTrack(name, tuning = STANDARD_GUITAR, fret = 3) {
   return {
-    schemaVersion: 1,
-    sourceVersion: "GP8",
-    versionEvidence: GP8_VERSION_EVIDENCE,
-    title: "Reader proof",
-    tracks: [
+    name,
+    shortName: name,
+    isPercussion: false,
+    staves: [
       {
-        name: "Proof Guitar",
-        shortName: "Proof",
-        isPercussion: false,
-        staves: [
+        tuningMidiHighToLow: tuning,
+        bars: [
           {
-            tuningMidiHighToLow: STANDARD_GUITAR,
-            bars: [
+            sourceNumber: 1,
+            timeSignatureNumerator: 4,
+            timeSignatureDenominator: 4,
+            repeatStart: false,
+            repeatCount: 0,
+            alternateEndings: 0,
+            voices: [
               {
-                sourceNumber: 1,
-                timeSignatureNumerator: 4,
-                timeSignatureDenominator: 4,
-                repeatStart: false,
-                repeatCount: 0,
-                alternateEndings: 0,
-                voices: [
+                index: 0,
+                beats: [
                   {
-                    index: 0,
-                    beats: [
+                    startTicks: 0,
+                    displayDurationTicks: 960,
+                    durationDenominator: 4,
+                    dots: 0,
+                    tupletNumerator: -1,
+                    tupletDenominator: -1,
+                    graceType: "none",
+                    isRest: false,
+                    techniques: [],
+                    notes: [
                       {
-                        startTicks: 0,
-                        displayDurationTicks: 960,
-                        durationDenominator: 4,
-                        dots: 0,
-                        tupletNumerator: -1,
-                        tupletDenominator: -1,
-                        graceType: "none",
-                        isRest: false,
+                        stringNumberLowToHigh: 1,
+                        fret,
+                        visible: true,
+                        isDead: false,
                         techniques: [],
-                        notes: [
-                          {
-                            stringNumberLowToHigh: 1,
-                            fret: 3,
-                            visible: true,
-                            isDead: false,
-                            techniques: [],
-                          },
-                        ],
                       },
                     ],
                   },
@@ -68,6 +61,16 @@ function proofIntermediate() {
         ],
       },
     ],
+  };
+}
+
+function proofIntermediate(tracks = [proofTrack("Proof Guitar")]) {
+  return {
+    schemaVersion: 1,
+    sourceVersion: "GP8",
+    versionEvidence: GP8_VERSION_EVIDENCE,
+    title: "Reader proof",
+    tracks,
   };
 }
 
@@ -93,14 +96,68 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
       supportOutcome: "checkpoint-proof",
       sourceFormat: "guitar-pro-archive",
       sourceFormatLabel: "Guitar Pro archive tablature",
+      requiresTrackSelection: false,
+    });
+    expect(result.trackInventory.autoSelection).toEqual({
+      trackIndex: 0,
+      staffIndex: 0,
     });
     expect(result.semanticDocument.positions).toHaveLength(1);
     expect(result.desktopBlocks).toHaveLength(1);
-    expect(result.desktopBlocks[0]).toHaveLength(6);
-    expect(result.desktopBlocks[0][0]).toMatch(/^E4\|/);
-    expect(result.desktopBlocks[0][5]).toMatch(/^E2\|/);
     expect(describePlayablePosition(result.semanticDocument, 0)).toContain(
       "Low E string, fret 3."
+    );
+  });
+
+  test("returns a selection request instead of silently choosing among supported tracks", async () => {
+    const ambiguous = proofIntermediate([
+      proofTrack("Lead Guitar"),
+      proofTrack("Bass", STANDARD_BASS, 5),
+    ]);
+    const decode = jest.fn(async () => ambiguous);
+
+    const result = await buildGuitarProArchiveProofReaderDocuments(
+      { name: "two-tracks.gp", size: 3, arrayBuffer: jest.fn() },
+      { workerFactory: jest.fn(), decode }
+    );
+
+    expect(decode).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({
+      requiresTrackSelection: true,
+      supportOutcome: "track-selection-required",
+      semanticDocument: null,
+      guitarProIntermediate: ambiguous,
+    });
+    expect(result.trackInventory.supportedCount).toBe(2);
+    expect(result.trackInventory.supportedItems.map((item) => item.trackName)).toEqual([
+      "Lead Guitar",
+      "Bass",
+    ]);
+  });
+
+  test("reuses the decoded intermediate and normalizes the explicit second track", async () => {
+    const file = { name: "two-tracks.gp", size: 3, arrayBuffer: jest.fn() };
+    const decoded = proofIntermediate([
+      proofTrack("Lead Guitar"),
+      proofTrack("Bass", STANDARD_BASS, 5),
+    ]);
+    const decode = jest.fn();
+
+    const result = await buildGuitarProArchiveProofReaderDocuments(file, {
+      intermediate: decoded,
+      selection: { trackIndex: 1, staffIndex: 0 },
+      decode,
+    });
+
+    expect(decode).not.toHaveBeenCalled();
+    expect(result.requiresTrackSelection).toBe(false);
+    expect(result.semanticDocument).toMatchObject({
+      sourceTrackIndex: 1,
+      sourceTrackName: "Bass",
+      instrument: "bass",
+    });
+    expect(describePlayablePosition(result.semanticDocument, 0)).toContain(
+      "E string, fret 5."
     );
   });
 
@@ -115,28 +172,8 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
     await expect(
       buildGuitarProArchiveProofReaderDocuments(
         { name: "broken.gp", size: 3, arrayBuffer: jest.fn() },
-        {
-          workerFactory: jest.fn(),
-          decode,
-        }
+        { workerFactory: jest.fn(), decode }
       )
     ).rejects.toBe(failure);
-  });
-
-  test("propagates semantic rejection after successful binary decoding", async () => {
-    const ambiguous = proofIntermediate();
-    ambiguous.tracks.push({ ...ambiguous.tracks[0], name: "Second Guitar" });
-
-    await expect(
-      buildGuitarProArchiveProofReaderDocuments(
-        { name: "two-guitars.gp", size: 3, arrayBuffer: jest.fn() },
-        {
-          workerFactory: jest.fn(),
-          decode: jest.fn(async () => ambiguous),
-        }
-      )
-    ).rejects.toMatchObject({
-      code: "MULTIPLE_SUPPORTED_GUITAR_PRO_TRACKS",
-    });
   });
 });

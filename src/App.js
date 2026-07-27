@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import DesktopSemanticReader from "./DesktopSemanticReader";
+import GuitarProTrackSelector from "./GuitarProTrackSelector";
 import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
@@ -25,7 +26,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Guitar Pro shared-archive proof 3B";
+const TEST_BUILD_LABEL = "Guitar Pro track selection proof 3C";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -55,12 +56,14 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("");
   const [iphoneError, setIphoneError] = useState("");
   const [desktopError, setDesktopError] = useState("");
+  const [guitarProSelectionSession, setGuitarProSelectionSession] = useState(null);
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
 
   const iphoneHeadingRef = useRef(null);
   const desktopHeadingRef = useRef(null);
   const legacyDesktopHeadingRef = useRef(null);
   const errorHeadingRef = useRef(null);
+  const trackSelectionHeadingRef = useRef(null);
   const desktopFocusPendingRef = useRef(false);
   const pendingIphoneFocusTargetRef = useRef(null);
   const iphoneFocusFrameRef = useRef(null);
@@ -83,7 +86,9 @@ function App() {
         const target =
           pendingIphoneFocusTargetRef.current === "reader"
             ? iphoneHeadingRef.current
-            : errorHeadingRef.current;
+            : pendingIphoneFocusTargetRef.current === "track-selection"
+              ? trackSelectionHeadingRef.current
+              : errorHeadingRef.current;
 
         if (!target) return;
 
@@ -165,6 +170,39 @@ function App() {
     });
   };
 
+
+const showGuitarProTrackSelection = (file, readerDocuments) => {
+  const session = {
+    file,
+    intermediate: readerDocuments.guitarProIntermediate,
+    inventory: readerDocuments.trackInventory,
+  };
+  const status = `This Guitar Pro archive contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
+
+  if (readingMode === "iphone") {
+    pendingIphoneFocusTargetRef.current = "track-selection";
+    flushSync(() => {
+      setDesktopBlocks([]);
+      setSemanticDocument(null);
+      setIphoneError("");
+      setDesktopError("");
+      setGuitarProSelectionSession(session);
+      setIsReadingFile(false);
+      setStatusMessage(status);
+      setIphoneFocusRequest((current) => current + 1);
+    });
+    return;
+  }
+
+  setDesktopBlocks([]);
+  setSemanticDocument(null);
+  setIphoneError("");
+  setDesktopError("");
+  setGuitarProSelectionSession(session);
+  setIsReadingFile(false);
+  setStatusMessage(status);
+  focusSoon(trackSelectionHeadingRef);
+};
   const finishUnreadableUpload = (message, status) => {
     if (readingMode === "iphone") {
       commitIphoneOutcome({
@@ -201,6 +239,7 @@ function App() {
     setDesktopError("");
     setSemanticDocument(null);
     setDesktopBlocks([]);
+    setGuitarProSelectionSession(null);
 
     if (!file) {
       finishUnreadableUpload(
@@ -217,6 +256,10 @@ function App() {
     if (initialFormat.id === "guitar-pro-proof") {
       try {
         readerDocuments = await buildGuitarProArchiveProofReaderDocuments(file);
+        if (readerDocuments.requiresTrackSelection) {
+          showGuitarProTrackSelection(file, readerDocuments);
+          return;
+        }
       } catch (error) {
         finishUnreadableUpload(
           messageFromError(
@@ -364,12 +407,77 @@ function App() {
     }
   };
 
+
+const handleGuitarProTrackSelection = async (selection) => {
+  const session = guitarProSelectionSession;
+  if (!session) return;
+
+  setIsReadingFile(true);
+  setStatusMessage("Preparing the selected Guitar Pro track.");
+  setIphoneError("");
+  setDesktopError("");
+
+  let readerDocuments;
+  try {
+    readerDocuments = await buildGuitarProArchiveProofReaderDocuments(session.file, {
+      intermediate: session.intermediate,
+      selection,
+    });
+  } catch (error) {
+    setGuitarProSelectionSession(null);
+    finishUnreadableUpload(
+      messageFromError(
+        error,
+        "The selected Guitar Pro track could not be prepared for the Guitar Eyes readers."
+      ),
+      "The selected Guitar Pro track could not be imported."
+    );
+    return;
+  }
+
+  const nextDocument = readerDocuments.semanticDocument;
+  const nextDesktopBlocks = readerDocuments.desktopBlocks;
+  const resolvedInstrument = readerDocuments.resolvedInstrument;
+  setGuitarProSelectionSession(null);
+
+  if (!nextDocument) {
+    finishUnreadableUpload(
+      "The selected Guitar Pro track did not produce a semantic reader document.",
+      "The selected Guitar Pro track could not be imported."
+    );
+    return;
+  }
+
+  const status = `Imported Guitar Pro archive tablature. Loaded ${nextDocument.positions.length} synchronized positions`;
+  if (readingMode === "iphone") {
+    commitIphoneOutcome({
+      target: "reader",
+      semanticDocument: nextDocument,
+      desktopBlocks: nextDesktopBlocks,
+      status: `${status} in iPhone reading mode.`,
+      resolvedInstrument,
+    });
+    return;
+  }
+
+  setDesktopBlocks(nextDesktopBlocks);
+  setSemanticDocument(nextDocument);
+  setIphoneError("");
+  setDesktopError("");
+  setSelectedInstrument(resolvedInstrument);
+  setIsReadingFile(false);
+  setStatusMessage(`${status} in desktop semantic reader mode.`);
+  desktopFocusPendingRef.current = true;
+};
   const handleReadingModeChange = (event) => {
     const nextMode = event.target.value;
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {
-      if (semanticDocument) {
+      if (guitarProSelectionSession) {
+        pendingIphoneFocusTargetRef.current = "track-selection";
+        setIphoneFocusRequest((current) => current + 1);
+      } else if (semanticDocument) {
         pendingIphoneFocusTargetRef.current = "reader";
         setIphoneFocusRequest((current) => current + 1);
       } else if (iphoneError) {
@@ -380,7 +488,9 @@ function App() {
     }
 
     pendingIphoneFocusTargetRef.current = null;
-    if (semanticDocument || desktopBlocks.length > 0) {
+    if (guitarProSelectionSession) {
+      focusSoon(trackSelectionHeadingRef);
+    } else if (semanticDocument || desktopBlocks.length > 0) {
       desktopFocusPendingRef.current = true;
     } else if (desktopError) {
       focusSoon(errorHeadingRef);
@@ -434,6 +544,15 @@ function App() {
       <div className="status-message" aria-live="polite" aria-atomic="true">
         {statusMessage}
       </div>
+
+{guitarProSelectionSession && (
+  <GuitarProTrackSelector
+    ref={trackSelectionHeadingRef}
+    inventory={guitarProSelectionSession.inventory}
+    onSubmit={handleGuitarProTrackSelection}
+    disabled={isReadingFile}
+  />
+)}
 
       {currentError && (
         <section

@@ -160,6 +160,72 @@ describe("Guitar Pro checkpoint application path", () => {
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
+
+test("moves VoiceOver focus into track selection and reuses the decoded archive", async () => {
+  useTouchDevice();
+  const intermediate = {
+    schemaVersion: 1,
+    sourceVersion: "GP8",
+    versionEvidence: GP8_VERSION_EVIDENCE,
+    title: "Two-track proof",
+    tracks: [],
+  };
+  const inventory = {
+    supportedCount: 2,
+    supportedItems: [
+      {
+        id: "guitar-pro-track-1-staff-1",
+        trackIndex: 0,
+        staffIndex: 0,
+        selectionLabel: "Lead Guitar. six-string guitar. Tuning high to low: E4, B3, G3, D3, A2, E2. 1 measure.",
+        supported: true,
+      },
+      {
+        id: "guitar-pro-track-2-staff-1",
+        trackIndex: 1,
+        staffIndex: 0,
+        selectionLabel: "Bass. four-string bass. Tuning high to low: G2, D2, A1, E1. 1 measure.",
+        supported: true,
+      },
+    ],
+    items: [],
+  };
+  buildGuitarProArchiveProofReaderDocuments
+    .mockResolvedValueOnce({
+      requiresTrackSelection: true,
+      trackInventory: inventory,
+      guitarProIntermediate: intermediate,
+    })
+    .mockResolvedValueOnce(proofReaderDocuments());
+  render(<App />);
+
+  const file = new File([new Uint8Array([1, 2, 3])], "two-tracks.gp", {
+    type: "application/octet-stream",
+  });
+  fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+    target: { files: [file] },
+  });
+
+  const selectorHeading = await screen.findByRole("heading", {
+    level: 2,
+    name: "Choose a Guitar Pro track",
+  });
+  fireEvent.focus(window);
+  await waitFor(() => expect(document.activeElement).toBe(selectorHeading));
+
+  fireEvent.click(screen.getByRole("radio", { name: /Bass\. four-string bass/i }));
+  fireEvent.click(screen.getByRole("button", { name: "Load selected track" }));
+
+  expect(buildGuitarProArchiveProofReaderDocuments).toHaveBeenNthCalledWith(2, file, {
+    intermediate,
+    selection: { trackIndex: 1, staffIndex: 0 },
+  });
+  const readerHeading = await screen.findByRole("heading", {
+    level: 2,
+    name: "iPhone tablature reader",
+  });
+  await waitFor(() => expect(document.activeElement).toBe(readerHeading));
+});
   test("routes GP decoder failure through the durable iPhone upload error", async () => {
     useTouchDevice();
     buildGuitarProArchiveProofReaderDocuments.mockRejectedValue(

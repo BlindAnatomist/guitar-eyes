@@ -304,6 +304,28 @@ describe("normalizeGuitarProIntermediate", () => {
     );
   });
 
+
+test("normalizes the explicitly selected supported track without decoding again", () => {
+  const document = normalizeGuitarProIntermediate(
+    intermediate([track("First Guitar"), track("Second Guitar")]),
+    { selection: { trackIndex: 1, staffIndex: 0 } }
+  );
+
+  expect(document.sourceTrackIndex).toBe(1);
+  expect(document.sourceStaffIndex).toBe(0);
+  expect(document.sourceTrackName).toBe("Second Guitar");
+});
+
+test("rejects invalid or unsupported explicit track coordinates", () => {
+  expectErrorCode(
+    () =>
+      normalizeGuitarProIntermediate(intermediate(), {
+        selection: { trackIndex: 9, staffIndex: 0 },
+      }),
+    "INVALID_GUITAR_PRO_TRACK_SELECTION"
+  );
+});
+
   test("rejects unsupported string counts and percussion-only scores", () => {
     expectErrorCode(
       () =>

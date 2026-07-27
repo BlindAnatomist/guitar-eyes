@@ -325,7 +325,7 @@ function countAndValidateResources(intermediate, limits) {
   return { tracks, staffCount, barCount, beatCount, noteCount };
 }
 
-function selectCandidateStaff(tracks) {
+function selectCandidateStaff(tracks, selection = null) {
   const frettedCandidates = [];
 
   tracks.forEach((track, trackIndex) => {
@@ -344,9 +344,41 @@ function selectCandidateStaff(tracks) {
     SUPPORTED_STRING_COUNTS.has(candidate.stringCount)
   );
 
+
+if (selection !== null) {
+  const trackIndex = selection?.trackIndex;
+  const staffIndex = selection?.staffIndex;
+  if (
+    !Number.isInteger(trackIndex) ||
+    trackIndex < 0 ||
+    !Number.isInteger(staffIndex) ||
+    staffIndex < 0
+  ) {
+    throw new GuitarProImportError(
+      "The selected Guitar Pro track coordinates are invalid.",
+      "INVALID_GUITAR_PRO_TRACK_SELECTION"
+    );
+  }
+
+  const selected = supported.find(
+    (candidate) =>
+      candidate.trackIndex === trackIndex && candidate.staffIndex === staffIndex
+  );
+  if (!selected) {
+    throw new GuitarProImportError(
+      "The selected Guitar Pro track is not available in the current four-string bass or six-string guitar profile.",
+      "INVALID_GUITAR_PRO_TRACK_SELECTION"
+    );
+  }
+
+  return {
+    ...selected,
+    ignoredTrackCount: Math.max(0, tracks.length - 1),
+  };
+}
   if (supported.length > 1) {
     throw new GuitarProImportError(
-      `The Guitar Pro file contains ${supported.length} supported tablature tracks. Checkpoint 3A does not silently choose one; an accessible track selector is required first.`,
+      `The Guitar Pro file contains ${supported.length} supported tablature tracks. Checkpoint 3C does not silently choose one; an accessible track selector is required first.`,
       "MULTIPLE_SUPPORTED_GUITAR_PRO_TRACKS"
     );
   }
@@ -355,7 +387,7 @@ function selectCandidateStaff(tracks) {
     const unsupportedCounts = [...new Set(frettedCandidates.map((candidate) => candidate.stringCount))];
     if (unsupportedCounts.length > 0) {
       throw new GuitarProImportError(
-        `The Guitar Pro file contains fretted ${unsupportedCounts.join("- and ")}-string material. Checkpoint 3A supports one four-string bass or six-string guitar staff only.`,
+        `The Guitar Pro file contains fretted ${unsupportedCounts.join("- and ")}-string material. Checkpoint 3C supports one four-string bass or six-string guitar staff only.`,
         "UNSUPPORTED_GUITAR_PRO_STRING_COUNT"
       );
     }
@@ -409,7 +441,7 @@ function activeVoiceForBar(bar, measureNumber) {
   }
   if (activeVoices.length > 1) {
     throw new GuitarProImportError(
-      `Measure ${measureNumber} contains ${activeVoices.length} active voices. Checkpoint 3A does not merge voices by guessing.`,
+      `Measure ${measureNumber} contains ${activeVoices.length} active voices. Checkpoint 3C does not merge voices by guessing.`,
       "CONFLICTING_GUITAR_PRO_VOICES"
     );
   }
@@ -479,7 +511,7 @@ function validateVersionEvidence(intermediate) {
 
 export function normalizeGuitarProIntermediate(
   intermediate,
-  { limits = GUITAR_PRO_LIMITS } = {}
+  { limits = GUITAR_PRO_LIMITS, selection = null } = {}
 ) {
   if (!intermediate || intermediate.schemaVersion !== 1) {
     throw new GuitarProImportError(
@@ -490,7 +522,7 @@ export function normalizeGuitarProIntermediate(
   const versionEvidence = validateVersionEvidence(intermediate);
 
   const { tracks } = countAndValidateResources(intermediate, limits);
-  const candidate = selectCandidateStaff(tracks);
+  const candidate = selectCandidateStaff(tracks, selection);
   const tuning = requireArray(
     candidate.staff.tuningMidiHighToLow,
     "The selected Guitar Pro staff has no tuning.",

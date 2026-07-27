@@ -169,25 +169,24 @@ Detailed record:
 
 - `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`
 
-## Current bounded checkpoint: Guitar Pro shared-archive proof 3B
+## Current bounded checkpoint: Guitar Pro track selection proof 3C
 
-Correct the proof identity and require archive-derived version evidence before normalization.
+Preserve the verified shared-archive GP8 evidence and add explicit track inventory and selection without decoding the file twice.
 
-Checkpoint 3B must:
+Checkpoint 3C must:
 
-1. retain exact `@coderline/alphatab` version `1.8.4` and its MPL-2.0 notice;
-2. inspect `VERSION` and `Content/score.gpif` before alphaTab normalization;
-3. identify the current project-authored fixture as GP8 semantic material inside the shared 7.0 `.gp` archive family;
-4. reject missing, malformed, duplicate, contradictory, encrypted, oversized, or unsupported version evidence;
-5. reject GP7 as untested until a genuine, clearly licensed GP7 specimen is obtained and verified;
-6. keep alphaTab lazy-loaded in a dedicated bounded worker;
-7. transfer only the Guitar Eyes-owned serializable intermediate representation;
-8. preserve the existing timing, tuning, notes, chords, rests, techniques, measures, and desktop/iPhone projections;
-9. retain the prohibition on silent track or voice selection;
-10. verify all inherited tests, archive-evidence tests, the production build, and emitted asset isolation;
-11. stop before publication and real-iPhone testing.
+1. build a serializable inventory for every decoded track and staff;
+2. report track name, staff number, percussion status, string count, tuning, measure count, support status, and support reason;
+3. continue automatically only when exactly one supported four-string bass or six-string guitar staff exists;
+4. require explicit track and staff coordinates when more than one supported staff exists;
+5. reuse the decoded intermediate after selection and never rerun alphaTab;
+6. reject invalid or unsupported selection coordinates;
+7. present supported tracks as one accessible radio group and report unsupported tracks separately;
+8. move iPhone VoiceOver focus to the selector heading after picker return and to the reader heading after submission;
+9. preserve all inherited ASCII, MusicXML, shared-archive, desktop, iPhone, speech, timing, resource, and focus tests;
+10. stop before publication and real-iPhone testing.
 
-The current branch contains an unhosted proof only. GP3, GP4, GP5, GP6, GP7, GP2, PowerTab, TuxGuitar, TablEdit, compressed MusicXML, playback, teacher mode, AI work, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
+The current branch remains an unhosted proof. Playback, teacher mode, looping, bookmarks, pattern analysis, AI work, commercial scraping, a pull request, merge, upstream change, and production publication remain outside this checkpoint.
 
 ## Testing responsibility
 
