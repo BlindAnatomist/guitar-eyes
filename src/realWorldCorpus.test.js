@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { describePlayablePosition } from "./positionDescription";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 import { detectTabFileFormat } from "./tabFormatDetector";
 
@@ -72,6 +73,76 @@ describe("real-world tablature format corpus", () => {
     expect(result.instrumentWasDetected).toBe(true);
     expect(result.semanticDocument.blocks).toHaveLength(2);
     expect(result.desktopBlocks).toHaveLength(2);
+  });
+
+  test("imports octave-qualified standard labels and Unicode custom tuning", () => {
+    const octave = buildReaderDocuments(
+      fixture("ascii-octave-qualified-standard.txt"),
+      "guitar"
+    );
+    const unicode = buildReaderDocuments(
+      fixture("ascii-unicode-accidentals.txt"),
+      "guitar"
+    );
+
+    expect(octave.desktopSource).toBe("semantic");
+    expect(octave.semanticDocument.strings.map((string) => string.octave)).toEqual([
+      4,
+      3,
+      3,
+      3,
+      2,
+      2,
+    ]);
+    expect(unicode.desktopSource).toBe("semantic");
+    expect(unicode.semanticDocument.strings.map((string) => string.tuning)).toEqual([
+      "F#",
+      "C#",
+      "A",
+      "E",
+      "B",
+      "F#",
+    ]);
+  });
+
+  test("keeps punctuation and transition notation out of the position count", () => {
+    const result = buildReaderDocuments(
+      fixture("ascii-ghost-harmonic-repeat-techniques.txt"),
+      "guitar"
+    );
+    const descriptions = result.semanticDocument.positions.map((_, index) =>
+      describePlayablePosition(result.semanticDocument, index)
+    );
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.semanticDocument.positions).toHaveLength(5);
+    expect(result.semanticDocument.positions.map((position) => position.duration?.symbol)).toEqual([
+      "Q",
+      "Q",
+      "Q",
+      "Q",
+      "Q",
+    ]);
+    expect(descriptions).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("fret 7, with hammer-on notation"),
+        expect.stringContaining("fret 5, with pull-off notation"),
+      ])
+    );
+    expect(result.semanticDocument.warnings.join(" ")).toMatch(
+      /Unsupported symbols did not create musical positions/i
+    );
+  });
+
+  test.each([
+    ["ascii-seven-string-guitar.txt", "guitar"],
+    ["ascii-five-string-bass.txt", "bass"],
+  ])("recognizes unsupported string-count family in %s without guessing", (name, instrument) => {
+    const result = buildReaderDocuments(fixture(name), instrument);
+
+    expect(result.supportOutcome).toBe("recognized-unsupported");
+    expect(result.semanticError.code).toBe("UNSUPPORTED_STRING_COUNT");
+    expect(result.semanticDocument).toBeNull();
   });
 
   test("recognizes the structured MusicXML target without sending it to ASCII parsing", () => {
