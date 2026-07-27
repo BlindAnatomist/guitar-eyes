@@ -1,4 +1,4 @@
-name: Temporary Guitar Pro version normalizer refactor
+name: Temporary Guitar Pro version refactor diagnostic
 
 on:
   push:
@@ -10,12 +10,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  statuses: write
+  contents: read
 
 jobs:
-  patch:
-    if: github.event.head_commit.message != 'Apply inspected Guitar Pro version normalizer [generated-version-refactor]'
+  diagnose:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -24,143 +22,109 @@ jobs:
           ref: work/tablature-intake-expansion
           fetch-depth: 0
 
-      - name: Require exact pre-refactor normalizer blob
-        run: |
-          test "$(git hash-object src/guitarProNormalizer.js)" = "4e3a67446e453500d5b96d8d20056090b8a6bcf1"
-          test -z "$(git status --short)"
-
-      - name: Apply exact source-identity refactor
+      - name: Simulate normalizer patch and record every guard
         shell: python
         run: |
           from pathlib import Path
+          import json
+          import traceback
 
-          path = Path('src/guitarProNormalizer.js')
-          text = path.read_text(encoding='utf-8')
-
-          old_import = 'import { GUITAR_PRO_LIMITS } from "./guitarProLimits";\n\n'
-          new_import = old_import + 'const GUITAR_PRO_SOURCE_FORMAT = "guitar-pro-archive";\n\n'
-          assert text.count(old_import) == 1
-          text = text.replace(old_import, new_import, 1)
-
-          replacements = {
-              'source: "guitar-pro-7",': 'source: GUITAR_PRO_SOURCE_FORMAT,',
-              'sourceFormat: "guitar-pro-7",': 'sourceFormat: GUITAR_PRO_SOURCE_FORMAT,',
-              'source: { format: "guitar-pro-7", measureNumber, beatIndex, noteIndex },': 'source: { format: GUITAR_PRO_SOURCE_FORMAT, measureNumber, beatIndex, noteIndex },',
-          }
-          expected_counts = {
-              'source: "guitar-pro-7",': 2,
-              'sourceFormat: "guitar-pro-7",': 4,
-              'source: { format: "guitar-pro-7", measureNumber, beatIndex, noteIndex },': 2,
-          }
-          for old, new in replacements.items():
-              assert text.count(old) == expected_counts[old], (old, text.count(old))
-              text = text.replace(old, new)
-
-          marker = 'export function normalizeGuitarProIntermediate(\n'
-          assert text.count(marker) == 1
-          validator = '''function validateVersionEvidence(intermediate) {
-            const evidence = intermediate.versionEvidence;
-            if (
-              !evidence ||
-              evidence.schemaVersion !== 1 ||
-              evidence.archiveFamily !== "GP7_PLUS_ZIP" ||
-              evidence.rootVersion !== "7.0" ||
-              evidence.sourceVersion !== intermediate.sourceVersion
-            ) {
-              throw new GuitarProImportError(
-                "The Guitar Pro decoder returned missing or inconsistent archive-version evidence.",
-                "INVALID_GUITAR_PRO_VERSION_EVIDENCE"
-              );
-            }
-
-            const gpMajor = /^([0-9]+)(?:\\.|$)/.exec(evidence.gpVersion || "")?.[1] || null;
-            const encodingMajor = /^GP([0-9]+)$/i.exec(evidence.encodingDescription || "")?.[1] || null;
-            const sourceMajor = /^GP([0-9]+)$/i.exec(evidence.sourceVersion || "")?.[1] || null;
-            if (!gpMajor || gpMajor !== encodingMajor || gpMajor !== sourceMajor) {
-              throw new GuitarProImportError(
-                "The Guitar Pro archive-version markers contradict one another.",
-                "CONTRADICTORY_GUITAR_PRO_VERSION_EVIDENCE"
-              );
-            }
-            if (evidence.sourceVersion !== "GP8") {
-              throw new GuitarProImportError(
-                `This checkpoint has direct project evidence for GP8 semantics inside the shared .gp archive only; the archive reports ${evidence.sourceVersion || "an unknown version"}.`,
-                "UNTESTED_GUITAR_PRO_VERSION"
-              );
-            }
-
-            return evidence;
+          text = Path('src/guitarProNormalizer.js').read_text(encoding='utf-8')
+          report = {
+              'blob': __import__('subprocess').check_output(
+                  ['git', 'hash-object', 'src/guitarProNormalizer.js'], text=True
+              ).strip(),
+              'counts': {},
+              'stages': [],
           }
 
-          '''
-          text = text.replace(marker, validator + marker, 1)
+          def mark(name, value=None):
+              report['stages'].append({'name': name, 'value': value})
 
-          start_marker = '  if (intermediate.sourceVersion !== "GP7") {'
-          end_marker = '\n\n  const { tracks } = countAndValidateResources(intermediate, limits);'
-          assert text.count(start_marker) == 1
-          start = text.index(start_marker)
-          end = text.index(end_marker, start)
-          old_block = text[start:end]
-          assert 'Checkpoint 3A has direct project evidence for Guitar Pro 7 only' in old_block
-          assert '"UNTESTED_GUITAR_PRO_VERSION"' in old_block
-          text = text[:start] + '  const versionEvidence = validateVersionEvidence(intermediate);' + text[end:]
+          try:
+              old_import = 'import { GUITAR_PRO_LIMITS } from "./guitarProLimits";\n\n'
+              report['counts']['old_import'] = text.count(old_import)
+              mark('old_import', report['counts']['old_import'])
+              text = text.replace(
+                  old_import,
+                  old_import + 'const GUITAR_PRO_SOURCE_FORMAT = "guitar-pro-archive";\n\n',
+                  1,
+              )
 
-          block_version = '    sourceVersion: intermediate.sourceVersion,\n    sourceTrackIndex:'
-          assert text.count(block_version) == 1
-          text = text.replace(
-              block_version,
-              '    sourceVersion: intermediate.sourceVersion,\n    versionEvidence,\n    sourceTrackIndex:',
-              1,
+              patterns = [
+                  'source: "guitar-pro-7",',
+                  'sourceFormat: "guitar-pro-7",',
+                  'source: { format: "guitar-pro-7", measureNumber, beatIndex, noteIndex },',
+              ]
+              for pattern in patterns:
+                  report['counts'][pattern] = text.count(pattern)
+                  mark(pattern, report['counts'][pattern])
+
+              text = text.replace(patterns[0], 'source: GUITAR_PRO_SOURCE_FORMAT,')
+              text = text.replace(patterns[1], 'sourceFormat: GUITAR_PRO_SOURCE_FORMAT,')
+              text = text.replace(
+                  patterns[2],
+                  'source: { format: GUITAR_PRO_SOURCE_FORMAT, measureNumber, beatIndex, noteIndex },',
+              )
+
+              marker = 'export function normalizeGuitarProIntermediate(\n'
+              report['counts']['export_marker'] = text.count(marker)
+              mark('export_marker', report['counts']['export_marker'])
+
+              start_marker = '  if (intermediate.sourceVersion !== "GP7") {'
+              end_marker = '\n\n  const { tracks } = countAndValidateResources(intermediate, limits);'
+              report['counts']['start_marker'] = text.count(start_marker)
+              report['counts']['end_marker'] = text.count(end_marker)
+              mark('version_markers', [
+                  report['counts']['start_marker'],
+                  report['counts']['end_marker'],
+              ])
+
+              start = text.index(start_marker)
+              end = text.index(end_marker, start)
+              old_block = text[start:end]
+              report['old_block'] = old_block
+              text = text[:start] + '  const versionEvidence = validateVersionEvidence(intermediate);' + text[end:]
+
+              block_version = '    sourceVersion: intermediate.sourceVersion,\n    sourceTrackIndex:'
+              document_version = '    sourceVersion: intermediate.sourceVersion,\n    title:'
+              report['counts']['block_version'] = text.count(block_version)
+              report['counts']['document_version'] = text.count(document_version)
+              mark('return_markers', [
+                  report['counts']['block_version'],
+                  report['counts']['document_version'],
+              ])
+
+              text = text.replace(
+                  block_version,
+                  '    sourceVersion: intermediate.sourceVersion,\n    versionEvidence,\n    sourceTrackIndex:',
+                  1,
+              )
+              text = text.replace(
+                  document_version,
+                  '    sourceVersion: intermediate.sourceVersion,\n    versionEvidence,\n    title:',
+                  1,
+              )
+
+              report['counts']['remaining_old_label'] = text.count('guitar-pro-7')
+              report['counts']['source_constant_references_without_validator'] = text.count(
+                  'GUITAR_PRO_SOURCE_FORMAT'
+              )
+              report['counts']['version_evidence_returns'] = text.count('    versionEvidence,')
+              mark('simulation_complete')
+          except Exception:
+              report['exception'] = traceback.format_exc()
+
+          Path('/tmp/version-refactor-diagnostic.json').write_text(
+              json.dumps(report, indent=2, sort_keys=True),
+              encoding='utf-8',
           )
+          print(json.dumps(report, indent=2, sort_keys=True))
 
-          document_version = '    sourceVersion: intermediate.sourceVersion,\n    title:'
-          assert text.count(document_version) == 1
-          text = text.replace(
-              document_version,
-              '    sourceVersion: intermediate.sourceVersion,\n    versionEvidence,\n    title:',
-              1,
-          )
-
-          path.write_text(text, encoding='utf-8')
-
-      - name: Verify and constrain generated normalizer patch
-        run: |
-          git diff -- src/guitarProNormalizer.js
-          test "$(git status --short | wc -l)" -eq 1
-          test "$(git status --short | awk '{print $2}')" = "src/guitarProNormalizer.js"
-          test "$(grep -o 'GUITAR_PRO_SOURCE_FORMAT' src/guitarProNormalizer.js | wc -l)" -eq 9
-          ! grep -F 'guitar-pro-7' src/guitarProNormalizer.js
-          grep -F 'const versionEvidence = validateVersionEvidence(intermediate);' src/guitarProNormalizer.js >/dev/null
-          test "$(grep -F '    versionEvidence,' src/guitarProNormalizer.js | wc -l)" -eq 2
-
-      - name: Commit exact normalizer refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/guitarProNormalizer.js
-          git commit -m 'Apply inspected Guitar Pro version normalizer [generated-version-refactor]'
-          git push origin HEAD:work/tablature-intake-expansion
-
-      - name: Record success status
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          curl --fail-with-body -sS -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"success\",\"context\":\"guitar-eyes/version-normalizer-refactor\",\"description\":\"Exact normalizer identity refactor committed\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
-
-      - name: Record failure status
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          curl --fail-with-body -sS -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
-            -d "{\"state\":\"failure\",\"context\":\"guitar-eyes/version-normalizer-refactor\",\"description\":\"Exact source fragment did not match; no normalizer commit\",\"target_url\":\"https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
+      - name: Upload diagnostic
+        uses: actions/upload-artifact@v4
+        with:
+          name: guitar-pro-version-refactor-diagnostic
+          path: /tmp/version-refactor-diagnostic.json
+          if-no-files-found: error
+          retention-days: 1
