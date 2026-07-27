@@ -15,10 +15,13 @@ function Upload({ onFileUpload, disabled = false }) {
       <input
         id="file-upload"
         type="file"
-        accept=".txt,.tab,.musicxml,.xml,.mxl,.gtp,.gp3,.gp4,.gp5,.gpx,.gp,.ptb,.pt2,.tg,.tef,text/plain,application/xml,text/xml"
         disabled={disabled}
         onChange={handleFileChange}
       />
+      <p id="file-upload-help">
+        Guitar Eyes checks the selected file after selection and gives an explicit message
+        when its format is unsupported.
+      </p>
     </div>
   );
 }
