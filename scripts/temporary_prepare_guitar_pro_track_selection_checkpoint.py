@@ -14,5 +14,21 @@ write(path, text)
 
 # Reader coordinator:'''
 text = text[:start] + replacement + text[end + len('write(path, text)\n\n# Reader coordinator:'):]
+
+start = text.index('old_focus = textwrap.dedent(\n')
+end = text.index('\n\nshow_selection = textwrap.dedent(', start)
+replacement = '''focus_start = text.index('        const target =\\n')
+focus_end = text.index('\\n\\n        if (!target)', focus_start)
+new_focus = (
+    '        const target =\\n'
+    '          pendingIphoneFocusTargetRef.current === "reader"\\n'
+    '            ? iphoneHeadingRef.current\\n'
+    '            : pendingIphoneFocusTargetRef.current === "track-selection"\\n'
+    '              ? trackSelectionHeadingRef.current\\n'
+    '              : errorHeadingRef.current;'
+)
+text = text[:focus_start] + new_focus + text[focus_end:]'''
+text = text[:start] + replacement + text[end:]
+
 path.write_text(text, encoding="utf-8")
 print("track selection checkpoint script prepared")
