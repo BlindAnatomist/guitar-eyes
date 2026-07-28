@@ -8,7 +8,9 @@ export class AudiblePlaybackError extends Error {
 
 const MIN_SOUND_SECONDS = 0.08;
 const MAX_SOUND_SECONDS = 2.5;
-const START_DELAY_SECONDS = 0.65;
+const DEFAULT_START_DELAY_SECONDS = 0.65;
+const MIN_START_DELAY_SECONDS = 0.5;
+const MAX_START_DELAY_SECONDS = 5;
 
 function defaultAudioContextFactory() {
   const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
@@ -23,6 +25,21 @@ function defaultAudioContextFactory() {
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
+}
+
+function validateStartDelaySeconds(value) {
+  if (
+    !Number.isFinite(value) ||
+    value < MIN_START_DELAY_SECONDS ||
+    value > MAX_START_DELAY_SECONDS
+  ) {
+    throw new AudiblePlaybackError(
+      "The sound delay must be between one half second and five seconds.",
+      "INVALID_AUDITION_DELAY"
+    );
+  }
+
+  return value;
 }
 
 function safeDisconnect(node) {
@@ -137,7 +154,9 @@ function configureMaster(context) {
 export function createPositionAuditioner({
   audioContextFactory = defaultAudioContextFactory,
   random = Math.random,
+  startDelaySeconds = DEFAULT_START_DELAY_SECONDS,
 } = {}) {
+  const resolvedStartDelaySeconds = validateStartDelaySeconds(startDelaySeconds);
   let context = null;
   let master = null;
   let disposed = false;
@@ -235,7 +254,7 @@ export function createPositionAuditioner({
     const mutedEvents = soundEvents.events.filter(
       (event) => event.type === "muted-string"
     );
-    const onset = context.currentTime + START_DELAY_SECONDS;
+    const onset = context.currentTime + resolvedStartDelaySeconds;
     const pitchedGain = clamp(
       0.42 / Math.sqrt(Math.max(1, pitchedEvents.length)),
       0.12,
