@@ -8,9 +8,9 @@ describe("checkpoint build identity", () => {
       "utf8"
     );
     const title =
-      "<title>Test build Audible current-position procedural plucked-string proof 1B</title>";
+      "<title>Test build Audible current-position VoiceOver-clearance proof 1C</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Audible current-position procedural plucked-string proof 1B.</h1>';
+      '<h1 id="test-build-heading">Test build: Audible current-position VoiceOver-clearance proof 1C.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
