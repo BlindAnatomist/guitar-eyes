@@ -159,7 +159,7 @@ describe("IPhoneTabReader", () => {
     await waitFor(() => expect(auditioner.audition).toHaveBeenCalledTimes(1));
     expect(buildPositionSoundEvents).toHaveBeenCalledWith(measureDocument, 0);
     expect(createPositionAuditioner).toHaveBeenCalledTimes(1);
-    expect(document.activeElement).toBe(audition);
+    expect(global.document.activeElement).toBe(audition);
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Measure 1 of 2. Position 1 of 3 in this measure."
     );
