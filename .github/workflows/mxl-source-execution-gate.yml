@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: e89caec63390d638b7b2d63c5e74689b2694223e
+      SOURCE_SHA: b840dc8ba63948ed75d1e982352002f96c694486
       STATUS_CONTEXT: guitar-eyes/mxl-source-gate
     steps:
       - name: Mark gate pending
@@ -91,6 +91,8 @@ jobs:
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
           test -f build/index.html
+          grep -Fq '<title>Test build Compressed MusicXML checkpoint 1</title>' build/index.html
+          grep -Fq 'Test build: Compressed MusicXML checkpoint 1.' build/index.html
           grep -Fq 'compressed MusicXML tablature' "$main_js"
           grep -Fq 'Read current position' "$main_js"
           grep -Fq 'Previous position' "$main_js"
