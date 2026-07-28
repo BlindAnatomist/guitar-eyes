@@ -40,7 +40,12 @@ function findEndOfCentralDirectory(view) {
   const earliestOffset = Math.max(0, view.byteLength - (0xffff + minimumLength));
 
   for (let offset = view.byteLength - minimumLength; offset >= earliestOffset; offset -= 1) {
-    if (view.getUint32(offset, true) === ZIP_SIGNATURES.endOfCentralDirectory) {
+    if (view.getUint32(offset, true) !== ZIP_SIGNATURES.endOfCentralDirectory) {
+      continue;
+    }
+
+    const commentLength = view.getUint16(offset + 20, true);
+    if (offset + minimumLength + commentLength === view.byteLength) {
       return offset;
     }
   }
@@ -59,7 +64,7 @@ function decodeUtf8(bytes, label, code = "INVALID_MXL_TEXT") {
   }
 }
 
-async function browserInflateRaw(bytes) {
+async function browserInflateRaw(bytes, maxBytes) {
   if (typeof DecompressionStream !== "function") {
     throw new CompressedMusicXmlImportError(
       "This browser cannot expand compressed MusicXML archive entries.",
@@ -77,15 +82,41 @@ async function browserInflateRaw(bytes) {
     );
   }
 
+  const reader = new Blob([bytes]).stream().pipeThrough(stream).getReader();
+  const chunks = [];
+  let totalBytes = 0;
+
   try {
-    const response = new Response(new Blob([bytes]).stream().pipeThrough(stream));
-    return new Uint8Array(await response.arrayBuffer());
-  } catch {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = value instanceof Uint8Array ? value : new Uint8Array(value);
+      totalBytes += chunk.byteLength;
+      if (totalBytes > maxBytes) {
+        await reader.cancel();
+        throw new CompressedMusicXmlImportError(
+          "A compressed MusicXML archive entry exceeds the checkpoint extraction limit.",
+          "MXL_ARCHIVE_EXPANSION_LIMIT"
+        );
+      }
+      chunks.push(chunk);
+    }
+  } catch (error) {
+    if (error instanceof CompressedMusicXmlImportError) throw error;
     throw new CompressedMusicXmlImportError(
       "A compressed MusicXML archive entry could not be expanded.",
       "MXL_DECOMPRESSION_FAILED"
     );
   }
+
+  const output = new Uint8Array(totalBytes);
+  let offset = 0;
+  chunks.forEach((chunk) => {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  });
+  return output;
 }
 
 function parseCentralDirectory(bytes, limits) {
@@ -123,8 +154,8 @@ function parseCentralDirectory(bytes, limits) {
     "MXL_CENTRAL_DIRECTORY_LIMIT"
   );
   requireArchive(
-    eocdOffset + 22 + commentLength <= bytes.byteLength,
-    "The compressed MusicXML ZIP comment is truncated."
+    eocdOffset + 22 + commentLength === bytes.byteLength,
+    "The compressed MusicXML ZIP comment length is inconsistent."
   );
   requireArchive(
     centralOffset + centralSize <= eocdOffset,
@@ -164,6 +195,13 @@ function parseCentralDirectory(bytes, limits) {
       method === 0 || method === 8,
       `Compressed MusicXML ZIP compression method ${method} is not supported.`,
       "UNSUPPORTED_MXL_ZIP_COMPRESSION"
+    );
+    requireArchive(
+      compressedSize !== 0xffffffff &&
+        uncompressedSize !== 0xffffffff &&
+        localHeaderOffset !== 0xffffffff,
+      "ZIP64 compressed MusicXML entries are not supported by this checkpoint.",
+      "UNSUPPORTED_MXL_ZIP64"
     );
 
     let name;
@@ -211,17 +249,36 @@ async function readEntry(bytes, view, entry, maxBytes, inflateRaw) {
 
   const flags = view.getUint16(offset + 6, true);
   const method = view.getUint16(offset + 8, true);
+  const localCompressedSize = view.getUint32(offset + 18, true);
+  const localUncompressedSize = view.getUint32(offset + 22, true);
   const fileNameLength = view.getUint16(offset + 26, true);
   const extraLength = view.getUint16(offset + 28, true);
-  const dataStart = offset + 30 + fileNameLength + extraLength;
+  const nameStart = offset + 30;
+  const nameEnd = nameStart + fileNameLength;
+  const dataStart = nameEnd + extraLength;
   const dataEnd = dataStart + entry.compressedSize;
 
   requireArchive((flags & 0x1) === 0, `${entry.name} is encrypted.`, "ENCRYPTED_MXL_ARCHIVE");
   requireArchive(method === entry.method, `${entry.name} has conflicting compression metadata.`);
+  requireArchive(nameEnd <= bytes.byteLength, `${entry.name} has a truncated local filename.`);
+  const localName = decodeUtf8(
+    bytes.subarray(nameStart, nameEnd),
+    `The local ZIP filename for ${entry.name}`,
+    "INVALID_MXL_ZIP_FILENAME"
+  );
+  requireArchive(localName === entry.name, `${entry.name} has conflicting local filename metadata.`);
+  if ((flags & 0x8) === 0) {
+    requireArchive(
+      localCompressedSize === entry.compressedSize &&
+        localUncompressedSize === entry.uncompressedSize,
+      `${entry.name} has conflicting local size metadata.`
+    );
+  }
   requireArchive(dataEnd <= bytes.byteLength, `${entry.name} has truncated compressed data.`);
 
   const compressed = bytes.subarray(dataStart, dataEnd);
-  const output = method === 0 ? new Uint8Array(compressed) : await inflateRaw(compressed);
+  const output =
+    method === 0 ? new Uint8Array(compressed) : await inflateRaw(compressed, maxBytes);
 
   requireArchive(
     output.byteLength === entry.uncompressedSize,
@@ -265,9 +322,9 @@ function descendants(node, name) {
 }
 
 function parseContainerXml(sourceText) {
-  if (/<!ENTITY\s/i.test(sourceText)) {
+  if (/<!DOCTYPE\s|<!ENTITY\s/i.test(sourceText)) {
     throw new CompressedMusicXmlImportError(
-      "The compressed MusicXML container contains a custom entity declaration.",
+      "The compressed MusicXML container contains a document type or custom entity declaration.",
       "UNSAFE_MXL_CONTAINER_ENTITY"
     );
   }
@@ -322,6 +379,11 @@ function requireSafeRootPath(path) {
   requireArchive(
     !path.startsWith("/") && !path.startsWith("\\") && !path.includes("\\"),
     "The compressed MusicXML rootfile path must be a relative slash-separated path.",
+    "UNSAFE_MXL_ROOTFILE_PATH"
+  );
+  requireArchive(
+    !/[\u0000-\u001f\u007f]/.test(path),
+    "The compressed MusicXML rootfile path contains a control character.",
     "UNSAFE_MXL_ROOTFILE_PATH"
   );
   const segments = path.split("/");
