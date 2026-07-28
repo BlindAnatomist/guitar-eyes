@@ -4,15 +4,32 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Audible current-position procedural plucked-string proof 1A";
+  "Audible current-position procedural plucked-string proof 1B";
+
+export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
+  if (!nextDocument || nextDocument.positions.length === 0) {
+    return 0;
+  }
+
+  if (activeDocument !== nextDocument) {
+    return 0;
+  }
+
+  return Math.min(
+    Math.max(0, currentIndex),
+    nextDocument.positions.length - 1
+  );
+}
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
   const [auditionStatus, setAuditionStatus] = useState("");
   const auditionerRef = useRef(null);
+  const activeDocumentRef = useRef(document);
 
   useEffect(() => {
+    activeDocumentRef.current = document;
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
     setAuditionStatus("");
@@ -34,10 +51,15 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     return null;
   }
 
-  const currentPosition = document.positions[currentIndex];
-  const currentDescription = describePlayablePosition(document, currentIndex);
-  const isFirstPosition = currentIndex === 0;
-  const isLastPosition = currentIndex === document.positions.length - 1;
+  const resolvedCurrentIndex = resolveReaderPositionIndex(
+    activeDocumentRef.current,
+    document,
+    currentIndex
+  );
+  const currentPosition = document.positions[resolvedCurrentIndex];
+  const currentDescription = describePlayablePosition(document, resolvedCurrentIndex);
+  const isFirstPosition = resolvedCurrentIndex === 0;
+  const isLastPosition = resolvedCurrentIndex === document.positions.length - 1;
   const hasMultipleBlocks = document.blocks.length > 1;
   const isFirstBlock = currentPosition.blockIndex === 0;
   const isLastBlock = currentPosition.blockIndex === document.blocks.length - 1;
@@ -49,6 +71,10 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     }));
   };
 
+  const clearAnnouncement = () => {
+    setAnnouncement((current) => ({ text: "", sequence: current.sequence }));
+  };
+
   const stopAuditionQuietly = () => {
     auditionerRef.current?.stop();
     setAuditionStatus("");
@@ -56,6 +82,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const moveTo = (nextIndex) => {
     stopAuditionQuietly();
+    clearAnnouncement();
     setCurrentIndex(nextIndex);
   };
 
@@ -70,17 +97,19 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   };
 
   const auditionCurrentPosition = async () => {
+    clearAnnouncement();
+
     try {
-      const soundEvents = buildPositionSoundEvents(document, currentIndex);
+      const soundEvents = buildPositionSoundEvents(document, resolvedCurrentIndex);
       if (!auditionerRef.current) {
         auditionerRef.current = createPositionAuditioner();
       }
       const result = await auditionerRef.current.audition(soundEvents);
 
       if (result.outcome === "rest") {
-        setAuditionStatus(
-          "Current position is a rest. No pitched sound was played."
-        );
+        const message = "Current position is a rest. No pitched sound was played.";
+        setAuditionStatus(message);
+        announce(message);
         return;
       }
 
@@ -97,11 +126,12 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         `Auditioned current position with ${parts.join(" and ")}.`
       );
     } catch (error) {
-      setAuditionStatus(
+      const message =
         error instanceof Error
           ? error.message
-          : "The current position could not be auditioned."
-      );
+          : "The current position could not be auditioned.";
+      setAuditionStatus(message);
+      announce(message);
     }
   };
 
@@ -115,11 +145,11 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       }${hasMultipleBlocks ? " in this block" : ""}. Position ${
         currentPosition.positionInMeasure
       } of ${currentPosition.positionsInMeasure} in this measure. Overall position ${
-        currentIndex + 1
+        resolvedCurrentIndex + 1
       } of ${document.positions.length}.`
     : hasMultipleBlocks
-    ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${currentIndex + 1} of ${document.positions.length}.`
-    : `Position ${currentIndex + 1} of ${document.positions.length}`;
+    ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${resolvedCurrentIndex + 1} of ${document.positions.length}.`
+    : `Position ${resolvedCurrentIndex + 1} of ${document.positions.length}`;
 
   return (
     <section className="iphone-reader" aria-labelledby="iphone-reader-heading">
@@ -156,7 +186,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       <div className="position-controls">
         <button
           type="button"
-          onClick={() => moveTo(currentIndex - 1)}
+          onClick={() => moveTo(resolvedCurrentIndex - 1)}
           disabled={isFirstPosition}
         >
           Previous position
@@ -169,19 +199,14 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </button>
         <button
           type="button"
-          onClick={() => moveTo(currentIndex + 1)}
+          onClick={() => moveTo(resolvedCurrentIndex + 1)}
           disabled={isLastPosition}
         >
           Next position
         </button>
       </div>
 
-      <p
-        className="audition-status"
-        id="audition-status"
-        role="status"
-        aria-atomic="true"
-      >
+      <p className="audition-status" id="audition-status">
         {auditionStatus}
       </p>
 
