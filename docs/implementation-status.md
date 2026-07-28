@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Last updated: July 27, 2026
+Last updated: July 28, 2026
 
 ## Repository authority
 
@@ -10,7 +10,7 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Current implementation branch: `work/tablature-intake-expansion`
+Current implementation branch: `work/playback-timing-foundation`
 
 Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
@@ -22,24 +22,30 @@ Verified ASCII intake expansion source: `08f8ab16135570d0e53b829daa5c153a15751a4
 
 Verified MusicXML implementation source: `715547a123b2a6e862a8020858df96cb34c63526`
 
-Verified, hosted, and real-iPhone-accepted Guitar Pro source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+Verified, hosted, and real-iPhone-accepted Guitar Pro application source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+
+Completed tablature-intake branch record: `work/tablature-intake-expansion` at `aa302dcee880df4a0947d3e374171554e4855022`
+
+Playback-timing branch starting point: `aa302dcee880df4a0947d3e374171554e4855022`
 
 Fork `main` remains exactly reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
 ## Governing architecture
 
-Guitar Eyes is one musical system with one semantic tablature document and two reader interfaces:
+Guitar Eyes is one musical system with one semantic tablature document and multiple consumers:
 
 1. iPhone presents synchronized musical positions sequentially for Safari and VoiceOver.
 2. Desktop presents the same document as strings by synchronized positions while preserving a spatial overview.
-3. Every supported format must normalize into the same semantic document.
-4. Format-specific parsers may interpret source syntax but may not create separate reader logic, playback logic, or musical models.
-5. Browser-level file filtering must not prevent iPhone users from selecting a file before Guitar Eyes can validate it.
-6. A third-party decoder may exist only behind an adapter and may not become the application architecture.
+3. Every supported format normalizes into the same semantic document.
+4. The playback-timing engine consumes that document without reparsing a source format.
+5. Teacher mode and future audible playback must consume the same document and timing layer.
+6. Format-specific parsers may interpret source syntax but may not create separate reader, timing, teacher, playback, or musical models.
+7. Browser-level file filtering must not prevent iPhone users from selecting a file before Guitar Eyes can validate it.
+8. A third-party decoder may exist only behind an adapter and may not become the application architecture.
 
 ## Accepted reader contracts
 
-Every intake checkpoint must preserve:
+Every future checkpoint must preserve:
 
 1. Previous position, Read current position, Next position order.
 2. Quiet position and block movement.
@@ -55,6 +61,8 @@ Every intake checkpoint must preserve:
 12. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
 13. Multi-track Guitar Pro archives must expose an inventory and require explicit selection.
 14. A selected-track summary must immediately precede `Load selected track` in VoiceOver reading order.
+15. Timing must derive from the semantic document rather than from raw display text.
+16. Missing or ambiguous duration must reject rather than be guessed for playback.
 
 ## Passed convergence recovery checkpoint 1
 
@@ -194,13 +202,77 @@ Recognition must not be described as reading support.
 1. Do not claim general GP7 support.
 2. Do not claim GP3 through GP6 support without lawful verified fixtures and direct tests.
 3. Do not claim arbitrary Guitar Pro compatibility from the accepted project-authored fixtures.
-4. Do not add a renderer, player, soundfont, audio worker, or playback implementation.
+4. Do not add an alphaTab renderer, alphaSynth player, notation font, soundfont, renderer worker, or audio worklet.
 5. Do not silently select a track.
 6. Do not create a second musical model.
 7. PowerTab, TuxGuitar, TablEdit, Guitar Pro 2, and compressed MusicXML require separate future routes.
 
+## Current authorized checkpoint: Playback Timing Foundation 1
+
+Plan:
+
+- `docs/playback-timing-foundation-checkpoint-1-plan-2026-07-28.md`
+
+State: `authorized-plan`
+
+Purpose:
+
+Create a pure deterministic timing engine from the accepted semantic document. The engine establishes temporal offsets for later playback and teacher mode but produces no sound and changes no interface.
+
+Required behavior:
+
+1. Preserve existing semantic position order.
+2. Accept an integer tempo from 20 through 300 quarter-note beats per minute.
+3. Use 120 BPM only as the explicit checkpoint default.
+4. Record whether tempo was explicit or defaulted.
+5. Derive exact reduced duration fractions from existing semantic evidence.
+6. Prefer Guitar Pro `quarterNoteFraction`.
+7. Reconstruct MusicXML duration from divisions.
+8. Convert accepted finite decimal quarter-note units only when no stronger exact source exists.
+9. Treat a chord as one onset.
+10. Treat a rest as a timed position.
+11. Calculate cumulative quarter-note and millisecond start, duration, and end offsets.
+12. Produce measure timing summaries when measure identity exists.
+13. Report total duration.
+14. Preserve source-order playback.
+15. Do not expand repeats or alternate endings.
+16. Reject missing, zero, negative, non-finite, malformed, or unrepresentable duration.
+17. Do not mutate the semantic document.
+18. Add no browser, React, UI, worker, renderer, player, or audio dependency.
+
+Verification boundary:
+
+1. Direct engine regression suite.
+2. Complete inherited automated suite.
+3. Production build.
+4. Diff inspection proving no UI, audio, player, renderer, worker, or unrelated format work.
+5. One intentional GitHub-hosted checkpoint only after source review because the current Chat runtime cannot execute the repository dependency gate.
+6. No Pages deployment and no real-iPhone test for this engine-only checkpoint.
+7. Exact confirmation that fork `main` remains identical to clean authority.
+
+## Explicitly deferred after Timing Foundation 1
+
+1. Audible playback.
+2. Web Audio or MIDI synthesis.
+3. Sampled guitar or bass sounds.
+4. Metronome sound.
+5. Playback controls.
+6. Automatic reader movement or focus changes.
+7. Visual cursor behavior.
+8. Looping.
+9. Bookmarks.
+10. Teacher mode.
+11. Practice scoring.
+12. Repeat expansion.
+13. Tempo extraction and tempo maps.
+14. Swing interpretation.
+15. Count-in behavior.
+16. `.mxl`, broader Guitar Pro, and other format expansion.
+
 ## Testing responsibility
 
-Dependency work, fixture generation, source implementation, automated tests, builds, and artifact inspection proceed without John.
+Dependency work, source implementation, automated tests, builds, artifact inspection, documentation, and repository-authority verification proceed without John.
 
-John is needed only for a stable hosted candidate and a bounded real-iPhone Safari and VoiceOver acceptance checkpoint.
+John is not needed for Playback Timing Foundation 1 because it changes no user-facing interface. He is needed only after a later stable hosted UI or audio candidate requires bounded real-iPhone Safari and VoiceOver judgment.
+
+Jason Washburn is not involved unless he separately agrees to desktop testing.
