@@ -19,7 +19,7 @@ const FORMAT_DEFINITIONS = {
   "compressed-musicxml": {
     id: "compressed-musicxml",
     label: "compressed MusicXML",
-    support: "planned",
+    support: "supported",
     isText: false,
   },
   "guitar-pro-proof": {
@@ -120,7 +120,7 @@ export function shouldReadTabFileAsText(format) {
 export function unsupportedTabFormatMessage(format) {
   switch (format?.id) {
     case "compressed-musicxml":
-      return "Compressed MusicXML was recognized. Guitar Eyes does not yet import .mxl files; uncompressed .musicxml or .xml tablature is supported first.";
+      return "The compressed MusicXML file could not be imported. Guitar Eyes requires a valid .mxl ZIP container whose META-INF/container.xml identifies a supported MusicXML tablature score.";
     case "guitar-pro-proof":
       return "A Guitar Pro .gp archive was recognized. This branch contains an unhosted project-fixture proof only; general Guitar Pro shared-archive support has not yet been accepted.";
     case "guitar-pro-legacy":
@@ -132,6 +132,6 @@ export function unsupportedTabFormatMessage(format) {
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported uncompressed MusicXML tablature, or an authorized checkpoint fixture.";
+      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, or an authorized checkpoint fixture.";
   }
 }

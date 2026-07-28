@@ -134,7 +134,13 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
   };
 }
 
-export function buildMusicXmlReaderDocuments(sourceText) {
+export function buildMusicXmlReaderDocuments(
+  sourceText,
+  {
+    sourceFormat = "musicxml",
+    sourceFormatLabel = "MusicXML tablature",
+  } = {}
+) {
   const semanticDocument = parseMusicXmlTablature(sourceText);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
@@ -147,7 +153,7 @@ export function buildMusicXmlReaderDocuments(sourceText) {
     resolvedInstrument: "guitar",
     instrumentWasDetected: false,
     supportOutcome: "supported",
-    sourceFormat: "musicxml",
-    sourceFormatLabel: "MusicXML tablature",
+    sourceFormat,
+    sourceFormatLabel,
   };
 }

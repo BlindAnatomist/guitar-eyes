@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
+import { readCompressedMusicXmlFile } from "./compressedMusicXmlImporter";
 import DesktopSemanticReader from "./DesktopSemanticReader";
 import GuitarProTrackSelector from "./GuitarProTrackSelector";
 import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
@@ -170,39 +171,39 @@ function App() {
     });
   };
 
+  const showGuitarProTrackSelection = (file, readerDocuments) => {
+    const session = {
+      file,
+      intermediate: readerDocuments.guitarProIntermediate,
+      inventory: readerDocuments.trackInventory,
+    };
+    const status = `This Guitar Pro archive contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
 
-const showGuitarProTrackSelection = (file, readerDocuments) => {
-  const session = {
-    file,
-    intermediate: readerDocuments.guitarProIntermediate,
-    inventory: readerDocuments.trackInventory,
+    if (readingMode === "iphone") {
+      pendingIphoneFocusTargetRef.current = "track-selection";
+      flushSync(() => {
+        setDesktopBlocks([]);
+        setSemanticDocument(null);
+        setIphoneError("");
+        setDesktopError("");
+        setGuitarProSelectionSession(session);
+        setIsReadingFile(false);
+        setStatusMessage(status);
+        setIphoneFocusRequest((current) => current + 1);
+      });
+      return;
+    }
+
+    setDesktopBlocks([]);
+    setSemanticDocument(null);
+    setIphoneError("");
+    setDesktopError("");
+    setGuitarProSelectionSession(session);
+    setIsReadingFile(false);
+    setStatusMessage(status);
+    focusSoon(trackSelectionHeadingRef);
   };
-  const status = `This Guitar Pro archive contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
 
-  if (readingMode === "iphone") {
-    pendingIphoneFocusTargetRef.current = "track-selection";
-    flushSync(() => {
-      setDesktopBlocks([]);
-      setSemanticDocument(null);
-      setIphoneError("");
-      setDesktopError("");
-      setGuitarProSelectionSession(session);
-      setIsReadingFile(false);
-      setStatusMessage(status);
-      setIphoneFocusRequest((current) => current + 1);
-    });
-    return;
-  }
-
-  setDesktopBlocks([]);
-  setSemanticDocument(null);
-  setIphoneError("");
-  setDesktopError("");
-  setGuitarProSelectionSession(session);
-  setIsReadingFile(false);
-  setStatusMessage(status);
-  focusSoon(trackSelectionHeadingRef);
-};
   const finishUnreadableUpload = (message, status) => {
     if (readingMode === "iphone") {
       commitIphoneOutcome({
@@ -267,6 +268,23 @@ const showGuitarProTrackSelection = (file, readerDocuments) => {
             "The Guitar Pro checkpoint file could not be prepared for the Guitar Eyes readers."
           ),
           "The selected Guitar Pro checkpoint file could not be imported."
+        );
+        return;
+      }
+    } else if (initialFormat.id === "compressed-musicxml") {
+      try {
+        const sourceText = await readCompressedMusicXmlFile(file);
+        readerDocuments = buildMusicXmlReaderDocuments(sourceText, {
+          sourceFormat: "compressed-musicxml",
+          sourceFormatLabel: "compressed MusicXML tablature",
+        });
+      } catch (error) {
+        finishUnreadableUpload(
+          messageFromError(
+            error,
+            "The compressed MusicXML tablature could not be prepared for the Guitar Eyes readers."
+          ),
+          "The selected compressed MusicXML tablature could not be imported."
         );
         return;
       }
@@ -407,68 +425,68 @@ const showGuitarProTrackSelection = (file, readerDocuments) => {
     }
   };
 
+  const handleGuitarProTrackSelection = async (selection) => {
+    const session = guitarProSelectionSession;
+    if (!session) return;
 
-const handleGuitarProTrackSelection = async (selection) => {
-  const session = guitarProSelectionSession;
-  if (!session) return;
+    setIsReadingFile(true);
+    setStatusMessage("Preparing the selected Guitar Pro track.");
+    setIphoneError("");
+    setDesktopError("");
 
-  setIsReadingFile(true);
-  setStatusMessage("Preparing the selected Guitar Pro track.");
-  setIphoneError("");
-  setDesktopError("");
+    let readerDocuments;
+    try {
+      readerDocuments = await buildGuitarProArchiveProofReaderDocuments(session.file, {
+        intermediate: session.intermediate,
+        selection,
+      });
+    } catch (error) {
+      setGuitarProSelectionSession(null);
+      finishUnreadableUpload(
+        messageFromError(
+          error,
+          "The selected Guitar Pro track could not be prepared for the Guitar Eyes readers."
+        ),
+        "The selected Guitar Pro track could not be imported."
+      );
+      return;
+    }
 
-  let readerDocuments;
-  try {
-    readerDocuments = await buildGuitarProArchiveProofReaderDocuments(session.file, {
-      intermediate: session.intermediate,
-      selection,
-    });
-  } catch (error) {
+    const nextDocument = readerDocuments.semanticDocument;
+    const nextDesktopBlocks = readerDocuments.desktopBlocks;
+    const resolvedInstrument = readerDocuments.resolvedInstrument;
     setGuitarProSelectionSession(null);
-    finishUnreadableUpload(
-      messageFromError(
-        error,
-        "The selected Guitar Pro track could not be prepared for the Guitar Eyes readers."
-      ),
-      "The selected Guitar Pro track could not be imported."
-    );
-    return;
-  }
 
-  const nextDocument = readerDocuments.semanticDocument;
-  const nextDesktopBlocks = readerDocuments.desktopBlocks;
-  const resolvedInstrument = readerDocuments.resolvedInstrument;
-  setGuitarProSelectionSession(null);
+    if (!nextDocument) {
+      finishUnreadableUpload(
+        "The selected Guitar Pro track did not produce a semantic reader document.",
+        "The selected Guitar Pro track could not be imported."
+      );
+      return;
+    }
 
-  if (!nextDocument) {
-    finishUnreadableUpload(
-      "The selected Guitar Pro track did not produce a semantic reader document.",
-      "The selected Guitar Pro track could not be imported."
-    );
-    return;
-  }
+    const status = `Imported Guitar Pro archive tablature. Loaded ${nextDocument.positions.length} synchronized positions`;
+    if (readingMode === "iphone") {
+      commitIphoneOutcome({
+        target: "reader",
+        semanticDocument: nextDocument,
+        desktopBlocks: nextDesktopBlocks,
+        status: `${status} in iPhone reading mode.`,
+        resolvedInstrument,
+      });
+      return;
+    }
 
-  const status = `Imported Guitar Pro archive tablature. Loaded ${nextDocument.positions.length} synchronized positions`;
-  if (readingMode === "iphone") {
-    commitIphoneOutcome({
-      target: "reader",
-      semanticDocument: nextDocument,
-      desktopBlocks: nextDesktopBlocks,
-      status: `${status} in iPhone reading mode.`,
-      resolvedInstrument,
-    });
-    return;
-  }
+    setDesktopBlocks(nextDesktopBlocks);
+    setSemanticDocument(nextDocument);
+    setIphoneError("");
+    setDesktopError("");
+    setSelectedInstrument(resolvedInstrument);
+    setIsReadingFile(false);
+    setStatusMessage(`${status} in desktop semantic reader mode.`);
+    desktopFocusPendingRef.current = true;
+  };
 
-  setDesktopBlocks(nextDesktopBlocks);
-  setSemanticDocument(nextDocument);
-  setIphoneError("");
-  setDesktopError("");
-  setSelectedInstrument(resolvedInstrument);
-  setIsReadingFile(false);
-  setStatusMessage(`${status} in desktop semantic reader mode.`);
-  desktopFocusPendingRef.current = true;
-};
   const handleReadingModeChange = (event) => {
     const nextMode = event.target.value;
     setReadingMode(nextMode);
@@ -545,14 +563,14 @@ const handleGuitarProTrackSelection = async (selection) => {
         {statusMessage}
       </div>
 
-{guitarProSelectionSession && (
-  <GuitarProTrackSelector
-    ref={trackSelectionHeadingRef}
-    inventory={guitarProSelectionSession.inventory}
-    onSubmit={handleGuitarProTrackSelection}
-    disabled={isReadingFile}
-  />
-)}
+      {guitarProSelectionSession && (
+        <GuitarProTrackSelector
+          ref={trackSelectionHeadingRef}
+          inventory={guitarProSelectionSession.inventory}
+          onSubmit={handleGuitarProTrackSelection}
+          disabled={isReadingFile}
+        />
+      )}
 
       {currentError && (
         <section
