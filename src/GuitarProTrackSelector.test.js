@@ -42,6 +42,27 @@ const inventory = {
 };
 
 describe("GuitarProTrackSelector", () => {
+  test("keeps the concise group name separate from the adjacent instructions", () => {
+    render(<GuitarProTrackSelector inventory={inventory} onSubmit={jest.fn()} />);
+
+    const heading = screen.getByRole("heading", {
+      level: 2,
+      name: "Choose a Guitar Pro track",
+    });
+    const group = screen.getByRole("group", {
+      name: "Available tablature tracks, 2 choices",
+    });
+    const instructions = screen.getByText(
+      /This file contains 2 supported tablature tracks/i
+    );
+
+    expect(group).not.toHaveAttribute("aria-describedby");
+    expect(
+      heading.compareDocumentPosition(instructions) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(screen.getAllByText(/This file contains 2 supported tablature tracks/i)).toHaveLength(1);
+  });
+
   test("requires an explicit radio choice before submission", () => {
     const onSubmit = jest.fn();
     render(<GuitarProTrackSelector inventory={inventory} onSubmit={onSubmit} />);
