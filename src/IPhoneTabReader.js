@@ -1,14 +1,31 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { describePlayablePosition } from "./positionDescription";
+import { buildPositionSoundEvents } from "./positionSoundEvents";
+import { createPositionAuditioner } from "./proceduralPluckedString";
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
+  const [auditionStatus, setAuditionStatus] = useState("");
+  const auditionerRef = useRef(null);
 
   useEffect(() => {
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
+    setAuditionStatus("");
+    const priorAuditioner = auditionerRef.current;
+    auditionerRef.current = null;
+    void priorAuditioner?.dispose();
   }, [document]);
+
+  useEffect(
+    () => () => {
+      const priorAuditioner = auditionerRef.current;
+      auditionerRef.current = null;
+      void priorAuditioner?.dispose();
+    },
+    []
+  );
 
   if (!document || document.positions.length === 0) {
     return null;
@@ -29,7 +46,13 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     }));
   };
 
+  const stopAuditionQuietly = () => {
+    auditionerRef.current?.stop();
+    setAuditionStatus("");
+  };
+
   const moveTo = (nextIndex) => {
+    stopAuditionQuietly();
     setCurrentIndex(nextIndex);
   };
 
@@ -40,6 +63,42 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
     if (nextIndex >= 0) {
       moveTo(nextIndex);
+    }
+  };
+
+  const auditionCurrentPosition = async () => {
+    try {
+      const soundEvents = buildPositionSoundEvents(document, currentIndex);
+      if (!auditionerRef.current) {
+        auditionerRef.current = createPositionAuditioner();
+      }
+      const result = await auditionerRef.current.audition(soundEvents);
+
+      if (result.outcome === "rest") {
+        setAuditionStatus(
+          "Current position is a rest. No pitched sound was played."
+        );
+        return;
+      }
+
+      const pitched = result.pitchedEventCount;
+      const muted = result.mutedEventCount;
+      const parts = [];
+      if (pitched > 0) {
+        parts.push(`${pitched} pitched ${pitched === 1 ? "string" : "strings"}`);
+      }
+      if (muted > 0) {
+        parts.push(`${muted} muted ${muted === 1 ? "string" : "strings"}`);
+      }
+      setAuditionStatus(
+        `Auditioned current position with ${parts.join(" and ")}.`
+      );
+    } catch (error) {
+      setAuditionStatus(
+        error instanceof Error
+          ? error.message
+          : "The current position could not be auditioned."
+      );
     }
   };
 
@@ -100,6 +159,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         <button type="button" onClick={() => announce(currentDescription)}>
           Read current position
         </button>
+        <button type="button" onClick={auditionCurrentPosition}>
+          Audition current position
+        </button>
         <button
           type="button"
           onClick={() => moveTo(currentIndex + 1)}
@@ -108,6 +170,15 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
           Next position
         </button>
       </div>
+
+      <p
+        className="audition-status"
+        id="audition-status"
+        role="status"
+        aria-atomic="true"
+      >
+        {auditionStatus}
+      </p>
 
       <p className="position-count">{positionCount}</p>
 
