@@ -10,7 +10,7 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Current record branch: `work/playback-timing-foundation`
+Current implementation branch: `work/audible-playback-output-foundation`
 
 Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
@@ -26,7 +26,7 @@ Verified, hosted, and real-iPhone-accepted Guitar Pro application source: `d6f9a
 
 Verified Playback Timing Foundation 1 engine source: `2b038b15afa09877f6d8dcf615bc060243578096`
 
-Completed tablature-intake record: `work/tablature-intake-expansion` at `aa302dcee880df4a0947d3e374171554e4855022`
+Completed playback-timing record: `work/playback-timing-foundation` at `b0f6ad7c801b26b8f5e26407ac835a17668cbbdd`
 
 Fork `main` remains exactly reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
@@ -38,15 +38,16 @@ Guitar Eyes is one musical system with one semantic tablature document and one d
 2. Desktop presents the same positions spatially as strings by synchronized positions.
 3. Every supported importer normalizes into the same semantic document.
 4. The playback-timing engine consumes the semantic document without reparsing a source format.
-5. Teacher mode and future audible playback must consume the accepted semantic document and timing timeline.
-6. No reader, teacher, player, or format may create a second musical or timing interpretation.
-7. Third-party decoder models remain behind importer adapters and do not become the application architecture.
+5. Audible output consumes the same semantic string identity and accepted timeline.
+6. Teacher mode must consume those same authorities.
+7. No reader, teacher, player, or format may create a second musical or timing interpretation.
+8. Third-party decoder models remain behind importer adapters and do not become the application architecture.
 
 ## Accepted reader contracts
 
 Every future checkpoint must preserve:
 
-1. Previous position, Read current position, Next position order.
+1. Previous position, Read current position, Next position in that relative order.
 2. Quiet position and block movement.
 3. Read current as the only action that announces full playing instructions.
 4. Omission of ordinary unplayed strings.
@@ -61,7 +62,9 @@ Every future checkpoint must preserve:
 13. Explicit inventory and selection for supported multi-track Guitar Pro archives.
 14. Selected-track details immediately before `Load selected track` in VoiceOver reading order.
 15. Timing derived from the semantic document rather than raw display text.
-16. Safe rejection instead of guessed duration.
+16. Safe rejection instead of guessed duration or pitch.
+17. Audible output only after explicit owner activation.
+18. Audition must not move reader position or VoiceOver focus.
 
 ## Passed convergence recovery checkpoint 1
 
@@ -151,7 +154,7 @@ Accepted capability:
 13. Position, measure, and total offsets are exposed as fractions, quarter-note units, and milliseconds.
 14. Playback order is `source-order`.
 15. Repeats and alternate endings are not expanded.
-16. Missing or unsafe duration rejects with stable `PlaybackTimingError` codes.
+16. Missing or unsafe duration rejects with stable error codes.
 17. The semantic document is not mutated.
 18. The module imports no React, browser, worker, renderer, player, or audio dependency.
 
@@ -162,17 +165,60 @@ Verification:
 3. Optimized production build compiled successfully.
 4. Exact five-file source boundary passed.
 5. No forbidden soundfont, audio-worklet, synth-worker, renderer-worker, or Bravura asset was emitted.
-6. Evidence artifact ID `8698174076`, digest `sha256:671ce33fc6b6e868a96ee49c26ea0fa8b31820b89fd0c797de13059723d908f5`.
-7. Fork `main` was restored and independently verified identical to clean authority.
-
-The first run, `30383593006`, failed only in an opaque shell authority guard before installation or tests. The corrected diagnostic gate passed. That procedure is preserved in `docs/known-problems-register-addendum-execution-gates.md`.
+6. Fork `main` was restored and independently verified identical to clean authority.
 
 Detailed records:
 
 - `docs/playback-timing-foundation-checkpoint-1-plan-2026-07-28.md`;
 - `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`.
 
-No Pages deployment or real-iPhone acceptance was required because the engine changes no interface, focus, speech, picker, or hosted interaction.
+## Current authorized checkpoint: Audible Playback Output Foundation 1
+
+Plan:
+
+- `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`.
+
+State: `implementation-in-progress`
+
+Current bounded source includes:
+
+1. `buildPositionSoundEvents`, a pure adapter from one semantic position and accepted timeline to pitched, muted, or rest sound events;
+2. exact standard six-string guitar and four-string bass pitch profiles;
+3. explicit tuning MIDI and explicit tuning-plus-octave support;
+4. rejection of custom tuning without octave evidence;
+5. fret-to-MIDI transposition and frequency derivation;
+6. chord strings scheduled at one semantic onset;
+7. explicit muted strings represented without invented pitch;
+8. one project-owned procedural plucked-string Web Audio engine;
+9. lazy `AudioContext` creation or resume only inside explicit audition;
+10. prior-node cleanup before repeated audition or reader navigation;
+11. one stable `Audition current position` action between Read current and Next;
+12. a persistent restrained audition status separate from full-position speech;
+13. no reader-position or focus movement;
+14. direct engine, adapter, reader, and accepted-corpus tests;
+15. an in-reader proof identity: `Audible current-position procedural plucked-string proof 1A`.
+
+Required source gate before John:
+
+1. exact branch-head and bounded-diff verification;
+2. complete inherited and new automated suite;
+3. optimized production build;
+4. source and build inspection proving no alphaSynth, soundfont, sample asset, audio worklet, renderer worker, or new third-party playback dependency;
+5. exact temporary Pages publication and live asset read-back;
+6. restoration of fork `main`;
+7. bounded real-iPhone audition test using `musicxml-chord-rest-two-measures.musicxml`.
+
+The iPhone acceptance must establish only:
+
+1. explicit activation produces audible sound for a pitched note or chord;
+2. a chord is perceived as simultaneous rather than sequential;
+3. a semantic rest reports that no pitched sound was played;
+4. repeated audition stops and replaces the prior sound without moving the reader;
+5. VoiceOver focus remains on `Audition current position`;
+6. Previous and Next remain quiet;
+7. Read current remains the only full-position instruction action.
+
+This checkpoint does not establish full-document playback, realistic guitar or bass timbre, technique-specific synthesis, looping, transport controls, automatic reader progression, tempo controls, repeat expansion, teacher mode, or practice scoring.
 
 ## Current format support
 
@@ -205,22 +251,12 @@ Recognition must not be described as reading support.
 5. Do not silently select a track.
 6. Do not create a second musical or timing model.
 7. Deferred formats require separate routes.
-
-## Current decision point
-
-No additional implementation checkpoint is currently authorized.
-
-The owner must choose and approve a bounded next plan for either:
-
-1. audible playback output consuming the accepted timeline; or
-2. non-audio teacher mode consuming the accepted semantic document and timeline.
-
-Do not begin playback controls, sound, automatic navigation, focus behavior, looping, bookmarks, teacher mode, practice scoring, repeat expansion, tempo extraction, count-in, swing, or new format support before that plan exists.
+8. Do not begin full playback or teacher mode from this audition proof.
 
 ## Testing responsibility
 
-Dependency work, source implementation, automated testing, builds, artifact inspection, documentation, and repository-authority verification proceed without John.
+Dependency work, source implementation, automated testing, builds, artifact inspection, documentation, repository administration, and hosted read-back proceed without John.
 
-John is needed only after a stable hosted user-facing candidate requires bounded real-iPhone Safari and VoiceOver judgment.
+John is needed only after the exact hosted audible proof passes every non-device gate.
 
 Jason Washburn is not involved unless he separately agrees to desktop testing.
