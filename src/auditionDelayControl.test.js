@@ -63,12 +63,26 @@ describe("audition VoiceOver-clearance control", () => {
     jest.clearAllMocks();
   });
 
-  test("defaults to two seconds and applies a changed delay to the next audition", async () => {
-    const { container } = render(<IPhoneTabReader document={document} />);
-    const delay = screen.getByLabelText("Sound delay after activation");
+  test("keeps the selector name concise and the explanation as one separate reading item", () => {
+    render(<IPhoneTabReader document={document} />);
+
+    const delay = screen.getByLabelText("Sound delay");
+    const help = screen.getByText(/VoiceOver to finish repeating the button name/i);
 
     expect(delay).toHaveValue("2");
-    expect(screen.getByText(/VoiceOver to finish repeating the button name/i)).toBeInTheDocument();
+    expect(delay).not.toHaveAttribute("aria-describedby");
+    expect(delay).toHaveAccessibleName("Sound delay");
+    expect(help).toBeInTheDocument();
+    expect(
+      delay.compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  test("defaults to two seconds and applies a changed delay to the next audition", async () => {
+    const { container } = render(<IPhoneTabReader document={document} />);
+    const delay = screen.getByLabelText("Sound delay");
+
+    expect(delay).toHaveValue("2");
 
     fireEvent.change(delay, { target: { value: "4" } });
     expect(delay).toHaveValue("4");
@@ -97,7 +111,7 @@ describe("audition VoiceOver-clearance control", () => {
     );
     await waitFor(() => expect(auditioner.audition).toHaveBeenCalledTimes(1));
 
-    fireEvent.change(screen.getByLabelText("Sound delay after activation"), {
+    fireEvent.change(screen.getByLabelText("Sound delay"), {
       target: { value: "3" },
     });
 
