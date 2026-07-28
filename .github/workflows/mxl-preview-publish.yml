@@ -1,0 +1,247 @@
+name: Publish compressed MusicXML checkpoint 1
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/mxl-preview-publish.yml
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-mxl-preview
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SOURCE_SHA: b840dc8ba63948ed75d1e982352002f96c694486
+      STATUS_CONTEXT: guitar-eyes/mxl-preview-publish
+    steps:
+      - name: Mark publication pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Publishing compressed MusicXML checkpoint 1',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact source authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor d6f9a0862c32bc3fa0b14834e027fefb1276bd8d HEAD
+          test -z "$(git status --short)"
+          mkdir -p /tmp/mxl-publication-evidence
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "trigger_sha=${GITHUB_SHA}"
+            echo "run_id=${GITHUB_RUN_ID}"
+          } > /tmp/mxl-publication-evidence/summary.txt
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: npm ci --no-audit --no-fund
+
+      - name: Build Pages artifact
+        shell: bash
+        run: |
+          set -o pipefail
+          PUBLIC_URL=/guitar-eyes CI=false npm run build 2>&1 | tee /tmp/mxl-publication-evidence/build.log
+
+      - name: Verify Pages build identity and contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          grep -Fq '<title>Test build Compressed MusicXML checkpoint 1</title>' build/index.html
+          grep -Fq 'Test build: Compressed MusicXML checkpoint 1.' build/index.html
+          grep -Fq '/guitar-eyes/static/' build/index.html
+          grep -Fq 'compressed MusicXML tablature' "$main_js"
+          grep -Fq 'META-INF/container.xml' "$main_js"
+          grep -Fq 'Read current position' "$main_js"
+          grep -Fq 'Previous position' "$main_js"
+          grep -Fq 'Next position' "$main_js"
+          grep -Fq 'iPhone tablature reader' "$main_js"
+          grep -Fq 'Desktop tablature reader' "$main_js"
+          {
+            echo "main_js=$main_js"
+            sha256sum build/index.html "$main_js"
+            echo "pages_build_contracts=passed"
+          } | tee /tmp/mxl-publication-evidence/build-inspection.txt
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Read back hosted HTML and bundle
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import os
+          import re
+          import time
+          import urllib.parse
+          import urllib.request
+          from html.parser import HTMLParser
+
+          page_url = os.environ["PAGE_URL"].rstrip("/") + "/"
+          cache_url = page_url + "?checkpoint=mxl-1&run=" + os.environ["GITHUB_RUN_ID"]
+
+          html_bytes = None
+          last_error = None
+          for _ in range(12):
+              try:
+                  request = urllib.request.Request(
+                      cache_url,
+                      headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
+                  )
+                  with urllib.request.urlopen(request, timeout=20) as response:
+                      if response.status == 200:
+                          html_bytes = response.read()
+                          break
+              except Exception as error:
+                  last_error = error
+              time.sleep(5)
+
+          if html_bytes is None:
+              raise RuntimeError(f"Hosted HTML did not become available: {last_error}")
+
+          html = html_bytes.decode("utf-8")
+          required_html = [
+              "<title>Test build Compressed MusicXML checkpoint 1</title>",
+              "Test build: Compressed MusicXML checkpoint 1.",
+          ]
+          for value in required_html:
+              if value not in html:
+                  raise RuntimeError(f"Hosted HTML is missing {value!r}")
+
+          class AssetParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.assets = []
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  for key in ("src", "href"):
+                      value = attrs.get(key)
+                      if value and value.startswith("/guitar-eyes/"):
+                          self.assets.append(value)
+
+          parser = AssetParser()
+          parser.feed(html)
+          assets = sorted(set(parser.assets))
+          if not assets:
+              raise RuntimeError("Hosted HTML did not reference repository-scoped assets")
+
+          downloaded = {}
+          for asset in assets:
+              url = urllib.parse.urljoin(page_url, asset)
+              with urllib.request.urlopen(url, timeout=20) as response:
+                  if response.status != 200:
+                      raise RuntimeError(f"Hosted asset returned {response.status}: {asset}")
+                  downloaded[asset] = response.read()
+
+          main_assets = [asset for asset in assets if re.search(r"/main\.[^.]+\.js$", asset)]
+          if len(main_assets) != 1:
+              raise RuntimeError(f"Expected one primary main JavaScript asset, found {main_assets}")
+          main_asset = main_assets[0]
+          main_text = downloaded[main_asset].decode("utf-8")
+          required_bundle = [
+              "compressed MusicXML tablature",
+              "META-INF/container.xml",
+              "Read current position",
+              "Previous position",
+              "Next position",
+              "iPhone tablature reader",
+              "Desktop tablature reader",
+          ]
+          for value in required_bundle:
+              if value not in main_text:
+                  raise RuntimeError(f"Hosted primary JavaScript is missing {value!r}")
+
+          evidence_path = "/tmp/mxl-publication-evidence/hosted-readback.txt"
+          with open(evidence_path, "w", encoding="utf-8") as evidence:
+              evidence.write(f"page_url={page_url}\n")
+              evidence.write("html_status=200\n")
+              evidence.write(f"html_sha256={hashlib.sha256(html_bytes).hexdigest()}\n")
+              evidence.write(f"main_asset={main_asset}\n")
+              evidence.write(
+                  f"main_js_sha256={hashlib.sha256(downloaded[main_asset]).hexdigest()}\n"
+              )
+              for asset in assets:
+                  evidence.write(f"asset_200={asset}\n")
+              evidence.write("hosted_contracts=passed\n")
+          print(open(evidence_path, encoding="utf-8").read())
+          PY
+
+      - name: Upload short-lived publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mxl-preview-publication-evidence
+          path: /tmp/mxl-publication-evidence
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Publish final publication status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Compressed MusicXML preview deployed and read back'
+                : 'Compressed MusicXML preview publication did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
