@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import IPhoneTabReader from "./IPhoneTabReader";
+import IPhoneTabReader, {
+  resolveReaderPositionIndex,
+} from "./IPhoneTabReader";
 import { parseSixStringTabText, parseTabDocumentText } from "./iphoneTabModel";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
@@ -58,6 +60,10 @@ function soundEvents({ rest = false } = {}) {
   };
 }
 
+function liveRegion(container) {
+  return container.querySelector('.visually-hidden[aria-live="polite"]');
+}
+
 describe("IPhoneTabReader", () => {
   let auditioner;
 
@@ -91,7 +97,7 @@ describe("IPhoneTabReader", () => {
     });
     const previous = screen.getByRole("button", { name: "Previous position" });
     const next = screen.getByRole("button", { name: "Next position" });
-    const status = screen.getByRole("status");
+    const status = container.querySelector(".audition-status");
     const description = container.querySelector(".position-description");
 
     expect(read).toBeEnabled();
@@ -102,6 +108,8 @@ describe("IPhoneTabReader", () => {
     expect(audition).not.toHaveAttribute("aria-describedby");
     expect(previous).not.toHaveAttribute("aria-describedby");
     expect(next).not.toHaveAttribute("aria-describedby");
+    expect(status).not.toHaveAttribute("role");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Next tablature block" })
     ).not.toBeInTheDocument();
@@ -124,16 +132,21 @@ describe("IPhoneTabReader", () => {
     ).toBeTruthy();
   });
 
+  test("resolves a newly loaded document to position one before reset effects settle", () => {
+    expect(resolveReaderPositionIndex(measureDocument, document, 1)).toBe(0);
+    expect(resolveReaderPositionIndex(document, document, 1)).toBe(1);
+    expect(resolveReaderPositionIndex(document, document, 99)).toBe(1);
+  });
+
   test("moves predictably without speaking the musical description automatically", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
-    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
 
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Position 2 of 2. High E string, fret 3."
     );
-    expect(liveRegion).toBeEmptyDOMElement();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
     expect(screen.getByRole("button", { name: "Next position" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous position" })).toBeEnabled();
   });
@@ -143,11 +156,12 @@ describe("IPhoneTabReader", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
 
-    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
-    expect(liveRegion).toHaveTextContent("Position 1 of 2. High E string, open.");
+    expect(liveRegion(container)).toHaveTextContent(
+      "Position 1 of 2. High E string, open."
+    );
   });
 
-  test("auditions the current position without moving focus or reader position", async () => {
+  test("auditions the current position without moving focus or creating competing speech", async () => {
     const { container } = render(<IPhoneTabReader document={measureDocument} />);
     const audition = screen.getByRole("button", {
       name: "Audition current position",
@@ -157,23 +171,21 @@ describe("IPhoneTabReader", () => {
     fireEvent.click(audition);
 
     await waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent(
+      expect(container.querySelector(".audition-status")).toHaveTextContent(
         "Auditioned current position with 1 pitched string."
       )
     );
-    expect(auditioner.audition).toHaveBeenCalledTimes(1);
     expect(buildPositionSoundEvents).toHaveBeenCalledWith(measureDocument, 0);
     expect(createPositionAuditioner).toHaveBeenCalledTimes(1);
     expect(global.document.activeElement).toBe(audition);
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Measure 1 of 2. Position 1 of 3 in this measure."
     );
-    expect(
-      container.querySelector('.visually-hidden[aria-live="polite"]')
-    ).toBeEmptyDOMElement();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
-  test("reports a rest without creating a full-position announcement", async () => {
+  test("announces a rest because no guitar sound competes with the message", async () => {
     buildPositionSoundEvents.mockReturnValue(soundEvents({ rest: true }));
     auditioner.audition.mockResolvedValue({
       outcome: "rest",
@@ -191,21 +203,24 @@ describe("IPhoneTabReader", () => {
         },
       ],
     };
-    render(<IPhoneTabReader document={restDocument} />);
+    const { container } = render(<IPhoneTabReader document={restDocument} />);
 
     fireEvent.click(
       screen.getByRole("button", { name: "Audition current position" })
     );
 
     await waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent(
+      expect(liveRegion(container)).toHaveTextContent(
         "Current position is a rest. No pitched sound was played."
       )
+    );
+    expect(container.querySelector(".audition-status")).toHaveTextContent(
+      "Current position is a rest. No pitched sound was played."
     );
   });
 
   test("stops the prior audition quietly when moving to another position", async () => {
-    render(<IPhoneTabReader document={measureDocument} />);
+    const { container } = render(<IPhoneTabReader document={measureDocument} />);
 
     fireEvent.click(
       screen.getByRole("button", { name: "Audition current position" })
@@ -215,14 +230,14 @@ describe("IPhoneTabReader", () => {
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
 
     expect(auditioner.stop).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(container.querySelector(".audition-status")).toBeEmptyDOMElement();
     expect(screen.getByText(/Overall position 2 of 6/)).toBeInTheDocument();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
   });
 
   test("renders explicit measure context and moves across the shared barline quietly", () => {
     const { container } = render(<IPhoneTabReader document={measureDocument} />);
     const next = screen.getByRole("button", { name: "Next position" });
-    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     expect(container.querySelector(".position-count")).toHaveTextContent(
       "Measure 1 of 2. Position 1 of 3 in this measure. Overall position 1 of 6."
@@ -235,10 +250,10 @@ describe("IPhoneTabReader", () => {
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Measure 2 of 2. Position 1 of 3 in this measure. Duration, quarter note. High E string, fret 5."
     );
-    expect(liveRegion).toBeEmptyDOMElement();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
 
     fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
-    expect(liveRegion).toHaveTextContent("Measure 2 of 2.");
+    expect(liveRegion(container)).toHaveTextContent("Measure 2 of 2.");
   });
 
   test("jumps between blocks quietly and keeps block controls independent of the description", () => {
@@ -248,7 +263,6 @@ describe("IPhoneTabReader", () => {
       name: "Previous tablature block",
     });
     const nextBlock = screen.getByRole("button", { name: "Next tablature block" });
-    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     expect(previousBlock).toBeDisabled();
     expect(nextBlock).toBeEnabled();
@@ -261,7 +275,7 @@ describe("IPhoneTabReader", () => {
       "Block 2 of 2. Position 1 of 2 in this block."
     );
     expect(screen.getByText(/Overall position 3 of 4/)).toBeInTheDocument();
-    expect(liveRegion).toBeEmptyDOMElement();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
     expect(previousBlock).toBeEnabled();
     expect(nextBlock).toBeDisabled();
   });
