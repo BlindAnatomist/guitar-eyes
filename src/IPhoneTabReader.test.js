@@ -1,7 +1,17 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import IPhoneTabReader from "./IPhoneTabReader";
 import { parseSixStringTabText, parseTabDocumentText } from "./iphoneTabModel";
+import { buildPositionSoundEvents } from "./positionSoundEvents";
+import { createPositionAuditioner } from "./proceduralPluckedString";
 import { buildReaderDocuments } from "./tabImportCoordinator";
+
+jest.mock("./positionSoundEvents", () => ({
+  buildPositionSoundEvents: jest.fn(),
+}));
+
+jest.mock("./proceduralPluckedString", () => ({
+  createPositionAuditioner: jest.fn(),
+}));
 
 const blockLines = [
   "e|--0---3--|",
@@ -30,19 +40,66 @@ const measureDocument = buildReaderDocuments(
   "guitar"
 ).semanticDocument;
 
+function soundEvents({ rest = false } = {}) {
+  return {
+    type: "position-sound-events",
+    isRest: rest,
+    durationMilliseconds: 500,
+    events: rest
+      ? []
+      : [
+          {
+            type: "pitched-string",
+            stringId: "block-1-string-1",
+            midi: 64,
+            frequencyHz: 329.627,
+          },
+        ],
+  };
+}
+
 describe("IPhoneTabReader", () => {
-  test("centers the current-position action between quiet navigation controls", () => {
+  let auditioner;
+
+  beforeEach(() => {
+    auditioner = {
+      audition: jest.fn().mockResolvedValue({
+        outcome: "auditioned",
+        pitchedEventCount: 1,
+        mutedEventCount: 0,
+        activeVoiceCount: 1,
+        contextState: "running",
+      }),
+      stop: jest.fn(),
+      dispose: jest.fn().mockResolvedValue(undefined),
+      state: jest.fn(),
+    };
+    buildPositionSoundEvents.mockReturnValue(soundEvents());
+    createPositionAuditioner.mockReturnValue(auditioner);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("keeps read and audition actions between quiet navigation controls", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
     const read = screen.getByRole("button", { name: "Read current position" });
+    const audition = screen.getByRole("button", {
+      name: "Audition current position",
+    });
     const previous = screen.getByRole("button", { name: "Previous position" });
     const next = screen.getByRole("button", { name: "Next position" });
+    const status = screen.getByRole("status");
     const description = container.querySelector(".position-description");
 
     expect(read).toBeEnabled();
+    expect(audition).toBeEnabled();
     expect(previous).toBeDisabled();
     expect(next).toBeEnabled();
     expect(read).not.toHaveAttribute("aria-describedby");
+    expect(audition).not.toHaveAttribute("aria-describedby");
     expect(previous).not.toHaveAttribute("aria-describedby");
     expect(next).not.toHaveAttribute("aria-describedby");
     expect(
@@ -54,16 +111,22 @@ describe("IPhoneTabReader", () => {
       previous.compareDocumentPosition(read) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      read.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+      read.compareDocumentPosition(audition) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      next.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
+      audition.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      next.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      status.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
 
   test("moves predictably without speaking the musical description automatically", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
-    const liveRegion = container.querySelector('[aria-live="polite"]');
+    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
 
@@ -80,14 +143,84 @@ describe("IPhoneTabReader", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Read current position" }));
 
-    const liveRegion = container.querySelector('[aria-live="polite"]');
+    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
     expect(liveRegion).toHaveTextContent("Position 1 of 2. High E string, open.");
+  });
+
+  test("auditions the current position without moving focus or reader position", async () => {
+    const { container } = render(<IPhoneTabReader document={measureDocument} />);
+    const audition = screen.getByRole("button", {
+      name: "Audition current position",
+    });
+    audition.focus();
+
+    fireEvent.click(audition);
+
+    await waitFor(() => expect(auditioner.audition).toHaveBeenCalledTimes(1));
+    expect(buildPositionSoundEvents).toHaveBeenCalledWith(measureDocument, 0);
+    expect(createPositionAuditioner).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(audition);
+    expect(container.querySelector(".position-description")).toHaveTextContent(
+      "Measure 1 of 2. Position 1 of 3 in this measure."
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Auditioned current position with 1 pitched string."
+    );
+    expect(
+      container.querySelector('.visually-hidden[aria-live="polite"]')
+    ).toBeEmptyDOMElement();
+  });
+
+  test("reports a rest without creating a full-position announcement", async () => {
+    buildPositionSoundEvents.mockReturnValue(soundEvents({ rest: true }));
+    auditioner.audition.mockResolvedValue({
+      outcome: "rest",
+      pitchedEventCount: 0,
+      mutedEventCount: 0,
+      activeVoiceCount: 0,
+      contextState: "uninitialized",
+    });
+    const restDocument = {
+      ...measureDocument,
+      positions: [
+        {
+          ...measureDocument.positions[0],
+          isRest: true,
+        },
+      ],
+    };
+    render(<IPhoneTabReader document={restDocument} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Audition current position" })
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Current position is a rest. No pitched sound was played."
+      )
+    );
+  });
+
+  test("stops the prior audition quietly when moving to another position", async () => {
+    render(<IPhoneTabReader document={measureDocument} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Audition current position" })
+    );
+    await waitFor(() => expect(auditioner.audition).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole("button", { name: "Next position" }));
+
+    expect(auditioner.stop).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(screen.getByText(/Overall position 2 of 6/)).toBeInTheDocument();
   });
 
   test("renders explicit measure context and moves across the shared barline quietly", () => {
     const { container } = render(<IPhoneTabReader document={measureDocument} />);
     const next = screen.getByRole("button", { name: "Next position" });
-    const liveRegion = container.querySelector('[aria-live="polite"]');
+    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     expect(container.querySelector(".position-count")).toHaveTextContent(
       "Measure 1 of 2. Position 1 of 3 in this measure. Overall position 1 of 6."
@@ -113,7 +246,7 @@ describe("IPhoneTabReader", () => {
       name: "Previous tablature block",
     });
     const nextBlock = screen.getByRole("button", { name: "Next tablature block" });
-    const liveRegion = container.querySelector('[aria-live="polite"]');
+    const liveRegion = container.querySelector('.visually-hidden[aria-live="polite"]');
 
     expect(previousBlock).toBeDisabled();
     expect(nextBlock).toBeEnabled();
