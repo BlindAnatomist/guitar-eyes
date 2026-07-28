@@ -28,21 +28,12 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   const [auditionDelaySeconds, setAuditionDelaySeconds] = useState(2);
   const auditionerRef = useRef(null);
   const activeDocumentRef = useRef(document);
-  const pendingAnnouncementTimerRef = useRef(null);
-
-  const clearPendingAnnouncementTimer = () => {
-    if (pendingAnnouncementTimerRef.current !== null) {
-      window.clearTimeout(pendingAnnouncementTimerRef.current);
-      pendingAnnouncementTimerRef.current = null;
-    }
-  };
 
   useEffect(() => {
     activeDocumentRef.current = document;
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
     setAuditionStatus("");
-    clearPendingAnnouncementTimer();
     const priorAuditioner = auditionerRef.current;
     auditionerRef.current = null;
     void priorAuditioner?.dispose();
@@ -50,7 +41,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   useEffect(
     () => () => {
-      clearPendingAnnouncementTimer();
       const priorAuditioner = auditionerRef.current;
       auditionerRef.current = null;
       void priorAuditioner?.dispose();
@@ -86,17 +76,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     setAnnouncement((current) => ({ text: "", sequence: current.sequence }));
   };
 
-  const announceAfterClearanceDelay = (message) => {
-    clearPendingAnnouncementTimer();
-    pendingAnnouncementTimerRef.current = window.setTimeout(() => {
-      setAuditionStatus(message);
-      announce(message);
-      pendingAnnouncementTimerRef.current = null;
-    }, auditionDelaySeconds * 1000);
-  };
-
   const stopAuditionQuietly = () => {
-    clearPendingAnnouncementTimer();
     auditionerRef.current?.stop();
     setAuditionStatus("");
   };
@@ -119,7 +99,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const changeAuditionDelay = (event) => {
     const nextDelay = Number(event.target.value);
-    clearPendingAnnouncementTimer();
     const priorAuditioner = auditionerRef.current;
     auditionerRef.current = null;
     void priorAuditioner?.dispose();
@@ -129,7 +108,6 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const auditionCurrentPosition = async () => {
     clearAnnouncement();
-    clearPendingAnnouncementTimer();
 
     try {
       const soundEvents = buildPositionSoundEvents(document, resolvedCurrentIndex);
@@ -141,9 +119,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       const result = await auditionerRef.current.audition(soundEvents);
 
       if (result.outcome === "rest") {
-        announceAfterClearanceDelay(
-          "Current position is a rest. No pitched sound was played."
-        );
+        const message = "Current position is a rest. No pitched sound was played.";
+        setAuditionStatus(message);
+        announce(message);
         return;
       }
 
@@ -157,14 +135,15 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         parts.push(`${muted} muted ${muted === 1 ? "string" : "strings"}`);
       }
       setAuditionStatus(
-        `Auditioned current position with ${parts.join(" and ")} after a ${auditionDelaySeconds}-second delay.`
+        `Auditioned current position with ${parts.join(" and ")}.`
       );
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "The current position could not be auditioned.";
-      announceAfterClearanceDelay(message);
+      setAuditionStatus(message);
+      announce(message);
     }
   };
 
@@ -231,7 +210,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </select>
         <p id="audition-delay-help">
           Choose enough time for VoiceOver to finish repeating the button name before the
-          sound or rest message begins.
+          guitar sound begins.
         </p>
       </div>
 
