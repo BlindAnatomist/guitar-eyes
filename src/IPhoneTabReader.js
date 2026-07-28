@@ -4,7 +4,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Audible current-position delay-control clarity proof 1D";
+  "Guitar Eyes concise-control speech proof 1E";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
