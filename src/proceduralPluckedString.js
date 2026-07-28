@@ -8,12 +8,10 @@ export class AudiblePlaybackError extends Error {
 
 const MIN_SOUND_SECONDS = 0.08;
 const MAX_SOUND_SECONDS = 2.5;
-const START_DELAY_SECONDS = 0.01;
+const START_DELAY_SECONDS = 0.65;
 
 function defaultAudioContextFactory() {
-  const browserWindow = typeof window === "undefined" ? null : window;
-  const AudioContextConstructor =
-    browserWindow?.AudioContext || browserWindow?.webkitAudioContext;
+  const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
   if (typeof AudioContextConstructor !== "function") {
     throw new AudiblePlaybackError(
       "This browser does not provide the Web Audio API required for the sound proof.",
