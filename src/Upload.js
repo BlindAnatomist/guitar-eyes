@@ -15,11 +15,10 @@ function Upload({ onFileUpload, disabled = false }) {
       <input
         id="file-upload"
         type="file"
-        aria-describedby="file-upload-help"
         disabled={disabled}
         onChange={handleFileChange}
       />
-      <p id="file-upload-help">
+      <p>
         Guitar Eyes checks the selected file after selection and gives an explicit message
         when its format is unsupported.
       </p>
