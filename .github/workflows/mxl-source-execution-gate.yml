@@ -1,0 +1,137 @@
+name: MXL source execution gate
+
+on:
+  push:
+    branches:
+      - work/mxl-execution-gate
+    paths:
+      - .github/workflows/mxl-source-execution-gate.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: mxl-source-execution-gate
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_SHA: 3ab7c06c3b17fbe1a1d9e11f65fd5f53031f952a
+      STATUS_CONTEXT: guitar-eyes/mxl-source-gate
+    steps:
+      - name: Mark gate pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Running exact-source MXL test and build gate',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact implementation source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact source and clean authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor d6f9a0862c32bc3fa0b14834e027fefb1276bd8d HEAD
+          test -z "$(git status --short)"
+          mkdir -p /tmp/mxl-gate-evidence
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "trigger_sha=${GITHUB_SHA}"
+            echo "runner=${RUNNER_OS}"
+          } > /tmp/mxl-gate-evidence/summary.txt
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          node --version | tee /tmp/mxl-gate-evidence/node-version.txt
+          npm --version | tee /tmp/mxl-gate-evidence/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/mxl-gate-evidence/npm-ci.log
+
+      - name: Run complete inherited and new test suite
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/mxl-gate-evidence/test.log
+
+      - name: Build production application
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee /tmp/mxl-gate-evidence/build.log
+
+      - name: Inspect compiled artifact and repository cleanliness
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          grep -Fq 'compressed MusicXML tablature' "$main_js"
+          grep -Fq 'Read current position' "$main_js"
+          grep -Fq 'Previous position' "$main_js"
+          grep -Fq 'Next position' "$main_js"
+          grep -Fq 'iPhone tablature reader' "$main_js"
+          grep -Fq 'Desktop tablature reader' "$main_js"
+          grep -Fq 'META-INF/container.xml' "$main_js"
+          git diff --exit-code
+          git diff --cached --exit-code
+          {
+            echo "main_js=$main_js"
+            sha256sum build/index.html "$main_js"
+            echo "compiled_contracts=passed"
+            echo "tracked_repository_clean=passed"
+          } | tee /tmp/mxl-gate-evidence/artifact-inspection.txt
+
+      - name: Upload short-lived verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mxl-source-execution-gate-evidence
+          path: /tmp/mxl-gate-evidence
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Publish final gate status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact-source MXL tests, build, and artifact checks passed'
+                : 'Exact-source MXL execution gate did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
