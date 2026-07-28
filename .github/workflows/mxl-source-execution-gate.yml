@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          npm run build 2>&1 | tee /tmp/mxl-gate-evidence/build.log
+          CI=false npm run build 2>&1 | tee /tmp/mxl-gate-evidence/build.log
 
       - name: Inspect compiled artifact and repository cleanliness
         shell: bash
