@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 
 describe("checkpoint build identity", () => {
-  test("places the unique audible proof identity before the React root", () => {
+  test("places the unique concise-control proof identity before the React root", () => {
     const html = fs.readFileSync(
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
     const title =
-      "<title>Test build Audible current-position delay-control clarity proof 1D</title>";
+      "<title>Test build Guitar Eyes concise-control speech proof 1E</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Audible current-position delay-control clarity proof 1D.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Eyes concise-control speech proof 1E.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
