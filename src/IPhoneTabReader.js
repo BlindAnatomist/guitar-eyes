@@ -3,6 +3,9 @@ import { describePlayablePosition } from "./positionDescription";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
+export const AUDIBLE_PROOF_LABEL =
+  "Audible current-position procedural plucked-string proof 1A";
+
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
@@ -123,6 +126,8 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       <h2 id="iphone-reader-heading" ref={headingRef} tabIndex="-1">
         iPhone tablature reader
       </h2>
+
+      <p className="audible-proof-label">Test build: {AUDIBLE_PROOF_LABEL}.</p>
 
       <p>
         This reader presents synchronized musical positions without placing every dash,
