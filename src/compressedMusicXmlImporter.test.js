@@ -1,11 +1,14 @@
 import fs from "fs";
 import path from "path";
+import { TextDecoder, TextEncoder } from "util";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 import {
   CompressedMusicXmlImportError,
   extractCompressedMusicXml,
 } from "./compressedMusicXmlImporter";
+
+Object.assign(global, { TextDecoder, TextEncoder });
 
 const originalMatchMedia = window.matchMedia;
 
