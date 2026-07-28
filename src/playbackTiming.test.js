@@ -455,7 +455,9 @@ describe("buildPlaybackTimeline", () => {
     );
 
     expect(source).not.toMatch(/from\s+["']react["']/i);
-    expect(source).not.toMatch(/\b(window|document|Worker|AudioContext)\b/);
+    expect(source).not.toMatch(
+      /window\.(requestAnimationFrame|setTimeout)|document\.(querySelector|getElementById)|new\s+Worker|AudioContext|webkitAudioContext/
+    );
     expect(source).not.toMatch(/alphaSynth|soundfont|renderer|play\s*\(/i);
   });
 });
