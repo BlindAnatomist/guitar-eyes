@@ -29,7 +29,7 @@ function clamp(value, minimum, maximum) {
 function safeDisconnect(node) {
   try {
     node?.disconnect?.();
-  } catch (_error) {
+  } catch {
     // A node may already be disconnected after its source ends.
   }
 }
@@ -154,7 +154,7 @@ export function createPositionAuditioner({
     activeVoices.forEach((voice) => {
       try {
         voice.source.stop(0);
-      } catch (_error) {
+      } catch {
         // A source can be stopped only once.
       }
       releaseVoice(voice);
