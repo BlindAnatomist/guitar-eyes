@@ -199,7 +199,7 @@ describe("createPositionAuditioner", () => {
     expect(factory).not.toHaveBeenCalled();
   });
 
-  test("resumes Web Audio inside audition and schedules a chord at one onset", async () => {
+  test("resumes Web Audio and schedules every chord voice after one shared clearance pause", async () => {
     const context = new FakeAudioContext();
     const auditioner = createPositionAuditioner({
       audioContextFactory: () => context,
@@ -214,9 +214,9 @@ describe("createPositionAuditioner", () => {
     expect(context.buffers).toHaveLength(3);
     expect(context.compressors).toHaveLength(1);
     expect(context.sources.map((source) => source.startCalls[0])).toEqual([
-      10.01,
-      10.01,
-      10.01,
+      10.65,
+      10.65,
+      10.65,
     ]);
     expect(result).toMatchObject({
       outcome: "auditioned",
