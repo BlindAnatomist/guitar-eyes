@@ -11,8 +11,9 @@ const MAX_SOUND_SECONDS = 2.5;
 const START_DELAY_SECONDS = 0.01;
 
 function defaultAudioContextFactory() {
+  const browserWindow = typeof window === "undefined" ? null : window;
   const AudioContextConstructor =
-    globalThis.AudioContext || globalThis.webkitAudioContext;
+    browserWindow?.AudioContext || browserWindow?.webkitAudioContext;
   if (typeof AudioContextConstructor !== "function") {
     throw new AudiblePlaybackError(
       "This browser does not provide the Web Audio API required for the sound proof.",
