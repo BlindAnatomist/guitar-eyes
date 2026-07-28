@@ -156,15 +156,17 @@ describe("IPhoneTabReader", () => {
 
     fireEvent.click(audition);
 
-    await waitFor(() => expect(auditioner.audition).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Auditioned current position with 1 pitched string."
+      )
+    );
+    expect(auditioner.audition).toHaveBeenCalledTimes(1);
     expect(buildPositionSoundEvents).toHaveBeenCalledWith(measureDocument, 0);
     expect(createPositionAuditioner).toHaveBeenCalledTimes(1);
     expect(global.document.activeElement).toBe(audition);
     expect(container.querySelector(".position-description")).toHaveTextContent(
       "Measure 1 of 2. Position 1 of 3 in this measure."
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Auditioned current position with 1 pitched string."
     );
     expect(
       container.querySelector('.visually-hidden[aria-live="polite"]')
