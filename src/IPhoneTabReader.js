@@ -4,7 +4,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Audible current-position VoiceOver-clearance proof 1C";
+  "Audible current-position delay-control clarity proof 1D";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
@@ -196,19 +196,18 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
       )}
 
       <div className="audition-delay-control">
-        <label htmlFor="audition-delay">Sound delay after activation</label>
+        <label htmlFor="audition-delay">Sound delay</label>
         <select
           id="audition-delay"
           value={auditionDelaySeconds}
           onChange={changeAuditionDelay}
-          aria-describedby="audition-delay-help"
         >
           <option value="1">1 second</option>
           <option value="2">2 seconds</option>
           <option value="3">3 seconds</option>
           <option value="4">4 seconds</option>
         </select>
-        <p id="audition-delay-help">
+        <p>
           Choose enough time for VoiceOver to finish repeating the button name before the
           guitar sound begins.
         </p>
