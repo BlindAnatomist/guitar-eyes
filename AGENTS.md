@@ -10,7 +10,8 @@ These instructions govern every human or agent working in `BlindAnatomist/guitar
 - Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature work there.
 - Preserve `work/convergence-from-accepted-semantic-core` as the accepted convergence record.
 - The completed tablature-intake record is `work/tablature-intake-expansion` at `aa302dcee880df4a0947d3e374171554e4855022`.
-- The current branch is `work/playback-timing-foundation`.
+- The completed playback-timing record is `work/playback-timing-foundation` at `b0f6ad7c801b26b8f5e26407ac835a17668cbbdd`.
+- The current branch is `work/audible-playback-output-foundation`, created from that completed timing record.
 - Documentation-only closure commits do not replace an accepted application or engine source.
 
 ## Accepted source identities
@@ -52,7 +53,8 @@ Before changing implementation, accessibility, repository administration, deploy
 24. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
 25. `docs/playback-timing-foundation-checkpoint-1-plan-2026-07-28.md`;
 26. `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`;
-27. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+27. `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`;
+28. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Do not rely on chat memory alone or rediscover a procedure already preserved in repository evidence.
 
@@ -65,7 +67,7 @@ Every future change must preserve:
 - W, H, Q, E, and S duration mapping and speech;
 - aligned explicit measures;
 - measure and position-within-measure speech;
-- Previous position, Read current position, Next position in that order;
+- Previous position, Read current position, Next position in that relative order;
 - quiet Previous and Next movement;
 - quiet tablature-block movement;
 - Read current position as the only action that announces full playing instructions in a semantic reader;
@@ -82,11 +84,11 @@ Every future change must preserve:
 
 The semantic tablature document is the sole musical authority for source format, instrument, blocks, strings, positions, durations, measures, chords, rests, techniques, warnings, and preserved unsupported material.
 
-Desktop, iPhone, timing, teacher mode, and future playback may present or consume that document differently, but none may create a second musical interpretation.
+Desktop, iPhone, timing, teacher mode, and audible playback may present or consume that document differently, but none may create a second musical interpretation.
 
 The accepted playback timeline is the sole deterministic temporal projection of the semantic document. Teacher mode and audible playback must consume that timeline rather than recalculate timing independently.
 
-A third-party parser may decode a source format, but its model must not escape the importer boundary. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models are outside the architecture unless a later owner-authorized checkpoint explicitly changes that boundary.
+A third-party parser may decode a source format, but its model must not escape the importer boundary. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models remain outside the architecture.
 
 ## Accepted tablature intake
 
@@ -114,33 +116,56 @@ Result record:
 
 - `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`.
 
-The accepted pure timing engine:
+The accepted timing engine consumes only the semantic document, preserves source order, derives exact quarter-note fractions, treats chords as one onset and rests as timed positions, calculates position and measure offsets, rejects missing duration, and imports no browser or audio dependency.
 
-1. consumes only the semantic tablature document;
-2. preserves source position order;
-3. accepts integer tempo from 20 through 300 BPM;
-4. uses an explicit checkpoint default of 120 BPM;
-5. preserves or reconstructs exact reduced quarter-note fractions;
-6. treats chords as one onset and rests as timed positions;
-7. calculates position, measure, and document offsets;
-8. exposes quarter-note fractions, quarter-note units, and milliseconds;
-9. reports source-order playback without repeat expansion;
-10. rejects missing or unsafe duration rather than guessing;
-11. does not mutate the semantic document;
-12. imports no React, browser, worker, renderer, player, or audio dependency.
+Verification run `30383944688` passed the complete inherited and new suite, production build, and source/asset boundary inspection. Fork `main` was restored exactly afterward.
 
-Verification run `30383944688` passed exact source checkout, the complete inherited and new automated suite, optimized production build, and source/asset boundary inspection. Fork `main` was restored exactly afterward.
+## Current authorized checkpoint: Audible Playback Output Foundation 1
 
-## Current decision boundary
+Authoritative plan:
 
-No new implementation checkpoint is authorized after Timing Foundation 1 until the owner chooses and approves a separate plan.
+- `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`.
 
-The next plan may address one of two routes:
+The checkpoint may:
 
-1. an audible playback-output foundation that consumes the accepted timeline; or
-2. a non-audio teacher-mode foundation that consumes the accepted semantic document and timeline.
+1. derive current-position pitch events from semantic string identity and the accepted playback timeline;
+2. use explicit tuning MIDI, explicit tuning plus octave, or an exact accepted standard guitar or bass tuning profile;
+3. reject custom tuning without octave evidence rather than guess;
+4. create a project-owned procedural plucked-string sound through native Web Audio;
+5. create or resume the audio context only during explicit owner activation;
+6. audition one current semantic position;
+7. schedule chord strings at one onset;
+8. preserve rests as silent timed outcomes;
+9. render explicit muted notes as short non-pitched events;
+10. add one stable `Audition current position` action between Read current and Next;
+11. preserve reader position and VoiceOver focus;
+12. stop prior audition nodes before a repeated audition or navigation;
+13. run the complete inherited and new suite and production build once after source review;
+14. publish one exact hosted proof only after the source gate passes;
+15. require bounded real-iPhone audibility and focus acceptance before closing.
 
-Do not begin either route, playback controls, automatic navigation, focus behavior, looping, bookmarks, practice scoring, repeat expansion, tempo extraction, tempo maps, count-in, swing, or additional format work without a new bounded checkpoint.
+The checkpoint must not add:
+
+- full-document playback;
+- Play, Pause, Stop, seeking, scrubber, or progress controls;
+- automatic reader progression;
+- focus or VoiceOver movement during sound;
+- looping;
+- metronome or count-in;
+- tempo controls or source tempo extraction;
+- repeat expansion;
+- technique-specific synthesis;
+- sampled instruments;
+- alphaSynth;
+- soundfonts;
+- AudioWorklets;
+- renderer workers;
+- third-party playback libraries;
+- teacher mode;
+- practice scoring;
+- bookmarks;
+- new file formats;
+- a second musical model.
 
 ## Deferred format work
 
@@ -173,8 +198,10 @@ Inspect a failed run before acting. Classify only the step that actually ran. Pr
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
+Audio must begin only from explicit owner activation. The audition action must retain a stable name, must not move focus, and must not alter the reader's current position. Status speech must remain separate from the full-position announcement channel.
+
 Use the committed-target focus, native-picker return, accessible build identity, speech-separation, and ordinary reading-order solutions already recorded in the known-problems ledgers.
 
-Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable hosted user-facing candidate requires real-iPhone judgment.
+Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone audibility and VoiceOver judgment.
 
 Jason Washburn's desktop testing remains optional unless he agrees to participate. His absence is not an active blocker.
