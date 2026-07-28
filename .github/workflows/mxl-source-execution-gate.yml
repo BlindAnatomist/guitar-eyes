@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 3ab7c06c3b17fbe1a1d9e11f65fd5f53031f952a
+      SOURCE_SHA: e89caec63390d638b7b2d63c5e74689b2694223e
       STATUS_CONTEXT: guitar-eyes/mxl-source-gate
     steps:
       - name: Mark gate pending
