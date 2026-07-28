@@ -39,15 +39,12 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
       <h2 id="guitar-pro-track-selector-heading" ref={headingRef} tabIndex="-1">
         Choose a Guitar Pro track
       </h2>
-      <p id="guitar-pro-track-selector-instructions">
+      <p>
         This file contains {supportedItems.length} supported tablature {supportedItems.length === 1 ? "track" : "tracks"}. No track is selected. Choose one explicitly before loading it. The separate Guitar or Bass control does not filter Guitar Pro tracks.
       </p>
 
       <form onSubmit={handleSubmit}>
-        <fieldset
-          disabled={disabled}
-          aria-describedby="guitar-pro-track-selector-instructions"
-        >
+        <fieldset disabled={disabled}>
           <legend>Available tablature tracks, {supportedItems.length} choices</legend>
           <div className="guitar-pro-track-options">
             {supportedItems.map((item) => (
