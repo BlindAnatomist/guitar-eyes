@@ -1,4 +1,4 @@
-name: Publish compressed MusicXML checkpoint 1
+name: Publish MXL audition convergence proof 1F
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: guitar-eyes-mxl-preview
+  group: guitar-eyes-mxl-audition-preview
   cancel-in-progress: true
 
 jobs:
@@ -25,8 +25,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     env:
-      SOURCE_SHA: b840dc8ba63948ed75d1e982352002f96c694486
-      STATUS_CONTEXT: guitar-eyes/mxl-preview-publish
+      SOURCE_SHA: 7c4ac3d20fbb1d1abc547d30039599804bfdbd7e
+      STATUS_CONTEXT: guitar-eyes/mxl-audition-preview-publish
     steps:
       - name: Mark publication pending
         uses: actions/github-script@v7
@@ -38,7 +38,7 @@ jobs:
               sha: context.sha,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Publishing compressed MusicXML checkpoint 1',
+              description: 'Publishing MXL audition convergence proof 1F',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
@@ -54,14 +54,15 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git merge-base --is-ancestor d6f9a0862c32bc3fa0b14834e027fefb1276bd8d HEAD
+          git merge-base --is-ancestor 165e2ed5792811ebac9bf0488be93810bfa6246c HEAD
           test -z "$(git status --short)"
-          mkdir -p /tmp/mxl-publication-evidence
+          mkdir -p /tmp/mxl-audition-publication-evidence
           {
             echo "source_sha=$(git rev-parse HEAD)"
             echo "trigger_sha=${GITHUB_SHA}"
             echo "run_id=${GITHUB_RUN_ID}"
-          } > /tmp/mxl-publication-evidence/summary.txt
+            echo "accepted_audition_ancestor=165e2ed5792811ebac9bf0488be93810bfa6246c"
+          } > /tmp/mxl-audition-publication-evidence/summary.txt
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
@@ -77,7 +78,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          PUBLIC_URL=/guitar-eyes CI=false npm run build 2>&1 | tee /tmp/mxl-publication-evidence/build.log
+          PUBLIC_URL=/guitar-eyes CI=false npm run build 2>&1 | tee /tmp/mxl-audition-publication-evidence/build.log
 
       - name: Verify Pages build identity and contracts
         shell: bash
@@ -85,21 +86,27 @@ jobs:
           set -euo pipefail
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
-          grep -Fq '<title>Test build Compressed MusicXML checkpoint 1</title>' build/index.html
-          grep -Fq 'Test build: Compressed MusicXML checkpoint 1.' build/index.html
+          grep -Fq '<title>Test build Guitar Eyes compressed MusicXML audition convergence proof 1F</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes compressed MusicXML audition convergence proof 1F.' build/index.html
           grep -Fq '/guitar-eyes/static/' build/index.html
           grep -Fq 'compressed MusicXML tablature' "$main_js"
           grep -Fq 'META-INF/container.xml' "$main_js"
-          grep -Fq 'Read current position' "$main_js"
           grep -Fq 'Previous position' "$main_js"
+          grep -Fq 'Read current position' "$main_js"
           grep -Fq 'Next position' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Position navigation' "$main_js"
+          grep -Fq 'Position audio' "$main_js"
+          grep -Fq 'Guitar Eyes compressed MusicXML audition convergence proof 1F' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
           grep -Fq 'iPhone tablature reader' "$main_js"
           grep -Fq 'Desktop tablature reader' "$main_js"
           {
             echo "main_js=$main_js"
             sha256sum build/index.html "$main_js"
-            echo "pages_build_contracts=passed"
-          } | tee /tmp/mxl-publication-evidence/build-inspection.txt
+            echo "pages_mxl_contract=passed"
+            echo "pages_audition_contract=passed"
+          } | tee /tmp/mxl-audition-publication-evidence/build-inspection.txt
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -129,7 +136,7 @@ jobs:
           from html.parser import HTMLParser
 
           page_url = os.environ["PAGE_URL"].rstrip("/") + "/"
-          cache_url = page_url + "?checkpoint=mxl-1&run=" + os.environ["GITHUB_RUN_ID"]
+          cache_url = page_url + "?checkpoint=mxl-audition-1f&run=" + os.environ["GITHUB_RUN_ID"]
 
           html_bytes = None
           last_error = None
@@ -152,8 +159,8 @@ jobs:
 
           html = html_bytes.decode("utf-8")
           required_html = [
-              "<title>Test build Compressed MusicXML checkpoint 1</title>",
-              "Test build: Compressed MusicXML checkpoint 1.",
+              "<title>Test build Guitar Eyes compressed MusicXML audition convergence proof 1F</title>",
+              "Test build: Guitar Eyes compressed MusicXML audition convergence proof 1F.",
           ]
           for value in required_html:
               if value not in html:
@@ -192,9 +199,14 @@ jobs:
           required_bundle = [
               "compressed MusicXML tablature",
               "META-INF/container.xml",
-              "Read current position",
               "Previous position",
+              "Read current position",
               "Next position",
+              "Audition current position",
+              "Position navigation",
+              "Position audio",
+              "Guitar Eyes compressed MusicXML audition convergence proof 1F",
+              "Current position is a rest. No pitched sound was played.",
               "iPhone tablature reader",
               "Desktop tablature reader",
           ]
@@ -202,7 +214,7 @@ jobs:
               if value not in main_text:
                   raise RuntimeError(f"Hosted primary JavaScript is missing {value!r}")
 
-          evidence_path = "/tmp/mxl-publication-evidence/hosted-readback.txt"
+          evidence_path = "/tmp/mxl-audition-publication-evidence/hosted-readback.txt"
           with open(evidence_path, "w", encoding="utf-8") as evidence:
               evidence.write(f"page_url={page_url}\n")
               evidence.write("html_status=200\n")
@@ -213,7 +225,8 @@ jobs:
               )
               for asset in assets:
                   evidence.write(f"asset_200={asset}\n")
-              evidence.write("hosted_contracts=passed\n")
+              evidence.write("hosted_mxl_contract=passed\n")
+              evidence.write("hosted_audition_contract=passed\n")
           print(open(evidence_path, encoding="utf-8").read())
           PY
 
@@ -221,8 +234,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mxl-preview-publication-evidence
-          path: /tmp/mxl-publication-evidence
+          name: mxl-audition-preview-publication-evidence
+          path: /tmp/mxl-audition-publication-evidence
           if-no-files-found: error
           retention-days: 1
 
@@ -241,7 +254,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Compressed MusicXML preview deployed and read back'
-                : 'Compressed MusicXML preview publication did not pass',
+                ? 'MXL audition convergence preview deployed and read back'
+                : 'MXL audition convergence publication did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
