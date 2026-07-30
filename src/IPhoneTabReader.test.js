@@ -88,7 +88,7 @@ describe("IPhoneTabReader", () => {
     jest.clearAllMocks();
   });
 
-  test("keeps read and audition actions between quiet navigation controls", () => {
+  test("keeps quiet navigation together and places position audio afterward", () => {
     const { container } = render(<IPhoneTabReader document={document} />);
 
     const read = screen.getByRole("button", { name: "Read current position" });
@@ -114,18 +114,20 @@ describe("IPhoneTabReader", () => {
       screen.queryByRole("button", { name: "Next tablature block" })
     ).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Current position" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Position navigation" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Position audio" })).toBeInTheDocument();
     expect(description).toHaveTextContent("Position 1 of 2. High E string, open.");
     expect(
       previous.compareDocumentPosition(read) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      read.compareDocumentPosition(audition) & Node.DOCUMENT_POSITION_FOLLOWING
+      read.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      audition.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING
+      next.compareDocumentPosition(audition) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
-      next.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING
+      audition.compareDocumentPosition(status) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
     expect(
       status.compareDocumentPosition(description) & Node.DOCUMENT_POSITION_FOLLOWING
@@ -176,6 +178,9 @@ describe("IPhoneTabReader", () => {
       )
     );
     expect(buildPositionSoundEvents).toHaveBeenCalledWith(measureDocument, 0);
+    expect(createPositionAuditioner).toHaveBeenCalledWith({
+      startDelaySeconds: 2,
+    });
     expect(createPositionAuditioner).toHaveBeenCalledTimes(1);
     expect(global.document.activeElement).toBe(audition);
     expect(container.querySelector(".position-description")).toHaveTextContent(

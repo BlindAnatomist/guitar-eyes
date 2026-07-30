@@ -86,14 +86,15 @@ describe("detectTabFileFormat", () => {
     expect(shouldReadTabFileAsText(detectTabFileFormat("score.xml"))).toBe(true);
   });
 
-  test("keeps compressed MusicXML recognized but unsupported", () => {
+  test("recognizes compressed MusicXML as a supported binary container", () => {
     const format = detectTabFileFormat("score.mxl");
     expect(format).toMatchObject({
       id: "compressed-musicxml",
-      support: "planned",
+      support: "supported",
       isText: false,
     });
-    expect(unsupportedTabFormatMessage(format)).toMatch(/does not yet import \.mxl/i);
+    expect(shouldReadTabFileAsText(format)).toBe(false);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/valid \.mxl ZIP container/i);
   });
 
   test("recognizes .gp only as an internal checkpoint proof", () => {

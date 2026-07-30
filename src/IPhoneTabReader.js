@@ -4,7 +4,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Guitar Eyes concise-control speech proof 1E";
+  "Guitar Eyes compressed MusicXML audition convergence proof 1F";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
@@ -213,7 +213,11 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </p>
       </div>
 
-      <div className="position-controls">
+      <div
+        className="position-controls"
+        role="group"
+        aria-label="Position navigation"
+      >
         <button
           type="button"
           onClick={() => moveTo(resolvedCurrentIndex - 1)}
@@ -224,15 +228,22 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         <button type="button" onClick={() => announce(currentDescription)}>
           Read current position
         </button>
-        <button type="button" onClick={auditionCurrentPosition}>
-          Audition current position
-        </button>
         <button
           type="button"
           onClick={() => moveTo(resolvedCurrentIndex + 1)}
           disabled={isLastPosition}
         >
           Next position
+        </button>
+      </div>
+
+      <div
+        className="audition-controls"
+        role="group"
+        aria-label="Position audio"
+      >
+        <button type="button" onClick={auditionCurrentPosition}>
+          Audition current position
         </button>
       </div>
 
