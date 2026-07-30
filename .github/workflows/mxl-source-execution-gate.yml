@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 724bf141b2bf45733b6c20446c6e2a7b3aa1d1a8
+      SOURCE_SHA: 7c4ac3d20fbb1d1abc547d30039599804bfdbd7e
       STATUS_CONTEXT: guitar-eyes/mxl-audition-convergence-gate
     steps:
       - name: Mark gate pending
@@ -92,7 +92,8 @@ jobs:
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
           test -f build/index.html
-          grep -Fq '<title>Test build Guitar Eyes concise-control speech proof 1E</title>' build/index.html
+          grep -Fq '<title>Test build Guitar Eyes compressed MusicXML audition convergence proof 1F</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes compressed MusicXML audition convergence proof 1F.' build/index.html
           grep -Fq 'compressed MusicXML tablature' "$main_js"
           grep -Fq 'META-INF/container.xml' "$main_js"
           grep -Fq 'Previous position' "$main_js"
