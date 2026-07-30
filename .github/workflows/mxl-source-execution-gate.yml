@@ -1,4 +1,4 @@
-name: MXL source execution gate
+name: MXL audition convergence gate
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: mxl-source-execution-gate
+  group: mxl-audition-convergence-gate
   cancel-in-progress: true
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: b840dc8ba63948ed75d1e982352002f96c694486
-      STATUS_CONTEXT: guitar-eyes/mxl-source-gate
+      SOURCE_SHA: 724bf141b2bf45733b6c20446c6e2a7b3aa1d1a8
+      STATUS_CONTEXT: guitar-eyes/mxl-audition-convergence-gate
     steps:
       - name: Mark gate pending
         uses: actions/github-script@v7
@@ -33,30 +33,31 @@ jobs:
               sha: context.sha,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Running exact-source MXL test and build gate',
+              description: 'Running exact MXL and audition convergence gate',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
-      - name: Check out exact implementation source
+      - name: Check out exact convergence source
         uses: actions/checkout@v4
         with:
           ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify exact source and clean authority
+      - name: Verify exact source and accepted audition ancestry
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git merge-base --is-ancestor d6f9a0862c32bc3fa0b14834e027fefb1276bd8d HEAD
+          git merge-base --is-ancestor 165e2ed5792811ebac9bf0488be93810bfa6246c HEAD
           test -z "$(git status --short)"
-          mkdir -p /tmp/mxl-gate-evidence
+          mkdir -p /tmp/mxl-convergence-evidence
           {
             echo "source_sha=$(git rev-parse HEAD)"
             echo "trigger_sha=${GITHUB_SHA}"
+            echo "accepted_audition_ancestor=165e2ed5792811ebac9bf0488be93810bfa6246c"
             echo "runner=${RUNNER_OS}"
-          } > /tmp/mxl-gate-evidence/summary.txt
+          } > /tmp/mxl-convergence-evidence/summary.txt
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
@@ -68,53 +69,58 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node --version | tee /tmp/mxl-gate-evidence/node-version.txt
-          npm --version | tee /tmp/mxl-gate-evidence/npm-version.txt
-          npm ci --no-audit --no-fund 2>&1 | tee /tmp/mxl-gate-evidence/npm-ci.log
+          node --version | tee /tmp/mxl-convergence-evidence/node-version.txt
+          npm --version | tee /tmp/mxl-convergence-evidence/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/mxl-convergence-evidence/npm-ci.log
 
-      - name: Run complete inherited and new test suite
+      - name: Run complete inherited and convergence test suite
         shell: bash
         run: |
           set -o pipefail
-          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/mxl-gate-evidence/test.log
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/mxl-convergence-evidence/test.log
 
       - name: Build production application
         shell: bash
         run: |
           set -o pipefail
-          CI=false npm run build 2>&1 | tee /tmp/mxl-gate-evidence/build.log
+          CI=false npm run build 2>&1 | tee /tmp/mxl-convergence-evidence/build.log
 
-      - name: Inspect compiled artifact and repository cleanliness
+      - name: Inspect compiled convergence artifact and repository cleanliness
         shell: bash
         run: |
           set -euo pipefail
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
           test -f build/index.html
-          grep -Fq '<title>Test build Compressed MusicXML checkpoint 1</title>' build/index.html
-          grep -Fq 'Test build: Compressed MusicXML checkpoint 1.' build/index.html
+          grep -Fq '<title>Test build Guitar Eyes concise-control speech proof 1E</title>' build/index.html
           grep -Fq 'compressed MusicXML tablature' "$main_js"
-          grep -Fq 'Read current position' "$main_js"
+          grep -Fq 'META-INF/container.xml' "$main_js"
           grep -Fq 'Previous position' "$main_js"
+          grep -Fq 'Read current position' "$main_js"
           grep -Fq 'Next position' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Position navigation' "$main_js"
+          grep -Fq 'Position audio' "$main_js"
+          grep -Fq 'Guitar Eyes compressed MusicXML audition convergence proof 1F' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
           grep -Fq 'iPhone tablature reader' "$main_js"
           grep -Fq 'Desktop tablature reader' "$main_js"
-          grep -Fq 'META-INF/container.xml' "$main_js"
           git diff --exit-code
           git diff --cached --exit-code
           {
             echo "main_js=$main_js"
             sha256sum build/index.html "$main_js"
-            echo "compiled_contracts=passed"
+            echo "compiled_mxl_contract=passed"
+            echo "compiled_audition_contract=passed"
             echo "tracked_repository_clean=passed"
-          } | tee /tmp/mxl-gate-evidence/artifact-inspection.txt
+          } | tee /tmp/mxl-convergence-evidence/artifact-inspection.txt
 
       - name: Upload short-lived verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mxl-source-execution-gate-evidence
-          path: /tmp/mxl-gate-evidence
+          name: mxl-audition-convergence-gate-evidence
+          path: /tmp/mxl-convergence-evidence
           if-no-files-found: error
           retention-days: 1
 
@@ -133,7 +139,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Exact-source MXL tests, build, and artifact checks passed'
-                : 'Exact-source MXL execution gate did not pass',
+                ? 'Exact MXL and audition convergence gate passed'
+                : 'Exact MXL and audition convergence gate did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
