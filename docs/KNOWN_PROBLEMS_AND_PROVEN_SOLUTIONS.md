@@ -4,7 +4,7 @@ Repository: `BlindAnatomist/guitar-eyes`
 
 Status: active repository memory
 
-Last reconciled: July 26, 2026
+Last reconciled: July 31, 2026
 
 ## Purpose
 
@@ -229,17 +229,26 @@ State: `local-proven`
 
 ### Proven solution
 
-Use this exact order in both interfaces:
+Use this exact navigation order in both interfaces:
 
 1. Previous position.
 2. Read current position.
 3. Next position.
 
+Position audio follows that navigation group. The accepted order is therefore:
+
+1. Previous position.
+2. Read current position.
+3. Next position.
+4. Audition current position.
+
+Future measure or bar playback belongs after Audition rather than inside the three-control navigation sequence.
+
 Initial upload focus belongs on the stable reader heading, not the initially disabled Previous button.
 
 ### Acceptance result
 
-The owner explicitly accepted this order during Measure Recognition Checkpoint 1.
+The owner explicitly accepted the three-control navigation order during Measure Recognition Checkpoint 1 and accepted the separated Audition placement during compressed-MusicXML audition convergence testing.
 
 ---
 
@@ -332,27 +341,77 @@ Passing tests establish only the contract they contain. Source ancestry and pres
 
 ## GE-012 — Desktop convergence can overwrite the accepted iPhone engine
 
-State: `candidate`
+State: `local-proven`
 
 ### Risk
 
 Replacing the application parser or semantic model in order to improve desktop presentation can erase accepted iPhone behavior and create two disagreeing interpretations of the music.
 
-### Candidate solution on the recovery branch
+### Proven solution
 
-1. Keep `iphoneTabModel.js`, `asciiRhythm.js`, `measureModel.js`, `tabImportCoordinator.js`, `positionDescription.js`, and `IPhoneTabReader.js` unchanged from the accepted foundation.
-2. Feed the same accepted semantic document to both interfaces.
+1. Keep the shared semantic parser and document as the sole musical authority.
+2. Feed the same semantic document to both interfaces.
 3. Present desktop strings as rows and synchronized positions as columns in a standard table.
 4. Preserve the original spatial source rows in a collapsed disclosure.
 5. Keep quiet movement and dedicated Read current speech in both interfaces.
 6. Keep the original grid only as a clearly labeled compatibility fallback when semantic interpretation is unsafe.
 7. Do not intercept VoiceOver Control+Option commands in either desktop path.
 8. Keep raw fallback cells out of the ordinary Tab sequence.
-9. Add convergence tests without replacing inherited tests.
+9. Preserve inherited iPhone tests and add convergence coverage rather than replacing them.
 
-### Acceptance boundary
+### Acceptance result
 
-Static JSX parsing has passed for the changed source and tests. Locked dependency installation, the complete inherited and new test suite, production build, hosted artifact inspection, and bounded real-iPhone regression remain required before this becomes `local-proven`.
+The recovered convergence line passed automated, production-build, hosted-artifact, and real-iPhone acceptance. Later ASCII, MusicXML, Guitar Pro, compressed-MusicXML, timing, and audition work continued from that accepted lineage without replacing the semantic authority.
+
+---
+
+## GE-013 — First Web Audio initialization replays stale heading focus
+
+State: `local-proven`
+
+### Symptoms
+
+On a real iPhone with Safari and VoiceOver, the first activation of `Audition current position` jumped focus to the page banner or reader heading. After the owner manually re-established focus, later auditions retained focus correctly, including after moving between positions.
+
+### Cause
+
+The first explicit audition creates or resumes Web Audio. During that browser boundary, Safari can expose a focus transition to a stale heading target even though the owner activated the Audition button. The defect is first-use-specific and must not be treated as a general need to trap focus.
+
+### Failed-do-not-repeat approaches
+
+1. Do not add repeated `focus()` calls or a timer chain that can trap VoiceOver.
+2. Do not restore focus after every audition.
+3. Do not restore focus when the owner intentionally moves to another control.
+4. Do not rely only on React `onBlur` or synthetic JSDOM focus behavior to prove the Safari mechanism.
+5. Do not broaden the native-picker focus-recovery request into unrelated audio initialization.
+6. Do not call the defect repaired without a hosted real-iPhone first-activation test.
+
+### Proven solution
+
+1. Arm a one-use guard only when the auditioner is created for the first time.
+2. Observe the actual next focus destination.
+3. Restore the Audition button only when focus lands on the stale reader heading or static test-build heading.
+4. Use `preventScroll: true`.
+5. Clear the guard after the first relevant focus transition.
+6. Clear the guard after a bounded timeout when no transition occurs.
+7. Leave intentional movement to every other control untouched.
+8. Test the guard mechanism directly for restoration, cleanup, timeout, and non-interference.
+9. Preserve the two-second sound delay and all existing navigation and speech contracts.
+10. Require hosted real-iPhone acceptance.
+
+### Acceptance result
+
+Accepted application source: `51741c03a9eaa339940c84d53e0f0f00e6413a93`.
+
+Verification passed 40 suites and 246 tests, the production build, compiled-contract inspection, Pages deployment, and hosted read-back. The owner then reported: `OK, all of that worked. It stayed focused.` Focus was not trapped, later navigation and audition remained intact, and the two-second delay remained accepted.
+
+Detailed record:
+
+- `docs/mxl-audition-first-focus-repair-real-iphone-acceptance-2026-07-31.md`.
+
+### Derived standard
+
+A focus repair must be target-specific, boundary-specific, one-use, and self-clearing. Restoring a displaced control is not permission to imprison focus there.
 
 ---
 
@@ -369,6 +428,12 @@ State-driven committed-target focus requires a persistent destination, target-sp
 State: `cross-repository-proven`
 
 An external native picker requires durable focus state across browser return events and target confirmation before clearing the request.
+
+### XR-FIRST-INITIALIZATION-FOCUS-001
+
+State: `cross-repository-candidate`
+
+When first-use browser initialization displaces focus, use a one-use destination-specific guard. Restore only from known stale targets, clear on intentional movement or timeout, avoid repeated focus calls, and require real-device acceptance before treating the mechanism as reusable elsewhere.
 
 ### XR-ACCESSIBLE-BUILD-IDENTITY-001
 
@@ -389,7 +454,7 @@ Keep navigation, status, and content speech separate:
 
 ### XR-SOURCE-LINEAGE-001
 
-State: `cross-repository-candidate`
+State: `cross-repository-proven`
 
 Before metered verification or publication, prove that the work branch descends from the accepted checkpoint, has zero commits behind it, and retains the inherited acceptance tests. A green replacement suite is not lineage evidence.
 
