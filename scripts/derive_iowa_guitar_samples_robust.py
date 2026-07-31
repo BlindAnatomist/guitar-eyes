@@ -3,7 +3,17 @@
 
 from __future__ import annotations
 
-from scripts import derive_iowa_guitar_samples as base
+import importlib.util
+import sys
+from pathlib import Path
+
+module_path = Path(__file__).with_name("derive_iowa_guitar_samples.py")
+spec = importlib.util.spec_from_file_location("derive_iowa_guitar_samples", module_path)
+if spec is None or spec.loader is None:
+    raise RuntimeError(f"Could not load the sibling extractor at {module_path}")
+base = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = base
+spec.loader.exec_module(base)
 
 
 def choose_harmonic_tolerant_candidate(samples, sample_rate, target_midi):
