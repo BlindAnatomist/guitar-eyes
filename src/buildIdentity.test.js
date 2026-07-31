@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 
 describe("checkpoint build identity", () => {
-  test("places the unique first audition focus repair identity before the React root", () => {
+  test("places the unique procedural timbre quality identity before the React root", () => {
     const html = fs.readFileSync(
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
     const title =
-      "<title>Test build Guitar Eyes first audition focus repair proof 1G</title>";
+      "<title>Test build Guitar Eyes procedural timbre quality proof 1H</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Guitar Eyes first audition focus repair proof 1G.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Eyes procedural timbre quality proof 1H.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
