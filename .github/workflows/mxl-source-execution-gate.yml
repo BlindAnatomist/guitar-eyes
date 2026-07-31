@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 1aafe2f86c2f7cca984462b685d2db01eec90ac3
+      SOURCE_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
       STATUS_CONTEXT: guitar-eyes/mxl-audition-first-focus-repair-gate
     steps:
       - name: Mark gate pending
@@ -92,8 +92,9 @@ jobs:
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
           test -f build/index.html
-          grep -Fq '<title>Test build Guitar Eyes compressed MusicXML audition convergence proof 1F</title>' build/index.html
-          grep -Fq 'Test build: Guitar Eyes compressed MusicXML audition convergence proof 1F.' build/index.html
+          grep -Fq '<title>Test build Guitar Eyes first audition focus repair proof 1G</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes first audition focus repair proof 1G.' build/index.html
+          grep -Fq 'Guitar Eyes first audition focus repair proof 1G' "$main_js"
           grep -Fq 'compressed MusicXML tablature' "$main_js"
           grep -Fq 'META-INF/container.xml' "$main_js"
           grep -Fq 'Previous position' "$main_js"
@@ -112,6 +113,7 @@ jobs:
             sha256sum build/index.html "$main_js"
             echo "compiled_mxl_contract=passed"
             echo "compiled_audition_contract=passed"
+            echo "compiled_first_focus_repair_identity=passed"
             echo "tracked_repository_clean=passed"
           } | tee /tmp/mxl-focus-repair-evidence/artifact-inspection.txt
 
