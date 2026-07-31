@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
+import { installFirstAuditionFocusGuard } from "./firstAuditionFocusGuard";
 import { describePlayablePosition } from "./positionDescription";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
@@ -27,13 +28,22 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   const [auditionStatus, setAuditionStatus] = useState("");
   const [auditionDelaySeconds, setAuditionDelaySeconds] = useState(2);
   const auditionerRef = useRef(null);
+  const auditionButtonRef = useRef(null);
+  const firstAuditionFocusGuardCleanupRef = useRef(null);
   const activeDocumentRef = useRef(document);
+
+  const clearFirstAuditionFocusGuard = () => {
+    const cleanup = firstAuditionFocusGuardCleanupRef.current;
+    firstAuditionFocusGuardCleanupRef.current = null;
+    cleanup?.();
+  };
 
   useEffect(() => {
     activeDocumentRef.current = document;
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
     setAuditionStatus("");
+    clearFirstAuditionFocusGuard();
     const priorAuditioner = auditionerRef.current;
     auditionerRef.current = null;
     void priorAuditioner?.dispose();
@@ -41,6 +51,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   useEffect(
     () => () => {
+      clearFirstAuditionFocusGuard();
       const priorAuditioner = auditionerRef.current;
       auditionerRef.current = null;
       void priorAuditioner?.dispose();
@@ -99,6 +110,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
   const changeAuditionDelay = (event) => {
     const nextDelay = Number(event.target.value);
+    clearFirstAuditionFocusGuard();
     const priorAuditioner = auditionerRef.current;
     auditionerRef.current = null;
     void priorAuditioner?.dispose();
@@ -111,9 +123,18 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
 
     try {
       const soundEvents = buildPositionSoundEvents(document, resolvedCurrentIndex);
-      if (!auditionerRef.current) {
+      const isFirstAudition = !auditionerRef.current;
+      if (isFirstAudition) {
         auditionerRef.current = createPositionAuditioner({
           startDelaySeconds: auditionDelaySeconds,
+        });
+
+        clearFirstAuditionFocusGuard();
+        const readerHeading =
+          headingRef && typeof headingRef === "object" ? headingRef.current : null;
+        firstAuditionFocusGuardCleanupRef.current = installFirstAuditionFocusGuard({
+          button: auditionButtonRef.current,
+          readerHeading,
         });
       }
       const result = await auditionerRef.current.audition(soundEvents);
@@ -242,7 +263,11 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         role="group"
         aria-label="Position audio"
       >
-        <button type="button" onClick={auditionCurrentPosition}>
+        <button
+          ref={auditionButtonRef}
+          type="button"
+          onClick={auditionCurrentPosition}
+        >
           Audition current position
         </button>
       </div>
