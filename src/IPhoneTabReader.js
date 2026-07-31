@@ -5,7 +5,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./proceduralPluckedString";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Guitar Eyes compressed MusicXML audition convergence proof 1F";
+  "Guitar Eyes first audition focus repair proof 1G";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
