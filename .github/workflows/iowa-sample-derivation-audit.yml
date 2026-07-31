@@ -1,0 +1,146 @@
+name: Iowa guitar sample derivation audit
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-audition-proof-1i
+    paths:
+      - .github/workflows/iowa-sample-derivation-audit.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-derivation-audit
+  cancel-in-progress: true
+
+jobs:
+  derive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-derivation-audit
+    steps:
+      - name: Mark derivation pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Deriving six exact Iowa guitar anchors',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact derivation source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify branch and source boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "work/iowa-sample-audition-proof-1i"
+          git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
+          test -f scripts/derive_iowa_guitar_samples.py
+          test -f src/iowaGuitarSampleManifest.js
+          test -z "$(git status --short)"
+
+      - name: Install explicit audio tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1
+
+      - name: Download exact official Iowa sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/iowa-source /tmp/iowa-derived
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes sample derivation/1I' \
+              --output "/tmp/iowa-source/${name}" \
+              "${base}/${name}"
+          done
+
+      - name: Derive and verify six anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/derive_iowa_guitar_samples.py \
+            --source-dir /tmp/iowa-source \
+            --output-dir /tmp/iowa-derived/samples \
+            --evidence /tmp/iowa-derived/derivation.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          evidence = json.loads(Path('/tmp/iowa-derived/derivation.json').read_text())
+          targets = evidence.get('targets', [])
+          if len(targets) != 6:
+              raise SystemExit(f'Expected six derived targets, found {len(targets)}')
+          expected_midis = [64, 59, 56, 52, 47, 40]
+          actual_midis = [target['estimatedMidi'] for target in targets]
+          if actual_midis != expected_midis:
+              raise SystemExit(f'Pitch estimate mismatch: {actual_midis}')
+          for target in targets:
+              duration = target['selectedDurationSeconds']
+              if not 0.72 <= duration <= 4.0:
+                  raise SystemExit(f'Unsafe derived duration: {target}')
+              if target['targetPitchScore'] < 0.20:
+                  raise SystemExit(f'Weak target pitch score: {target}')
+              output = Path('/tmp/iowa-derived/samples') / target['derivedFilename']
+              if not output.is_file() or output.stat().st_size < 20000:
+                  raise SystemExit(f'Missing or implausibly small output: {output}')
+          print(json.dumps(evidence, indent=2))
+          PY
+          sha256sum /tmp/iowa-derived/samples/*.wav \
+            | tee /tmp/iowa-derived/derived-sha256.txt
+
+      - name: Upload one-day derivation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-guitar-sample-derivation-audit
+          path: /tmp/iowa-derived
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final derivation status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Six Iowa guitar anchors derived and verified'
+                : 'Iowa guitar anchor derivation did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
