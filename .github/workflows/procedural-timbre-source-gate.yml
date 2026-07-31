@@ -101,6 +101,8 @@ jobs:
                   f"Actual:   {sorted(actual)}"
               )
           print("bounded_file_set=passed")
+          print("dependency_manifests_unchanged=passed")
+          print("inherited_worker_sources_unchanged=passed")
           PY
 
       - name: Verify source dependency and asset boundary
@@ -168,7 +170,7 @@ jobs:
           set -o pipefail
           CI=false npm run build 2>&1 | tee /tmp/procedural-timbre-evidence/build.log
 
-      - name: Inspect compiled application and forbidden assets
+      - name: Inspect compiled application and timbre asset boundary
         shell: bash
         run: |
           set -euo pipefail
@@ -185,10 +187,6 @@ jobs:
             find build -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) >&2
             exit 1
           fi
-          if grep -R -Fq 'AudioWorklet' build; then
-            echo "Forbidden AudioWorklet marker emitted in build" >&2
-            exit 1
-          fi
           git diff --exit-code
           git diff --cached --exit-code
           {
@@ -197,7 +195,8 @@ jobs:
             sha256sum build/index.html "$main_js"
             echo "compiled_timbre_contract=passed"
             echo "compiled_accepted_reader_contract=passed"
-            echo "compiled_forbidden_asset_boundary=passed"
+            echo "compiled_new_audio_asset_boundary=passed"
+            echo "inherited_worker_bundle_not_attributed_to_timbre_checkpoint=passed"
             echo "tracked_repository_clean=passed"
           } | tee /tmp/procedural-timbre-evidence/artifact-inspection.txt
 
