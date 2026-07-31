@@ -1,0 +1,231 @@
+name: Procedural timbre quality source gate
+
+on:
+  push:
+    branches:
+      - work/procedural-timbre-execution-gate
+    paths:
+      - .github/workflows/procedural-timbre-source-gate.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-procedural-timbre-source-gate
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_SHA: 40f110b909f679e64132468c1b4f4abdd431fcc4
+      BASE_SHA: f4e9892cda5423ddb4699e93b94074d08e7be751
+      ACCEPTED_APPLICATION_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
+      STATUS_CONTEXT: guitar-eyes/procedural-timbre-quality-gate
+    steps:
+      - name: Mark gate pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Running exact procedural timbre quality gate',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact timbre source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          if [ "$actual" != "$SOURCE_SHA" ]; then
+            echo "Expected source SHA $SOURCE_SHA but checked out $actual" >&2
+            exit 1
+          fi
+          if [ -n "$(git status --short)" ]; then
+            echo "Expected a clean source checkout" >&2
+            git status --short >&2
+            exit 1
+          fi
+
+      - name: Verify accepted ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git merge-base --is-ancestor "$ACCEPTED_APPLICATION_SHA" HEAD; then
+            echo "Accepted application source $ACCEPTED_APPLICATION_SHA is not an ancestor of $SOURCE_SHA" >&2
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$BASE_SHA" HEAD; then
+            echo "Integrated documentation head $BASE_SHA is not an ancestor of $SOURCE_SHA" >&2
+            exit 1
+          fi
+
+      - name: Verify exact bounded file set
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          expected = {
+              "docs/procedural-timbre-quality-foundation-plan-2026-07-31.md",
+              "docs/procedural-timbre-quality-foundation-gate-preflight-2026-07-31.md",
+              "src/proceduralPluckedString.js",
+              "src/proceduralTimbreQuality.test.js",
+          }
+          actual = set(
+              subprocess.check_output(
+                  ["git", "diff", "--name-only", os.environ["BASE_SHA"], "HEAD"],
+                  text=True,
+              ).splitlines()
+          )
+          if actual != expected:
+              raise SystemExit(
+                  "Changed-file boundary mismatch.\n"
+                  f"Expected: {sorted(expected)}\n"
+                  f"Actual:   {sorted(actual)}"
+              )
+          print("bounded_file_set=passed")
+          PY
+
+      - name: Verify source dependency and asset boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("src/proceduralPluckedString.js").read_text(encoding="utf-8")
+          package = Path("package.json").read_text(encoding="utf-8")
+          required = [
+              "buildProceduralStringProfile",
+              "createBiquadFilter",
+              "pickTransientGain",
+              "toneCutoffHz",
+              "loopDamping",
+          ]
+          for value in required:
+              if value not in source:
+                  raise SystemExit(f"Missing timbre source contract: {value}")
+          forbidden = [
+              "alphaSynth",
+              "AudioWorklet",
+              "decodeAudioData",
+              "MediaElementAudioSource",
+              ".mp3",
+              ".wav",
+              ".ogg",
+              ".flac",
+              ".sf2",
+          ]
+          combined = source + "\n" + package
+          for value in forbidden:
+              if value in combined:
+                  raise SystemExit(f"Forbidden timbre dependency or asset marker: {value}")
+          print("source_timbre_contract=passed")
+          print("source_forbidden_asset_boundary=passed")
+          PY
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/procedural-timbre-evidence
+          node --version | tee /tmp/procedural-timbre-evidence/node-version.txt
+          npm --version | tee /tmp/procedural-timbre-evidence/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/procedural-timbre-evidence/npm-ci.log
+
+      - name: Run complete inherited and timbre test suite
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/procedural-timbre-evidence/test.log
+
+      - name: Build production application
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=false npm run build 2>&1 | tee /tmp/procedural-timbre-evidence/build.log
+
+      - name: Inspect compiled application and forbidden assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          grep -Fq 'Guitar Eyes first audition focus repair proof 1G' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'INVALID_TIMBRE_EVENT' "$main_js"
+          grep -Fq 'A procedural string profile requires one valid pitched-string event.' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          if find build -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) | grep -q .; then
+            echo "Forbidden audio asset emitted in build" >&2
+            find build -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) >&2
+            exit 1
+          fi
+          if grep -R -Fq 'AudioWorklet' build; then
+            echo "Forbidden AudioWorklet marker emitted in build" >&2
+            exit 1
+          fi
+          git diff --exit-code
+          git diff --cached --exit-code
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "main_js=$main_js"
+            sha256sum build/index.html "$main_js"
+            echo "compiled_timbre_contract=passed"
+            echo "compiled_accepted_reader_contract=passed"
+            echo "compiled_forbidden_asset_boundary=passed"
+            echo "tracked_repository_clean=passed"
+          } | tee /tmp/procedural-timbre-evidence/artifact-inspection.txt
+
+      - name: Upload short-lived verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: procedural-timbre-quality-gate-evidence
+          path: /tmp/procedural-timbre-evidence
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final gate status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact procedural timbre quality gate passed'
+                : 'Procedural timbre quality gate did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
