@@ -1,0 +1,139 @@
+name: Iowa guitar sample acquisition audit
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-audition-proof-1i
+    paths:
+      - .github/workflows/iowa-guitar-sample-acquisition-audit.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-acquisition-audit
+  cancel-in-progress: true
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-acquisition-audit
+    steps:
+      - name: Mark acquisition pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Inspecting exact Iowa guitar source files',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out acquisition record
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify branch and clean authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "work/iowa-sample-audition-proof-1i"
+          git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
+          test -z "$(git status --short)"
+
+      - name: Acquire exact official Iowa guitar files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/iowa-guitar-source/files /tmp/iowa-guitar-source/metadata
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            url="${base}/${name}"
+            echo "source_url=${url}" | tee "/tmp/iowa-guitar-source/metadata/${name}.url.txt"
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes sample verification/1I' \
+              --output "/tmp/iowa-guitar-source/files/${name}" \
+              "${url}"
+            test -s "/tmp/iowa-guitar-source/files/${name}"
+          done
+          sha256sum /tmp/iowa-guitar-source/files/* | tee /tmp/iowa-guitar-source/metadata/source-sha256.txt
+
+      - name: Inspect formats and silence boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/iowa-guitar-source/metadata/ffprobe /tmp/iowa-guitar-source/metadata/silence
+          for path in /tmp/iowa-guitar-source/files/*.aif; do
+            name="$(basename "$path")"
+            ffprobe -v error -show_format -show_streams -of json "$path" \
+              > "/tmp/iowa-guitar-source/metadata/ffprobe/${name}.json"
+            ffmpeg -hide_banner -nostdin -i "$path" \
+              -af 'silencedetect=noise=-42dB:d=0.10' -f null - \
+              2> "/tmp/iowa-guitar-source/metadata/silence/${name}.log" || true
+            echo "===== ${name} ====="
+            grep -E 'Duration:|silence_start:|silence_end:' \
+              "/tmp/iowa-guitar-source/metadata/silence/${name}.log" || true
+          done
+
+      - name: Record acquisition preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "trigger_sha=${GITHUB_SHA}"
+            echo "source_collection=https://theremin.music.uiowa.edu/MIS.html"
+            echo "guitar_catalog=https://theremin.music.uiowa.edu/MISguitar.html"
+            echo "runner=ubuntu-24.04"
+            echo "timeout_minutes=12"
+            echo "artifact_retention_days=1"
+            echo "publication=none"
+            echo "repository_write=none"
+            echo "acquisition_complete=passed"
+          } > /tmp/iowa-guitar-source/metadata/audit-summary.txt
+
+      - name: Upload one-day acquisition evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-guitar-sample-acquisition-audit
+          path: /tmp/iowa-guitar-source
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Publish final acquisition status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact Iowa guitar source audit passed'
+                : 'Iowa guitar source audit did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
