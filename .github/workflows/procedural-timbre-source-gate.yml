@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 40f110b909f679e64132468c1b4f4abdd431fcc4
+      SOURCE_SHA: b3d9f39de3900c0065875451bc2a90531226c707
       BASE_SHA: f4e9892cda5423ddb4699e93b94074d08e7be751
       ACCEPTED_APPLICATION_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
       STATUS_CONTEXT: guitar-eyes/procedural-timbre-quality-gate
@@ -85,6 +85,10 @@ jobs:
           expected = {
               "docs/procedural-timbre-quality-foundation-plan-2026-07-31.md",
               "docs/procedural-timbre-quality-foundation-gate-preflight-2026-07-31.md",
+              "public/index.html",
+              "src/IPhoneTabReader.js",
+              "src/buildIdentity.test.js",
+              "src/checkpointBuildIdentity.test.js",
               "src/proceduralPluckedString.js",
               "src/proceduralTimbreQuality.test.js",
           }
@@ -114,6 +118,7 @@ jobs:
 
           source = Path("src/proceduralPluckedString.js").read_text(encoding="utf-8")
           package = Path("package.json").read_text(encoding="utf-8")
+          identity = "Guitar Eyes procedural timbre quality proof 1H"
           required = [
               "buildProceduralStringProfile",
               "createBiquadFilter",
@@ -124,6 +129,10 @@ jobs:
           for value in required:
               if value not in source:
                   raise SystemExit(f"Missing timbre source contract: {value}")
+          if identity not in Path("src/IPhoneTabReader.js").read_text(encoding="utf-8"):
+              raise SystemExit(f"Missing runtime identity: {identity}")
+          if identity not in Path("public/index.html").read_text(encoding="utf-8"):
+              raise SystemExit(f"Missing static identity: {identity}")
           forbidden = [
               "alphaSynth",
               "AudioWorklet",
@@ -140,6 +149,7 @@ jobs:
               if value in combined:
                   raise SystemExit(f"Forbidden timbre dependency or asset marker: {value}")
           print("source_timbre_contract=passed")
+          print("source_identity_contract=passed")
           print("source_forbidden_asset_boundary=passed")
           PY
 
@@ -177,7 +187,9 @@ jobs:
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
           test -f build/index.html
-          grep -Fq 'Guitar Eyes first audition focus repair proof 1G' "$main_js"
+          grep -Fq '<title>Test build Guitar Eyes procedural timbre quality proof 1H</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes procedural timbre quality proof 1H.' build/index.html
+          grep -Fq 'Guitar Eyes procedural timbre quality proof 1H' "$main_js"
           grep -Fq 'Audition current position' "$main_js"
           grep -Fq 'INVALID_TIMBRE_EVENT' "$main_js"
           grep -Fq 'A procedural string profile requires one valid pitched-string event.' "$main_js"
@@ -194,6 +206,7 @@ jobs:
             echo "main_js=$main_js"
             sha256sum build/index.html "$main_js"
             echo "compiled_timbre_contract=passed"
+            echo "compiled_timbre_identity=passed"
             echo "compiled_accepted_reader_contract=passed"
             echo "compiled_new_audio_asset_boundary=passed"
             echo "inherited_worker_bundle_not_attributed_to_timbre_checkpoint=passed"
