@@ -50,6 +50,15 @@ jobs:
           git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
           test -z "$(git status --short)"
 
+      - name: Install explicit audio inspection tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
       - name: Acquire exact official Iowa guitar files
         shell: bash
         run: |
@@ -87,7 +96,7 @@ jobs:
               > "/tmp/iowa-guitar-source/metadata/ffprobe/${name}.json"
             ffmpeg -hide_banner -nostdin -i "$path" \
               -af 'silencedetect=noise=-42dB:d=0.10' -f null - \
-              2> "/tmp/iowa-guitar-source/metadata/silence/${name}.log" || true
+              2> "/tmp/iowa-guitar-source/metadata/silence/${name}.log"
             echo "===== ${name} ====="
             grep -E 'Duration:|silence_start:|silence_end:' \
               "/tmp/iowa-guitar-source/metadata/silence/${name}.log" || true
@@ -107,15 +116,18 @@ jobs:
             echo "artifact_retention_days=1"
             echo "publication=none"
             echo "repository_write=none"
+            echo "first_run_failure=ffprobe_not_preinstalled"
+            echo "rerun_reason=explicit_ffmpeg_package_added"
             echo "acquisition_complete=passed"
           } > /tmp/iowa-guitar-source/metadata/audit-summary.txt
 
-      - name: Upload one-day acquisition evidence
+      - name: Upload one-day acquisition metadata
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: iowa-guitar-sample-acquisition-audit
-          path: /tmp/iowa-guitar-source
-          if-no-files-found: error
+          path: /tmp/iowa-guitar-source/metadata
+          if-no-files-found: warn
           retention-days: 1
 
       - name: Publish final acquisition status
