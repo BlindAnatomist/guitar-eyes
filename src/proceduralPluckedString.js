@@ -11,6 +11,12 @@ const MAX_SOUND_SECONDS = 2.5;
 const DEFAULT_START_DELAY_SECONDS = 0.65;
 const MIN_START_DELAY_SECONDS = 0.5;
 const MAX_START_DELAY_SECONDS = 5;
+const BODY_FILTER_SPECS = [
+  { type: "highpass", frequencyHz: 42, q: 0.7 },
+  { type: "peaking", frequencyHz: 110, q: 1.05, gainDb: 2.4 },
+  { type: "peaking", frequencyHz: 220, q: 1.35, gainDb: 1.6 },
+  { type: "lowpass", frequencyHz: 5200, q: 0.65 },
+];
 
 function defaultAudioContextFactory() {
   const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
@@ -90,7 +96,44 @@ function validateSoundEvents(soundEvents) {
   });
 }
 
-function createPluckedBuffer(context, event, random) {
+export function buildProceduralStringProfile(event) {
+  if (
+    !event ||
+    event.type !== "pitched-string" ||
+    !Number.isFinite(event.frequencyHz) ||
+    event.frequencyHz <= 0 ||
+    !Number.isInteger(event.midi)
+  ) {
+    throw new AudiblePlaybackError(
+      "A procedural string profile requires one valid pitched-string event.",
+      "INVALID_TIMBRE_EVENT"
+    );
+  }
+
+  const stringIndex = Number.isInteger(event.stringIndex)
+    ? clamp(event.stringIndex, 0, 7)
+    : 3;
+  const stringDepth = clamp(stringIndex / 5, 0, 1);
+  const pitchDepth = clamp((64 - event.midi) / 36, 0, 1);
+  const warmth = clamp(stringDepth * 0.48 + pitchDepth * 0.52, 0, 1);
+  const brightness = 1 - warmth;
+
+  return {
+    warmth,
+    excitationSmoothing: clamp(0.48 + warmth * 0.28, 0.48, 0.76),
+    pickPosition: clamp(0.18 + stringDepth * 0.07, 0.18, 0.25),
+    pickTransientGain: clamp(0.105 - warmth * 0.032, 0.073, 0.105),
+    loopBlend: clamp(0.43 + warmth * 0.1, 0.43, 0.53),
+    loopDamping: clamp(0.992 + warmth * 0.0042, 0.992, 0.9962),
+    toneCutoffHz: clamp(
+      2100 + brightness * 2100 + event.frequencyHz * 1.8,
+      1900,
+      5600
+    ),
+  };
+}
+
+function createPluckedBuffer(context, event, random, profile) {
   const sampleRate = context.sampleRate;
   const durationSeconds = clamp(
     event.durationMilliseconds / 1000,
@@ -102,16 +145,48 @@ function createPluckedBuffer(context, event, random) {
   const buffer = context.createBuffer(1, sampleCount, sampleRate);
   const samples = buffer.getChannelData(0);
   const excitationLength = Math.min(delaySamples, sampleCount);
+  const excitation = new Float32Array(excitationLength);
+  const pickDelay = Math.max(
+    1,
+    Math.min(excitationLength - 1, Math.round(delaySamples * profile.pickPosition))
+  );
+  let smoothedNoise = 0;
 
   for (let index = 0; index < excitationLength; index += 1) {
-    samples[index] = (random() * 2 - 1) * 0.6;
+    const rawNoise = random() * 2 - 1;
+    smoothedNoise =
+      smoothedNoise * profile.excitationSmoothing +
+      rawNoise * (1 - profile.excitationSmoothing);
+    excitation[index] = smoothedNoise;
+    const combed =
+      smoothedNoise -
+      (index >= pickDelay ? excitation[index - pickDelay] * 0.72 : 0);
+    const roundedPluckEnvelope = Math.sin(
+      (Math.PI * (index + 0.5)) / excitationLength
+    );
+    samples[index] = combed * roundedPluckEnvelope * 0.72;
   }
 
-  const damping = event.midi < 45 ? 0.997 : event.midi > 76 ? 0.992 : 0.995;
+  const transientLength = Math.min(
+    sampleCount,
+    Math.max(2, Math.ceil(sampleRate * 0.007))
+  );
+  let priorTransientNoise = 0;
+  for (let index = 0; index < transientLength; index += 1) {
+    const rawNoise = random() * 2 - 1;
+    const brightNoise = rawNoise - priorTransientNoise * 0.7;
+    priorTransientNoise = rawNoise;
+    const envelope = 1 - index / transientLength;
+    samples[index] +=
+      brightNoise * envelope * envelope * profile.pickTransientGain;
+  }
+
   for (let index = delaySamples; index < sampleCount; index += 1) {
     const first = samples[index - delaySamples];
     const second = samples[Math.max(0, index - delaySamples - 1)];
-    samples[index] = (first + second) * 0.5 * damping;
+    samples[index] =
+      (first * (1 - profile.loopBlend) + second * profile.loopBlend) *
+      profile.loopDamping;
   }
 
   return buffer;
@@ -122,33 +197,62 @@ function createMutedBuffer(context, random) {
   const sampleCount = Math.max(2, Math.ceil(sampleRate * 0.045));
   const buffer = context.createBuffer(1, sampleCount, sampleRate);
   const samples = buffer.getChannelData(0);
+  let smoothedNoise = 0;
 
   for (let index = 0; index < sampleCount; index += 1) {
+    const rawNoise = random() * 2 - 1;
+    smoothedNoise = smoothedNoise * 0.58 + rawNoise * 0.42;
     const envelope = 1 - index / sampleCount;
-    samples[index] = (random() * 2 - 1) * envelope * envelope * 0.35;
+    samples[index] = smoothedNoise * envelope * envelope * envelope * 0.3;
   }
 
   return buffer;
 }
 
+function setAudioParam(param, value, time) {
+  param?.setValueAtTime?.(value, time);
+}
+
+function createBodyFilter(context, specification) {
+  const filter = context.createBiquadFilter();
+  filter.type = specification.type;
+  setAudioParam(filter.frequency, specification.frequencyHz, context.currentTime);
+  setAudioParam(filter.Q, specification.q, context.currentTime);
+  if (Number.isFinite(specification.gainDb)) {
+    setAudioParam(filter.gain, specification.gainDb, context.currentTime);
+  }
+  return filter;
+}
+
 function configureMaster(context) {
   const gain = context.createGain();
-  gain.gain.setValueAtTime(0.72, context.currentTime);
+  gain.gain.setValueAtTime(0.64, context.currentTime);
+  const bodyFilters = [];
+
+  let output = gain;
+  if (typeof context.createBiquadFilter === "function") {
+    BODY_FILTER_SPECS.forEach((specification) => {
+      const filter = createBodyFilter(context, specification);
+      output.connect(filter);
+      output = filter;
+      bodyFilters.push(filter);
+    });
+  }
 
   if (typeof context.createDynamicsCompressor !== "function") {
-    gain.connect(context.destination);
-    return { input: gain, gain, compressor: null };
+    output.connect(context.destination);
+    return { input: gain, gain, compressor: null, bodyFilters };
   }
 
   const compressor = context.createDynamicsCompressor();
-  compressor.threshold?.setValueAtTime?.(-18, context.currentTime);
-  compressor.knee?.setValueAtTime?.(12, context.currentTime);
-  compressor.ratio?.setValueAtTime?.(6, context.currentTime);
-  compressor.attack?.setValueAtTime?.(0.003, context.currentTime);
-  compressor.release?.setValueAtTime?.(0.18, context.currentTime);
-  gain.connect(compressor);
+  compressor.threshold?.setValueAtTime?.(-20, context.currentTime);
+  compressor.knee?.setValueAtTime?.(16, context.currentTime);
+  compressor.ratio?.setValueAtTime?.(4.5, context.currentTime);
+  compressor.attack?.setValueAtTime?.(0.006, context.currentTime);
+  compressor.release?.setValueAtTime?.(0.22, context.currentTime);
+  output.connect(compressor);
   compressor.connect(context.destination);
-  return { input: gain, gain, compressor };
+  return { input: gain, gain, compressor, bodyFilters };
 }
 
 export function createPositionAuditioner({
@@ -165,6 +269,7 @@ export function createPositionAuditioner({
   function releaseVoice(voice) {
     activeVoices.delete(voice);
     safeDisconnect(voice.source);
+    safeDisconnect(voice.tone);
     safeDisconnect(voice.gain);
   }
 
@@ -213,20 +318,35 @@ export function createPositionAuditioner({
     return context;
   }
 
-  function scheduleVoice(buffer, when, gainValue) {
+  function scheduleVoice(buffer, when, gainValue, toneCutoffHz = null) {
     const source = context.createBufferSource();
     const gain = context.createGain();
+    const tone =
+      Number.isFinite(toneCutoffHz) &&
+      typeof context.createBiquadFilter === "function"
+        ? context.createBiquadFilter()
+        : null;
+
     source.buffer = buffer;
     gain.gain.setValueAtTime(0.0001, when);
-    gain.gain.linearRampToValueAtTime(gainValue, when + 0.004);
+    gain.gain.linearRampToValueAtTime(gainValue, when + 0.006);
     gain.gain.exponentialRampToValueAtTime(
       0.0001,
       when + Math.max(MIN_SOUND_SECONDS, buffer.duration)
     );
-    source.connect(gain);
+
+    if (tone) {
+      tone.type = "lowpass";
+      setAudioParam(tone.frequency, toneCutoffHz, when);
+      setAudioParam(tone.Q, 0.62, when);
+      source.connect(tone);
+      tone.connect(gain);
+    } else {
+      source.connect(gain);
+    }
     gain.connect(master.input);
 
-    const voice = { source, gain };
+    const voice = { source, tone, gain };
     activeVoices.add(voice);
     source.onended = () => releaseVoice(voice);
     source.start(when);
@@ -256,16 +376,22 @@ export function createPositionAuditioner({
     );
     const onset = context.currentTime + resolvedStartDelaySeconds;
     const pitchedGain = clamp(
-      0.42 / Math.sqrt(Math.max(1, pitchedEvents.length)),
-      0.12,
-      0.42
+      0.34 / Math.sqrt(Math.max(1, pitchedEvents.length)),
+      0.1,
+      0.34
     );
 
     pitchedEvents.forEach((event) => {
-      scheduleVoice(createPluckedBuffer(context, event, random), onset, pitchedGain);
+      const profile = buildProceduralStringProfile(event);
+      scheduleVoice(
+        createPluckedBuffer(context, event, random, profile),
+        onset,
+        pitchedGain,
+        profile.toneCutoffHz
+      );
     });
     mutedEvents.forEach(() => {
-      scheduleVoice(createMutedBuffer(context, random), onset, 0.2);
+      scheduleVoice(createMutedBuffer(context, random), onset, 0.2, 2600);
     });
 
     return {
@@ -281,6 +407,7 @@ export function createPositionAuditioner({
     if (disposed) return;
     stop();
     safeDisconnect(master?.gain);
+    master?.bodyFilters?.forEach((filter) => safeDisconnect(filter));
     safeDisconnect(master?.compressor);
     if (context && context.state !== "closed" && typeof context.close === "function") {
       await context.close();
