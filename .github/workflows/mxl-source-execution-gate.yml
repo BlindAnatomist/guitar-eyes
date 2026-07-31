@@ -1,4 +1,4 @@
-name: MXL audition convergence gate
+name: MXL audition first-focus repair gate
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   statuses: write
 
 concurrency:
-  group: mxl-audition-convergence-gate
+  group: mxl-audition-first-focus-repair-gate
   cancel-in-progress: true
 
 jobs:
@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 7c4ac3d20fbb1d1abc547d30039599804bfdbd7e
-      STATUS_CONTEXT: guitar-eyes/mxl-audition-convergence-gate
+      SOURCE_SHA: 1f06eaf92765be93f0e80c67c6044386cac54f50
+      STATUS_CONTEXT: guitar-eyes/mxl-audition-first-focus-repair-gate
     steps:
       - name: Mark gate pending
         uses: actions/github-script@v7
@@ -33,31 +33,31 @@ jobs:
               sha: context.sha,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Running exact MXL and audition convergence gate',
+              description: 'Running exact first audition focus repair gate',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
-      - name: Check out exact convergence source
+      - name: Check out exact repair source
         uses: actions/checkout@v4
         with:
           ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify exact source and accepted audition ancestry
+      - name: Verify exact source and accepted convergence ancestry
         shell: bash
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git merge-base --is-ancestor 165e2ed5792811ebac9bf0488be93810bfa6246c HEAD
+          git merge-base --is-ancestor 7c4ac3d20fbb1d1abc547d30039599804bfdbd7e HEAD
           test -z "$(git status --short)"
-          mkdir -p /tmp/mxl-convergence-evidence
+          mkdir -p /tmp/mxl-focus-repair-evidence
           {
             echo "source_sha=$(git rev-parse HEAD)"
             echo "trigger_sha=${GITHUB_SHA}"
-            echo "accepted_audition_ancestor=165e2ed5792811ebac9bf0488be93810bfa6246c"
+            echo "accepted_convergence_ancestor=7c4ac3d20fbb1d1abc547d30039599804bfdbd7e"
             echo "runner=${RUNNER_OS}"
-          } > /tmp/mxl-convergence-evidence/summary.txt
+          } > /tmp/mxl-focus-repair-evidence/summary.txt
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
@@ -69,23 +69,23 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node --version | tee /tmp/mxl-convergence-evidence/node-version.txt
-          npm --version | tee /tmp/mxl-convergence-evidence/npm-version.txt
-          npm ci --no-audit --no-fund 2>&1 | tee /tmp/mxl-convergence-evidence/npm-ci.log
+          node --version | tee /tmp/mxl-focus-repair-evidence/node-version.txt
+          npm --version | tee /tmp/mxl-focus-repair-evidence/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/mxl-focus-repair-evidence/npm-ci.log
 
-      - name: Run complete inherited and convergence test suite
+      - name: Run complete inherited and repair test suite
         shell: bash
         run: |
           set -o pipefail
-          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/mxl-convergence-evidence/test.log
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 | tee /tmp/mxl-focus-repair-evidence/test.log
 
       - name: Build production application
         shell: bash
         run: |
           set -o pipefail
-          CI=false npm run build 2>&1 | tee /tmp/mxl-convergence-evidence/build.log
+          CI=false npm run build 2>&1 | tee /tmp/mxl-focus-repair-evidence/build.log
 
-      - name: Inspect compiled convergence artifact and repository cleanliness
+      - name: Inspect compiled repair artifact and repository cleanliness
         shell: bash
         run: |
           set -euo pipefail
@@ -102,7 +102,6 @@ jobs:
           grep -Fq 'Audition current position' "$main_js"
           grep -Fq 'Position navigation' "$main_js"
           grep -Fq 'Position audio' "$main_js"
-          grep -Fq 'Guitar Eyes compressed MusicXML audition convergence proof 1F' "$main_js"
           grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
           grep -Fq 'iPhone tablature reader' "$main_js"
           grep -Fq 'Desktop tablature reader' "$main_js"
@@ -114,14 +113,14 @@ jobs:
             echo "compiled_mxl_contract=passed"
             echo "compiled_audition_contract=passed"
             echo "tracked_repository_clean=passed"
-          } | tee /tmp/mxl-convergence-evidence/artifact-inspection.txt
+          } | tee /tmp/mxl-focus-repair-evidence/artifact-inspection.txt
 
       - name: Upload short-lived verification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mxl-audition-convergence-gate-evidence
-          path: /tmp/mxl-convergence-evidence
+          name: mxl-audition-first-focus-repair-evidence
+          path: /tmp/mxl-focus-repair-evidence
           if-no-files-found: error
           retention-days: 1
 
@@ -140,7 +139,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Exact MXL and audition convergence gate passed'
-                : 'Exact MXL and audition convergence gate did not pass',
+                ? 'Exact first audition focus repair gate passed'
+                : 'Exact first audition focus repair gate did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
