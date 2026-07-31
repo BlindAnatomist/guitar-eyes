@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: 8b865a896c37de6e4224c09140b4cec5252dca4a
+      SOURCE_SHA: 1aafe2f86c2f7cca984462b685d2db01eec90ac3
       STATUS_CONTEXT: guitar-eyes/mxl-audition-first-focus-repair-gate
     steps:
       - name: Mark gate pending
