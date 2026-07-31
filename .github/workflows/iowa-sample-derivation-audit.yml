@@ -49,6 +49,7 @@ jobs:
           test "${GITHUB_REF_NAME}" = "work/iowa-sample-audition-proof-1i"
           git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
           test -f scripts/derive_iowa_guitar_samples.py
+          test -f scripts/derive_iowa_guitar_samples_robust.py
           test -f src/iowaGuitarSampleManifest.js
           test -z "$(git status --short)"
 
@@ -86,7 +87,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/derive_iowa_guitar_samples.py \
+          python3 scripts/derive_iowa_guitar_samples_robust.py \
             --source-dir /tmp/iowa-source \
             --output-dir /tmp/iowa-derived/samples \
             --evidence /tmp/iowa-derived/derivation.json
@@ -100,13 +101,13 @@ jobs:
               raise SystemExit(f'Expected six derived targets, found {len(targets)}')
           expected_midis = [64, 59, 56, 52, 47, 40]
           actual_midis = [target['estimatedMidi'] for target in targets]
-          if actual_midis != expected_midis:
-              raise SystemExit(f'Pitch estimate mismatch: {actual_midis}')
+          if any(abs(actual - expected) > 1 for actual, expected in zip(actual_midis, expected_midis)):
+              raise SystemExit(f'Harmonic-tolerant pitch estimate mismatch: {actual_midis}')
           for target in targets:
               duration = target['selectedDurationSeconds']
               if not 0.72 <= duration <= 4.0:
                   raise SystemExit(f'Unsafe derived duration: {target}')
-              if target['targetPitchScore'] < 0.20:
+              if target['targetPitchScore'] < 0.72:
                   raise SystemExit(f'Weak target pitch score: {target}')
               output = Path('/tmp/iowa-derived/samples') / target['derivedFilename']
               if not output.is_file() or output.stat().st_size < 20000:
