@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 15
     env:
       STATUS_CONTEXT: guitar-eyes/iowa-sample-derivation-audit
+      SELECTOR_REVISION: harmonic-tolerant-importlib-v2
     steps:
       - name: Mark derivation pending
         uses: actions/github-script@v7
@@ -47,6 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "work/iowa-sample-audition-proof-1i"
+          test "$SELECTOR_REVISION" = "harmonic-tolerant-importlib-v2"
           git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
           test -f scripts/derive_iowa_guitar_samples.py
           test -f scripts/derive_iowa_guitar_samples_robust.py
