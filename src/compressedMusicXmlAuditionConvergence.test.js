@@ -3,13 +3,13 @@ import path from "path";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import App from "./App";
 import { readCompressedMusicXmlFile } from "./compressedMusicXmlImporter";
-import { createPositionAuditioner } from "./proceduralPluckedString";
+import { createPositionAuditioner } from "./sampleAwarePositionAuditioner";
 
 jest.mock("./compressedMusicXmlImporter", () => ({
   readCompressedMusicXmlFile: jest.fn(),
 }));
 
-jest.mock("./proceduralPluckedString", () => ({
+jest.mock("./sampleAwarePositionAuditioner", () => ({
   createPositionAuditioner: jest.fn(),
 }));
 
@@ -63,6 +63,8 @@ test("compressed MusicXML reaches the accepted audition reader without breaking 
       outcome: "auditioned",
       pitchedEventCount: 1,
       mutedEventCount: 0,
+      sampledEventCount: 1,
+      proceduralFallbackCount: 0,
       activeVoiceCount: 1,
       contextState: "running",
     }),
