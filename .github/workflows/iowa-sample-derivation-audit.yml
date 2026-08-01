@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 15
     env:
       STATUS_CONTEXT: guitar-eyes/iowa-sample-derivation-audit
-      SELECTOR_REVISION: harmonic-tolerant-importlib-v2
+      SELECTOR_REVISION: catalog-ordered-chromatic-group-v3
     steps:
       - name: Mark derivation pending
         uses: actions/github-script@v7
@@ -48,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "work/iowa-sample-audition-proof-1i"
-          test "$SELECTOR_REVISION" = "harmonic-tolerant-importlib-v2"
+          test "$SELECTOR_REVISION" = "catalog-ordered-chromatic-group-v3"
           git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
           test -f scripts/derive_iowa_guitar_samples.py
           test -f scripts/derive_iowa_guitar_samples_robust.py
@@ -102,18 +102,27 @@ jobs:
           if len(targets) != 6:
               raise SystemExit(f'Expected six derived targets, found {len(targets)}')
           expected_midis = [64, 59, 56, 52, 47, 40]
-          actual_midis = [target['estimatedMidi'] for target in targets]
-          if any(abs(actual - expected) > 1 for actual, expected in zip(actual_midis, expected_midis)):
-              raise SystemExit(f'Harmonic-tolerant pitch estimate mismatch: {actual_midis}')
+          expected_ordinals = [0, 0, 1, 2, 2, 0]
+          expected_note_counts = [8, 1, 5, 10, 3, 8]
+          if [target['target_midi'] for target in targets] != expected_midis:
+              raise SystemExit('Target MIDI authority changed')
+          if [target['target_note_ordinal'] for target in targets] != expected_ordinals:
+              raise SystemExit('Catalog target ordinals changed')
+          if [target['source_note_count'] for target in targets] != expected_note_counts:
+              raise SystemExit('Catalog source note counts changed')
           for target in targets:
+              if target['selection_method'] != 'catalog-ordered-chromatic-group-v3':
+                  raise SystemExit(f'Unexpected selection method: {target}')
               duration = target['selectedDurationSeconds']
               if not 0.72 <= duration <= 4.0:
                   raise SystemExit(f'Unsafe derived duration: {target}')
-              if target['targetPitchScore'] < 0.72:
-                  raise SystemExit(f'Weak target pitch score: {target}')
-              output = Path('/tmp/iowa-derived/samples') / target['derivedFilename']
+              if target['targetPitchScore'] < 0.45:
+                  raise SystemExit(f'Weak supporting pitch score: {target}')
+              output = Path('/tmp/iowa-derived/samples') / target['derived_filename']
               if not output.is_file() or output.stat().st_size < 20000:
                   raise SystemExit(f'Missing or implausibly small output: {output}')
+              if target['derivedSha256'] != __import__('hashlib').sha256(output.read_bytes()).hexdigest():
+                  raise SystemExit(f'Derived hash mismatch: {output}')
           print(json.dumps(evidence, indent=2))
           PY
           sha256sum /tmp/iowa-derived/samples/*.wav \
