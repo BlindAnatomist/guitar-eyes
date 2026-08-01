@@ -1,4 +1,4 @@
-name: Publish procedural timbre quality proof 1H
+name: Publish Iowa string-aware sample proof 1I
 
 on:
   push:
@@ -14,19 +14,20 @@ permissions:
   statuses: write
 
 concurrency:
-  group: guitar-eyes-procedural-timbre-preview
+  group: guitar-eyes-iowa-sample-preview
   cancel-in-progress: true
 
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     env:
-      SOURCE_SHA: b3d9f39de3900c0065875451bc2a90531226c707
-      STATUS_CONTEXT: guitar-eyes/procedural-timbre-preview-publish
+      SOURCE_SHA: 38d70ff39815417f97276596005c410d840ac26a
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-preview-publish
+      EVIDENCE_DIR: /tmp/iowa-sample-publication-evidence
     steps:
       - name: Mark publication pending
         uses: actions/github-script@v7
@@ -38,7 +39,7 @@ jobs:
               sha: context.sha,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Publishing procedural timbre quality proof 1H',
+              description: 'Publishing Iowa string-aware sample proof 1I',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
@@ -55,14 +56,87 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           git merge-base --is-ancestor 51741c03a9eaa339940c84d53e0f0f00e6413a93 HEAD
+          git merge-base --is-ancestor 52053bca9a3e12029497f433cd834810abbfdeb6 HEAD
           test -z "$(git status --short)"
-          mkdir -p /tmp/procedural-timbre-publication-evidence
+          mkdir -p "$EVIDENCE_DIR" /tmp/iowa-source
           {
             echo "source_sha=$(git rev-parse HEAD)"
             echo "trigger_sha=${GITHUB_SHA}"
             echo "run_id=${GITHUB_RUN_ID}"
             echo "accepted_application_ancestor=51741c03a9eaa339940c84d53e0f0f00e6413a93"
-          } > /tmp/procedural-timbre-publication-evidence/summary.txt
+            echo "procedural_result_ancestor=52053bca9a3e12029497f433cd834810abbfdeb6"
+            echo "derivation_authority_run=30674590285"
+          } > "$EVIDENCE_DIR/summary.txt"
+
+      - name: Install explicit audio derivation tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1 | tee "$EVIDENCE_DIR/ffmpeg-version.txt"
+
+      - name: Download exact official Iowa sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes Iowa sample publication/1I' \
+              --output "/tmp/iowa-source/${name}" \
+              "${base}/${name}"
+          done
+          sha256sum /tmp/iowa-source/*.aif | tee "$EVIDENCE_DIR/source-sha256.txt"
+
+      - name: Derive and lock six browser samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/derive_iowa_guitar_samples_robust.py \
+            --source-dir /tmp/iowa-source \
+            --output-dir public/samples/iowa-guitar \
+            --evidence "$EVIDENCE_DIR/derivation.json"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          lock_path = Path('public/samples/iowa-guitar/manifest.json')
+          lock = json.loads(lock_path.read_text())
+          if lock['proofIdentity'] != 'Guitar Eyes Iowa string-aware sample proof 1I':
+              raise SystemExit('Wrong 1I proof identity')
+          if lock['derivationRun'] != 30674590285:
+              raise SystemExit('Wrong derivation authority')
+          if lock['selectionMethod'] != 'catalog-ordered-chromatic-group-v3':
+              raise SystemExit('Wrong derivation method')
+          for sample in lock['samples']:
+              path = lock_path.parent / sample['derivedFilename']
+              if not path.is_file():
+                  raise SystemExit(f'Missing derived asset: {path}')
+              actual_bytes = path.stat().st_size
+              actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+              if actual_bytes != sample['derivedBytes']:
+                  raise SystemExit(
+                      f'Byte mismatch for {path.name}: {actual_bytes} != {sample["derivedBytes"]}'
+                  )
+              if actual_hash != sample['derivedSha256']:
+                  raise SystemExit(
+                      f'Hash mismatch for {path.name}: {actual_hash} != {sample["derivedSha256"]}'
+                  )
+          print('derived_asset_lock=passed')
+          PY
+          sha256sum public/samples/iowa-guitar/*.wav \
+            | tee "$EVIDENCE_DIR/derived-sha256.txt"
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
@@ -78,38 +152,55 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          PUBLIC_URL=/guitar-eyes CI=false npm run build 2>&1 | tee /tmp/procedural-timbre-publication-evidence/build.log
+          PUBLIC_URL=/guitar-eyes CI=false npm run build 2>&1 \
+            | tee "$EVIDENCE_DIR/build.log"
 
-      - name: Verify Pages build identity and contracts
+      - name: Verify Pages artifact identity, contracts, and sample hashes
         shell: bash
         run: |
           set -euo pipefail
           main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
           test -n "$main_js"
-          grep -Fq '<title>Test build Guitar Eyes procedural timbre quality proof 1H</title>' build/index.html
-          grep -Fq 'Test build: Guitar Eyes procedural timbre quality proof 1H.' build/index.html
+          test -f build/index.html
+          test -f build/samples/iowa-guitar/manifest.json
+          grep -Fq '<title>Test build Guitar Eyes Iowa string-aware sample proof 1I</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa string-aware sample proof 1I.' build/index.html
           grep -Fq '/guitar-eyes/static/' build/index.html
-          grep -Fq 'Guitar Eyes procedural timbre quality proof 1H' "$main_js"
+          grep -Fq 'Guitar Eyes Iowa string-aware sample proof 1I' "$main_js"
+          grep -Fq 'string-1-e4.wav' "$main_js"
+          grep -Fq 'string-6-e2.wav' "$main_js"
+          grep -Fq 'IOWA_SAMPLE_RANGE_UNSUPPORTED' "$main_js"
           grep -Fq 'Audition current position' "$main_js"
-          grep -Fq 'INVALID_TIMBRE_EVENT' "$main_js"
-          grep -Fq 'A procedural string profile requires one valid pitched-string event.' "$main_js"
-          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
           grep -Fq 'Previous position' "$main_js"
           grep -Fq 'Read current position' "$main_js"
           grep -Fq 'Next position' "$main_js"
-          grep -Fq 'iPhone tablature reader' "$main_js"
-          grep -Fq 'Desktop tablature reader' "$main_js"
-          if find build -type f \( -iname '*.mp3' -o -iname '*.wav' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) | grep -q .; then
-            echo "Forbidden audio asset emitted in Pages build" >&2
-            exit 1
-          fi
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          source_lock = json.loads(Path('public/samples/iowa-guitar/manifest.json').read_text())
+          built_lock = json.loads(Path('build/samples/iowa-guitar/manifest.json').read_text())
+          if built_lock != source_lock:
+              raise SystemExit('Built sample manifest differs from source lock')
+          for sample in source_lock['samples']:
+              path = Path('build/samples/iowa-guitar') / sample['derivedFilename']
+              if path.stat().st_size != sample['derivedBytes']:
+                  raise SystemExit(f'Built byte mismatch: {path}')
+              if hashlib.sha256(path.read_bytes()).hexdigest() != sample['derivedSha256']:
+                  raise SystemExit(f'Built hash mismatch: {path}')
+          print('pages_sample_hashes=passed')
+          PY
           {
             echo "main_js=$main_js"
-            sha256sum build/index.html "$main_js"
-            echo "pages_timbre_contract=passed"
-            echo "pages_reader_contract=passed"
-            echo "pages_new_audio_asset_boundary=passed"
-          } | tee /tmp/procedural-timbre-publication-evidence/build-inspection.txt
+            sha256sum build/index.html build/samples/iowa-guitar/manifest.json "$main_js"
+            sha256sum build/samples/iowa-guitar/*.wav
+            echo 'pages_identity=passed'
+            echo 'pages_sample_engine_contract=passed'
+            echo 'pages_reader_contract=passed'
+            echo 'pages_sample_asset_lock=passed'
+          } | tee "$EVIDENCE_DIR/build-inspection.txt"
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -123,7 +214,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Read back hosted HTML and bundle
+      - name: Read back hosted HTML, bundle, manifest, and all samples
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         shell: bash
@@ -131,118 +222,132 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import hashlib
+          import json
           import os
           import re
           import time
           import urllib.parse
           import urllib.request
           from html.parser import HTMLParser
+          from pathlib import Path
 
-          page_url = os.environ["PAGE_URL"].rstrip("/") + "/"
-          cache_url = page_url + "?checkpoint=procedural-timbre-1h&run=" + os.environ["GITHUB_RUN_ID"]
+          page_url = os.environ['PAGE_URL'].rstrip('/') + '/'
+          run_id = os.environ['GITHUB_RUN_ID']
 
-          html_bytes = None
-          last_error = None
-          for _ in range(12):
-              try:
-                  request = urllib.request.Request(
-                      cache_url,
-                      headers={"Cache-Control": "no-cache", "Pragma": "no-cache"},
-                  )
-                  with urllib.request.urlopen(request, timeout=20) as response:
-                      if response.status == 200:
-                          html_bytes = response.read()
-                          break
-              except Exception as error:
-                  last_error = error
-              time.sleep(5)
+          def fetch(url, attempts=1):
+              last_error = None
+              for _ in range(attempts):
+                  try:
+                      request = urllib.request.Request(
+                          url,
+                          headers={'Cache-Control': 'no-cache', 'Pragma': 'no-cache'},
+                      )
+                      with urllib.request.urlopen(request, timeout=30) as response:
+                          if response.status != 200:
+                              raise RuntimeError(f'HTTP {response.status}: {url}')
+                          return response.read()
+                  except Exception as error:
+                      last_error = error
+                      time.sleep(5)
+              raise RuntimeError(f'Could not fetch {url}: {last_error}')
 
-          if html_bytes is None:
-              raise RuntimeError(f"Hosted HTML did not become available: {last_error}")
-
-          html = html_bytes.decode("utf-8")
-          required_html = [
-              "<title>Test build Guitar Eyes procedural timbre quality proof 1H</title>",
-              "Test build: Guitar Eyes procedural timbre quality proof 1H.",
-          ]
-          for value in required_html:
-              if value not in html:
-                  raise RuntimeError(f"Hosted HTML is missing {value!r}")
+          html_url = page_url + f'?checkpoint=iowa-sample-1i&run={run_id}'
+          html_bytes = fetch(html_url, attempts=12)
+          html = html_bytes.decode('utf-8')
+          for required in (
+              '<title>Test build Guitar Eyes Iowa string-aware sample proof 1I</title>',
+              'Test build: Guitar Eyes Iowa string-aware sample proof 1I.',
+          ):
+              if required not in html:
+                  raise RuntimeError(f'Hosted HTML is missing {required!r}')
 
           class AssetParser(HTMLParser):
               def __init__(self):
                   super().__init__()
                   self.assets = []
               def handle_starttag(self, tag, attrs):
-                  attrs = dict(attrs)
-                  for key in ("src", "href"):
-                      value = attrs.get(key)
-                      if value and value.startswith("/guitar-eyes/"):
+                  attributes = dict(attrs)
+                  for key in ('src', 'href'):
+                      value = attributes.get(key)
+                      if value and value.startswith('/guitar-eyes/'):
                           self.assets.append(value)
 
           parser = AssetParser()
           parser.feed(html)
           assets = sorted(set(parser.assets))
-          if not assets:
-              raise RuntimeError("Hosted HTML did not reference repository-scoped assets")
-
-          downloaded = {}
-          for asset in assets:
-              url = urllib.parse.urljoin(page_url, asset)
-              with urllib.request.urlopen(url, timeout=20) as response:
-                  if response.status != 200:
-                      raise RuntimeError(f"Hosted asset returned {response.status}: {asset}")
-                  downloaded[asset] = response.read()
-
-          main_assets = [asset for asset in assets if re.search(r"/main\.[^.]+\.js$", asset)]
+          main_assets = [asset for asset in assets if re.search(r'/main\.[^.]+\.js$', asset)]
           if len(main_assets) != 1:
-              raise RuntimeError(f"Expected one primary main JavaScript asset, found {main_assets}")
+              raise RuntimeError(f'Expected one main JavaScript asset, found {main_assets}')
           main_asset = main_assets[0]
-          main_text = downloaded[main_asset].decode("utf-8")
-          required_bundle = [
-              "Guitar Eyes procedural timbre quality proof 1H",
-              "Audition current position",
-              "INVALID_TIMBRE_EVENT",
-              "A procedural string profile requires one valid pitched-string event.",
-              "Current position is a rest. No pitched sound was played.",
-              "Previous position",
-              "Read current position",
-              "Next position",
-              "iPhone tablature reader",
-              "Desktop tablature reader",
-          ]
-          for value in required_bundle:
-              if value not in main_text:
-                  raise RuntimeError(f"Hosted primary JavaScript is missing {value!r}")
+          main_bytes = fetch(urllib.parse.urljoin(page_url, main_asset))
+          main_text = main_bytes.decode('utf-8')
+          for required in (
+              'Guitar Eyes Iowa string-aware sample proof 1I',
+              'string-1-e4.wav',
+              'string-6-e2.wav',
+              'IOWA_SAMPLE_RANGE_UNSUPPORTED',
+              'Audition current position',
+              'Previous position',
+              'Read current position',
+              'Next position',
+              'Current position is a rest. No pitched sound was played.',
+          ):
+              if required not in main_text:
+                  raise RuntimeError(f'Hosted JavaScript is missing {required!r}')
 
-          forbidden_extensions = (".mp3", ".wav", ".ogg", ".flac", ".sf2")
-          for asset in assets:
-              if asset.lower().endswith(forbidden_extensions):
-                  raise RuntimeError(f"Hosted page references forbidden audio asset: {asset}")
+          local_lock_bytes = Path('public/samples/iowa-guitar/manifest.json').read_bytes()
+          local_lock = json.loads(local_lock_bytes)
+          manifest_url = urllib.parse.urljoin(
+              page_url,
+              f'samples/iowa-guitar/manifest.json?run={run_id}',
+          )
+          hosted_lock_bytes = fetch(manifest_url)
+          hosted_lock = json.loads(hosted_lock_bytes)
+          if hosted_lock != local_lock:
+              raise RuntimeError('Hosted sample manifest differs from the locked manifest')
 
-          evidence_path = "/tmp/procedural-timbre-publication-evidence/hosted-readback.txt"
-          with open(evidence_path, "w", encoding="utf-8") as evidence:
-              evidence.write(f"page_url={page_url}\n")
-              evidence.write("html_status=200\n")
-              evidence.write(f"html_sha256={hashlib.sha256(html_bytes).hexdigest()}\n")
-              evidence.write(f"main_asset={main_asset}\n")
-              evidence.write(
-                  f"main_js_sha256={hashlib.sha256(downloaded[main_asset]).hexdigest()}\n"
+          sample_evidence = []
+          for sample in local_lock['samples']:
+              relative = 'samples/iowa-guitar/' + sample['derivedFilename']
+              url = urllib.parse.urljoin(page_url, relative + f'?run={run_id}')
+              data = fetch(url)
+              actual_hash = hashlib.sha256(data).hexdigest()
+              if len(data) != sample['derivedBytes']:
+                  raise RuntimeError(f'Hosted byte mismatch for {sample["derivedFilename"]}')
+              if actual_hash != sample['derivedSha256']:
+                  raise RuntimeError(f'Hosted hash mismatch for {sample["derivedFilename"]}')
+              sample_evidence.append(
+                  (sample['derivedFilename'], len(data), actual_hash)
               )
-              for asset in assets:
-                  evidence.write(f"asset_200={asset}\n")
-              evidence.write("hosted_timbre_contract=passed\n")
-              evidence.write("hosted_reader_contract=passed\n")
-              evidence.write("hosted_new_audio_asset_boundary=passed\n")
-          print(open(evidence_path, encoding="utf-8").read())
+
+          evidence_path = os.path.join(
+              os.environ['EVIDENCE_DIR'],
+              'hosted-readback.txt',
+          )
+          with open(evidence_path, 'w', encoding='utf-8') as evidence:
+              evidence.write(f'page_url={page_url}\n')
+              evidence.write('html_status=200\n')
+              evidence.write(f'html_sha256={hashlib.sha256(html_bytes).hexdigest()}\n')
+              evidence.write(f'main_asset={main_asset}\n')
+              evidence.write(f'main_js_sha256={hashlib.sha256(main_bytes).hexdigest()}\n')
+              evidence.write(f'manifest_sha256={hashlib.sha256(hosted_lock_bytes).hexdigest()}\n')
+              for filename, byte_count, digest in sample_evidence:
+                  evidence.write(
+                      f'sample_200={filename};bytes={byte_count};sha256={digest}\n'
+                  )
+              evidence.write('hosted_identity=passed\n')
+              evidence.write('hosted_sample_engine_contract=passed\n')
+              evidence.write('hosted_reader_contract=passed\n')
+              evidence.write('hosted_sample_asset_lock=passed\n')
+          print(Path(evidence_path).read_text())
           PY
 
-      - name: Upload short-lived publication evidence
+      - name: Upload one-day publication evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: procedural-timbre-preview-publication-evidence
-          path: /tmp/procedural-timbre-publication-evidence
+          name: iowa-sample-proof-publication-evidence
+          path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 1
 
@@ -261,7 +366,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Procedural timbre preview deployed and read back'
-                : 'Procedural timbre preview publication did not pass',
+                ? 'Iowa sample proof deployed and fully read back'
+                : 'Iowa sample proof publication did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
