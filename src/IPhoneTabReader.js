@@ -2,10 +2,10 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { installFirstAuditionFocusGuard } from "./firstAuditionFocusGuard";
 import { describePlayablePosition } from "./positionDescription";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
-import { createPositionAuditioner } from "./proceduralPluckedString";
+import { createPositionAuditioner } from "./sampleAwarePositionAuditioner";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Guitar Eyes procedural timbre quality proof 1H";
+  "Guitar Eyes Iowa string-aware sample proof 1I";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
