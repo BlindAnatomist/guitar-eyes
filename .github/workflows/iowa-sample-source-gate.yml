@@ -1,0 +1,241 @@
+name: Iowa sample proof exact source gate
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-execution-gate
+    paths:
+      - .github/workflows/iowa-sample-source-gate.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-source-gate
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_SHA: cfbb846f1c4b82f71ea117ebf20f71c52eafb330
+      BASE_SHA: 52053bca9a3e12029497f433cd834810abbfdeb6
+      ACCEPTED_APPLICATION_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-proof-source-gate
+    steps:
+      - name: Mark exact gate pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Running exact Iowa sample proof source gate',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact candidate source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify exact source and ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$ACCEPTED_APPLICATION_SHA" HEAD
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          test -z "$(git status --short)"
+
+      - name: Verify bounded file set and asset policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          expected = {
+              '.github/workflows/iowa-guitar-sample-acquisition-audit.yml',
+              '.github/workflows/iowa-sample-derivation-audit.yml',
+              'docs/iowa-sample-audition-proof-1i-plan-2026-07-31.md',
+              'public/index.html',
+              'public/samples/iowa-guitar/manifest.json',
+              'scripts/derive_iowa_guitar_samples.py',
+              'scripts/derive_iowa_guitar_samples_robust.py',
+              'src/IPhoneTabReader.js',
+              'src/buildIdentity.test.js',
+              'src/checkpointBuildIdentity.test.js',
+              'src/iowaGuitarSampleManifest.js',
+              'src/iowaGuitarSampleManifest.test.js',
+              'src/iowaSampleAuditioner.js',
+              'src/iowaSampleAuditioner.test.js',
+              'src/sampleAwarePositionAuditioner.js',
+              'src/sampleAwarePositionAuditioner.test.js',
+          }
+          actual = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', os.environ['BASE_SHA'], 'HEAD'],
+              text=True,
+          ).splitlines())
+          if actual != expected:
+              raise SystemExit(
+                  f'Changed-file boundary mismatch. Expected {sorted(expected)}; actual {sorted(actual)}'
+              )
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          forbidden = [
+              path for path in tracked
+              if path.lower().endswith(('.wav', '.aif', '.aiff', '.mp3', '.ogg', '.flac', '.sf2'))
+          ]
+          if forbidden:
+              raise SystemExit(f'Binary audio must not be committed by this proof: {forbidden}')
+          print('bounded_file_set=passed')
+          print('no_tracked_audio_assets=passed')
+          PY
+
+      - name: Verify sample lock and Python source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            scripts/derive_iowa_guitar_samples.py \
+            scripts/derive_iowa_guitar_samples_robust.py
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          lock = json.loads(Path('public/samples/iowa-guitar/manifest.json').read_text())
+          if lock['proofIdentity'] != 'Guitar Eyes Iowa string-aware sample proof 1I':
+              raise SystemExit('Wrong proof identity in sample lock')
+          if lock['derivationRun'] != 30674590285:
+              raise SystemExit('Wrong derivation run authority')
+          if lock['selectionMethod'] != 'catalog-ordered-chromatic-group-v3':
+              raise SystemExit('Wrong selection method')
+          samples = lock.get('samples', [])
+          if len(samples) != 6:
+              raise SystemExit(f'Expected six locked samples, found {len(samples)}')
+          expected_filenames = [
+              'string-1-e4.wav',
+              'string-2-b3.wav',
+              'string-3-g-sharp3.wav',
+              'string-4-e3.wav',
+              'string-5-b2.wav',
+              'string-6-e2.wav',
+          ]
+          if [sample['derivedFilename'] for sample in samples] != expected_filenames:
+              raise SystemExit('Derived filename order changed')
+          for sample in samples:
+              if len(sample['sourceSha256']) != 64 or len(sample['derivedSha256']) != 64:
+                  raise SystemExit(f'Invalid sample hash lock: {sample}')
+              if sample['derivedBytes'] < 20000:
+                  raise SystemExit(f'Implausible sample byte lock: {sample}')
+          source = Path('src/iowaGuitarSampleManifest.js').read_text()
+          for sample in samples:
+              for value in (
+                  sample['sourceFilename'],
+                  sample['sourceSha256'],
+                  sample['derivedFilename'],
+                  sample['derivedSha256'],
+              ):
+                  if value not in source:
+                      raise SystemExit(f'JavaScript manifest is missing locked value {value}')
+          print('sample_lock=passed')
+          print('python_source=passed')
+          PY
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/iowa-sample-source-gate
+          node --version | tee /tmp/iowa-sample-source-gate/node-version.txt
+          npm --version | tee /tmp/iowa-sample-source-gate/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/iowa-sample-source-gate/npm-ci.log
+
+      - name: Run complete inherited and sample proof test suite
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 \
+            | tee /tmp/iowa-sample-source-gate/test.log
+
+      - name: Build production application
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=false npm run build 2>&1 | tee /tmp/iowa-sample-source-gate/build.log
+
+      - name: Inspect compiled candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          test -f build/samples/iowa-guitar/manifest.json
+          grep -Fq '<title>Test build Guitar Eyes Iowa string-aware sample proof 1I</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa string-aware sample proof 1I.' build/index.html
+          grep -Fq 'Guitar Eyes Iowa string-aware sample proof 1I' "$main_js"
+          grep -Fq 'string-1-e4.wav' "$main_js"
+          grep -Fq 'string-6-e2.wav' "$main_js"
+          grep -Fq 'IOWA_SAMPLE_RANGE_UNSUPPORTED' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          if find build -type f \( -iname '*.wav' -o -iname '*.aif' -o -iname '*.aiff' -o -iname '*.mp3' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) | grep -q .; then
+            echo 'Source-only build unexpectedly contains audio assets' >&2
+            exit 1
+          fi
+          git diff --exit-code
+          git diff --cached --exit-code
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "main_js=$main_js"
+            sha256sum build/index.html build/samples/iowa-guitar/manifest.json "$main_js"
+            echo 'compiled_identity=passed'
+            echo 'compiled_sample_contract=passed'
+            echo 'compiled_reader_contract=passed'
+            echo 'source_build_asset_boundary=passed'
+            echo 'tracked_repository_clean=passed'
+          } | tee /tmp/iowa-sample-source-gate/artifact-inspection.txt
+
+      - name: Upload one-day gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-proof-source-gate
+          path: /tmp/iowa-sample-source-gate
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final source status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact Iowa sample proof source gate passed'
+                : 'Iowa sample proof source gate did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
