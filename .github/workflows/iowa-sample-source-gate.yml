@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      SOURCE_SHA: cfbb846f1c4b82f71ea117ebf20f71c52eafb330
+      SOURCE_SHA: 38d70ff39815417f97276596005c410d840ac26a
       BASE_SHA: 52053bca9a3e12029497f433cd834810abbfdeb6
       ACCEPTED_APPLICATION_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
       STATUS_CONTEXT: guitar-eyes/iowa-sample-proof-source-gate
@@ -74,6 +74,7 @@ jobs:
               'src/IPhoneTabReader.js',
               'src/buildIdentity.test.js',
               'src/checkpointBuildIdentity.test.js',
+              'src/compressedMusicXmlAuditionConvergence.test.js',
               'src/iowaGuitarSampleManifest.js',
               'src/iowaGuitarSampleManifest.test.js',
               'src/iowaSampleAuditioner.js',
