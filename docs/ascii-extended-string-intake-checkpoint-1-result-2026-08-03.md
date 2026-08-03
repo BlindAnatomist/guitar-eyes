@@ -12,7 +12,9 @@ Accepted application source in ancestry: `51741c03a9eaa339940c84d53e0f0f00e6413a
 
 Verified engine source: `3a6f44eeae7a8c9f19abff19c1cfd714f07a2164`
 
-Hosted publication source: `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe`
+Superseded hosted source: `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe`
+
+Accepted format-only source: `aca0cd79cc274ea598cc9e67c26e13e41e61011a`
 
 ## Implemented bounded support
 
@@ -23,11 +25,11 @@ The shared ASCII importer now supports:
 
 Every string must carry the expected octave. Custom extended-string tunings, incomplete octave evidence, and other string counts remain unsupported.
 
-The Guitar and Bass selector remains a family preference. No third selector state, second parser, second semantic model, second timing model, or sampled-audio dependency was added.
+The Guitar and Bass selector remains a family preference. Seven-string guitar remains within `Guitar family`; five-string bass is automatically detected and changes the selector from `Guitar family` to `Bass family` when necessary. No third selector state, second parser, second semantic model, or second timing model was added.
 
 ## Preserved semantic behavior
 
-The new profiles reuse the accepted semantic document, desktop projection, iPhone reader, rhythm mapping, measure model, position description, playback timeline, procedural current-position audition, file-picker focus recovery, two-second sound delay, and first-audition focus repair.
+The new profiles reuse the accepted semantic document, desktop projection, iPhone reader, rhythm mapping, measure model, position description, file-picker focus recovery, and semantic navigation.
 
 The importer preserves:
 
@@ -38,7 +40,9 @@ The importer preserves:
 5. explicit High E, Low E, and Low B identities where applicable;
 6. frets, open strings, mutes, techniques, rhythm, measures, warnings, and original spatial rows.
 
-The two project-authored fixtures now contain one explicit quarter-note open-string chord position so semantic intake, timing, and procedural pitch derivation can be verified without guessed duration.
+The two project-authored fixtures contain one explicit quarter-note open-string chord position so semantic intake, duration, string identity, and family detection can be verified without guessed timing.
+
+Playback and audition remain outside this checkpoint. Existing playback modules were not redesigned or deleted, but the accepted format-only page does not render the sound-delay selector, audition button, position-audio group, sound explanation, audition status, or historical audition proof label.
 
 ## First exact gate and classified failure
 
@@ -62,7 +66,7 @@ The coordinator now emits an extended-profile-specific error only when complete 
 
 The obsolete rejection tests were converted into positive bounded-support tests. The selector now says `Guitar family` and `Bass family`, and help text states the exact extended-string octave requirement without overclaiming support.
 
-## Successful corrected gate
+## Successful engine gate
 
 Corrected exact source: `3a6f44eeae7a8c9f19abff19c1cfd714f07a2164`
 
@@ -85,67 +89,90 @@ Results:
 11. compiled Low B identity passed;
 12. compiled Guitar-family and Bass-family selector wording passed;
 13. compiled help contract passed;
-14. compiled accepted reader controls passed;
+14. compiled semantic reader controls passed;
 15. sampled Iowa assets were absent from the build.
 
 Evidence artifact: `8868244463`, retained for one day by policy.
 
 The build retained one inherited ESLint warning in `src/compressedMusicXmlImporter.js` concerning control characters in a regular expression. This checkpoint did not modify that file, and the warning did not prevent the production build.
 
-## Hosted identity
+## Superseded 4A publication
 
-Publication source `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe` adds only the unique acceptance identity and its focused tests beyond the verified engine and result record.
-
-The hosted identity is:
+Publication source `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe` produced the hosted identity:
 
 `Guitar Eyes extended-string ASCII intake proof 4A`
 
-The static title and first heading carry that identity. Historical in-application proof labels remain compiled evidence but are hidden from the accessibility tree in this hosted acceptance build so VoiceOver encounters one build identity.
+The application passed automated verification and publication, but the hosted reader still exposed inherited playback controls. The user correctly rejected that as a violation of the format-only boundary. The 4A page is superseded and is not an accepted real-device checkpoint.
 
-## Publication inspection failures and proven correction
+## Format-only correction
 
-The application source repeatedly passed tests and production builds. Three publication attempts stopped before deployment because the workflow inspected minified HTML as if it preserved source formatting:
+The accepted page activates an explicit format-only surface. It preserves:
 
-1. run `30845148497` used ordinary `grep` across a newline;
-2. run `30845340154` assumed a space before the CSS opening brace;
-3. stale queued run `30845684336` assumed the minifier preserved combined-selector order.
+1. Previous position;
+2. Read current position;
+3. Next position;
+4. current-position description;
+5. position count;
+6. block navigation when applicable;
+7. parsing notes;
+8. VoiceOver picker-return focus.
 
-These were workflow-inspection failures, not application, test, or build failures. No failed run deployed anything.
+It omits from the rendered and accessibility trees:
 
-The proven inspection method is:
+1. Sound delay;
+2. Audition current position;
+3. Position audio;
+4. guitar-sound explanatory copy;
+5. audition status;
+6. historical audition proof labels.
 
-1. source identity tests establish that both historical-label selectors share the hidden rule;
-2. built and hosted inspection independently confirms both selector tokens survive;
-3. built and hosted inspection independently confirms a `display:none` declaration survives;
-4. inspection does not assume whitespace, selector order, or source formatting after minification.
+A dedicated regression test fails if any omitted playback surface returns while format-only mode is active.
 
-## Successful publication and live read-back
+Accepted format-only source: `aca0cd79cc274ea598cc9e67c26e13e41e61011a`
 
-Exact publication source: `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe`
+Hosted identity:
 
-Successful publication run: `30845766066`
+`Guitar Eyes format-only extended-string ASCII intake proof 4B`
 
-Status context: `guitar-eyes/ascii-extended-string-intake-4a`
+## Successful 4B gate and publication
+
+Initial 4B run `30846704243` passed the complete suite and production build, then stopped before deployment because the publication workflow expected the unminified source string `window.GUITAR_EYES_FORMAT_ONLY = true;` in built HTML. The minifier removed spaces. This was an inspection-script defect, not an application defect.
+
+The inspection was corrected to require the durable `GUITAR_EYES_FORMAT_ONLY` token while source tests continued to prove assignment to `true`.
+
+Successful publication run: `30846839893`
+
+Status context: `guitar-eyes/ascii-format-only-4b`
 
 Results:
 
-1. exact publication authority and sixteen-file boundary passed;
-2. focused build-identity tests passed;
-3. production Pages build passed;
-4. minifier-safe artifact inspection passed;
-5. unique static title and first heading passed;
-6. both hidden historical-label tokens and hidden display declaration passed;
-7. compiled seven-string guitar and five-string bass profiles passed;
-8. compiled safety errors and Low B identity passed;
-9. compiled Guitar-family and Bass-family selector wording passed;
-10. accepted Read current position and Audition current position controls passed;
-11. sampled Iowa assets were absent;
-12. GitHub Pages deployment passed;
-13. hosted HTML and JavaScript read-back passed.
+1. exact source and six-file correction boundary passed;
+2. no Iowa, WAV, sampled-audio asset, or workflow entered the feature source;
+3. 41 of 41 test suites passed;
+4. 252 of 252 tests passed;
+5. the dedicated format-only surface test passed;
+6. production Pages build passed;
+7. minifier-safe artifact inspection passed;
+8. sampled Iowa assets were absent;
+9. GitHub Pages deployment passed;
+10. hosted identity read-back passed.
 
-Publication evidence artifact: `8868630902`, retained for one day by policy.
+## Real-iPhone VoiceOver acceptance
 
-Pages artifact: `8868624677`, retained for one day by policy.
+Real-device test date: August 3, 2026.
+
+Device and access mode: iPhone with VoiceOver.
+
+User-reported results:
+
+1. file-picker return focus was correct;
+2. the audition button, sound-delay selector, and all other playback-mode surfaces were absent;
+3. the seven-string guitar fixture read all seven strings;
+4. the five-string bass fixture read all five strings;
+5. seven-string guitar correctly remained within `Guitar family`, so the family selector did not need to change;
+6. five-string bass was detected automatically and changed the selector to `Bass family` without manual intervention.
+
+Real-device acceptance verdict: passed.
 
 ## Repository restoration
 
@@ -159,8 +186,8 @@ The comparison showed zero commits ahead, zero behind, and zero changed files.
 
 No pull request, merge, upstream modification, sampled-audio reopening, or teacher-mode implementation occurred.
 
-## Remaining acceptance boundary
+## Checkpoint status
 
-Automated verification, production build, publication, and hosted read-back are complete.
+ASCII Extended-String Intake Checkpoint 1 is automated-test accepted, production-build accepted, hosted-read-back accepted, and real-iPhone VoiceOver accepted.
 
-The remaining requirement is one bounded real-iPhone test of the exact seven-string guitar and five-string bass fixtures. The test concerns intake, semantic speech, family detection, duration, focus recovery, and preservation of accepted reader controls. It does not reopen sampled-audio testing or require a sound-quality judgment.
+The accepted scope is exact octave-qualified standard seven-string guitar and five-string bass ASCII through the shared semantic readers, with a format-only iPhone surface. Playback remains sealed and deferred.
