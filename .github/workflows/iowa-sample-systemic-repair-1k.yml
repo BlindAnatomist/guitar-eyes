@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      SOURCE_SHA: 61de66b7b967d62caaf4b392f7963fc8510e8199
+      SOURCE_SHA: 14446381f8e0c0ba49bfb2481c0e68e1e4e468c2
       BASE_SHA: 33ae73dbe6f26655ab31ebb567acf54887661ce1
       STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k
       EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k
@@ -60,6 +60,7 @@ jobs:
           expected = {
               '.github/workflows/iowa-sample-systemic-repair-1k.yml',
               'docs/iowa-sample-systemic-repair-1k-first-derivation-diagnostic-2026-08-03.md',
+              'docs/iowa-sample-systemic-repair-1k-loudness-target-diagnostic-2026-08-03.md',
               'docs/iowa-sample-systemic-repair-1k-preflight-2026-08-03.md',
               'fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml',
               'public/fixtures/iowa-all-six-strings-chord-rest.musicxml',
@@ -193,7 +194,7 @@ jobs:
                   raise SystemExit(f'Byte mismatch for {path.name}')
               if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
                   raise SystemExit(f'Hash mismatch for {path.name}')
-              if abs(sample['activeRmsDbfs'] + 24.0) > 1.25:
+              if abs(sample['activeRmsDbfs'] + 30.0) > 1.25:
                   raise SystemExit(f'Unsafe active loudness for {path.name}')
           print('six_sample_lock=passed')
           print('cross_sample_balance=passed')
