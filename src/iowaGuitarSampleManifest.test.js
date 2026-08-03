@@ -7,7 +7,7 @@ import {
 } from "./iowaGuitarSampleManifest";
 
 describe("Iowa guitar sample manifest", () => {
-  test("keeps one licensed and hash-locked anchor on each physical guitar string", () => {
+  test("keeps one licensed, balanced, and hash-locked anchor on each physical guitar string", () => {
     expect(IOWA_GUITAR_SAMPLE_MANIFEST).toHaveLength(6);
     expect(IOWA_GUITAR_SAMPLE_MANIFEST.map((entry) => entry.stringIndex)).toEqual([
       0,
@@ -23,10 +23,22 @@ describe("Iowa guitar sample manifest", () => {
       expect(entry.derivedFilename).toMatch(/\.wav$/);
       expect(entry.derivedBytes).toBeGreaterThan(20000);
       expect(entry.derivedSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(entry.derivedWindowRms).toBeGreaterThanOrEqual(1450);
+      expect(entry.postDerivationDefensiblePitch).toBe(true);
+      expect(
+        Math.abs(entry.postDerivationEstimatedMidi - entry.anchorMidi)
+      ).toBeLessThanOrEqual(1);
     });
+
+    const lowE = IOWA_GUITAR_SAMPLE_MANIFEST.find(
+      (entry) => entry.stringNumber === 6
+    );
+    expect(lowE.sourceEstimatedMidi).toBe(40);
+    expect(lowE.usedExactEstimatedMidi).toBe(true);
+    expect(lowE.postDerivationEstimatedMidi).toBe(40);
   });
 
-  test("matches the public machine-readable derivation lock", () => {
+  test("matches the public machine-readable 1K derivation lock", () => {
     const lock = JSON.parse(
       fs.readFileSync(
         path.join(
@@ -40,21 +52,50 @@ describe("Iowa guitar sample manifest", () => {
       )
     );
 
-    expect(lock.proofIdentity).toBe("Guitar Eyes Iowa string-aware sample proof 1I");
-    expect(lock.selectionMethod).toBe("catalog-ordered-chromatic-group-v3");
+    expect(lock.proofIdentity).toBe(
+      "Guitar Eyes Iowa sample integrity and focus proof 1K"
+    );
+    expect(lock.selectionMethod).toBe(
+      "catalog-group-exact-or-defensible-pitch-then-rms-v2"
+    );
+    expect(lock.normalizationMethod).toBe(
+      "35hz-high-pass-max-100ms-rms-v1"
+    );
     expect(lock.samples).toHaveLength(6);
     expect(
-      lock.samples.map(({ derivedFilename, derivedBytes, derivedSha256 }) => ({
-        derivedFilename,
-        derivedBytes,
-        derivedSha256,
-      }))
-    ).toEqual(
-      IOWA_GUITAR_SAMPLE_MANIFEST.map(
-        ({ derivedFilename, derivedBytes, derivedSha256 }) => ({
+      lock.samples.map(
+        ({
           derivedFilename,
           derivedBytes,
           derivedSha256,
+          derivedWindowRms,
+          postDerivationEstimatedMidi,
+          postDerivationDefensiblePitch,
+        }) => ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          derivedWindowRms,
+          postDerivationEstimatedMidi,
+          postDerivationDefensiblePitch,
+        })
+      )
+    ).toEqual(
+      IOWA_GUITAR_SAMPLE_MANIFEST.map(
+        ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          derivedWindowRms,
+          postDerivationEstimatedMidi,
+          postDerivationDefensiblePitch,
+        }) => ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          derivedWindowRms,
+          postDerivationEstimatedMidi,
+          postDerivationDefensiblePitch,
         })
       )
     );
@@ -94,9 +135,15 @@ describe("Iowa guitar sample manifest", () => {
 
   test("does not invent a sample for malformed or non-pitched events", () => {
     expect(selectIowaGuitarSample(null)).toBeNull();
-    expect(selectIowaGuitarSample({ type: "muted-string", stringIndex: 1 })).toBeNull();
     expect(
-      selectIowaGuitarSample({ type: "pitched-string", stringIndex: 9, midi: 64 })
+      selectIowaGuitarSample({ type: "muted-string", stringIndex: 1 })
+    ).toBeNull();
+    expect(
+      selectIowaGuitarSample({
+        type: "pitched-string",
+        stringIndex: 9,
+        midi: 64,
+      })
     ).toBeNull();
   });
 });
