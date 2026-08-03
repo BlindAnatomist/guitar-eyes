@@ -8,7 +8,26 @@ async function loadBrowserWorkerFactory() {
   return module.createGuitarProBrowserWorker;
 }
 
-export async function buildGuitarProArchiveProofReaderDocuments(
+function sourceLabel(intermediate) {
+  switch (intermediate?.sourceVersion) {
+    case "GP3":
+      return "Guitar Pro 3 tablature";
+    case "GP4":
+      return "Guitar Pro 4 tablature";
+    case "GP5":
+      return "Guitar Pro 5 tablature";
+    case "GP6":
+      return "Guitar Pro 6 tablature";
+    case "GP7":
+      return "Guitar Pro 7 tablature";
+    case "GP8":
+      return "Guitar Pro 8 tablature";
+    default:
+      return "Guitar Pro tablature";
+  }
+}
+
+export async function buildGuitarProReaderDocuments(
   file,
   {
     workerFactory = null,
@@ -27,6 +46,7 @@ export async function buildGuitarProArchiveProofReaderDocuments(
     });
   }
 
+  const sourceFormatLabel = sourceLabel(resolvedIntermediate);
   const trackInventory = inventory(resolvedIntermediate);
   if (trackInventory.requiresSelection && !selection) {
     return {
@@ -38,8 +58,8 @@ export async function buildGuitarProArchiveProofReaderDocuments(
       resolvedInstrument: null,
       instrumentWasDetected: false,
       supportOutcome: "track-selection-required",
-      sourceFormat: "guitar-pro-archive",
-      sourceFormatLabel: "Guitar Pro archive tablature",
+      sourceFormat: "guitar-pro",
+      sourceFormatLabel,
       requiresTrackSelection: true,
       trackInventory,
       guitarProIntermediate: resolvedIntermediate,
@@ -60,11 +80,14 @@ export async function buildGuitarProArchiveProofReaderDocuments(
     requestedInstrument: semanticDocument.instrument,
     resolvedInstrument: semanticDocument.instrument,
     instrumentWasDetected: false,
-    supportOutcome: "checkpoint-proof",
-    sourceFormat: "guitar-pro-archive",
-    sourceFormatLabel: "Guitar Pro archive tablature",
+    supportOutcome: "checkpoint-foundation",
+    sourceFormat: "guitar-pro",
+    sourceFormatLabel,
     requiresTrackSelection: false,
     trackInventory,
     guitarProIntermediate: null,
   };
 }
+
+export const buildGuitarProArchiveProofReaderDocuments =
+  buildGuitarProReaderDocuments;
