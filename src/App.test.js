@@ -65,6 +65,8 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByRole("radio", { name: "iPhone semantic reader" })).not.toBeChecked();
     expect(screen.getByLabelText("Upload tablature file:")).toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Guitar family" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Bass family" })).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
       screen.getByText(/Test build: Guitar Pro multi-track binary proof 3D/i)
@@ -163,7 +165,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByText(/could not be loaded in iPhone reading mode/i)).toBeInTheDocument();
   });
 
-  test("recognizes unsupported seven-string ASCII without showing a misleading desktop grid", async () => {
+  test("loads exact seven-string ASCII into the desktop semantic reader", async () => {
     render(<App />);
 
     const file = new File(
@@ -178,12 +180,15 @@ describe("Guitar Eyes application shell", () => {
 
     const heading = await screen.findByRole("heading", {
       level: 2,
-      name: "Tablature could not be loaded",
+      name: "Desktop tablature reader",
     });
 
-    expect(screen.getByText(/recognized 7-string ASCII tablature/i)).toBeInTheDocument();
-    expect(screen.getByText(/string count that is not yet supported/i)).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { level: 3, name: "Tablature 1" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Loaded 1 synchronized positions/i)).toBeInTheDocument();
+    expect(screen.getByText(/Low B string, open/i)).toBeInTheDocument();
+    expect(screen.getByText(/Duration, quarter note/i)).toBeInTheDocument();
+    expect(screen.getAllByRole("table")).toHaveLength(1);
+    expect(screen.queryByRole("heading", { name: "Tablature could not be loaded" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Choose Instrument:")).toHaveValue("guitar");
 
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
