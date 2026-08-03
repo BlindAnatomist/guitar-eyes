@@ -12,11 +12,19 @@ const InfoSection = () => (
 
     <h3>Supported file intake</h3>
     <p>
-      Accepted support currently includes selected .txt and .tab ASCII tablature and
-      uncompressed .musicxml or .xml six-string guitar tablature containing explicit
-      string and fret data. This unhosted branch also contains a project-authored Guitar
-      Pro 7 dependency and normalization proof. That proof is not yet general Guitar Pro
-      support and must not be treated as a published feature.
+      Accepted ASCII support includes standard six-string guitar and four-string bass,
+      plus exact standard seven-string guitar and five-string bass when every string
+      label includes the expected octave. Uncompressed .musicxml or .xml support remains
+      bounded to six-string guitar tablature containing explicit string and fret data.
+      This branch also retains the accepted bounded Guitar Pro import described by the
+      repository records; it is not general Guitar Pro compatibility.
+    </p>
+
+    <h3>Instrument family selector</h3>
+    <p>
+      Guitar and Bass are family preferences rather than fixed string counts. Guitar Eyes
+      uses complete string structure and safe tuning evidence to detect a supported family
+      and updates the selector when the uploaded tablature proves the other family.
     </p>
 
     <h3>Position navigation</h3>
@@ -48,9 +56,10 @@ const InfoSection = () => (
     <p>
       When an ASCII text file cannot yet be interpreted safely by the shared semantic
       model, the original Guitar Eyes grid remains available as a compatibility fallback
-      rather than inventing musical meaning. Compressed MusicXML, Guitar Pro versions
-      outside the internal proof, PowerTab, TuxGuitar, TablEdit, and unsupported string
-      counts produce explicit messages instead of misleading reader results.
+      rather than inventing musical meaning. Extended-string ASCII without the exact
+      bounded octave evidence, other unsupported string counts, unsupported Guitar Pro
+      families, PowerTab, TuxGuitar, and TablEdit produce explicit messages instead of
+      misleading reader results.
     </p>
   </>
 );
