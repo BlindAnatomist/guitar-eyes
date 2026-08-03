@@ -59,7 +59,7 @@ function inspectLegacy(bytes, expectedFamily) {
   }
 
   const declaredLength = bytes[0];
-  if (declaredLength < LEGACY_PREFIX.length + 3 || declaredLength > 30) {
+  if (declaredLength < LEGACY_PREFIX.length + 4 || declaredLength > 30) {
     throw new GuitarProSourceError(
       "The legacy Guitar Pro version-string length is invalid.",
       "MALFORMED_LEGACY_GUITAR_PRO_HEADER"
@@ -80,7 +80,7 @@ function inspectLegacy(bytes, expectedFamily) {
     );
   }
 
-  const versionMatch = /^FICHIER GUITAR PRO ([0-9]+)\.([0-9]+)$/u.exec(
+  const versionMatch = /^FICHIER GUITAR PRO v([0-9]+)\.([0-9]+)$/u.exec(
     versionText
   );
   if (!versionMatch) {
