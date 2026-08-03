@@ -59,6 +59,7 @@ jobs:
           import subprocess
 
           expected = {
+              'docs/iowa-sample-systemic-repair-1k-first-derivation-diagnostic-2026-08-03.md',
               'docs/iowa-sample-systemic-repair-1k-preflight-2026-08-03.md',
               'fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml',
               'public/fixtures/iowa-all-six-strings-chord-rest.musicxml',
