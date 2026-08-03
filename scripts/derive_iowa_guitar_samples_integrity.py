@@ -24,8 +24,10 @@ HIGH_PASS_HZ = 35.0
 TARGET_WINDOW_RMS = 1800.0
 MIN_OUTPUT_WINDOW_RMS = 1450.0
 MAX_OUTPUT_PEAK = 32767.0 * 0.82
-MAX_AMPLIFICATION = 24.0
+MAX_AMPLIFICATION = 30.0
 PITCH_NEAR_BEST_MARGIN = 0.10
+MAX_ESTIMATED_MIDI_DISTANCE = 1
+MAX_TARGET_TO_BEST_SCORE_GAP = 0.02
 MIN_POST_DERIVATION_PITCH_SCORE = 0.34
 
 selection_evidence: dict[int, dict[str, object]] = {}
@@ -83,6 +85,13 @@ def candidate_strength(samples, sample_rate: int, candidate) -> float:
     return maximum_window_rms(high_pass(samples[start:end], sample_rate), sample_rate)
 
 
+def is_defensible_pitch(candidate, target_midi: int) -> bool:
+    return (
+        abs(candidate.best_midi - target_midi) <= MAX_ESTIMATED_MIDI_DISTANCE
+        and candidate.target_score >= candidate.best_score - MAX_TARGET_TO_BEST_SCORE_GAP
+    )
+
+
 def choose_integrity_candidate(samples, sample_rate: int, target_midi: int):
     global current_target_midi
     current_target_midi = target_midi
@@ -110,15 +119,20 @@ def choose_integrity_candidate(samples, sample_rate: int, target_midi: int):
     group_start = round(len(candidates) * ordinal / note_count)
     group_end = round(len(candidates) * (ordinal + 1) / note_count)
     group = candidates[group_start:group_end]
-    eligible = [
+    pitch_valid = [
         candidate
         for candidate in group
         if candidate.available_samples >= round(sample_rate * base.MIN_DERIVED_SECONDS)
         and candidate.target_score >= 0.45
+        and is_defensible_pitch(candidate, target_midi)
     ]
+    exact_pitch = [
+        candidate for candidate in pitch_valid if candidate.best_midi == target_midi
+    ]
+    eligible = exact_pitch or pitch_valid
     if not eligible:
         raise RuntimeError(
-            f"No pitch-eligible catalog take remained for target MIDI {target_midi}"
+            f"No defensible catalog take remained for target MIDI {target_midi}"
         )
 
     best_target_score = max(candidate.target_score for candidate in eligible)
@@ -141,7 +155,8 @@ def choose_integrity_candidate(samples, sample_rate: int, target_midi: int):
     )
 
     selection_evidence[target_midi] = {
-        "selectionMethod": "catalog-group-near-best-pitch-then-audible-rms-v1",
+        "selectionMethod": "catalog-group-exact-or-defensible-pitch-then-rms-v2",
+        "usedExactEstimatedMidi": bool(exact_pitch),
         "bestTargetPitchScore": round(best_target_score, 6),
         "pitchEligibilityFloor": round(pitch_floor, 6),
         "chosenAudibleWindowRmsBeforeNormalization": round(
@@ -159,6 +174,8 @@ def choose_integrity_candidate(samples, sample_rate: int, target_midi: int):
                 "audibleWindowRms": round(
                     strengths[candidate.onset_sample], 6
                 ),
+                "defensiblePitch": is_defensible_pitch(candidate, target_midi),
+                "exactEstimatedMidi": candidate.best_midi == target_midi,
                 "nearBestPitch": candidate in near_best,
                 "chosen": candidate == chosen,
             }
@@ -215,15 +232,23 @@ def derive_integrity_samples(samples, sample_rate: int, candidate) -> array.arra
     target_score, estimated_midi, best_score = base.pitch_scores(
         output, sample_rate, 0, current_target_midi
     )
+    defensible_output_pitch = (
+        abs(estimated_midi - current_target_midi) <= MAX_ESTIMATED_MIDI_DISTANCE
+        and target_score >= best_score - MAX_TARGET_TO_BEST_SCORE_GAP
+    )
     if output_window_rms < MIN_OUTPUT_WINDOW_RMS:
         raise RuntimeError(
             f"Derived MIDI {current_target_midi} remained too quiet: "
             f"window RMS {output_window_rms:.2f}"
         )
-    if target_score < MIN_POST_DERIVATION_PITCH_SCORE:
+    if (
+        target_score < MIN_POST_DERIVATION_PITCH_SCORE
+        or not defensible_output_pitch
+    ):
         raise RuntimeError(
             f"Derived MIDI {current_target_midi} failed post-derivation pitch integrity: "
-            f"target score {target_score:.3f}, estimated MIDI {estimated_midi}"
+            f"target score {target_score:.3f}, estimated MIDI {estimated_midi}, "
+            f"best score {best_score:.3f}"
         )
 
     derivation_evidence[current_target_midi] = {
@@ -239,6 +264,7 @@ def derive_integrity_samples(samples, sample_rate: int, candidate) -> array.arra
         "postDerivationTargetPitchScore": round(target_score, 6),
         "postDerivationEstimatedMidi": estimated_midi,
         "postDerivationBestPitchScore": round(best_score, 6),
+        "postDerivationDefensiblePitch": defensible_output_pitch,
     }
     return output
 
@@ -255,7 +281,7 @@ def main() -> None:
     base.run(arguments.source_dir, arguments.output_dir, arguments.evidence)
 
     evidence = json.loads(arguments.evidence.read_text(encoding="utf-8"))
-    evidence["integritySchemaVersion"] = 1
+    evidence["integritySchemaVersion"] = 2
     evidence["normalizationMethod"] = "35hz-high-pass-max-100ms-rms-v1"
     for target in evidence["targets"]:
         midi = int(target["target_midi"])
