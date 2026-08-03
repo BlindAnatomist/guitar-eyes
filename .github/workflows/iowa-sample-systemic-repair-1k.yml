@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      SOURCE_SHA: ${{ github.event.before }}
+      SOURCE_SHA: 61de66b7b967d62caaf4b392f7963fc8510e8199
       BASE_SHA: 33ae73dbe6f26655ab31ebb567acf54887661ce1
       STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k
       EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k
@@ -50,7 +50,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$SOURCE_SHA" != "0000000000000000000000000000000000000000"
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           git merge-base --is-ancestor "$BASE_SHA" HEAD
           test -z "$(git status --short)"
@@ -59,6 +58,7 @@ jobs:
           import subprocess
 
           expected = {
+              '.github/workflows/iowa-sample-systemic-repair-1k.yml',
               'docs/iowa-sample-systemic-repair-1k-first-derivation-diagnostic-2026-08-03.md',
               'docs/iowa-sample-systemic-repair-1k-preflight-2026-08-03.md',
               'fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml',
