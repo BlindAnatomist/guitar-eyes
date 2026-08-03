@@ -29,6 +29,27 @@ export const ASCII_INSTRUMENT_PROFILES = {
       { shortName: "low B", spokenName: "Low B string" },
     ],
   },
+  eightStringGuitar: {
+    id: "guitar",
+    profileId: "eight-string-guitar",
+    label: "eight-string guitar",
+    stringCount: 8,
+    standardTuning: ["E", "B", "G", "D", "A", "E", "B", "F#"],
+    standardOctaves: [4, 3, 3, 3, 2, 2, 1, 1],
+    requireEveryOctave: true,
+    requireExactStandardOctaves: true,
+    allowCustomTuningWithoutOctaves: false,
+    stringIdentities: [
+      { shortName: "high E", spokenName: "High E string" },
+      { shortName: "B", spokenName: "B string" },
+      { shortName: "G", spokenName: "G string" },
+      { shortName: "D", spokenName: "D string" },
+      { shortName: "A", spokenName: "A string" },
+      { shortName: "low E", spokenName: "Low E string" },
+      { shortName: "low B", spokenName: "Low B string" },
+      { shortName: "low F sharp", spokenName: "Low F sharp string" },
+    ],
+  },
   bass: {
     id: "bass",
     profileId: "four-string-bass",
@@ -55,11 +76,30 @@ export const ASCII_INSTRUMENT_PROFILES = {
       { shortName: "low B", spokenName: "Low B string" },
     ],
   },
+  sixStringBass: {
+    id: "bass",
+    profileId: "six-string-bass",
+    label: "six-string bass",
+    stringCount: 6,
+    standardTuning: ["C", "G", "D", "A", "E", "B"],
+    standardOctaves: [3, 2, 2, 1, 1, 0],
+    requireEveryOctave: true,
+    requireExactStandardOctaves: true,
+    allowCustomTuningWithoutOctaves: false,
+    stringIdentities: [
+      { shortName: "high C", spokenName: "High C string" },
+      { shortName: "G", spokenName: "G string" },
+      { shortName: "D", spokenName: "D string" },
+      { shortName: "A", spokenName: "A string" },
+      { shortName: "E", spokenName: "E string" },
+      { shortName: "low B", spokenName: "Low B string" },
+    ],
+  },
 };
 
 export const SUPPORTED_ASCII_PROFILE_KEYS_BY_FAMILY = {
-  guitar: ["guitar", "sevenStringGuitar"],
-  bass: ["bass", "fiveStringBass"],
+  guitar: ["guitar", "sevenStringGuitar", "eightStringGuitar"],
+  bass: ["bass", "fiveStringBass", "sixStringBass"],
 };
 
 export const UNSUPPORTED_ASCII_INSTRUMENT_PROFILES = {};
