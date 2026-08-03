@@ -22,8 +22,8 @@ const FORMAT_DEFINITIONS = {
     support: "supported",
     isText: false,
   },
-  "guitar-pro": {
-    id: "guitar-pro",
+  "guitar-pro-proof": {
+    id: "guitar-pro-proof",
     label: "Guitar Pro tablature",
     support: "checkpoint-foundation",
     isText: false,
@@ -68,24 +68,40 @@ const EXTENSION_FORMATS = new Map([
   ["mxl", { id: "compressed-musicxml" }],
   [
     "gp3",
-    { id: "guitar-pro", label: "Guitar Pro 3 tablature", sourceFamily: "GP3" },
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 3 tablature",
+      sourceFamily: "GP3",
+    },
   ],
   [
     "gp4",
-    { id: "guitar-pro", label: "Guitar Pro 4 tablature", sourceFamily: "GP4" },
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 4 tablature",
+      sourceFamily: "GP4",
+    },
   ],
   [
     "gp5",
-    { id: "guitar-pro", label: "Guitar Pro 5 tablature", sourceFamily: "GP5" },
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 5 tablature",
+      sourceFamily: "GP5",
+    },
   ],
   [
     "gpx",
-    { id: "guitar-pro", label: "Guitar Pro 6 tablature", sourceFamily: "GP6" },
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 6 tablature",
+      sourceFamily: "GP6",
+    },
   ],
   [
     "gp",
     {
-      id: "guitar-pro",
+      id: "guitar-pro-proof",
       label: "Guitar Pro 7 or 8 tablature",
       sourceFamily: "GP7_OR_GP8",
     },
@@ -145,7 +161,7 @@ export function unsupportedTabFormatMessage(format) {
   switch (format?.id) {
     case "compressed-musicxml":
       return "The compressed MusicXML file could not be imported. Guitar Eyes requires a valid .mxl ZIP container whose META-INF/container.xml identifies a supported MusicXML tablature score.";
-    case "guitar-pro":
+    case "guitar-pro-proof":
       return "The Guitar Pro file could not be imported. Guitar Eyes requires valid GP3, GP4, GP5, GP6 GPX, or supported GP7/GP8 internal version evidence plus a tablature track that preserves string, fret, and duration identity.";
     case "guitar-pro-2":
       return "A Guitar Pro 2 .gtp file was recognized. Guitar Eyes does not import GP2 files; support requires a separate lawful fixture and version-specific decoder evidence.";
