@@ -140,7 +140,12 @@ def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
 
 
 def _build_candidates(samples, sample_rate, target_midi):
-    detected = base.detect_attacks(samples, sample_rate)
+    try:
+        detected = base.detect_attacks(samples, sample_rate)
+    except RuntimeError as error:
+        if not str(error).startswith("No pluck attacks were detected"):
+            raise
+        detected = []
     onsets = [0, *[onset for onset in detected if onset > 0]]
     candidates = []
     for index, onset in enumerate(onsets):
