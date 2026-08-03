@@ -22,6 +22,7 @@ jobs:
     env:
       STATUS_CONTEXT: guitar-eyes/iowa-sample-integrity-diagnostic-1k
       EVIDENCE_DIR: /tmp/iowa-integrity-1k
+      PYTHONDONTWRITEBYTECODE: 1
     steps:
       - name: Mark diagnostic pending
         uses: actions/github-script@v7
@@ -56,6 +57,7 @@ jobs:
             scripts/derive_iowa_guitar_samples.py \
             scripts/derive_iowa_guitar_samples_robust.py \
             scripts/derive_iowa_guitar_samples_integrity.py
+          find scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           test -z "$(git status --short)"
           mkdir -p "$EVIDENCE_DIR/source" "$EVIDENCE_DIR/derived"
           echo "source_sha=$(git rev-parse HEAD)" > "$EVIDENCE_DIR/summary.txt"
