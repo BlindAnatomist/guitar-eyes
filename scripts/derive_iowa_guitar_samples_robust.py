@@ -17,28 +17,27 @@ base = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = base
 spec.loader.exec_module(base)
 
-# The official filenames identify ascending chromatic ranges. Each session contains
-# repeated takes of those notes in that order. These values are zero-based ordinals.
 ORDERED_GROUPS = {
-    64: {"source_note_count": 8, "target_note_ordinal": 0},  # E4 in E4-B4
-    59: {"source_note_count": 1, "target_note_ordinal": 0},  # B3 alone
-    56: {"source_note_count": 5, "target_note_ordinal": 1},  # G#3 in G3-B3
-    52: {"source_note_count": 10, "target_note_ordinal": 2},  # E3 in D3-B3
-    47: {"source_note_count": 3, "target_note_ordinal": 2},  # B2 in A2-B2
-    40: {"source_note_count": 8, "target_note_ordinal": 0},  # E2 in E2-B2
+    64: {"source_note_count": 8, "target_note_ordinal": 0},
+    59: {"source_note_count": 1, "target_note_ordinal": 0},
+    56: {"source_note_count": 5, "target_note_ordinal": 1},
+    52: {"source_note_count": 10, "target_note_ordinal": 2},
+    47: {"source_note_count": 3, "target_note_ordinal": 2},
+    40: {"source_note_count": 8, "target_note_ordinal": 0},
 }
 
-SELECTION_METHOD = "catalog-ordered-signal-validated-v4"
-TARGET_ACTIVE_RMS_DBFS = -30.0
+SELECTION_METHOD = "catalog-ordered-source-start-aware-v5"
+TARGET_ACTIVE_RMS_DBFS = -26.0
 ACTIVE_RMS_TOLERANCE_DB = 1.25
 PEAK_LIMIT = 0.88
 MAX_NORMALIZATION_GAIN = 12.0
 MIN_ABSOLUTE_ACTIVE_RMS = 180.0
-MIN_RELATIVE_GROUP_RMS = 0.35
+MIN_RELATIVE_SOURCE_RMS = 0.20
 MIN_TARGET_PITCH_SCORE = 0.45
 MAX_ESTIMATED_MIDI_DISTANCE = 1
-MIN_MOTION_FRACTION_OF_TARGET = 0.20
-MIN_ZERO_CROSSING_FRACTION_OF_TARGET = 0.22
+MIN_MOTION_FRACTION_OF_TARGET = 0.14
+MIN_ZERO_CROSSING_FRACTION_OF_TARGET = 0.18
+MIN_EVENT_GAP_SECONDS = 6.0
 ANALYSIS_START_SECONDS = 0.018
 ANALYSIS_MAX_SECONDS = 0.72
 ANALYSIS_END_GUARD_SECONDS = 0.06
@@ -140,31 +139,17 @@ def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
     }
 
 
-def _musical_candidate(candidate, metrics, group_max_rms, target_midi):
-    return (
-        candidate.available_samples
-        >= round(base.SAMPLE_RATE * base.MIN_DERIVED_SECONDS)
-        and candidate.target_score >= MIN_TARGET_PITCH_SCORE
-        and abs(candidate.best_midi - target_midi)
-        <= MAX_ESTIMATED_MIDI_DISTANCE
-        and metrics["active_rms"]
-        >= max(
-            MIN_ABSOLUTE_ACTIVE_RMS,
-            group_max_rms * MIN_RELATIVE_GROUP_RMS,
-        )
-        and metrics["motion_ratio"] >= metrics["minimum_motion_ratio"]
-        and metrics["zero_crossing_hz"]
-        >= metrics["minimum_zero_crossing_hz"]
-    )
-
-
-def choose_catalog_ordered_candidate(samples, sample_rate, target_midi):
-    attacks = base.detect_attacks(samples, sample_rate)
+def _build_candidates(samples, sample_rate, target_midi):
+    detected = base.detect_attacks(samples, sample_rate)
+    onsets = [0, *[onset for onset in detected if onset > 0]]
     candidates = []
-    for index, onset in enumerate(attacks):
-        next_onset = attacks[index + 1] if index + 1 < len(attacks) else len(samples)
+    for index, onset in enumerate(onsets):
+        next_onset = onsets[index + 1] if index + 1 < len(onsets) else len(samples)
         target_score, best_midi, best_score = base.pitch_scores(
-            samples, sample_rate, onset, target_midi
+            samples,
+            sample_rate,
+            onset,
+            target_midi,
         )
         candidates.append(
             base.Candidate(
@@ -175,61 +160,113 @@ def choose_catalog_ordered_candidate(samples, sample_rate, target_midi):
                 available_samples=max(0, next_onset - onset),
             )
         )
+    return candidates
 
-    configuration = ORDERED_GROUPS[target_midi]
-    note_count = configuration["source_note_count"]
-    ordinal = configuration["target_note_ordinal"]
-    group_start = round(len(candidates) * ordinal / note_count)
-    group_end = round(len(candidates) * (ordinal + 1) / note_count)
-    group = candidates[group_start:group_end]
+
+def _musical_candidate(candidate, metrics, source_max_rms, target_midi):
+    # Discover musical events from signal evidence only. The source files
+    # contain chromatic sequences, so target-pitch constraints here would
+    # erase every valid event except the requested note. Pitch is checked only
+    # after the catalog ordinal identifies the intended event.
+    return (
+        metrics["active_rms"]
+        >= max(
+            MIN_ABSOLUTE_ACTIVE_RMS,
+            source_max_rms * MIN_RELATIVE_SOURCE_RMS,
+        )
+        and metrics["motion_ratio"] >= metrics["minimum_motion_ratio"]
+        and metrics["zero_crossing_hz"]
+        >= metrics["minimum_zero_crossing_hz"]
+    )
+
+
+def _select_ordered_events(samples, sample_rate, target_midi):
+    candidates = _build_candidates(samples, sample_rate, target_midi)
     measured = [
         (
             candidate,
-            candidate_signal_metrics(samples, sample_rate, candidate, target_midi),
+            candidate_signal_metrics(
+                samples,
+                sample_rate,
+                candidate,
+                target_midi,
+            ),
         )
-        for candidate in group
+        for candidate in candidates
     ]
-    group_max_rms = max(
+    source_max_rms = max(
         (metrics["active_rms"] for _, metrics in measured),
         default=0.0,
     )
-
-    matches = [
+    eligible = [
         (candidate, metrics)
         for candidate, metrics in measured
-        if _musical_candidate(candidate, metrics, group_max_rms, target_midi)
+        if _musical_candidate(
+            candidate,
+            metrics,
+            source_max_rms,
+            target_midi,
+        )
     ]
-    if not matches:
+
+    minimum_gap = round(sample_rate * MIN_EVENT_GAP_SECONDS)
+    events = []
+    for candidate, metrics in sorted(
+        eligible,
+        key=lambda item: (
+            item[1]["active_rms"] * item[1]["motion_ratio"],
+            item[0].target_score,
+            -item[0].onset_sample,
+        ),
+        reverse=True,
+    ):
+        if all(
+            abs(candidate.onset_sample - accepted.onset_sample) >= minimum_gap
+            for accepted, _ in events
+        ):
+            events.append((candidate, metrics))
+
+    events.sort(key=lambda item: item[0].onset_sample)
+    return candidates, events
+
+
+def choose_catalog_ordered_candidate(samples, sample_rate, target_midi):
+    configuration = ORDERED_GROUPS[target_midi]
+    note_count = configuration["source_note_count"]
+    ordinal = configuration["target_note_ordinal"]
+    candidates, events = _select_ordered_events(
+        samples,
+        sample_rate,
+        target_midi,
+    )
+
+    if len(events) != note_count:
         diagnostic = ", ".join(
             f"{candidate.onset_sample / sample_rate:.3f}s:"
             f"midi{candidate.best_midi}:target={candidate.target_score:.3f}:"
-            f"best={candidate.best_score:.3f}:"
             f"rms={metrics['active_rms']:.1f}:"
-            f"motion={metrics['motion_ratio']:.5f}/"
-            f"{metrics['minimum_motion_ratio']:.5f}:"
-            f"zcr={metrics['zero_crossing_hz']:.1f}/"
-            f"{metrics['minimum_zero_crossing_hz']:.1f}:"
-            f"available={candidate.available_samples / sample_rate:.3f}s"
-            for candidate, metrics in measured
+            f"motion={metrics['motion_ratio']:.5f}:"
+            f"zcr={metrics['zero_crossing_hz']:.1f}"
+            for candidate, metrics in events
         )
         raise RuntimeError(
-            f"No signal-valid take remained in catalog group {ordinal + 1} "
-            f"of {note_count} for target MIDI {target_midi}. Candidates: {diagnostic}"
+            f"Expected {note_count} ordered musical events for target MIDI "
+            f"{target_midi}; found {len(events)}. Events: {diagnostic}"
         )
 
-    chosen, _ = max(
-        matches,
-        key=lambda item: (
-            item[1]["active_rms"],
-            item[0].target_score,
-            item[0].best_score,
-            min(
-                item[0].available_samples,
-                round(sample_rate * base.MAX_DERIVED_SECONDS),
-            ),
-            -item[0].onset_sample,
-        ),
-    )
+    chosen, _ = events[ordinal]
+    if (
+        chosen.target_score < MIN_TARGET_PITCH_SCORE
+        or abs(chosen.best_midi - target_midi)
+        > MAX_ESTIMATED_MIDI_DISTANCE
+    ):
+        raise RuntimeError(
+            f"Catalog event {ordinal + 1} of {note_count} failed target "
+            f"pitch validation for MIDI {target_midi}: "
+            f"onset={chosen.onset_sample / sample_rate:.3f}s, "
+            f"best_midi={chosen.best_midi}, "
+            f"target_score={chosen.target_score:.3f}"
+        )
     return chosen, candidates
 
 
