@@ -63,7 +63,34 @@ function validateGpx(evidence) {
   }
 }
 
+function validateGp7GpifOnly(evidence) {
+  if (
+    (evidence.sourceFamily || evidence.archiveFamily) !==
+      "GUITAR_PRO_SHARED_ZIP" ||
+    evidence.extensionFamily !== ".gp" ||
+    evidence.packageVariant !== "GP7_GPIF_ONLY" ||
+    evidence.rootVersion != null ||
+    evidence.gpVersion != null ||
+    evidence.encodingDescription != null ||
+    evidence.versionText !== "Guitar Pro 7 GPIF-only shared archive" ||
+    evidence.signature !== "Content/score.gpif" ||
+    !Number.isInteger(evidence.declaredTrackCount) ||
+    evidence.declaredTrackCount < 1 ||
+    evidence.trackCountEvidence !== "gpif-declaration"
+  ) {
+    fail("The GP7 GPIF-only archive evidence is missing or contradictory.");
+  }
+}
+
 function validateShared(sourceVersion, evidence) {
+  if (
+    sourceVersion === "GP7" &&
+    evidence.packageVariant === "GP7_GPIF_ONLY"
+  ) {
+    validateGp7GpifOnly(evidence);
+    return;
+  }
+
   const expectedMajor = sourceVersion.slice(2);
   const gpMajor = /^([0-9]+)(?:\.|$)/u.exec(
     String(evidence.gpVersion || "")
