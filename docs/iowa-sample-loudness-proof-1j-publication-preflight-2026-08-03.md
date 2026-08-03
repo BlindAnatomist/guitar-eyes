@@ -4,13 +4,15 @@ Date: August 3, 2026
 
 Repository: `BlindAnatomist/guitar-eyes`
 
-Branch: `work/iowa-sample-loudness-proof-1j`
+Work branch: `work/iowa-sample-loudness-proof-1j`
 
 Exact verified application source: `33ae73dbe6f26655ab31ebb567acf54887661ce1`
 
 Preserved Iowa sample proof 1I source: `4aee0deba0823b846cb2a067733ac487f8e5b6c5`
 
 Inherited accepted application source: `51741c03a9eaa339940c84d53e0f0f00e6413a93`
+
+Clean fork-main authority: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
 Verification run: `30825941641`
 
@@ -32,27 +34,29 @@ Publish only exact source `33ae73dbe6f26655ab31ebb567acf54887661ce1` so the owne
 
 ## Proven route
 
-This publication deliberately reuses the successful 1I method from run `30675069758`:
+This publication deliberately reuses the successful 1I method from run `30675069758` and the repository solution recorded as GE-003:
 
-1. check out the exact verified application source;
-2. verify accepted ancestry and the successful 1J source status;
-3. install FFmpeg on a standard Ubuntu runner;
-4. download the exact six official University of Iowa source sessions;
-5. verify source hashes;
-6. reproduce the six browser WAVs with the locked derivation script;
-7. verify every derived byte count and SHA-256;
-8. install locked Node dependencies;
-9. build with `PUBLIC_URL=/guitar-eyes`;
-10. inspect the artifact before deployment;
-11. upload and deploy through the `github-pages` environment;
-12. read back the live 1J identity, bundle, manifest, and samples;
-13. retain one day of publication evidence.
+1. create one bounded temporary publisher commit on fork `main`, because the `github-pages` environment permits deployment only from `main`;
+2. have that workflow check out exact verified application source `33ae73dbe6f26655ab31ebb567acf54887661ce1`, not the temporary publisher commit;
+3. verify accepted ancestry and the successful 1J source status;
+4. install FFmpeg on a standard Ubuntu runner;
+5. download the exact six official University of Iowa source sessions;
+6. verify source hashes;
+7. reproduce the six browser WAVs with the locked derivation script;
+8. verify every derived byte count and SHA-256;
+9. install locked Node dependencies;
+10. build with `PUBLIC_URL=/guitar-eyes`;
+11. inspect the artifact before deployment;
+12. upload and deploy through the `github-pages` environment;
+13. read back the live 1J identity, bundle, manifest, and samples;
+14. retain one day of publication evidence;
+15. immediately move fork `main` back to exact clean authority `60c2e5de0887b1bcdd426d932632946edd07d3c3` and independently verify zero divergence and zero changed files.
 
 The sample manifest remains the authoritative 1I sample-set lock because 1J changes playback gain and balance, not source recordings, extraction, or sample identity.
 
 ## Workflow boundary
 
-Trigger: one push creating the dedicated publication workflow on `work/iowa-sample-loudness-proof-1j`.
+Trigger: one temporary publisher commit on fork `main` containing only the dedicated publication workflow.
 
 Runner: standard GitHub-hosted `ubuntu-24.04`.
 
@@ -66,8 +70,8 @@ No test suite is repeated because the exact source already passed run `308259416
 
 ## Repository and cost boundary
 
-This is one intentional zero-dollar publication checkpoint. It does not modify fork `main`, touch `Phlypper/guitar-eyes`, open a pull request, merge, add a paid service or runner, or begin measure playback, full playback, teacher mode, scoring, bookmarks, AI work, or any new format.
+This is one intentional zero-dollar publication checkpoint. Fork `main` may contain the temporary publisher only for the duration of the bounded Pages run and must be restored exactly afterward. The procedure does not touch `Phlypper/guitar-eyes`, open a pull request, merge application work, add a paid service or runner, or begin measure playback, full playback, teacher mode, scoring, bookmarks, AI work, or any new format.
 
 ## Stop condition
 
-Stop after successful hosted read-back and independent confirmation that fork `main` remains identical to clean authority `60c2e5de0887b1bcdd426d932632946edd07d3c3`. The next action is bounded owner listening on the four-position proof file.
+Stop after successful hosted read-back and independent confirmation that fork `main` is again identical to clean authority `60c2e5de0887b1bcdd426d932632946edd07d3c3`. The next action is bounded owner listening on the four-position proof file.
