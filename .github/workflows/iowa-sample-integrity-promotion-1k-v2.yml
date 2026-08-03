@@ -1,0 +1,235 @@
+name: Iowa sample integrity promotion 1K v2
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-integrity-focus-proof-1k
+    paths:
+      - .github/workflows/iowa-sample-integrity-promotion-1k-v2.yml
+
+permissions:
+  contents: write
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-integrity-promotion-1k-v2
+  cancel-in-progress: false
+
+jobs:
+  promote-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BRANCH_NAME: work/iowa-sample-integrity-focus-proof-1k
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-integrity-focus-proof-1k-v2
+      EVIDENCE_DIR: /tmp/iowa-integrity-promotion-1k-v2
+      PYTHONDONTWRITEBYTECODE: 1
+    steps:
+      - name: Mark promotion pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Reproducing samples and running the established 1K gate',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Verify bounded branch source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "$BRANCH_NAME"
+          git merge-base --is-ancestor c4e4ff982cb502a192bbed409720a7fdf9b1c201 HEAD
+          test -f scripts/derive_iowa_guitar_samples_integrity.py
+          test -f public/samples/iowa-guitar/manifest.json
+          test -z "$(git status --short)"
+          mkdir -p "$EVIDENCE_DIR/source" "$EVIDENCE_DIR/derived"
+          printf 'source_sha=%s\n' "$(git rev-parse HEAD)" > "$EVIDENCE_DIR/summary.txt"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install audio decoder and fetch exact Iowa sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes sample integrity promotion/1K-v2' \
+              --output "$EVIDENCE_DIR/source/${name}" \
+              "${base}/${name}"
+          done
+
+      - name: Reproduce and promote the locked samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/derive_iowa_guitar_samples_integrity.py \
+            --source-dir "$EVIDENCE_DIR/source" \
+            --output-dir "$EVIDENCE_DIR/derived" \
+            --evidence "$EVIDENCE_DIR/derivation.json"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/iowa-integrity-promotion-1k-v2')
+          evidence = json.loads((root / 'derivation.json').read_text())
+          lock = json.loads(Path('public/samples/iowa-guitar/manifest.json').read_text())
+          targets = evidence['targets']
+          samples = {item['derivedFilename']: item for item in lock['samples']}
+          if lock['proofIdentity'] != 'Guitar Eyes Iowa sample integrity and focus proof 1K':
+              raise SystemExit('Wrong proof identity')
+          if len(targets) != 6 or len(samples) != 6:
+              raise SystemExit('Expected exactly six samples')
+          for target in targets:
+              name = target['derived_filename']
+              output = root / 'derived' / name
+              sample = samples[name]
+              digest = hashlib.sha256(output.read_bytes()).hexdigest()
+              expected = (
+                  sample['derivedBytes'],
+                  sample['derivedSha256'],
+                  sample['derivedWindowRms'],
+                  sample['postDerivationEstimatedMidi'],
+                  sample['postDerivationDefensiblePitch'],
+              )
+              actual = (
+                  output.stat().st_size,
+                  digest,
+                  target['derivedWindowRms'],
+                  target['postDerivationEstimatedMidi'],
+                  target['postDerivationDefensiblePitch'],
+              )
+              if actual != expected:
+                  raise SystemExit(f'Locked sample mismatch for {name}: {actual} != {expected}')
+          low_e = next(target for target in targets if target['target_midi'] == 40)
+          if low_e['estimatedMidi'] != 40 or low_e['postDerivationEstimatedMidi'] != 40:
+              raise SystemExit('Low E is not exact E2')
+          PY
+          rm -f public/samples/iowa-guitar/*.wav
+          cp "$EVIDENCE_DIR"/derived/*.wav public/samples/iowa-guitar/
+          sha256sum public/samples/iowa-guitar/*.wav | tee "$EVIDENCE_DIR/promoted-sha256.txt"
+
+      - name: Install exact dependencies and run all tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          CI=true npm test -- --watchAll=false
+
+      - name: Build with established nonfatal-warning policy
+        shell: bash
+        env:
+          CI: "false"
+          PUBLIC_URL: /guitar-eyes
+        run: npm run build
+
+      - name: Verify built sample identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Guitar Eyes Iowa sample integrity and focus proof 1K' \
+            build/samples/iowa-guitar/manifest.json
+          for source in public/samples/iowa-guitar/*.wav; do
+            built="build/samples/iowa-guitar/$(basename "$source")"
+            test -f "$built"
+            cmp --silent "$source" "$built"
+          done
+
+      - name: Commit verified promotion and remove temporary workflows
+        id: promote
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t changed < <(git status --short | sed 's/^...//' | sort)
+          expected=(
+            public/samples/iowa-guitar/string-1-e4.wav
+            public/samples/iowa-guitar/string-2-b3.wav
+            public/samples/iowa-guitar/string-3-g-sharp3.wav
+            public/samples/iowa-guitar/string-4-e3.wav
+            public/samples/iowa-guitar/string-5-b2.wav
+            public/samples/iowa-guitar/string-6-e2.wav
+          )
+          if [[ "${changed[*]}" != "${expected[*]}" ]]; then
+            git status --short
+            exit 1
+          fi
+          rm .github/workflows/iowa-sample-integrity-promotion-1k.yml
+          rm .github/workflows/iowa-sample-integrity-promotion-1k-v2.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/samples/iowa-guitar/*.wav \
+            .github/workflows/iowa-sample-integrity-promotion-1k.yml \
+            .github/workflows/iowa-sample-integrity-promotion-1k-v2.yml
+          git commit -m 'Promote verified Iowa sample integrity proof 1K'
+          final_sha="$(git rev-parse HEAD)"
+          echo "final_sha=$final_sha" >> "$GITHUB_OUTPUT"
+          printf 'final_sha=%s\n' "$final_sha" >> "$EVIDENCE_DIR/summary.txt"
+          git push origin "HEAD:$BRANCH_NAME"
+
+      - name: Mark final head successful
+        uses: actions/github-script@v7
+        env:
+          FINAL_SHA: ${{ steps.promote.outputs.final_sha }}
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.FINAL_SHA,
+              state: 'success',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Samples, 275 tests, focus repair, and production build passed',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Upload one-day evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-integrity-promotion-1k-v2
+          path: /tmp/iowa-integrity-promotion-1k-v2
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Mark source failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'failure',
+              context: process.env.STATUS_CONTEXT,
+              description: 'The established 1K promotion gate did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
