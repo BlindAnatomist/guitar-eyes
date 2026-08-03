@@ -1,4 +1,7 @@
-import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
+import {
+  buildGuitarProArchiveProofReaderDocuments,
+  buildGuitarProReaderDocuments,
+} from "./guitarProReaderDocuments";
 import { describePlayablePosition } from "./positionDescription";
 
 const STANDARD_GUITAR = [64, 59, 55, 50, 45, 40];
@@ -64,23 +67,35 @@ function proofTrack(name, tuning = STANDARD_GUITAR, fret = 3) {
   };
 }
 
-function proofIntermediate(tracks = [proofTrack("Proof Guitar")]) {
+function proofIntermediate(
+  tracks = [proofTrack("Proof Guitar")],
+  sourceVersion = "GP8"
+) {
   return {
     schemaVersion: 1,
-    sourceVersion: "GP8",
-    versionEvidence: GP8_VERSION_EVIDENCE,
+    sourceVersion,
+    versionEvidence:
+      sourceVersion === "GP8"
+        ? GP8_VERSION_EVIDENCE
+        : {
+            schemaVersion: 2,
+            sourceFamily: "GUITAR_PRO_LEGACY_BINARY",
+            extensionFamily: `.${sourceVersion.toLowerCase()}`,
+            sourceVersion,
+            declaredTrackCount: null,
+          },
     title: "Reader proof",
     tracks,
   };
 }
 
-describe("buildGuitarProArchiveProofReaderDocuments", () => {
+describe("buildGuitarProReaderDocuments", () => {
   test("decodes once and projects one semantic document into both readers", async () => {
     const file = { name: "proof.gp", size: 4, arrayBuffer: jest.fn() };
     const workerFactory = jest.fn(() => ({ postMessage: jest.fn() }));
     const decode = jest.fn(async () => proofIntermediate());
 
-    const result = await buildGuitarProArchiveProofReaderDocuments(file, {
+    const result = await buildGuitarProReaderDocuments(file, {
       workerFactory,
       decode,
     });
@@ -93,9 +108,9 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
       requestedInstrument: "guitar",
       resolvedInstrument: "guitar",
       instrumentWasDetected: false,
-      supportOutcome: "checkpoint-proof",
-      sourceFormat: "guitar-pro-archive",
-      sourceFormatLabel: "Guitar Pro archive tablature",
+      supportOutcome: "checkpoint-foundation",
+      sourceFormat: "guitar-pro",
+      sourceFormatLabel: "Guitar Pro 8 tablature",
       requiresTrackSelection: false,
     });
     expect(result.trackInventory.autoSelection).toEqual({
@@ -109,6 +124,22 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
     );
   });
 
+  test.each([
+    ["GP3", "Guitar Pro 3 tablature"],
+    ["GP4", "Guitar Pro 4 tablature"],
+    ["GP5", "Guitar Pro 5 tablature"],
+    ["GP6", "Guitar Pro 6 tablature"],
+    ["GP7", "Guitar Pro 7 tablature"],
+    ["GP8", "Guitar Pro 8 tablature"],
+  ])("reports %s without calling it a shared archive", async (sourceVersion, sourceFormatLabel) => {
+    const result = await buildGuitarProReaderDocuments(
+      { name: `proof.${sourceVersion.toLowerCase()}`, size: 4, arrayBuffer: jest.fn() },
+      { decode: jest.fn(async () => proofIntermediate(undefined, sourceVersion)), workerFactory: jest.fn() }
+    );
+
+    expect(result.sourceFormatLabel).toBe(sourceFormatLabel);
+  });
+
   test("returns a selection request instead of silently choosing among supported tracks", async () => {
     const ambiguous = proofIntermediate([
       proofTrack("Lead Guitar"),
@@ -116,7 +147,7 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
     ]);
     const decode = jest.fn(async () => ambiguous);
 
-    const result = await buildGuitarProArchiveProofReaderDocuments(
+    const result = await buildGuitarProReaderDocuments(
       { name: "two-tracks.gp", size: 3, arrayBuffer: jest.fn() },
       { workerFactory: jest.fn(), decode }
     );
@@ -127,6 +158,8 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
       supportOutcome: "track-selection-required",
       semanticDocument: null,
       guitarProIntermediate: ambiguous,
+      sourceFormat: "guitar-pro",
+      sourceFormatLabel: "Guitar Pro 8 tablature",
     });
     expect(result.trackInventory.supportedCount).toBe(2);
     expect(result.trackInventory.supportedItems.map((item) => item.trackName)).toEqual([
@@ -143,7 +176,7 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
     ]);
     const decode = jest.fn();
 
-    const result = await buildGuitarProArchiveProofReaderDocuments(file, {
+    const result = await buildGuitarProReaderDocuments(file, {
       intermediate: decoded,
       selection: { trackIndex: 1, staffIndex: 0 },
       decode,
@@ -161,17 +194,23 @@ describe("buildGuitarProArchiveProofReaderDocuments", () => {
     );
   });
 
+  test("keeps the historical export as an exact compatibility alias", () => {
+    expect(buildGuitarProArchiveProofReaderDocuments).toBe(
+      buildGuitarProReaderDocuments
+    );
+  });
+
   test("propagates worker failures without constructing a partial reader document", async () => {
-    const failure = Object.assign(new Error("Corrupt Guitar Pro archive"), {
-      code: "CORRUPT_GUITAR_PRO_ARCHIVE",
+    const failure = Object.assign(new Error("Corrupt Guitar Pro file"), {
+      code: "CORRUPT_GUITAR_PRO_FILE",
     });
     const decode = jest.fn(async () => {
       throw failure;
     });
 
     await expect(
-      buildGuitarProArchiveProofReaderDocuments(
-        { name: "broken.gp", size: 3, arrayBuffer: jest.fn() },
+      buildGuitarProReaderDocuments(
+        { name: "broken.gp5", size: 3, arrayBuffer: jest.fn() },
         { workerFactory: jest.fn(), decode }
       )
     ).rejects.toBe(failure);
