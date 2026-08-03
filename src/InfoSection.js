@@ -3,8 +3,8 @@ import React from "react";
 const InfoSection = () => (
   <>
     <p>
-      Welcome to Guitar Eyes for Mac. Supported ASCII guitar and bass files and
-      uncompressed MusicXML guitar tablature are imported into the same synchronized
+      Welcome to Guitar Eyes for Mac. Supported ASCII, MusicXML, compressed MusicXML,
+      and bounded Guitar Pro guitar and bass files are imported into the same synchronized
       musical document used by the iPhone reader. The desktop view preserves strings as
       rows and musical positions as columns while retaining rhythm, measures, rests,
       open strings, frets, chords, and supported notation.
@@ -15,17 +15,30 @@ const InfoSection = () => (
       Accepted ASCII support includes standard six-string guitar and four-string bass,
       plus exact standard seven-string and eight-string guitar and five-string and
       six-string bass when every string label includes the expected octave. Uncompressed
-      .musicxml or .xml support remains bounded to six-string guitar tablature containing
-      explicit string and fret data. This branch also retains the accepted bounded Guitar
-      Pro import described by the repository records; it is not general Guitar Pro
-      compatibility.
+      .musicxml or .xml and compressed .mxl support remain bounded to six-string guitar
+      tablature containing explicit string and fret data. The current Guitar Pro
+      foundation accepts internally verified GP3, GP4, GP5, GP6 GPX, and supported GP7 or
+      GP8 .gp files when alphaTab preserves a four-string bass or six-string guitar staff,
+      exact string and fret identity, measures, and supported duration. This is bounded
+      cross-format intake, not a claim that every feature in every Guitar Pro file is
+      supported.
+    </p>
+
+    <h3>Guitar Pro track selection</h3>
+    <p>
+      A Guitar Pro file with one supported tablature staff loads that staff directly. A
+      file with more than one supported guitar or bass staff presents an explicit track
+      selector. Guitar Eyes does not silently choose a track. Percussion, unsupported
+      string counts, conflicting voices, missing coordinates, unsafe timing, and malformed
+      internal version evidence are rejected rather than guessed.
     </p>
 
     <h3>Instrument family selector</h3>
     <p>
       Guitar and Bass are family preferences rather than fixed string counts. Guitar Eyes
       uses complete string structure and safe tuning evidence to detect a supported family
-      and updates the selector when the uploaded tablature proves the other family.
+      and updates the selector when the uploaded tablature proves the other family. The
+      family selector does not filter tracks inside a structured Guitar Pro file.
     </p>
 
     <h3>Extended-string boundary</h3>
@@ -50,7 +63,8 @@ const InfoSection = () => (
       Previous position and Next position move quietly. Read current position is the only
       action that announces the complete playing instruction. When a file contains more
       than one tablature block, Previous tablature block and Next tablature block jump
-      quietly between blocks.
+      quietly between blocks. The accepted format-only surface contains no audition,
+      sound-delay, or position-audio controls.
     </p>
 
     <h3>Spatial overview</h3>
@@ -67,9 +81,9 @@ const InfoSection = () => (
       When an ASCII text file cannot yet be interpreted safely by the shared semantic
       model, the original Guitar Eyes grid remains available as a compatibility fallback
       rather than inventing musical meaning. Extended-string ASCII without the exact
-      bounded octave evidence, other unsupported string counts, unsupported Guitar Pro
-      families, PowerTab, TuxGuitar, and TablEdit produce explicit messages instead of
-      misleading reader results.
+      bounded octave evidence, Guitar Pro 2 .gtp, unsupported Guitar Pro structures,
+      PowerTab, TuxGuitar, and TablEdit produce explicit messages instead of misleading
+      reader results.
     </p>
   </>
 );
