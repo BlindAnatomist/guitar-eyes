@@ -9,6 +9,7 @@ import {
   ASCII_INSTRUMENT_PROFILES,
   collectTabStringLineRuns,
   containsPlayableAsciiNotation,
+  SUPPORTED_ASCII_PROFILE_KEYS_BY_FAMILY,
   UNSUPPORTED_ASCII_INSTRUMENT_PROFILES,
 } from "./tabStringLine";
 
@@ -18,26 +19,82 @@ function alternateInstrument(selectedInstrument) {
   return selectedInstrument === "bass" ? "guitar" : "bass";
 }
 
-function supportedCandidateAnalyses(sourceText, requestedInstrument) {
-  const candidates = [requestedInstrument, alternateInstrument(requestedInstrument)];
+function orderedProfileKeys(requestedInstrument) {
+  const alternate = alternateInstrument(requestedInstrument);
+  return [
+    ...SUPPORTED_ASCII_PROFILE_KEYS_BY_FAMILY[requestedInstrument],
+    ...SUPPORTED_ASCII_PROFILE_KEYS_BY_FAMILY[alternate],
+  ];
+}
 
-  return candidates
-    .map((instrument) => ({
-      instrument,
-      analysis: analyzeTabRunsForProfile(
-        sourceText,
-        ASCII_INSTRUMENT_PROFILES[instrument]
-      ),
-    }))
+function supportedCandidateAnalyses(sourceText, requestedInstrument) {
+  return orderedProfileKeys(requestedInstrument)
+    .map((profileKey) => {
+      const profile = ASCII_INSTRUMENT_PROFILES[profileKey];
+      return {
+        profileKey,
+        profile,
+        analysis: analyzeTabRunsForProfile(sourceText, profile),
+      };
+    })
     .filter((candidate) => candidate.analysis.valid)
     .sort((left, right) => {
       const confidenceDifference =
         right.analysis.confidence - left.analysis.confidence;
       if (confidenceDifference !== 0) return confidenceDifference;
-      if (left.instrument === requestedInstrument) return -1;
-      if (right.instrument === requestedInstrument) return 1;
+
+      const leftPreferred = left.profile.id === requestedInstrument;
+      const rightPreferred = right.profile.id === requestedInstrument;
+      if (leftPreferred && !rightPreferred) return -1;
+      if (rightPreferred && !leftPreferred) return 1;
       return 0;
     });
+}
+
+function applyProfileStringIdentities(document, profile) {
+  if (!Array.isArray(profile.stringIdentities)) return document;
+
+  const blocks = document.blocks.map((block) => {
+    const strings = block.strings.map((string, index) => ({
+      ...string,
+      ...(profile.stringIdentities[index] || {}),
+    }));
+    return { ...block, strings };
+  });
+
+  return {
+    ...document,
+    blocks,
+    strings: blocks.flatMap((block) => block.strings),
+  };
+}
+
+function exactCountProfileError(sourceText, requestedInstrument) {
+  const collected = collectTabStringLineRuns(sourceText);
+  const hasPlayableRun = collected.runs.some((run) =>
+    run.some((entry) => containsPlayableAsciiNotation(entry.content))
+  );
+
+  if (!hasPlayableRun) return null;
+
+  for (const profileKey of orderedProfileKeys(requestedInstrument)) {
+    const profile = ASCII_INSTRUMENT_PROFILES[profileKey];
+    const hasExactCountRun = collected.runs.some(
+      (run) => run.length > 0 && run.length % profile.stringCount === 0
+    );
+    if (!hasExactCountRun) continue;
+
+    const analysis = analyzeTabRunsForProfile(sourceText, profile);
+    if (
+      !analysis.valid &&
+      analysis.code !== "NO_TABLATURE_BLOCKS" &&
+      analysis.code !== "INCOMPLETE_TABLATURE_BLOCK"
+    ) {
+      return new TabParseError(analysis.message, analysis.code);
+    }
+  }
+
+  return null;
 }
 
 function unsupportedStringCountError(sourceText) {
@@ -62,7 +119,7 @@ function unsupportedStringCountError(sourceText) {
   const labels = stringCounts.map((count) => `${count}-string`).join(" and ");
 
   return new TabParseError(
-    `Guitar Eyes recognized ${labels} ASCII tablature. Semantic reading currently supports complete four-string bass and six-string guitar blocks; this verified string-count family was preserved but not guessed into another instrument.`,
+    `Guitar Eyes recognized ${labels} ASCII tablature. This verified string-count family was preserved but is not yet supported by the semantic reader.`,
     "UNSUPPORTED_STRING_COUNT"
   );
 }
@@ -76,8 +133,15 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
 
   for (const candidate of candidates) {
     try {
-      const parsedDocument = parseTabDocumentText(sourceText, candidate.instrument);
-      const rhythmDocument = applyAsciiRhythmToDocument(sourceText, parsedDocument);
+      const parsedDocument = parseTabDocumentText(sourceText, candidate.profileKey);
+      const identifiedDocument = applyProfileStringIdentities(
+        parsedDocument,
+        candidate.profile
+      );
+      const rhythmDocument = applyAsciiRhythmToDocument(
+        sourceText,
+        identifiedDocument
+      );
       const semanticDocument = applyExplicitMeasuresToDocument(rhythmDocument);
       const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
@@ -87,20 +151,21 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
         semanticDocument,
         semanticError: null,
         requestedInstrument,
-        resolvedInstrument: candidate.instrument,
-        instrumentWasDetected: candidate.instrument !== requestedInstrument,
+        resolvedInstrument: candidate.profile.id,
+        instrumentWasDetected: candidate.profile.id !== requestedInstrument,
         supportOutcome: "supported",
         sourceFormat: "ascii-text",
         sourceFormatLabel: "ASCII text tablature",
       };
     } catch (error) {
-      if (candidate.instrument === requestedInstrument || semanticError === null) {
+      if (candidate.profile.id === requestedInstrument || semanticError === null) {
         semanticError = error;
       }
     }
   }
 
   semanticError =
+    exactCountProfileError(sourceText, requestedInstrument) ||
     unsupportedStringCountError(sourceText) ||
     semanticError ||
     (() => {
@@ -110,7 +175,7 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
       );
       return new TabParseError(
         requestedAnalysis.message ||
-          "The tablature could not be normalized safely as four-string bass or six-string guitar.",
+          "The tablature could not be normalized safely as a supported guitar or bass profile.",
         requestedAnalysis.code || "INSTRUMENT_STRUCTURE_MISMATCH"
       );
     })();
