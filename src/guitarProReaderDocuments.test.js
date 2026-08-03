@@ -17,6 +17,55 @@ const GP8_VERSION_EVIDENCE = Object.freeze({
   entryCount: 6,
 });
 
+function sourceEvidence(sourceVersion) {
+  if (sourceVersion === "GP8") return GP8_VERSION_EVIDENCE;
+
+  const major = Number(sourceVersion.slice(2));
+  if (major >= 3 && major <= 5) {
+    return {
+      schemaVersion: 2,
+      sourceFamily: "GUITAR_PRO_LEGACY_BINARY",
+      extensionFamily: `.gp${major}`,
+      sourceVersion,
+      versionText: `FICHIER GUITAR PRO v${major}.${major === 5 ? "10" : "00"}`,
+      major,
+      minor: major === 5 ? 10 : 0,
+      signature: "FICHIER GUITAR PRO",
+      declaredTrackCount: null,
+      trackCountEvidence: "decoder-only",
+    };
+  }
+
+  if (sourceVersion === "GP6") {
+    return {
+      schemaVersion: 2,
+      sourceFamily: "GUITAR_PRO_GPX_CONTAINER",
+      extensionFamily: ".gpx",
+      sourceVersion,
+      versionText: "Guitar Pro 6",
+      major: 6,
+      minor: null,
+      signature: "BCFZ",
+      declaredTrackCount: null,
+      trackCountEvidence: "decoder-only",
+    };
+  }
+
+  return {
+    schemaVersion: 2,
+    archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+    sourceFamily: "GUITAR_PRO_SHARED_ZIP",
+    extensionFamily: ".gp",
+    rootVersion: "7.0",
+    gpVersion: `${major}.0.0`,
+    encodingDescription: sourceVersion,
+    sourceVersion,
+    entryCount: 6,
+    declaredTrackCount: 1,
+    trackCountEvidence: "gpif-declaration",
+  };
+}
+
 function proofTrack(name, tuning = STANDARD_GUITAR, fret = 3) {
   return {
     name,
@@ -74,16 +123,7 @@ function proofIntermediate(
   return {
     schemaVersion: 1,
     sourceVersion,
-    versionEvidence:
-      sourceVersion === "GP8"
-        ? GP8_VERSION_EVIDENCE
-        : {
-            schemaVersion: 2,
-            sourceFamily: "GUITAR_PRO_LEGACY_BINARY",
-            extensionFamily: `.${sourceVersion.toLowerCase()}`,
-            sourceVersion,
-            declaredTrackCount: null,
-          },
+    versionEvidence: sourceEvidence(sourceVersion),
     title: "Reader proof",
     tracks,
   };
@@ -131,14 +171,28 @@ describe("buildGuitarProReaderDocuments", () => {
     ["GP6", "Guitar Pro 6 tablature"],
     ["GP7", "Guitar Pro 7 tablature"],
     ["GP8", "Guitar Pro 8 tablature"],
-  ])("reports %s without calling it a shared archive", async (sourceVersion, sourceFormatLabel) => {
-    const result = await buildGuitarProReaderDocuments(
-      { name: `proof.${sourceVersion.toLowerCase()}`, size: 4, arrayBuffer: jest.fn() },
-      { decode: jest.fn(async () => proofIntermediate(undefined, sourceVersion)), workerFactory: jest.fn() }
-    );
+  ])(
+    "reports %s without calling it a shared archive",
+    async (sourceVersion, sourceFormatLabel) => {
+      const result = await buildGuitarProReaderDocuments(
+        {
+          name: `proof.${sourceVersion.toLowerCase()}`,
+          size: 4,
+          arrayBuffer: jest.fn(),
+        },
+        {
+          decode: jest.fn(async () =>
+            proofIntermediate(undefined, sourceVersion)
+          ),
+          workerFactory: jest.fn(),
+        }
+      );
 
-    expect(result.sourceFormatLabel).toBe(sourceFormatLabel);
-  });
+      expect(result.sourceFormatLabel).toBe(sourceFormatLabel);
+      expect(result.semanticDocument.sourceVersion).toBe(sourceVersion);
+      expect(result.semanticDocument.sourceFormat).toBe("guitar-pro");
+    }
+  );
 
   test("returns a selection request instead of silently choosing among supported tracks", async () => {
     const ambiguous = proofIntermediate([
@@ -162,10 +216,9 @@ describe("buildGuitarProReaderDocuments", () => {
       sourceFormatLabel: "Guitar Pro 8 tablature",
     });
     expect(result.trackInventory.supportedCount).toBe(2);
-    expect(result.trackInventory.supportedItems.map((item) => item.trackName)).toEqual([
-      "Lead Guitar",
-      "Bass",
-    ]);
+    expect(
+      result.trackInventory.supportedItems.map((item) => item.trackName)
+    ).toEqual(["Lead Guitar", "Bass"]);
   });
 
   test("reuses the decoded intermediate and normalizes the explicit second track", async () => {
