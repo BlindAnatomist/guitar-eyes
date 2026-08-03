@@ -240,9 +240,9 @@ describe("ASCII extended-string intake checkpoint 2", () => {
       ].join("\n"),
     ],
     [
-      "altered six-string bass",
+      "six-string bass with the wrong high-C octave",
       [
-        "C#3|--0--|",
+        "C2|--0--|",
         "G2|--0--|",
         "D2|--0--|",
         "A1|--0--|",
