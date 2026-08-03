@@ -5,7 +5,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./sampleAwarePositionAuditioner";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Guitar Eyes Iowa sample loudness proof 1J";
+  "Guitar Eyes Iowa systemic sample repair proof 1K";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
