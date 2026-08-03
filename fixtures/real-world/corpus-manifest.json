@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "created": "2026-07-26",
-  "updated": "2026-07-27",
+  "updated": "2026-08-03",
   "project": "Guitar Eyes",
   "policy": {
     "committedMaterial": "Original, public-domain, or clearly licensed only",
@@ -140,10 +140,12 @@
       "provenance": "Project-authored structural specimen",
       "license": "CC0-1.0",
       "features": [
-        "seven-string guitar",
-        "octave-qualified tuning"
+        "standard seven-string guitar",
+        "complete octave-qualified tuning",
+        "quarter-note rhythm line",
+        "one seven-note open-string chord position"
       ],
-      "currentExpectation": "Recognized ASCII with unsupported string count; no six-string reinterpretation"
+      "currentExpectation": "Semantic seven-string guitar import succeeds through the guitar family; exact string count, octave evidence, Low E and Low B identities, one quarter-note position, desktop projection, and procedural pitch events are preserved"
     },
     {
       "path": "ascii-five-string-bass.txt",
@@ -151,10 +153,12 @@
       "provenance": "Project-authored structural specimen",
       "license": "CC0-1.0",
       "features": [
-        "five-string bass",
-        "octave-qualified tuning"
+        "standard five-string bass",
+        "complete octave-qualified tuning",
+        "quarter-note rhythm line",
+        "one five-note open-string chord position"
       ],
-      "currentExpectation": "Recognized ASCII with unsupported string count; no four-string reinterpretation"
+      "currentExpectation": "Semantic five-string bass import succeeds through the bass family; exact string count, octave evidence, Low B identity, one quarter-note position, desktop projection, and procedural pitch events are preserved"
     },
     {
       "path": "ascii-ghost-harmonic-repeat-techniques.txt",
