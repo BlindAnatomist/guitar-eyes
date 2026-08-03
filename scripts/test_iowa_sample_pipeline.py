@@ -30,12 +30,17 @@ def sine(frequency: float, amplitude: float, seconds: float = 1.0) -> array.arra
     )
 
 
-def candidate(samples: array.array, midi: int) -> object:
+def candidate(
+    samples: array.array,
+    midi: int,
+    *,
+    target_score: float = 0.9,
+) -> object:
     return base.Candidate(
         onset_sample=0,
-        target_score=0.9,
+        target_score=target_score,
         best_midi=midi,
-        best_score=0.9,
+        best_score=target_score,
         available_samples=len(samples),
     )
 
@@ -76,6 +81,25 @@ assert (
 )
 assert max(abs(value) for value in normalized) / 32768.0 <= pipeline.PEAK_LIMIT + 0.002
 
+# The real Iowa B-string session's strongest plausible B3 take has a measured
+# crossing rate near 62 Hz and a pitch estimate one semitone below the target.
+# A guitar waveform with that bounded profile must remain eligible while the
+# stronger pitch and group-relative RMS evidence stay intact.
+b3_like = sine(62.0, 600.0)
+b3_candidate = candidate(b3_like, 58, target_score=0.959)
+b3_metrics = pipeline.candidate_signal_metrics(
+    b3_like,
+    base.SAMPLE_RATE,
+    b3_candidate,
+    59,
+)
+assert pipeline._musical_candidate(
+    b3_candidate,
+    b3_metrics,
+    b3_metrics["active_rms"],
+    59,
+)
+
 drift = sine(5.0, 1200.0)
 drift_candidate = candidate(drift, 40)
 drift_metrics = pipeline.candidate_signal_metrics(
@@ -92,5 +116,6 @@ assert not pipeline._musical_candidate(
 )
 
 print("synthetic_signal_rejection=passed")
+print("realistic_b3_motion_profile=passed")
 print("weak_valid_note_normalization=passed")
 print("peak_limit=passed")
