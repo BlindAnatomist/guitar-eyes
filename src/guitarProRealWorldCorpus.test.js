@@ -1,11 +1,17 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import { TextDecoder, TextEncoder } from "util";
 import * as alphaTab from "@coderline/alphatab";
 import { inspectGuitarProSource } from "./guitarProSourceVersion";
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 import { normalizeVerifiedGuitarProIntermediate } from "./guitarProSourceNormalizer";
 import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
+
+beforeAll(() => {
+  global.TextDecoder = TextDecoder;
+  global.TextEncoder = TextEncoder;
+});
 
 const FIXTURE_DIRECTORY = path.join(
   process.cwd(),
