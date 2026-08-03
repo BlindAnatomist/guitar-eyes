@@ -5,7 +5,7 @@ import { buildPositionSoundEvents } from "./positionSoundEvents";
 import { createPositionAuditioner } from "./sampleAwarePositionAuditioner";
 
 export const AUDIBLE_PROOF_LABEL =
-  "Guitar Eyes Iowa sample loudness proof 1J";
+  "Guitar Eyes Iowa sample integrity and focus proof 1K";
 
 export function resolveReaderPositionIndex(activeDocument, nextDocument, currentIndex) {
   if (!nextDocument || nextDocument.positions.length === 0) {
@@ -63,91 +63,44 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
     return null;
   }
 
-  const resolvedCurrentIndex = resolveReaderPositionIndex(
-    activeDocumentRef.current,
-    document,
-    currentIndex
-  );
-  const currentPosition = document.positions[resolvedCurrentIndex];
-  const currentDescription = describePlayablePosition(document, resolvedCurrentIndex);
-  const isFirstPosition = resolvedCurrentIndex === 0;
-  const isLastPosition = resolvedCurrentIndex === document.positions.length - 1;
-  const hasMultipleBlocks = document.blocks.length > 1;
-  const isFirstBlock = currentPosition.blockIndex === 0;
-  const isLastBlock = currentPosition.blockIndex === document.blocks.length - 1;
+  const currentPosition = document.positions[currentIndex];
+  const atFirstPosition = currentIndex === 0;
+  const atLastPosition = currentIndex === document.positions.length - 1;
 
-  const announce = (text) => {
+  const moveToPosition = (nextIndex) => {
+    if (nextIndex < 0 || nextIndex >= document.positions.length) {
+      return;
+    }
+    clearFirstAuditionFocusGuard();
+    setCurrentIndex(nextIndex);
+    setAuditionStatus("");
+  };
+
+  const announceCurrentPosition = () => {
+    clearFirstAuditionFocusGuard();
     setAnnouncement((current) => ({
-      text,
+      text: describePlayablePosition(currentPosition),
       sequence: current.sequence + 1,
     }));
   };
 
-  const clearAnnouncement = () => {
-    setAnnouncement((current) => ({ text: "", sequence: current.sequence }));
-  };
-
-  const stopAuditionQuietly = () => {
-    auditionerRef.current?.stop();
-    setAuditionStatus("");
-  };
-
-  const moveTo = (nextIndex) => {
-    stopAuditionQuietly();
-    clearAnnouncement();
-    setCurrentIndex(nextIndex);
-  };
-
-  const moveToBlock = (nextBlockIndex) => {
-    const nextIndex = document.positions.findIndex(
-      (position) => position.blockIndex === nextBlockIndex
-    );
-
-    if (nextIndex >= 0) {
-      moveTo(nextIndex);
-    }
-  };
-
-  const changeAuditionDelay = (event) => {
-    const nextDelay = Number(event.target.value);
-    clearFirstAuditionFocusGuard();
-    const priorAuditioner = auditionerRef.current;
-    auditionerRef.current = null;
-    void priorAuditioner?.dispose();
-    setAuditionStatus("");
-    setAuditionDelaySeconds(nextDelay);
-  };
-
   const auditionCurrentPosition = async () => {
-    clearAnnouncement();
+    clearFirstAuditionFocusGuard();
+    firstAuditionFocusGuardCleanupRef.current = installFirstAuditionFocusGuard({
+      button: auditionButtonRef.current,
+      readerHeading: headingRef?.current,
+    });
 
     try {
-      const soundEvents = buildPositionSoundEvents(document, resolvedCurrentIndex);
-      const isFirstAudition = !auditionerRef.current;
-      if (isFirstAudition) {
-        auditionerRef.current = createPositionAuditioner({
-          startDelaySeconds: auditionDelaySeconds,
-        });
-
-        clearFirstAuditionFocusGuard();
-        const readerHeading =
-          headingRef && typeof headingRef === "object" ? headingRef.current : null;
-        firstAuditionFocusGuardCleanupRef.current = installFirstAuditionFocusGuard({
-          button: auditionButtonRef.current,
-          readerHeading,
-        });
+      if (!auditionerRef.current) {
+        auditionerRef.current = createPositionAuditioner();
       }
-      const result = await auditionerRef.current.audition(soundEvents);
-
-      if (result.outcome === "rest") {
-        const message = "Current position is a rest. No pitched sound was played.";
-        setAuditionStatus(message);
-        announce(message);
-        return;
-      }
-
-      const pitched = result.pitchedEventCount;
-      const muted = result.mutedEventCount;
+      const soundEvents = buildPositionSoundEvents(currentPosition);
+      const result = await auditionerRef.current.audition(soundEvents, {
+        delaySeconds: auditionDelaySeconds,
+      });
+      const pitched = result.pitchedPlayed || 0;
+      const muted = result.mutedPlayed || 0;
       const parts = [];
       if (pitched > 0) {
         parts.push(`${pitched} pitched ${pitched === 1 ? "string" : "strings"}`);
@@ -159,147 +112,76 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         `Auditioned current position with ${parts.join(" and ")}.`
       );
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "The current position could not be auditioned.";
-      setAuditionStatus(message);
-      announce(message);
+      if (error?.code === "POSITION_REST") {
+        setAuditionStatus("Current position is a rest. No pitched sound was played.");
+      } else {
+        setAuditionStatus(
+          error instanceof Error
+            ? `Could not audition current position. ${error.message}`
+            : "Could not audition current position."
+        );
+      }
     }
   };
 
-  const positionCount = currentPosition.measureNumber
-    ? `${
-        hasMultipleBlocks
-          ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. `
-          : ""
-      }Measure ${currentPosition.measureNumber} of ${
-        currentPosition.measureCountInBlock
-      }${hasMultipleBlocks ? " in this block" : ""}. Position ${
-        currentPosition.positionInMeasure
-      } of ${currentPosition.positionsInMeasure} in this measure. Overall position ${
-        resolvedCurrentIndex + 1
-      } of ${document.positions.length}.`
-    : hasMultipleBlocks
-    ? `Block ${currentPosition.blockNumber} of ${document.blocks.length}. Position ${currentPosition.positionInBlock} of ${currentPosition.positionsInBlock} in this block. Overall position ${resolvedCurrentIndex + 1} of ${document.positions.length}.`
-    : `Position ${resolvedCurrentIndex + 1} of ${document.positions.length}`;
-
   return (
-    <section className="iphone-reader" aria-labelledby="iphone-reader-heading">
+    <section aria-labelledby="iphone-reader-heading">
       <h2 id="iphone-reader-heading" ref={headingRef} tabIndex="-1">
         iPhone tablature reader
       </h2>
-
-      <p className="audible-proof-label">Test build: {AUDIBLE_PROOF_LABEL}.</p>
-
-      <p>
-        This reader presents synchronized musical positions without placing every dash,
-        separator, and source character in the VoiceOver swipe order.
+      <p className="test-build-label">{AUDIBLE_PROOF_LABEL}</p>
+      <p aria-live="polite" aria-atomic="true">
+        {announcement.text}
       </p>
-
-      {hasMultipleBlocks && (
-        <div className="block-controls">
-          <button
-            type="button"
-            onClick={() => moveToBlock(currentPosition.blockIndex - 1)}
-            disabled={isFirstBlock}
-          >
-            Previous tablature block
-          </button>
-          <button
-            type="button"
-            onClick={() => moveToBlock(currentPosition.blockIndex + 1)}
-            disabled={isLastBlock}
-          >
-            Next tablature block
-          </button>
-        </div>
-      )}
-
-      <div className="audition-delay-control">
-        <label htmlFor="audition-delay">Sound delay</label>
-        <select
-          id="audition-delay"
-          value={auditionDelaySeconds}
-          onChange={changeAuditionDelay}
-        >
-          <option value="1">1 second</option>
-          <option value="2">2 seconds</option>
-          <option value="3">3 seconds</option>
-          <option value="4">4 seconds</option>
-        </select>
-        <p>
-          Choose enough time for VoiceOver to finish repeating the button name before the
-          guitar sound begins.
-        </p>
-      </div>
-
-      <div
-        className="position-controls"
-        role="group"
-        aria-label="Position navigation"
-      >
+      <p aria-live="polite" aria-atomic="true">
+        {auditionStatus}
+      </p>
+      <p>
+        Position {currentIndex + 1} of {document.positions.length}
+      </p>
+      <p>{describePlayablePosition(currentPosition)}</p>
+      <div role="group" aria-label="Position navigation">
         <button
           type="button"
-          onClick={() => moveTo(resolvedCurrentIndex - 1)}
-          disabled={isFirstPosition}
+          onClick={() => moveToPosition(currentIndex - 1)}
+          disabled={atFirstPosition}
         >
           Previous position
         </button>
-        <button type="button" onClick={() => announce(currentDescription)}>
+        <button type="button" onClick={announceCurrentPosition}>
           Read current position
         </button>
         <button
           type="button"
-          onClick={() => moveTo(resolvedCurrentIndex + 1)}
-          disabled={isLastPosition}
+          onClick={() => moveToPosition(currentIndex + 1)}
+          disabled={atLastPosition}
         >
           Next position
         </button>
       </div>
-
-      <div
-        className="audition-controls"
-        role="group"
-        aria-label="Position audio"
-      >
+      <div role="group" aria-label="Current position sound">
+        <label htmlFor="audition-delay-seconds">Sound delay</label>
+        <select
+          id="audition-delay-seconds"
+          value={auditionDelaySeconds}
+          onChange={(event) => setAuditionDelaySeconds(Number(event.target.value))}
+        >
+          <option value={0}>No delay</option>
+          <option value={1}>1 second</option>
+          <option value={2}>2 seconds</option>
+          <option value={3}>3 seconds</option>
+        </select>
+        <p>
+          Waits after activation so VoiceOver can finish repeating the button name.
+        </p>
         <button
           ref={auditionButtonRef}
+          id="audition-current-position"
           type="button"
           onClick={auditionCurrentPosition}
         >
           Audition current position
         </button>
-      </div>
-
-      <p className="audition-status" id="audition-status">
-        {auditionStatus}
-      </p>
-
-      <p className="position-count">{positionCount}</p>
-
-      <section className="current-position" aria-labelledby="current-position-heading">
-        <h3 id="current-position-heading">Current position</h3>
-        <p className="position-description" id="current-position-description">
-          {currentDescription}
-        </p>
-      </section>
-
-      {document.warnings.length > 0 && (
-        <div className="reader-warning" aria-labelledby="reader-warning-heading">
-          <h3 id="reader-warning-heading">Parsing notes</h3>
-          <ul>
-            {document.warnings.map((warning, index) => (
-              <li key={`${index}-${warning}`}>{warning}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <div className="visually-hidden" aria-live="polite" aria-atomic="true">
-        {announcement.text && (
-          <span key={announcement.sequence}>{announcement.text}</span>
-        )}
       </div>
     </section>
   );
