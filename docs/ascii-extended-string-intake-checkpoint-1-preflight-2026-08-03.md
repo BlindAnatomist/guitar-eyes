@@ -48,7 +48,7 @@ The checkpoint does not support:
 8. full playback or transport controls;
 9. a new instrument selector value.
 
-The existing Guitar and Bass selector remains a family preference. A seven-string guitar resolves to the `guitar` family; a five-string bass resolves to the `bass` family.
+The existing Guitar and Bass selector remains a family preference. A seven-string guitar resolves to the `guitar` family; a five-string bass resolves to the `bass` family. Selector labels and help copy may be updated only to state that family behavior honestly; no new selector state or reader mechanism is authorized.
 
 ## Required semantic behavior
 
@@ -60,6 +60,7 @@ The existing Guitar and Bass selector remains a family preference. A seven-strin
 6. Keep desktop and iPhone projections derived from the same semantic document.
 7. Preserve quiet movement, dedicated `Read current position`, Files-picker focus recovery, control order, two-second audition delay, and accepted first-audition focus behavior.
 8. Permit the accepted procedural current-position auditioner to derive pitch only from the explicit octave evidence already carried by the strings. Do not add another pitch profile or modify sampled audio.
+9. Do not misdiagnose an incomplete six-string guitar block as a five-string bass merely because the line count is divisible by five; extended-profile errors require matching standard tuning labels.
 
 ## Required tests
 
@@ -72,6 +73,9 @@ The existing Guitar and Bass selector remains a family preference. A seven-strin
 7. Procedural sound-event pitch derivation from explicit octaves.
 8. Preservation of inherited reader, timing, import, focus, and audition tests.
 9. Corpus manifest expectations updated from recognized-unsupported to supported within this exact profile.
+10. Application-shell coverage updated from obsolete rejection expectations to successful semantic loading.
+11. Selector and help copy must not describe Guitar or Bass as fixed to six or four strings.
+12. Incomplete ordinary guitar material must retain its prior `INCOMPLETE_TABLATURE_BLOCK` diagnosis.
 
 ## Execution discipline
 
@@ -82,16 +86,23 @@ The existing Guitar and Bass selector remains a family preference. A seven-strin
 5. Preserve the zero-dollar policy.
 6. Do not publish or involve the owner until the complete inherited and new suite and production build pass.
 7. If publication becomes necessary, use the proven exact-source temporary-main procedure and restore fork `main` immediately.
+8. A failed first gate may receive one correction run only after every named failure is classified and the workflow is repinned to a new immutable source.
 
-## Expected source boundary
+## Final authorized source boundary
 
-The initial expected boundary is limited to:
+The implementation and verification boundary is limited to:
 
 1. `src/tabStringLine.js`;
-2. `src/iphoneTabModel.js`;
-3. `src/tabImportCoordinator.js`;
-4. focused existing and new tests;
-5. `fixtures/real-world/corpus-manifest.json`;
-6. this preflight and later checkpoint result documentation.
+2. `src/tabImportCoordinator.js`;
+3. `src/InstrumentDropdown.js`;
+4. `src/InfoSection.js`;
+5. `src/tabStringLine.test.js`;
+6. `src/tabImportCoordinator.test.js`;
+7. `src/App.test.js`;
+8. `src/realWorldCorpus.test.js`;
+9. `fixtures/real-world/ascii-seven-string-guitar.txt`;
+10. `fixtures/real-world/ascii-five-string-bass.txt`;
+11. `fixtures/real-world/corpus-manifest.json`;
+12. this preflight and later checkpoint result documentation.
 
-No sampled-audio file, Iowa branch file, workflow, dependency, binary asset, MusicXML importer, Guitar Pro importer, or reader component is authorized to change.
+No sampled-audio file, Iowa branch file, workflow inside the feature source, dependency, binary asset, MusicXML importer, Guitar Pro importer, reader component, focus component, playback engine, or timing engine is authorized to change.
