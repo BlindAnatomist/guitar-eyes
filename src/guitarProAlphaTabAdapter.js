@@ -94,18 +94,37 @@ function trackToIntermediate(track) {
 function serializeVersionEvidence(versionEvidence) {
   if (!versionEvidence) return null;
 
-  const serialized = {
-    schemaVersion: Number(versionEvidence.schemaVersion),
-    archiveFamily: String(versionEvidence.archiveFamily),
-    rootVersion: String(versionEvidence.rootVersion),
-    gpVersion: String(versionEvidence.gpVersion),
-    encodingDescription: String(versionEvidence.encodingDescription),
-    sourceVersion: String(versionEvidence.sourceVersion),
-    entryCount: Number(versionEvidence.entryCount),
-  };
+  const serialized = {};
+  const numericFields = ["schemaVersion", "major", "minor", "entryCount"];
+  const stringFields = [
+    "archiveFamily",
+    "sourceFamily",
+    "extensionFamily",
+    "rootVersion",
+    "gpVersion",
+    "encodingDescription",
+    "sourceVersion",
+    "versionText",
+    "signature",
+    "trackCountEvidence",
+  ];
 
+  numericFields.forEach((field) => {
+    if (Number.isFinite(versionEvidence[field])) {
+      serialized[field] = Number(versionEvidence[field]);
+    } else if (versionEvidence[field] === null) {
+      serialized[field] = null;
+    }
+  });
+  stringFields.forEach((field) => {
+    if (typeof versionEvidence[field] === "string") {
+      serialized[field] = versionEvidence[field];
+    }
+  });
   if (Number.isInteger(versionEvidence.declaredTrackCount)) {
     serialized.declaredTrackCount = versionEvidence.declaredTrackCount;
+  } else if (versionEvidence.declaredTrackCount === null) {
+    serialized.declaredTrackCount = null;
   }
 
   return serialized;
