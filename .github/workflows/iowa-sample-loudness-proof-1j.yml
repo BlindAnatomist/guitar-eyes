@@ -1,0 +1,185 @@
+name: Iowa sample loudness proof 1J exact gate
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-loudness-proof-1j
+    paths:
+      - .github/workflows/iowa-sample-loudness-proof-1j.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-loudness-proof-1j
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SOURCE_SHA: 33ae73dbe6f26655ab31ebb567acf54887661ce1
+      BASE_SHA: 4aee0deba0823b846cb2a067733ac487f8e5b6c5
+      ACCEPTED_APPLICATION_SHA: 51741c03a9eaa339940c84d53e0f0f00e6413a93
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-loudness-proof-1j
+    steps:
+      - name: Mark exact source gate pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Running exact Iowa sample loudness proof 1J gate',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact 1J source candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify source identity ancestry and cleanliness
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$ACCEPTED_APPLICATION_SHA" HEAD
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          test -z "$(git status --short)"
+
+      - name: Verify exact bounded file set
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          expected = {
+              'public/index.html',
+              'src/IPhoneTabReader.js',
+              'src/buildIdentity.test.js',
+              'src/checkpointBuildIdentity.test.js',
+              'src/iowaSampleAuditioner.js',
+              'src/iowaSampleLoudness.test.js',
+          }
+          actual = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', os.environ['BASE_SHA'], 'HEAD'],
+              text=True,
+          ).splitlines())
+          if actual != expected:
+              raise SystemExit(
+                  f'Changed-file boundary mismatch. Expected {sorted(expected)}; actual {sorted(actual)}'
+              )
+          print('bounded_file_set=passed')
+          PY
+
+      - name: Verify loudness source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'export const IOWA_MASTER_INPUT_GAIN = 1.05;' src/iowaSampleAuditioner.js
+          grep -Fq 'const BASE_PITCHED_GAIN = 0.6;' src/iowaSampleAuditioner.js
+          grep -Fq 'Object.freeze([1, 1, 1.04, 1.1, 1.22, 1.4])' src/iowaSampleAuditioner.js
+          grep -Fq 'resolveIowaPitchedGain(pitchedEvents[index], pitchedEvents.length)' src/iowaSampleAuditioner.js
+          grep -Fq 'Guitar Eyes Iowa sample loudness proof 1J' src/IPhoneTabReader.js
+          grep -Fq '<title>Test build Guitar Eyes Iowa sample loudness proof 1J</title>' public/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa sample loudness proof 1J.' public/index.html
+          test -f src/iowaSampleLoudness.test.js
+          echo 'loudness_source_contract=passed'
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/iowa-sample-loudness-proof-1j
+          node --version | tee /tmp/iowa-sample-loudness-proof-1j/node-version.txt
+          npm --version | tee /tmp/iowa-sample-loudness-proof-1j/npm-version.txt
+          npm ci --no-audit --no-fund 2>&1 | tee /tmp/iowa-sample-loudness-proof-1j/npm-ci.log
+
+      - name: Run complete inherited and 1J test suite
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 \
+            | tee /tmp/iowa-sample-loudness-proof-1j/test.log
+
+      - name: Build production application
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=false npm run build 2>&1 | tee /tmp/iowa-sample-loudness-proof-1j/build.log
+
+      - name: Inspect compiled candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          grep -Fq '<title>Test build Guitar Eyes Iowa sample loudness proof 1J</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa sample loudness proof 1J.' build/index.html
+          grep -Fq 'Guitar Eyes Iowa sample loudness proof 1J' "$main_js"
+          grep -Fq 'string-1-e4.wav' "$main_js"
+          grep -Fq 'string-6-e2.wav' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          if find build -type f \( -iname '*.wav' -o -iname '*.aif' -o -iname '*.aiff' -o -iname '*.mp3' -o -iname '*.ogg' -o -iname '*.flac' -o -iname '*.sf2' \) | grep -q .; then
+            echo 'Source-only build unexpectedly contains audio assets' >&2
+            exit 1
+          fi
+          git diff --exit-code
+          git diff --cached --exit-code
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "main_js=$main_js"
+            sha256sum build/index.html "$main_js"
+            echo 'compiled_identity=passed'
+            echo 'compiled_sample_contract=passed'
+            echo 'compiled_reader_contract=passed'
+            echo 'source_build_asset_boundary=passed'
+            echo 'tracked_repository_clean=passed'
+          } | tee /tmp/iowa-sample-loudness-proof-1j/artifact-inspection.txt
+
+      - name: Upload one-day verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-loudness-proof-1j
+          path: /tmp/iowa-sample-loudness-proof-1j
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final source status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact Iowa sample loudness proof 1J gate passed'
+                : 'Iowa sample loudness proof 1J gate did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
