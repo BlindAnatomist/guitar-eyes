@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 
 describe("checkpoint build identity", () => {
-  test("places the unique Iowa loudness proof identity before the React root", () => {
+  test("places the unique Iowa integrity and focus proof identity before the React root", () => {
     const html = fs.readFileSync(
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
     const title =
-      "<title>Test build Guitar Eyes Iowa sample loudness proof 1J</title>";
+      "<title>Test build Guitar Eyes Iowa sample integrity and focus proof 1K</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Guitar Eyes Iowa sample loudness proof 1J.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Eyes Iowa sample integrity and focus proof 1K.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
