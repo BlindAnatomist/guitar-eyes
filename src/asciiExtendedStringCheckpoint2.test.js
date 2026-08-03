@@ -227,7 +227,7 @@ describe("ASCII extended-string intake checkpoint 2", () => {
 
   test.each([
     [
-      "altered eight-string guitar",
+      "eight-string guitar with the wrong low-F-sharp octave",
       [
         "E4|--0--|",
         "B3|--0--|",
@@ -236,13 +236,13 @@ describe("ASCII extended-string intake checkpoint 2", () => {
         "A2|--0--|",
         "E2|--0--|",
         "B1|--0--|",
-        "F1|--0--|",
+        "F#0|--0--|",
       ].join("\n"),
     ],
     [
       "six-string bass with the wrong high-C octave",
       [
-        "C2|--0--|",
+        "C4|--0--|",
         "G2|--0--|",
         "D2|--0--|",
         "A1|--0--|",
