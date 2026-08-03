@@ -1,5 +1,5 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
-import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
+import { normalizeVerifiedGuitarProIntermediate } from "./guitarProSourceNormalizer";
 import { buildGuitarProTrackInventory } from "./guitarProTrackInventory";
 import { decodeGuitarProArchiveProofFile } from "./guitarProWorkerClient";
 
@@ -32,7 +32,7 @@ export async function buildGuitarProReaderDocuments(
   {
     workerFactory = null,
     decode = decodeGuitarProArchiveProofFile,
-    normalize = normalizeGuitarProIntermediate,
+    normalize = normalizeVerifiedGuitarProIntermediate,
     inventory = buildGuitarProTrackInventory,
     intermediate = null,
     selection = null,
