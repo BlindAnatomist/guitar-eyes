@@ -37,6 +37,8 @@ MIN_ABSOLUTE_ACTIVE_RMS = 180.0
 MIN_RELATIVE_GROUP_RMS = 0.35
 MIN_TARGET_PITCH_SCORE = 0.45
 MAX_ESTIMATED_MIDI_DISTANCE = 1
+MIN_MOTION_FRACTION_OF_TARGET = 0.20
+MIN_ZERO_CROSSING_FRACTION_OF_TARGET = 0.22
 ANALYSIS_START_SECONDS = 0.018
 ANALYSIS_MAX_SECONDS = 0.72
 ANALYSIS_END_GUARD_SECONDS = 0.06
@@ -79,6 +81,7 @@ def _analysis_values(samples, sample_rate, onset, available_samples):
 
 
 def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
+    target_frequency = _target_frequency(target_midi)
     values = _analysis_values(
         samples,
         sample_rate,
@@ -93,7 +96,9 @@ def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
             "motion_ratio": 0.0,
             "minimum_motion_ratio": 1.0,
             "zero_crossing_hz": 0.0,
-            "minimum_zero_crossing_hz": _target_frequency(target_midi) * 0.42,
+            "minimum_zero_crossing_hz": (
+                target_frequency * MIN_ZERO_CROSSING_FRACTION_OF_TARGET
+            ),
         }
 
     rms = math.sqrt(sum(value * value for value in values) / len(values))
@@ -107,9 +112,11 @@ def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
     )
     motion_ratio = difference_rms / max(rms, 1e-12)
     expected_motion = 2.0 * math.sin(
-        math.pi * _target_frequency(target_midi) / sample_rate
+        math.pi * target_frequency / sample_rate
     )
-    minimum_motion_ratio = expected_motion * 0.42
+    minimum_motion_ratio = (
+        expected_motion * MIN_MOTION_FRACTION_OF_TARGET
+    )
 
     crossings = sum(
         1
@@ -118,7 +125,9 @@ def candidate_signal_metrics(samples, sample_rate, candidate, target_midi):
     )
     duration_seconds = len(values) / sample_rate
     zero_crossing_hz = crossings / max(2.0 * duration_seconds, 1e-12)
-    minimum_zero_crossing_hz = _target_frequency(target_midi) * 0.42
+    minimum_zero_crossing_hz = (
+        target_frequency * MIN_ZERO_CROSSING_FRACTION_OF_TARGET
+    )
 
     return {
         "active_rms": rms,
