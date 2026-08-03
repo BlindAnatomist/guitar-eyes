@@ -31,6 +31,8 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
   const auditionButtonRef = useRef(null);
   const firstAuditionFocusGuardCleanupRef = useRef(null);
   const activeDocumentRef = useRef(document);
+  const formatOnlyBuild =
+    typeof window !== "undefined" && window.GUITAR_EYES_FORMAT_ONLY === true;
 
   const clearFirstAuditionFocusGuard = () => {
     const cleanup = firstAuditionFocusGuardCleanupRef.current;
@@ -190,7 +192,9 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         iPhone tablature reader
       </h2>
 
-      <p className="audible-proof-label">Test build: {AUDIBLE_PROOF_LABEL}.</p>
+      {!formatOnlyBuild && (
+        <p className="audible-proof-label">Test build: {AUDIBLE_PROOF_LABEL}.</p>
+      )}
 
       <p>
         This reader presents synchronized musical positions without placing every dash,
@@ -216,23 +220,25 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </div>
       )}
 
-      <div className="audition-delay-control">
-        <label htmlFor="audition-delay">Sound delay</label>
-        <select
-          id="audition-delay"
-          value={auditionDelaySeconds}
-          onChange={changeAuditionDelay}
-        >
-          <option value="1">1 second</option>
-          <option value="2">2 seconds</option>
-          <option value="3">3 seconds</option>
-          <option value="4">4 seconds</option>
-        </select>
-        <p>
-          Choose enough time for VoiceOver to finish repeating the button name before the
-          guitar sound begins.
-        </p>
-      </div>
+      {!formatOnlyBuild && (
+        <div className="audition-delay-control">
+          <label htmlFor="audition-delay">Sound delay</label>
+          <select
+            id="audition-delay"
+            value={auditionDelaySeconds}
+            onChange={changeAuditionDelay}
+          >
+            <option value="1">1 second</option>
+            <option value="2">2 seconds</option>
+            <option value="3">3 seconds</option>
+            <option value="4">4 seconds</option>
+          </select>
+          <p>
+            Choose enough time for VoiceOver to finish repeating the button name before the
+            guitar sound begins.
+          </p>
+        </div>
+      )}
 
       <div
         className="position-controls"
@@ -258,23 +264,27 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
         </button>
       </div>
 
-      <div
-        className="audition-controls"
-        role="group"
-        aria-label="Position audio"
-      >
-        <button
-          ref={auditionButtonRef}
-          type="button"
-          onClick={auditionCurrentPosition}
-        >
-          Audition current position
-        </button>
-      </div>
+      {!formatOnlyBuild && (
+        <>
+          <div
+            className="audition-controls"
+            role="group"
+            aria-label="Position audio"
+          >
+            <button
+              ref={auditionButtonRef}
+              type="button"
+              onClick={auditionCurrentPosition}
+            >
+              Audition current position
+            </button>
+          </div>
 
-      <p className="audition-status" id="audition-status">
-        {auditionStatus}
-      </p>
+          <p className="audition-status" id="audition-status">
+            {auditionStatus}
+          </p>
+        </>
+      )}
 
       <p className="position-count">{positionCount}</p>
 
