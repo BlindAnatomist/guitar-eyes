@@ -2,6 +2,10 @@ import fs from "fs";
 import path from "path";
 import {
   IOWA_GUITAR_SAMPLE_MANIFEST,
+  IOWA_GUITAR_SAMPLE_NORMALIZATION,
+  IOWA_GUITAR_SAMPLE_PROOF_IDENTITY,
+  IOWA_GUITAR_SAMPLE_SELECTION_METHOD,
+  IOWA_GUITAR_SAMPLE_SET_ACTIVE_LOUDNESS_SPREAD_DB,
   MAX_IOWA_SAMPLE_SHIFT_SEMITONES,
   selectIowaGuitarSample,
 } from "./iowaGuitarSampleManifest";
@@ -23,10 +27,14 @@ describe("Iowa guitar sample manifest", () => {
       expect(entry.derivedFilename).toMatch(/\.wav$/);
       expect(entry.derivedBytes).toBeGreaterThan(20000);
       expect(entry.derivedSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(Math.abs(entry.activeRmsDbfs + 30)).toBeLessThanOrEqual(1.25);
+      expect(entry.peakDbfs).toBeLessThan(0);
+      expect(entry.targetPitchScore).toBeGreaterThanOrEqual(0.45);
+      expect(Math.abs(entry.estimatedMidi - entry.anchorMidi)).toBeLessThanOrEqual(1);
     });
   });
 
-  test("matches the public machine-readable derivation lock", () => {
+  test("matches the public systemic derivation and normalization lock", () => {
     const lock = JSON.parse(
       fs.readFileSync(
         path.join(
@@ -40,21 +48,53 @@ describe("Iowa guitar sample manifest", () => {
       )
     );
 
-    expect(lock.proofIdentity).toBe("Guitar Eyes Iowa string-aware sample proof 1I");
-    expect(lock.selectionMethod).toBe("catalog-ordered-chromatic-group-v3");
+    expect(lock.schemaVersion).toBe(2);
+    expect(lock.proofIdentity).toBe(IOWA_GUITAR_SAMPLE_PROOF_IDENTITY);
+    expect(lock.selectionMethod).toBe(IOWA_GUITAR_SAMPLE_SELECTION_METHOD);
+    expect(lock.normalization).toEqual(IOWA_GUITAR_SAMPLE_NORMALIZATION);
+    expect(lock.setActiveLoudnessSpreadDb).toBe(
+      IOWA_GUITAR_SAMPLE_SET_ACTIVE_LOUDNESS_SPREAD_DB
+    );
+    expect(lock.setActiveLoudnessSpreadDb).toBeLessThanOrEqual(1.75);
     expect(lock.samples).toHaveLength(6);
     expect(
-      lock.samples.map(({ derivedFilename, derivedBytes, derivedSha256 }) => ({
-        derivedFilename,
-        derivedBytes,
-        derivedSha256,
-      }))
-    ).toEqual(
-      IOWA_GUITAR_SAMPLE_MANIFEST.map(
-        ({ derivedFilename, derivedBytes, derivedSha256 }) => ({
+      lock.samples.map(
+        ({
           derivedFilename,
           derivedBytes,
           derivedSha256,
+          activeRmsDbfs,
+          peakDbfs,
+          targetPitchScore,
+          estimatedMidi,
+        }) => ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          activeRmsDbfs,
+          peakDbfs,
+          targetPitchScore,
+          estimatedMidi,
+        })
+      )
+    ).toEqual(
+      IOWA_GUITAR_SAMPLE_MANIFEST.map(
+        ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          activeRmsDbfs,
+          peakDbfs,
+          targetPitchScore,
+          estimatedMidi,
+        }) => ({
+          derivedFilename,
+          derivedBytes,
+          derivedSha256,
+          activeRmsDbfs,
+          peakDbfs,
+          targetPitchScore,
+          estimatedMidi,
         })
       )
     );
