@@ -294,7 +294,6 @@ export async function inspectGuitarProArchiveVersion(
 
   const gpVersion = tagText(gpifXml, "GPVersion");
   const encodingDescription = tagText(gpifXml, "EncodingDescription");
-  const trackCount = declaredTrackCount(gpifXml);
 
   if (!versionEntry) {
     if (gpVersion !== null || encodingDescription !== null) {
@@ -303,6 +302,7 @@ export async function inspectGuitarProArchiveVersion(
         "MISSING_GUITAR_PRO_VERSION_EVIDENCE"
       );
     }
+    const trackCount = declaredTrackCount(gpifXml);
 
     return {
       schemaVersion: 1,
@@ -335,6 +335,7 @@ export async function inspectGuitarProArchiveVersion(
     gpVersion,
     encodingDescription
   );
+  const trackCount = declaredTrackCount(gpifXml);
 
   return {
     schemaVersion: 1,
