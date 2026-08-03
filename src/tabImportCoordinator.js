@@ -69,6 +69,20 @@ function applyProfileStringIdentities(document, profile) {
   };
 }
 
+function runContainsExactStandardSegments(run, profile) {
+  if (run.length === 0 || run.length % profile.stringCount !== 0) return false;
+
+  for (let offset = 0; offset < run.length; offset += profile.stringCount) {
+    const segment = run.slice(offset, offset + profile.stringCount);
+    const exactLabels = segment.every(
+      (entry, index) => entry.tuning === profile.standardTuning[index]
+    );
+    if (!exactLabels) return false;
+  }
+
+  return true;
+}
+
 function exactCountProfileError(sourceText, requestedInstrument) {
   const collected = collectTabStringLineRuns(sourceText);
   const hasPlayableRun = collected.runs.some((run) =>
@@ -79,10 +93,10 @@ function exactCountProfileError(sourceText, requestedInstrument) {
 
   for (const profileKey of orderedProfileKeys(requestedInstrument)) {
     const profile = ASCII_INSTRUMENT_PROFILES[profileKey];
-    const hasExactCountRun = collected.runs.some(
-      (run) => run.length > 0 && run.length % profile.stringCount === 0
+    const hasPlausibleExactProfileRun = collected.runs.some((run) =>
+      runContainsExactStandardSegments(run, profile)
     );
-    if (!hasExactCountRun) continue;
+    if (!hasPlausibleExactProfileRun) continue;
 
     const analysis = analyzeTabRunsForProfile(sourceText, profile);
     if (
