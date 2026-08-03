@@ -13,11 +13,12 @@ const InfoSection = () => (
     <h3>Supported file intake</h3>
     <p>
       Accepted ASCII support includes standard six-string guitar and four-string bass,
-      plus exact standard seven-string guitar and five-string bass when every string
-      label includes the expected octave. Uncompressed .musicxml or .xml support remains
-      bounded to six-string guitar tablature containing explicit string and fret data.
-      This branch also retains the accepted bounded Guitar Pro import described by the
-      repository records; it is not general Guitar Pro compatibility.
+      plus exact standard seven-string and eight-string guitar and five-string and
+      six-string bass when every string label includes the expected octave. Uncompressed
+      .musicxml or .xml support remains bounded to six-string guitar tablature containing
+      explicit string and fret data. This branch also retains the accepted bounded Guitar
+      Pro import described by the repository records; it is not general Guitar Pro
+      compatibility.
     </p>
 
     <h3>Instrument family selector</h3>
@@ -25,6 +26,15 @@ const InfoSection = () => (
       Guitar and Bass are family preferences rather than fixed string counts. Guitar Eyes
       uses complete string structure and safe tuning evidence to detect a supported family
       and updates the selector when the uploaded tablature proves the other family.
+    </p>
+
+    <h3>Extended-string boundary</h3>
+    <p>
+      Extended-string ASCII is accepted only for the exact octave-qualified profiles
+      recorded by the project. Eight-string guitar uses E4, B3, G3, D3, A2, E2, B1, F
+      sharp 1 from highest to lowest. Six-string bass uses C3, G2, D2, A1, E1, B0 from
+      highest to lowest. Missing octaves and alternate profiles are rejected rather than
+      guessed.
     </p>
 
     <h3>Position navigation</h3>
