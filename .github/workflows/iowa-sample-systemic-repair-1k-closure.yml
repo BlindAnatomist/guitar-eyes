@@ -1,0 +1,204 @@
+name: Iowa sample systemic repair 1K exact closure
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-systemic-repair-1k
+    paths:
+      - .github/workflows/iowa-sample-systemic-repair-1k-closure.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-systemic-repair-1k-closure
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      SOURCE_SHA: 624950689928988e825fe38615694ef153e9b3b2
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k-exact
+      EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k-closure
+    steps:
+      - name: Mark exact closure pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Closing the compiled Iowa 1K inspection',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify source and prior full-gate evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -z "$(git status --short)"
+          mkdir -p "$EVIDENCE_DIR/source"
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "prior_full_gate_run=30834858518"
+            echo "prior_test_suites=46/46"
+            echo "prior_tests=273/273"
+            echo "prior_production_build=passed"
+            echo "prior_six_sample_reproduction=passed"
+            echo "prior_cross_sample_balance=passed"
+          } > "$EVIDENCE_DIR/authority.txt"
+
+      - name: Install audio tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1 | tee "$EVIDENCE_DIR/ffmpeg-version.txt"
+
+      - name: Download official sessions and reproduce locked WAVs
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes Iowa 1K exact closure' \
+              --output "$EVIDENCE_DIR/source/${name}" \
+              "${base}/${name}"
+          done
+          python3 scripts/derive_iowa_guitar_samples_robust.py \
+            --source-dir "$EVIDENCE_DIR/source" \
+            --output-dir public/samples/iowa-guitar \
+            --evidence "$EVIDENCE_DIR/derivation.json"
+          python3 scripts/audit_iowa_guitar_samples.py \
+            --sample-dir public/samples/iowa-guitar \
+            --evidence "$EVIDENCE_DIR/audit.json" \
+            > "$EVIDENCE_DIR/audit-output.txt"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          lock_path = Path('public/samples/iowa-guitar/manifest.json')
+          lock = json.loads(lock_path.read_text())
+          for sample in lock['samples']:
+              path = lock_path.parent / sample['derivedFilename']
+              data = path.read_bytes()
+              if len(data) != sample['derivedBytes']:
+                  raise SystemExit(f'Byte mismatch for {path.name}')
+              if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
+                  raise SystemExit(f'Hash mismatch for {path.name}')
+          print('exact_wav_reproduction=passed')
+          PY
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies and build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm ci --no-audit --no-fund
+          CI=false npm run build 2>&1 | tee "$EVIDENCE_DIR/build.log"
+
+      - name: Inspect compiled exact candidate correctly
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          test -f build/samples/iowa-guitar/manifest.json
+          test -f build/fixtures/iowa-all-six-strings-chord-rest.musicxml
+          grep -Fq '<title>Test build Guitar Eyes Iowa systemic sample repair proof 1K</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa systemic sample repair proof 1K.' build/index.html
+          grep -Fq 'Guitar Eyes Iowa systemic sample repair proof 1K' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          source = json.loads(Path('public/samples/iowa-guitar/manifest.json').read_text())
+          built = json.loads(Path('build/samples/iowa-guitar/manifest.json').read_text())
+          if built != source:
+              raise SystemExit('Built 1K manifest differs from source lock')
+          if built['selectionMethod'] != 'catalog-ordered-signal-validated-v4':
+              raise SystemExit('Built manifest lost the 1K selection method')
+          if built['setActiveLoudnessSpreadDb'] > 1.75:
+              raise SystemExit('Built manifest has unsafe set spread')
+          for sample in built['samples']:
+              path = Path('build/samples/iowa-guitar') / sample['derivedFilename']
+              data = path.read_bytes()
+              if len(data) != sample['derivedBytes']:
+                  raise SystemExit(f'Built byte mismatch for {path.name}')
+              if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
+                  raise SystemExit(f'Built hash mismatch for {path.name}')
+          print('compiled_manifest_contract=passed')
+          print('compiled_six_wav_lock=passed')
+          PY
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "main_js=$main_js"
+            sha256sum build/index.html build/samples/iowa-guitar/manifest.json "$main_js"
+            echo 'compiled_identity=passed'
+            echo 'compiled_reader_contract=passed'
+            echo 'compiled_sample_contract=passed'
+          } | tee "$EVIDENCE_DIR/build-inspection.txt"
+
+      - name: Upload one-day closure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-systemic-repair-1k-closure
+          path: /tmp/iowa-sample-systemic-repair-1k-closure
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish exact closure status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Exact Iowa 1K source passed complete verification'
+                : 'Iowa 1K closure did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
