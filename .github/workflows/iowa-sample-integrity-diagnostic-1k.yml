@@ -1,0 +1,172 @@
+name: Iowa sample integrity diagnostic 1K
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-integrity-focus-proof-1k
+    paths:
+      - .github/workflows/iowa-sample-integrity-diagnostic-1k.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-integrity-diagnostic-1k
+  cancel-in-progress: true
+
+jobs:
+  derive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-integrity-diagnostic-1k
+      EVIDENCE_DIR: /tmp/iowa-integrity-1k
+    steps:
+      - name: Mark diagnostic pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Deriving pitch and loudness verified Iowa candidates',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact diagnostic source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify branch source and Python boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "work/iowa-sample-integrity-focus-proof-1k"
+          git merge-base --is-ancestor 33ae73dbe6f26655ab31ebb567acf54887661ce1 HEAD
+          test -f scripts/derive_iowa_guitar_samples.py
+          test -f scripts/derive_iowa_guitar_samples_robust.py
+          test -f scripts/derive_iowa_guitar_samples_integrity.py
+          python3 -m py_compile \
+            scripts/derive_iowa_guitar_samples.py \
+            scripts/derive_iowa_guitar_samples_robust.py \
+            scripts/derive_iowa_guitar_samples_integrity.py
+          test -z "$(git status --short)"
+          mkdir -p "$EVIDENCE_DIR/source" "$EVIDENCE_DIR/derived"
+          echo "source_sha=$(git rev-parse HEAD)" > "$EVIDENCE_DIR/summary.txt"
+
+      - name: Install explicit audio tool
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1 | tee "$EVIDENCE_DIR/ffmpeg-version.txt"
+
+      - name: Download exact official Iowa sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes sample integrity diagnostic/1K' \
+              --output "$EVIDENCE_DIR/source/${name}" \
+              "${base}/${name}"
+          done
+          sha256sum "$EVIDENCE_DIR"/source/*.aif \
+            | tee "$EVIDENCE_DIR/source-sha256.txt"
+
+      - name: Derive and verify six integrity candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/derive_iowa_guitar_samples_integrity.py \
+            --source-dir "$EVIDENCE_DIR/source" \
+            --output-dir "$EVIDENCE_DIR/derived" \
+            --evidence "$EVIDENCE_DIR/derivation.json"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path('/tmp/iowa-integrity-1k')
+          evidence = json.loads((root / 'derivation.json').read_text())
+          targets = evidence.get('targets', [])
+          if len(targets) != 6:
+              raise SystemExit(f'Expected six targets, found {len(targets)}')
+          if evidence.get('normalizationMethod') != '35hz-high-pass-max-100ms-rms-v1':
+              raise SystemExit('Wrong integrity normalization method')
+          expected_midis = [64, 59, 56, 52, 47, 40]
+          if [target['target_midi'] for target in targets] != expected_midis:
+              raise SystemExit('Target MIDI authority changed')
+          for target in targets:
+              if target['selectionMethod'] != 'catalog-group-near-best-pitch-then-audible-rms-v1':
+                  raise SystemExit(f'Wrong selection method: {target}')
+              if target['derivedWindowRms'] < 1450:
+                  raise SystemExit(f'Derived sample remains too quiet: {target}')
+              if target['derivedPeak'] > round(32767 * 0.82) + 1:
+                  raise SystemExit(f'Derived sample exceeds peak boundary: {target}')
+              if target['appliedScale'] > 24.0:
+                  raise SystemExit(f'Unsafe amplification: {target}')
+              if target['postDerivationTargetPitchScore'] < 0.34:
+                  raise SystemExit(f'Post-derivation pitch failure: {target}')
+              output = root / 'derived' / target['derived_filename']
+              if not output.is_file():
+                  raise SystemExit(f'Missing output: {output}')
+              digest = hashlib.sha256(output.read_bytes()).hexdigest()
+              if digest != target['derivedSha256']:
+                  raise SystemExit(f'Derived hash mismatch: {output}')
+          print(json.dumps(evidence, indent=2))
+          PY
+          sha256sum "$EVIDENCE_DIR"/derived/*.wav \
+            | tee "$EVIDENCE_DIR/derived-sha256.txt"
+
+      - name: Upload one-day diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-integrity-diagnostic-1k
+          path: |
+            /tmp/iowa-integrity-1k/summary.txt
+            /tmp/iowa-integrity-1k/ffmpeg-version.txt
+            /tmp/iowa-integrity-1k/source-sha256.txt
+            /tmp/iowa-integrity-1k/derivation.json
+            /tmp/iowa-integrity-1k/derived-sha256.txt
+            /tmp/iowa-integrity-1k/derived
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final diagnostic status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Six pitch and loudness verified Iowa candidates derived'
+                : 'Iowa sample integrity diagnostic did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
