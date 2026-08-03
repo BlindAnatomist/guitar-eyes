@@ -97,24 +97,27 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/valid \.mxl ZIP container/i);
   });
 
-  test("recognizes .gp only as an internal checkpoint proof", () => {
-    const format = detectTabFileFormat("proof.gp");
-
+  test.each([
+    ["song.gp3", "GP3", "Guitar Pro 3 tablature"],
+    ["song.gp4", "GP4", "Guitar Pro 4 tablature"],
+    ["song.gp5", "GP5", "Guitar Pro 5 tablature"],
+    ["song.gpx", "GP6", "Guitar Pro 6 tablature"],
+    ["song.gp", "GP7_OR_GP8", "Guitar Pro 7 or 8 tablature"],
+  ])("routes %s through the authorized Guitar Pro importer", (fileName, sourceFamily, label) => {
+    const format = detectTabFileFormat(fileName);
     expect(format).toMatchObject({
       id: "guitar-pro-proof",
-      support: "checkpoint-proof",
+      support: "checkpoint-foundation",
       isText: false,
+      sourceFamily,
+      label,
     });
     expect(shouldReadTabFileAsText(format)).toBe(false);
-    expect(unsupportedTabFormatMessage(format)).toMatch(/unhosted project-fixture proof/i);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/valid GP3, GP4, GP5, GP6 GPX/i);
   });
 
   test.each([
-    ["song.gtp", "guitar-pro-legacy"],
-    ["song.gp3", "guitar-pro-legacy"],
-    ["song.gp4", "guitar-pro-legacy"],
-    ["song.gp5", "guitar-pro-legacy"],
-    ["song.gpx", "guitar-pro-legacy"],
+    ["song.gtp", "guitar-pro-2"],
     ["song.ptb", "powertab"],
     ["song.pt2", "powertab"],
     ["song.tg", "tuxguitar"],
