@@ -2,6 +2,10 @@ import fs from "fs";
 import path from "path";
 import { parseMusicXmlTablature } from "./musicXmlImporter";
 
+function playableStrings(position) {
+  return position.strings.filter((entry) => entry.type !== "silent");
+}
+
 test("the Iowa listening fixture covers all six open strings, one chord, and one rest", () => {
   const source = fs.readFileSync(
     path.join(
@@ -23,16 +27,10 @@ test("the Iowa listening fixture covers all six open strings, one chord, and one
     expect(document.positions[positionIndex].strings[stringIndex]).toMatchObject({
       type: "open",
     });
-    expect(
-      document.positions[positionIndex].strings.filter(
-        (entry) => entry.type !== "inactive"
-      )
-    ).toHaveLength(1);
+    expect(playableStrings(document.positions[positionIndex])).toHaveLength(1);
   });
 
-  expect(
-    document.positions[6].strings.filter((entry) => entry.type !== "inactive")
-  ).toHaveLength(6);
+  expect(playableStrings(document.positions[6])).toHaveLength(6);
   expect(document.positions[6].strings.map((entry) => entry.type)).toEqual([
     "open",
     "open",
@@ -41,5 +39,6 @@ test("the Iowa listening fixture covers all six open strings, one chord, and one
     "fret",
     "open",
   ]);
+  expect(playableStrings(document.positions[7])).toHaveLength(0);
   expect(document.positions[7]).toMatchObject({ isRest: true });
 });
