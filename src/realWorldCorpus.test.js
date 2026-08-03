@@ -138,14 +138,27 @@ describe("real-world tablature format corpus", () => {
   });
 
   test.each([
-    ["ascii-seven-string-guitar.txt", "guitar"],
-    ["ascii-five-string-bass.txt", "bass"],
-  ])("recognizes unsupported string-count family in %s without guessing", (name, instrument) => {
+    ["ascii-seven-string-guitar.txt", "guitar", "seven-string guitar", 7],
+    ["ascii-five-string-bass.txt", "bass", "five-string bass", 5],
+  ])("imports exact extended-string family in %s without guessing", (name, instrument, label, count) => {
     const result = buildReaderDocuments(fixture(name), instrument);
+    const description = describePlayablePosition(result.semanticDocument, 0);
 
-    expect(result.supportOutcome).toBe("recognized-unsupported");
-    expect(result.semanticError.code).toBe("UNSUPPORTED_STRING_COUNT");
-    expect(result.semanticDocument).toBeNull();
+    expect(result.supportOutcome).toBe("supported");
+    expect(result.semanticError).toBeNull();
+    expect(result.semanticDocument).toMatchObject({
+      instrument,
+      instrumentLabel: label,
+      stringCount: count,
+    });
+    expect(result.semanticDocument.positions).toHaveLength(1);
+    expect(result.semanticDocument.positions[0].duration).toMatchObject({
+      symbol: "Q",
+      name: "quarter note",
+      quarterNoteUnits: 1,
+    });
+    expect(result.desktopBlocks[0]).toHaveLength(count);
+    expect(description).toContain("Low B string, open.");
   });
 
   test("detects and imports the minimal uncompressed MusicXML fixture", () => {
