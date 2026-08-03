@@ -1,0 +1,247 @@
+name: Iowa sample systemic repair 1K derivation
+
+on:
+  push:
+    branches:
+      - work/iowa-sample-systemic-repair-1k
+    paths:
+      - .github/workflows/iowa-sample-systemic-repair-1k.yml
+
+permissions:
+  contents: read
+  statuses: write
+
+concurrency:
+  group: guitar-eyes-iowa-sample-systemic-repair-1k
+  cancel-in-progress: true
+
+jobs:
+  derive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SOURCE_SHA: ${{ github.event.before }}
+      BASE_SHA: 33ae73dbe6f26655ab31ebb567acf54887661ce1
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k
+      EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k
+    steps:
+      - name: Mark exact derivation pending
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state: 'pending',
+              context: process.env.STATUS_CONTEXT,
+              description: 'Deriving and auditing the complete Iowa 1K sample set',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+      - name: Check out exact systemic-repair source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify source identity ancestry and boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$SOURCE_SHA" != "0000000000000000000000000000000000000000"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          test -z "$(git status --short)"
+          python3 - <<'PY'
+          import os
+          import subprocess
+
+          expected = {
+              'docs/iowa-sample-systemic-repair-1k-preflight-2026-08-03.md',
+              'fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml',
+              'public/fixtures/iowa-all-six-strings-chord-rest.musicxml',
+              'scripts/audit_iowa_guitar_samples.py',
+              'scripts/build_iowa_sample_lock.py',
+              'scripts/derive_iowa_guitar_samples_robust.py',
+              'scripts/test_iowa_sample_pipeline.py',
+              'src/iowaListeningFixture.test.js',
+          }
+          actual = set(subprocess.check_output(
+              ['git', 'diff', '--name-only', os.environ['BASE_SHA'], 'HEAD'],
+              text=True,
+          ).splitlines())
+          if actual != expected:
+              raise SystemExit(
+                  f'Changed-file boundary mismatch. Expected {sorted(expected)}; actual {sorted(actual)}'
+              )
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          forbidden = [
+              path for path in tracked
+              if path.lower().endswith(('.wav', '.aif', '.aiff', '.mp3', '.ogg', '.flac', '.sf2'))
+          ]
+          if forbidden:
+              raise SystemExit(f'Binary audio must not be committed: {forbidden}')
+          print('source_identity=passed')
+          print('accepted_ancestry=passed')
+          print('bounded_file_set=passed')
+          print('no_tracked_audio_assets=passed')
+          PY
+          mkdir -p "$EVIDENCE_DIR/samples" "$EVIDENCE_DIR/source"
+
+      - name: Compile pipeline and run synthetic checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            scripts/derive_iowa_guitar_samples.py \
+            scripts/derive_iowa_guitar_samples_robust.py \
+            scripts/audit_iowa_guitar_samples.py \
+            scripts/build_iowa_sample_lock.py \
+            scripts/test_iowa_sample_pipeline.py
+          python3 scripts/test_iowa_sample_pipeline.py \
+            | tee "$EVIDENCE_DIR/synthetic-checks.txt"
+
+      - name: Install explicit audio derivation tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -n 1 | tee "$EVIDENCE_DIR/ffmpeg-version.txt"
+
+      - name: Download exact official Iowa sessions
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://theremin.music.uiowa.edu/sound%20files/MIS/Piano_Other/guitar'
+          files=(
+            'Guitar.mf.sulE.E2B2.mono.aif'
+            'Guitar.mf.sulA.A2B2.mono.aif'
+            'Guitar.mf.sulD.D3B3.mono.aif'
+            'Guitar.mf.sulG.G3B3.mono.aif'
+            'Guitar.mf.sulB.B3.mono.aif'
+            'Guitar.mf.sul_E.E4B4.mono.aif'
+          )
+          for name in "${files[@]}"; do
+            curl --fail --location --retry 3 --retry-all-errors \
+              --connect-timeout 20 --max-time 180 \
+              --user-agent 'Guitar Eyes Iowa systemic sample repair/1K' \
+              --output "$EVIDENCE_DIR/source/${name}" \
+              "${base}/${name}"
+          done
+          sha256sum "$EVIDENCE_DIR"/source/*.aif \
+            | tee "$EVIDENCE_DIR/source-sha256.txt"
+
+      - name: Derive all six signal-valid normalized anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/derive_iowa_guitar_samples_robust.py \
+            --source-dir "$EVIDENCE_DIR/source" \
+            --output-dir "$EVIDENCE_DIR/samples" \
+            --evidence "$EVIDENCE_DIR/derivation.json"
+          sha256sum "$EVIDENCE_DIR"/samples/*.wav \
+            | tee "$EVIDENCE_DIR/derived-sha256.txt"
+
+      - name: Audit the complete six-sample set
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_iowa_guitar_samples.py \
+            --sample-dir "$EVIDENCE_DIR/samples" \
+            --evidence "$EVIDENCE_DIR/audit.json" \
+            | tee "$EVIDENCE_DIR/audit-output.txt"
+          python3 scripts/build_iowa_sample_lock.py \
+            --derivation "$EVIDENCE_DIR/derivation.json" \
+            --audit "$EVIDENCE_DIR/audit.json" \
+            --run-id "$GITHUB_RUN_ID" \
+            --output "$EVIDENCE_DIR/candidate-manifest.json" \
+            | tee "$EVIDENCE_DIR/manifest-output.txt"
+
+      - name: Inspect the candidate lock and fixture identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmp \
+            fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml \
+            public/fixtures/iowa-all-six-strings-chord-rest.musicxml
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          evidence = Path(os.environ['EVIDENCE_DIR'])
+          manifest = json.loads((evidence / 'candidate-manifest.json').read_text())
+          if manifest['schemaVersion'] != 2:
+              raise SystemExit('Wrong 1K manifest schema')
+          if manifest['proofIdentity'] != 'Guitar Eyes Iowa systemic sample repair proof 1K':
+              raise SystemExit('Wrong 1K proof identity')
+          if manifest['selectionMethod'] != 'catalog-ordered-signal-validated-v4':
+              raise SystemExit('Wrong 1K selection method')
+          if len(manifest['samples']) != 6:
+              raise SystemExit('The systemic lock must contain six samples')
+          if manifest['setActiveLoudnessSpreadDb'] > 1.75:
+              raise SystemExit('The locked six-sample loudness spread is unsafe')
+          for sample in manifest['samples']:
+              path = evidence / 'samples' / sample['derivedFilename']
+              data = path.read_bytes()
+              if len(data) != sample['derivedBytes']:
+                  raise SystemExit(f'Byte mismatch for {path.name}')
+              if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
+                  raise SystemExit(f'Hash mismatch for {path.name}')
+              if abs(sample['activeRmsDbfs'] + 24.0) > 1.25:
+                  raise SystemExit(f'Unsafe active loudness for {path.name}')
+          print('six_sample_lock=passed')
+          print('cross_sample_balance=passed')
+          print('fixture_identity=passed')
+          PY
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install locked dependencies
+        shell: bash
+        run: npm ci --no-audit --no-fund
+
+      - name: Verify the consolidated listening fixture
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=true npm test -- --watchAll=false --runInBand \
+            src/iowaListeningFixture.test.js 2>&1 \
+            | tee "$EVIDENCE_DIR/fixture-test.log"
+
+      - name: Upload one-day derivation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iowa-sample-systemic-repair-1k
+          path: /tmp/iowa-sample-systemic-repair-1k
+          if-no-files-found: warn
+          retention-days: 1
+
+      - name: Publish final source status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = '${{ job.status }}' === 'success'
+              ? 'success'
+              : ('${{ job.status }}' === 'failure' ? 'failure' : 'error');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.SOURCE_SHA,
+              state,
+              context: process.env.STATUS_CONTEXT,
+              description: state === 'success'
+                ? 'Complete Iowa 1K sample set derived and audited'
+                : 'Iowa 1K systemic derivation did not pass',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
