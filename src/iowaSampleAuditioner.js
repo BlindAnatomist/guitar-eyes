@@ -5,6 +5,11 @@ const MIN_START_DELAY_SECONDS = 0.5;
 const MAX_START_DELAY_SECONDS = 5;
 const MIN_VOICE_SECONDS = 0.32;
 const MAX_VOICE_SECONDS = 2.8;
+export const IOWA_MASTER_INPUT_GAIN = 1.05;
+const BASE_PITCHED_GAIN = 0.6;
+const MIN_PITCHED_GAIN = 0.19;
+const MAX_PITCHED_GAIN = 0.84;
+const STRING_GAIN_MULTIPLIERS = Object.freeze([1, 1, 1.04, 1.1, 1.22, 1.4]);
 
 export class IowaSampleAuditionError extends Error {
   constructor(message, code = "IOWA_SAMPLE_AUDITION_ERROR") {
@@ -37,6 +42,22 @@ function defaultFetch(input, init) {
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
+}
+
+export function resolveIowaPitchedGain(event, pitchedEventCount) {
+  const voiceCount =
+    Number.isInteger(pitchedEventCount) && pitchedEventCount > 0
+      ? pitchedEventCount
+      : 1;
+  const stringMultiplier = Number.isInteger(event?.stringIndex)
+    ? STRING_GAIN_MULTIPLIERS[event.stringIndex] ?? 1
+    : 1;
+
+  return clamp(
+    (BASE_PITCHED_GAIN * stringMultiplier) / Math.sqrt(voiceCount),
+    MIN_PITCHED_GAIN,
+    MAX_PITCHED_GAIN
+  );
 }
 
 function validateStartDelaySeconds(value) {
@@ -92,7 +113,7 @@ function setAudioParam(parameter, value, time) {
 
 function configureMaster(context) {
   const input = context.createGain();
-  setAudioParam(input.gain, 0.82, context.currentTime);
+  setAudioParam(input.gain, IOWA_MASTER_INPUT_GAIN, context.currentTime);
 
   let output = input;
   const filters = [];
@@ -312,17 +333,12 @@ export function createIowaSampleAuditioner({
       MIN_VOICE_SECONDS,
       MAX_VOICE_SECONDS
     );
-    const pitchedGain = clamp(
-      0.48 / Math.sqrt(Math.max(1, pitchedEvents.length)),
-      0.15,
-      0.48
-    );
 
     buffers.forEach((buffer, index) => {
       scheduleBuffer(
         buffer,
         onset,
-        pitchedGain,
+        resolveIowaPitchedGain(pitchedEvents[index], pitchedEvents.length),
         selections[index].playbackRate,
         requestedDurationSeconds
       );
