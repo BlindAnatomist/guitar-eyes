@@ -14,12 +14,7 @@ describe("Iowa guitar sample manifest", () => {
   test("keeps one licensed and hash-locked anchor on each physical guitar string", () => {
     expect(IOWA_GUITAR_SAMPLE_MANIFEST).toHaveLength(6);
     expect(IOWA_GUITAR_SAMPLE_MANIFEST.map((entry) => entry.stringIndex)).toEqual([
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
+      0, 1, 2, 3, 4, 5,
     ]);
     IOWA_GUITAR_SAMPLE_MANIFEST.forEach((entry) => {
       expect(entry.sourceFilename).toMatch(/^Guitar\.mf\./);
@@ -27,23 +22,27 @@ describe("Iowa guitar sample manifest", () => {
       expect(entry.derivedFilename).toMatch(/\.wav$/);
       expect(entry.derivedBytes).toBeGreaterThan(20000);
       expect(entry.derivedSha256).toMatch(/^[a-f0-9]{64}$/);
-      expect(Math.abs(entry.activeRmsDbfs + 30)).toBeLessThanOrEqual(1.25);
+      expect(Math.abs(entry.activeRmsDbfs + 26)).toBeLessThanOrEqual(1.25);
       expect(entry.peakDbfs).toBeLessThan(0);
       expect(entry.targetPitchScore).toBeGreaterThanOrEqual(0.45);
       expect(Math.abs(entry.estimatedMidi - entry.anchorMidi)).toBeLessThanOrEqual(1);
+      expect(entry.detectedMusicalEventCount).toBe(entry.sourceNoteCount);
     });
+  });
+
+  test("locks the three source-start notes to the actual first musical event", () => {
+    const byString = new Map(
+      IOWA_GUITAR_SAMPLE_MANIFEST.map((entry) => [entry.stringNumber, entry])
+    );
+    expect(byString.get(1).selectedOnsetSeconds).toBe(0);
+    expect(byString.get(2).selectedOnsetSeconds).toBe(0);
+    expect(byString.get(6).selectedOnsetSeconds).toBe(0);
   });
 
   test("matches the public systemic derivation and normalization lock", () => {
     const lock = JSON.parse(
       fs.readFileSync(
-        path.join(
-          process.cwd(),
-          "public",
-          "samples",
-          "iowa-guitar",
-          "manifest.json"
-        ),
+        path.join(process.cwd(), "public", "samples", "iowa-guitar", "manifest.json"),
         "utf8"
       )
     );
@@ -59,42 +58,18 @@ describe("Iowa guitar sample manifest", () => {
     expect(lock.samples).toHaveLength(6);
     expect(
       lock.samples.map(
-        ({
-          derivedFilename,
-          derivedBytes,
-          derivedSha256,
-          activeRmsDbfs,
-          peakDbfs,
-          targetPitchScore,
-          estimatedMidi,
-        }) => ({
-          derivedFilename,
-          derivedBytes,
-          derivedSha256,
-          activeRmsDbfs,
-          peakDbfs,
-          targetPitchScore,
-          estimatedMidi,
+        ({ derivedFilename, derivedBytes, derivedSha256, activeRmsDbfs,
+           peakDbfs, targetPitchScore, estimatedMidi, selectedOnsetSeconds }) => ({
+          derivedFilename, derivedBytes, derivedSha256, activeRmsDbfs,
+          peakDbfs, targetPitchScore, estimatedMidi, selectedOnsetSeconds,
         })
       )
     ).toEqual(
       IOWA_GUITAR_SAMPLE_MANIFEST.map(
-        ({
-          derivedFilename,
-          derivedBytes,
-          derivedSha256,
-          activeRmsDbfs,
-          peakDbfs,
-          targetPitchScore,
-          estimatedMidi,
-        }) => ({
-          derivedFilename,
-          derivedBytes,
-          derivedSha256,
-          activeRmsDbfs,
-          peakDbfs,
-          targetPitchScore,
-          estimatedMidi,
+        ({ derivedFilename, derivedBytes, derivedSha256, activeRmsDbfs,
+           peakDbfs, targetPitchScore, estimatedMidi, selectedOnsetSeconds }) => ({
+          derivedFilename, derivedBytes, derivedSha256, activeRmsDbfs,
+          peakDbfs, targetPitchScore, estimatedMidi, selectedOnsetSeconds,
         })
       )
     );
@@ -102,11 +77,8 @@ describe("Iowa guitar sample manifest", () => {
 
   test("selects only from the event's own physical string", () => {
     const selection = selectIowaGuitarSample({
-      type: "pitched-string",
-      stringIndex: 5,
-      midi: 40,
+      type: "pitched-string", stringIndex: 5, midi: 40,
     });
-
     expect(selection.entry.stringNumber).toBe(6);
     expect(selection.entry.anchorName).toBe("E2");
     expect(selection.semitoneShift).toBe(0);
@@ -116,27 +88,19 @@ describe("Iowa guitar sample manifest", () => {
 
   test("permits only the bounded same-string pitch range", () => {
     expect(MAX_IOWA_SAMPLE_SHIFT_SEMITONES).toBe(3);
-    expect(
-      selectIowaGuitarSample({
-        type: "pitched-string",
-        stringIndex: 0,
-        midi: 67,
-      })
-    ).not.toBeNull();
-    expect(
-      selectIowaGuitarSample({
-        type: "pitched-string",
-        stringIndex: 0,
-        midi: 68,
-      })
-    ).toBeNull();
+    expect(selectIowaGuitarSample({
+      type: "pitched-string", stringIndex: 0, midi: 67,
+    })).not.toBeNull();
+    expect(selectIowaGuitarSample({
+      type: "pitched-string", stringIndex: 0, midi: 68,
+    })).toBeNull();
   });
 
   test("does not invent a sample for malformed or non-pitched events", () => {
     expect(selectIowaGuitarSample(null)).toBeNull();
     expect(selectIowaGuitarSample({ type: "muted-string", stringIndex: 1 })).toBeNull();
-    expect(
-      selectIowaGuitarSample({ type: "pitched-string", stringIndex: 9, midi: 64 })
-    ).toBeNull();
+    expect(selectIowaGuitarSample({
+      type: "pitched-string", stringIndex: 9, midi: 64,
+    })).toBeNull();
   });
 });
