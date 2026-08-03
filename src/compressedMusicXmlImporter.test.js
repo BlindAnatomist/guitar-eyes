@@ -207,6 +207,16 @@ describe("compressed MusicXML extraction", () => {
     ],
     [
       makeZip([
+        storedEntry(
+          "META-INF/container.xml",
+          containerXml("score\u007f.musicxml")
+        ),
+        storedEntry("score\u007f.musicxml", "<score-partwise/>"),
+      ]),
+      "UNSAFE_MXL_ROOTFILE_PATH",
+    ],
+    [
+      makeZip([
         storedEntry("META-INF/container.xml", containerXml()),
         storedEntry("META-INF/container.xml", containerXml()),
         storedEntry("score.musicxml", "<score-partwise/>"),
