@@ -142,8 +142,11 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
   const requestedInstrument = SUPPORTED_INSTRUMENTS.includes(selectedInstrument)
     ? selectedInstrument
     : "guitar";
-  const candidates = supportedCandidateAnalyses(sourceText, requestedInstrument);
-  let semanticError = null;
+  const strictProfileError = exactCountProfileError(sourceText, requestedInstrument);
+  const candidates = strictProfileError
+    ? []
+    : supportedCandidateAnalyses(sourceText, requestedInstrument);
+  let semanticError = strictProfileError;
 
   for (const candidate of candidates) {
     try {
@@ -179,9 +182,8 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
   }
 
   semanticError =
-    exactCountProfileError(sourceText, requestedInstrument) ||
-    unsupportedStringCountError(sourceText) ||
     semanticError ||
+    unsupportedStringCountError(sourceText) ||
     (() => {
       const requestedAnalysis = analyzeTabRunsForProfile(
         sourceText,
