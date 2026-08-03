@@ -100,6 +100,7 @@ function serializeVersionEvidence(versionEvidence) {
     "archiveFamily",
     "sourceFamily",
     "extensionFamily",
+    "packageVariant",
     "rootVersion",
     "gpVersion",
     "encodingDescription",
