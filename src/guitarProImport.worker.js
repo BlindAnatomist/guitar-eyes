@@ -1,6 +1,6 @@
 /* global globalThis */
 
-import { inspectGuitarProArchiveVersion } from "./guitarProArchiveVersion";
+import { inspectGuitarProSource } from "./guitarProSourceVersion";
 import { decodeGuitarProScoreWithIntegrity } from "./guitarProDecodeIntegrity";
 
 function workerError(error) {
@@ -12,7 +12,7 @@ function workerError(error) {
 }
 
 globalThis.onmessage = async (event) => {
-  const { requestId, bytes } = event.data || {};
+  const { requestId, fileName, bytes } = event.data || {};
 
   try {
     if (!(bytes instanceof ArrayBuffer)) {
@@ -20,9 +20,14 @@ globalThis.onmessage = async (event) => {
         code: "INVALID_GUITAR_PRO_WORKER_INPUT",
       });
     }
+    if (typeof fileName !== "string" || fileName.length === 0) {
+      throw Object.assign(new Error("The Guitar Pro worker did not receive a filename."), {
+        code: "INVALID_GUITAR_PRO_WORKER_INPUT",
+      });
+    }
 
     const rawBytes = new Uint8Array(bytes);
-    const versionEvidence = await inspectGuitarProArchiveVersion(rawBytes);
+    const versionEvidence = await inspectGuitarProSource(rawBytes, { fileName });
     const alphaTab = await import("@coderline/alphatab");
     const intermediate = decodeGuitarProScoreWithIntegrity(alphaTab, rawBytes, {
       versionEvidence,
