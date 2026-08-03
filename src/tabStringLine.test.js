@@ -101,23 +101,69 @@ describe("ASCII string-line analysis", () => {
     });
   });
 
-  test("keeps five- and seven-string runs distinct from supported profiles", () => {
-    const sevenAsGuitar = analyzeTabRunsForProfile(
+  test("accepts exact octave-qualified seven-string guitar and five-string bass profiles", () => {
+    const seven = analyzeTabRunsForProfile(
+      fixture("ascii-seven-string-guitar.txt"),
+      ASCII_INSTRUMENT_PROFILES.sevenStringGuitar
+    );
+    const five = analyzeTabRunsForProfile(
+      fixture("ascii-five-string-bass.txt"),
+      ASCII_INSTRUMENT_PROFILES.fiveStringBass
+    );
+
+    expect(seven).toMatchObject({ valid: true, confidence: 110 });
+    expect(seven.blocks[0]).toHaveLength(7);
+    expect(five).toMatchObject({ valid: true, confidence: 110 });
+    expect(five.blocks[0]).toHaveLength(5);
+  });
+
+  test("keeps extended profiles distinct from four- and six-string profiles", () => {
+    const sevenAsSix = analyzeTabRunsForProfile(
       fixture("ascii-seven-string-guitar.txt"),
       ASCII_INSTRUMENT_PROFILES.guitar
     );
-    const fiveAsBass = analyzeTabRunsForProfile(
+    const fiveAsFour = analyzeTabRunsForProfile(
       fixture("ascii-five-string-bass.txt"),
       ASCII_INSTRUMENT_PROFILES.bass
     );
 
-    expect(sevenAsGuitar).toMatchObject({
+    expect(sevenAsSix).toMatchObject({
       valid: false,
       code: "INCOMPLETE_TABLATURE_BLOCK",
     });
-    expect(fiveAsBass).toMatchObject({
+    expect(fiveAsFour).toMatchObject({
       valid: false,
       code: "INCOMPLETE_TABLATURE_BLOCK",
+    });
+  });
+
+  test("requires complete exact octave evidence for extended profiles", () => {
+    const missingOctaves = fixture("ascii-seven-string-guitar.txt").replace(
+      /([A-G])\d(?=\|)/g,
+      "$1"
+    );
+    const alteredLowB = fixture("ascii-seven-string-guitar.txt").replace(
+      "B1|--0--|",
+      "B0|--0--|"
+    );
+
+    expect(
+      analyzeTabRunsForProfile(
+        missingOctaves,
+        ASCII_INSTRUMENT_PROFILES.sevenStringGuitar
+      )
+    ).toMatchObject({
+      valid: false,
+      code: "MISSING_TUNING_OCTAVES",
+    });
+    expect(
+      analyzeTabRunsForProfile(
+        alteredLowB,
+        ASCII_INSTRUMENT_PROFILES.sevenStringGuitar
+      )
+    ).toMatchObject({
+      valid: false,
+      code: "UNVERIFIED_TUNING_PROFILE",
     });
   });
 
