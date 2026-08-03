@@ -2,7 +2,9 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { TextDecoder, TextEncoder } from "util";
+import { inflateRawSync } from "zlib";
 import * as alphaTab from "@coderline/alphatab";
+import { inspectGuitarProArchiveVersion } from "./guitarProArchiveVersion";
 import { inspectGuitarProSource } from "./guitarProSourceVersion";
 import { alphaTabScoreToGuitarProIntermediate } from "./guitarProAlphaTabAdapter";
 import { normalizeVerifiedGuitarProIntermediate } from "./guitarProSourceNormalizer";
@@ -67,6 +69,10 @@ function bytesFor(fileName) {
   return fs.readFileSync(path.join(FIXTURE_DIRECTORY, fileName));
 }
 
+async function inflateRaw(bytes) {
+  return new Uint8Array(inflateRawSync(Buffer.from(bytes)));
+}
+
 function musicalProjection(document) {
   return {
     sourceFormat: document.sourceFormat,
@@ -92,6 +98,8 @@ async function decodeFixture(family) {
   const raw = bytesFor(family.fileName);
   const versionEvidence = await inspectGuitarProSource(raw, {
     fileName: family.fileName,
+    inspectSharedArchive: (input) =>
+      inspectGuitarProArchiveVersion(input, { inflateRaw }),
   });
   const score = alphaTab.importer.ScoreLoader.loadScoreFromBytes(
     new Uint8Array(raw),
