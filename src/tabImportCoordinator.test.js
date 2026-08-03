@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { describePlayablePosition } from "./positionDescription";
+import { buildPositionSoundEvents } from "./positionSoundEvents";
 import {
   buildMusicXmlReaderDocuments,
   buildReaderDocuments,
@@ -132,16 +133,76 @@ describe("buildReaderDocuments", () => {
   });
 
   test.each([
-    ["ascii-seven-string-guitar.txt", "guitar", "7-string"],
-    ["ascii-five-string-bass.txt", "bass", "5-string"],
-  ])("recognizes but does not guess unsupported string count in %s", (name, selected, label) => {
+    [
+      "ascii-seven-string-guitar.txt",
+      "guitar",
+      "seven-string guitar",
+      7,
+      35,
+    ],
+    ["ascii-five-string-bass.txt", "bass", "five-string bass", 5, 23],
+  ])(
+    "imports exact extended-string ASCII from %s into both readers",
+    (name, family, label, stringCount, lowBMidi) => {
+      const result = buildReaderDocuments(fixture(name), family);
+      const description = describePlayablePosition(result.semanticDocument, 0);
+      const soundEvents = buildPositionSoundEvents(result.semanticDocument, 0);
+      const lowB = soundEvents.events.find(
+        (event) => event.stringIndex === stringCount - 1
+      );
+
+      expect(result).toMatchObject({
+        desktopSource: "semantic",
+        semanticError: null,
+        requestedInstrument: family,
+        resolvedInstrument: family,
+        instrumentWasDetected: false,
+        supportOutcome: "supported",
+      });
+      expect(result.semanticDocument).toMatchObject({
+        instrument: family,
+        instrumentLabel: label,
+        stringCount,
+      });
+      expect(result.semanticDocument.strings).toHaveLength(stringCount);
+      expect(result.desktopBlocks).toHaveLength(1);
+      expect(result.desktopBlocks[0]).toHaveLength(stringCount);
+      expect(description).toContain("Low B string, open.");
+      expect(soundEvents).toMatchObject({
+        isChord: true,
+        pitchedEventCount: stringCount,
+      });
+      expect(lowB).toMatchObject({
+        type: "pitched-string",
+        fret: 0,
+        midi: lowBMidi,
+      });
+    }
+  );
+
+  test.each([
+    ["ascii-seven-string-guitar.txt", "bass", "guitar"],
+    ["ascii-five-string-bass.txt", "guitar", "bass"],
+  ])("auto-detects the extended family in %s", (name, selected, resolved) => {
     const result = buildReaderDocuments(fixture(name), selected);
+
+    expect(result.desktopSource).toBe("semantic");
+    expect(result.requestedInstrument).toBe(selected);
+    expect(result.resolvedInstrument).toBe(resolved);
+    expect(result.instrumentWasDetected).toBe(true);
+  });
+
+  test("rejects seven-string material without complete octave evidence", () => {
+    const source = fixture("ascii-seven-string-guitar.txt").replace(
+      /([A-G])\d(?=\|)/g,
+      "$1"
+    );
+    const result = buildReaderDocuments(source, "guitar");
 
     expect(result.desktopSource).toBe("legacy-fallback");
     expect(result.semanticDocument).toBeNull();
-    expect(result.semanticError.code).toBe("UNSUPPORTED_STRING_COUNT");
-    expect(result.semanticError.message).toContain(label);
-    expect(result.supportOutcome).toBe("recognized-unsupported");
+    expect(result.semanticError.code).toBe("MISSING_TUNING_OCTAVES");
+    expect(result.supportOutcome).toBe("unsafe-fallback");
   });
 
   test.each([
