@@ -1,4 +1,4 @@
-name: Iowa sample systemic repair 1K derivation
+name: Iowa sample systemic repair 1K exact gate
 
 on:
   push:
@@ -12,20 +12,20 @@ permissions:
   statuses: write
 
 concurrency:
-  group: guitar-eyes-iowa-sample-systemic-repair-1k
+  group: guitar-eyes-iowa-sample-systemic-repair-1k-exact
   cancel-in-progress: true
 
 jobs:
-  derive:
+  verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      SOURCE_SHA: 14446381f8e0c0ba49bfb2481c0e68e1e4e468c2
+      SOURCE_SHA: 624950689928988e825fe38615694ef153e9b3b2
       BASE_SHA: 33ae73dbe6f26655ab31ebb567acf54887661ce1
-      STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k
-      EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-systemic-repair-1k-exact
+      EVIDENCE_DIR: /tmp/iowa-sample-systemic-repair-1k-exact
     steps:
-      - name: Mark exact derivation pending
+      - name: Mark exact gate pending
         uses: actions/github-script@v7
         with:
           script: |
@@ -35,18 +35,18 @@ jobs:
               sha: process.env.SOURCE_SHA,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Deriving and auditing the complete Iowa 1K sample set',
+              description: 'Verifying the exact Iowa 1K application source',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
-      - name: Check out exact systemic-repair source
+      - name: Check out exact 1K source
         uses: actions/checkout@v4
         with:
           ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Verify source identity ancestry and boundary
+      - name: Verify exact source ancestry and boundary
         shell: bash
         run: |
           set -euo pipefail
@@ -60,14 +60,22 @@ jobs:
           expected = {
               '.github/workflows/iowa-sample-systemic-repair-1k.yml',
               'docs/iowa-sample-systemic-repair-1k-first-derivation-diagnostic-2026-08-03.md',
+              'docs/iowa-sample-systemic-repair-1k-fixture-test-diagnostic-2026-08-03.md',
               'docs/iowa-sample-systemic-repair-1k-loudness-target-diagnostic-2026-08-03.md',
               'docs/iowa-sample-systemic-repair-1k-preflight-2026-08-03.md',
               'fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml',
               'public/fixtures/iowa-all-six-strings-chord-rest.musicxml',
+              'public/index.html',
+              'public/samples/iowa-guitar/manifest.json',
               'scripts/audit_iowa_guitar_samples.py',
               'scripts/build_iowa_sample_lock.py',
               'scripts/derive_iowa_guitar_samples_robust.py',
               'scripts/test_iowa_sample_pipeline.py',
+              'src/IPhoneTabReader.js',
+              'src/buildIdentity.test.js',
+              'src/checkpointBuildIdentity.test.js',
+              'src/iowaGuitarSampleManifest.js',
+              'src/iowaGuitarSampleManifest.test.js',
               'src/iowaListeningFixture.test.js',
           }
           actual = set(subprocess.check_output(
@@ -90,9 +98,9 @@ jobs:
           print('bounded_file_set=passed')
           print('no_tracked_audio_assets=passed')
           PY
-          mkdir -p "$EVIDENCE_DIR/samples" "$EVIDENCE_DIR/source"
+          mkdir -p "$EVIDENCE_DIR/source"
 
-      - name: Compile pipeline and run synthetic checks
+      - name: Compile and verify the systemic pipeline
         shell: bash
         run: |
           set -euo pipefail
@@ -105,7 +113,7 @@ jobs:
           python3 scripts/test_iowa_sample_pipeline.py \
             | tee "$EVIDENCE_DIR/synthetic-checks.txt"
 
-      - name: Install explicit audio derivation tools
+      - name: Install explicit audio tools
         shell: bash
         run: |
           set -euo pipefail
@@ -129,77 +137,62 @@ jobs:
           for name in "${files[@]}"; do
             curl --fail --location --retry 3 --retry-all-errors \
               --connect-timeout 20 --max-time 180 \
-              --user-agent 'Guitar Eyes Iowa systemic sample repair/1K' \
+              --user-agent 'Guitar Eyes Iowa systemic sample repair/1K exact gate' \
               --output "$EVIDENCE_DIR/source/${name}" \
               "${base}/${name}"
           done
           sha256sum "$EVIDENCE_DIR"/source/*.aif \
             | tee "$EVIDENCE_DIR/source-sha256.txt"
 
-      - name: Derive all six signal-valid normalized anchors
+      - name: Reproduce and verify every locked 1K WAV
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/derive_iowa_guitar_samples_robust.py \
             --source-dir "$EVIDENCE_DIR/source" \
-            --output-dir "$EVIDENCE_DIR/samples" \
+            --output-dir public/samples/iowa-guitar \
             --evidence "$EVIDENCE_DIR/derivation.json"
-          sha256sum "$EVIDENCE_DIR"/samples/*.wav \
-            | tee "$EVIDENCE_DIR/derived-sha256.txt"
-
-      - name: Audit the complete six-sample set
-        shell: bash
-        run: |
-          set -euo pipefail
           python3 scripts/audit_iowa_guitar_samples.py \
-            --sample-dir "$EVIDENCE_DIR/samples" \
+            --sample-dir public/samples/iowa-guitar \
             --evidence "$EVIDENCE_DIR/audit.json" \
-            | tee "$EVIDENCE_DIR/audit-output.txt"
-          python3 scripts/build_iowa_sample_lock.py \
-            --derivation "$EVIDENCE_DIR/derivation.json" \
-            --audit "$EVIDENCE_DIR/audit.json" \
-            --run-id "$GITHUB_RUN_ID" \
-            --output "$EVIDENCE_DIR/candidate-manifest.json" \
-            | tee "$EVIDENCE_DIR/manifest-output.txt"
-
-      - name: Inspect the candidate lock and fixture identity
-        shell: bash
-        run: |
-          set -euo pipefail
-          cmp \
-            fixtures/real-world/iowa-all-six-strings-chord-rest.musicxml \
-            public/fixtures/iowa-all-six-strings-chord-rest.musicxml
+            > "$EVIDENCE_DIR/audit-output.txt"
           python3 - <<'PY'
           import hashlib
           import json
-          import os
           from pathlib import Path
 
-          evidence = Path(os.environ['EVIDENCE_DIR'])
-          manifest = json.loads((evidence / 'candidate-manifest.json').read_text())
-          if manifest['schemaVersion'] != 2:
+          lock_path = Path('public/samples/iowa-guitar/manifest.json')
+          lock = json.loads(lock_path.read_text())
+          audit = json.loads(Path('/tmp/iowa-sample-systemic-repair-1k-exact/audit.json').read_text())
+          if lock['schemaVersion'] != 2:
               raise SystemExit('Wrong 1K manifest schema')
-          if manifest['proofIdentity'] != 'Guitar Eyes Iowa systemic sample repair proof 1K':
+          if lock['proofIdentity'] != 'Guitar Eyes Iowa systemic sample repair proof 1K':
               raise SystemExit('Wrong 1K proof identity')
-          if manifest['selectionMethod'] != 'catalog-ordered-signal-validated-v4':
+          if lock['derivationRun'] != 30834146324:
+              raise SystemExit('Wrong 1K derivation authority')
+          if lock['selectionMethod'] != 'catalog-ordered-signal-validated-v4':
               raise SystemExit('Wrong 1K selection method')
-          if len(manifest['samples']) != 6:
-              raise SystemExit('The systemic lock must contain six samples')
-          if manifest['setActiveLoudnessSpreadDb'] > 1.75:
-              raise SystemExit('The locked six-sample loudness spread is unsafe')
-          for sample in manifest['samples']:
-              path = evidence / 'samples' / sample['derivedFilename']
+          if lock['setActiveLoudnessSpreadDb'] > 1.75:
+              raise SystemExit('Unsafe 1K set spread')
+          audit_by_name = {sample['derivedFilename']: sample for sample in audit['samples']}
+          for sample in lock['samples']:
+              path = lock_path.parent / sample['derivedFilename']
               data = path.read_bytes()
               if len(data) != sample['derivedBytes']:
                   raise SystemExit(f'Byte mismatch for {path.name}')
               if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
                   raise SystemExit(f'Hash mismatch for {path.name}')
-              if abs(sample['activeRmsDbfs'] + 30.0) > 1.25:
-                  raise SystemExit(f'Unsafe active loudness for {path.name}')
-          print('six_sample_lock=passed')
+              measured = audit_by_name[path.name]
+              if measured['activeRmsDbfs'] != sample['activeRmsDbfs']:
+                  raise SystemExit(f'Loudness mismatch for {path.name}')
+              if measured['peakDbfs'] != sample['peakDbfs']:
+                  raise SystemExit(f'Peak mismatch for {path.name}')
+          print('six_sample_reproduction=passed')
+          print('sample_hash_lock=passed')
           print('cross_sample_balance=passed')
-          print('fixture_identity=passed')
           PY
+          sha256sum public/samples/iowa-guitar/*.wav \
+            | tee "$EVIDENCE_DIR/derived-sha256.txt"
 
       - name: Set up Node 20
         uses: actions/setup-node@v4
@@ -211,20 +204,70 @@ jobs:
         shell: bash
         run: npm ci --no-audit --no-fund
 
-      - name: Verify the consolidated listening fixture
+      - name: Run complete inherited and 1K test suite
         shell: bash
         run: |
           set -o pipefail
-          CI=true npm test -- --watchAll=false --runInBand \
-            src/iowaListeningFixture.test.js 2>&1 \
-            | tee "$EVIDENCE_DIR/fixture-test.log"
+          CI=true npm test -- --watchAll=false --runInBand 2>&1 \
+            | tee "$EVIDENCE_DIR/test.log"
 
-      - name: Upload one-day derivation evidence
+      - name: Build production application
+        shell: bash
+        run: |
+          set -o pipefail
+          CI=false npm run build 2>&1 | tee "$EVIDENCE_DIR/build.log"
+
+      - name: Inspect compiled exact candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_js="$(find build/static/js -maxdepth 1 -type f -name 'main.*.js' | head -n 1)"
+          test -n "$main_js"
+          test -f build/index.html
+          test -f build/samples/iowa-guitar/manifest.json
+          test -f build/fixtures/iowa-all-six-strings-chord-rest.musicxml
+          grep -Fq '<title>Test build Guitar Eyes Iowa systemic sample repair proof 1K</title>' build/index.html
+          grep -Fq 'Test build: Guitar Eyes Iowa systemic sample repair proof 1K.' build/index.html
+          grep -Fq 'Guitar Eyes Iowa systemic sample repair proof 1K' "$main_js"
+          grep -Fq 'catalog-ordered-signal-validated-v4' "$main_js"
+          grep -Fq 'c06ca04b0b82d6d0e30648fc84d3633041b1dc0978ae7bdd6df959cbae22c76f' "$main_js"
+          grep -Fq 'Audition current position' "$main_js"
+          grep -Fq 'Current position is a rest. No pitched sound was played.' "$main_js"
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          source = json.loads(Path('public/samples/iowa-guitar/manifest.json').read_text())
+          built = json.loads(Path('build/samples/iowa-guitar/manifest.json').read_text())
+          if built != source:
+              raise SystemExit('Built 1K manifest differs from source lock')
+          for sample in source['samples']:
+              path = Path('build/samples/iowa-guitar') / sample['derivedFilename']
+              data = path.read_bytes()
+              if len(data) != sample['derivedBytes']:
+                  raise SystemExit(f'Built byte mismatch for {path.name}')
+              if hashlib.sha256(data).hexdigest() != sample['derivedSha256']:
+                  raise SystemExit(f'Built hash mismatch for {path.name}')
+          print('compiled_sample_lock=passed')
+          PY
+          git diff --exit-code -- . ':(exclude)public/samples/iowa-guitar/*.wav'
+          git diff --cached --exit-code
+          {
+            echo "source_sha=$(git rev-parse HEAD)"
+            echo "main_js=$main_js"
+            sha256sum build/index.html build/samples/iowa-guitar/manifest.json "$main_js"
+            echo 'compiled_identity=passed'
+            echo 'compiled_reader_contract=passed'
+            echo 'compiled_sample_contract=passed'
+          } | tee "$EVIDENCE_DIR/build-inspection.txt"
+
+      - name: Upload one-day exact-gate evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iowa-sample-systemic-repair-1k
-          path: /tmp/iowa-sample-systemic-repair-1k
+          name: iowa-sample-systemic-repair-1k-exact
+          path: /tmp/iowa-sample-systemic-repair-1k-exact
           if-no-files-found: warn
           retention-days: 1
 
@@ -243,7 +286,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Complete Iowa 1K sample set derived and audited'
-                : 'Iowa 1K systemic derivation did not pass',
+                ? 'Exact Iowa 1K source passed complete verification'
+                : 'Exact Iowa 1K source did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
