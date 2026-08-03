@@ -12,7 +12,9 @@ Accepted format-only source in ancestry: `aca0cd79cc274ea598cc9e67c26e13e41e6101
 
 Verified engine source: `4b3e89ba068db36a364cb824ccd1cc513f3734cf`
 
-Hosted publication source: `030e1f6af2de23e41ad993ab0292893b072664eb`
+Accepted hosted application source: `030e1f6af2de23e41ad993ab0292893b072664eb`
+
+State: `passed`
 
 ## Implemented bounded support
 
@@ -132,18 +134,39 @@ Publication results:
 9. hosted HTML identity read-back passed;
 10. hosted JavaScript profile read-back passed.
 
-## Current acceptance boundary
+## Successful real-iPhone acceptance
 
-Automated tests, production build, publication, and hosted read-back are complete.
+The owner tested the hosted 4C proof on a real iPhone with Safari, VoiceOver, and the iPhone Files picker.
 
-Real-iPhone VoiceOver acceptance remains required before Checkpoint 2 is complete. The bounded test concerns only:
+The exact report was:
+
+> That worked everything was fine. Focus was good. The tuning was accurate so like I said it all worked.
+
+Within the bounded test, this accepts:
 
 1. Files-picker focus recovery;
-2. all eight guitar strings;
-3. all six bass strings;
-4. Guitar/Bass family behavior;
-5. quarter-note duration and semantic navigation;
-6. absence of every playback or audition surface.
+2. complete eight-string guitar reading;
+3. complete six-string bass reading;
+4. correct Guitar/Bass family behavior;
+5. accurate exact-standard tuning representation;
+6. quarter-note duration and semantic position behavior;
+7. continued absence of playback and audition controls.
+
+Detailed record:
+
+- `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`.
+
+## Final verdict
+
+ASCII Extended-String Intake Checkpoint 2 is passed and closed.
+
+The accepted application source is:
+
+`030e1f6af2de23e41ad993ab0292893b072664eb`
+
+Documentation-only closure commits do not replace that application source.
+
+The checkpoint does not establish arbitrary eight-string guitar tuning, arbitrary six-string bass tuning, missing-octave inference, another instrument family, another file format, playback, realistic timbre, or teacher mode.
 
 ## Repository restoration
 
