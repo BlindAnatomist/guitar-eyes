@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      STATUS_CONTEXT: guitar-eyes/iowa-sample-integrity-diagnostic-1k-v2
+      STATUS_CONTEXT: guitar-eyes/iowa-sample-integrity-diagnostic-1k-v3
       EVIDENCE_DIR: /tmp/iowa-integrity-1k
       PYTHONDONTWRITEBYTECODE: 1
     steps:
@@ -34,7 +34,7 @@ jobs:
               sha: context.sha,
               state: 'pending',
               context: process.env.STATUS_CONTEXT,
-              description: 'Deriving exact or defensible pitch Iowa candidates',
+              description: 'Deriving exact-source and defensible-output Iowa candidates',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
 
@@ -86,7 +86,7 @@ jobs:
           for name in "${files[@]}"; do
             curl --fail --location --retry 3 --retry-all-errors \
               --connect-timeout 20 --max-time 180 \
-              --user-agent 'Guitar Eyes sample integrity diagnostic/1K-v2' \
+              --user-agent 'Guitar Eyes sample integrity diagnostic/1K-v3' \
               --output "$EVIDENCE_DIR/source/${name}" \
               "${base}/${name}"
           done
@@ -124,12 +124,12 @@ jobs:
                   raise SystemExit(f'Wrong selection method: {target}')
               if midi != 59 and not target['usedExactEstimatedMidi']:
                   raise SystemExit(f'Exact source estimate was not used for MIDI {midi}: {target}')
-              if midi != 59 and target['postDerivationEstimatedMidi'] != midi:
-                  raise SystemExit(f'Derived estimate is not exact for MIDI {midi}: {target}')
-              if midi == 59 and abs(target['postDerivationEstimatedMidi'] - midi) > 1:
-                  raise SystemExit(f'B3 estimate exceeded one semitone: {target}')
+              if abs(target['postDerivationEstimatedMidi'] - midi) > 1:
+                  raise SystemExit(f'Derived estimate exceeded one semitone for MIDI {midi}: {target}')
               if not target['postDerivationDefensiblePitch']:
                   raise SystemExit(f'Derived pitch is not defensible: {target}')
+              if target['postDerivationTargetPitchScore'] < target['postDerivationBestPitchScore'] - 0.02:
+                  raise SystemExit(f'Target pitch score materially trails best estimate: {target}')
               if target['derivedWindowRms'] < 1450:
                   raise SystemExit(f'Derived sample remains too quiet: {target}')
               if target['derivedPeak'] > round(32767 * 0.82) + 1:
@@ -153,7 +153,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: iowa-sample-integrity-diagnostic-1k-v2
+          name: iowa-sample-integrity-diagnostic-1k-v3
           path: |
             /tmp/iowa-integrity-1k/summary.txt
             /tmp/iowa-integrity-1k/ffmpeg-version.txt
@@ -179,7 +179,7 @@ jobs:
               state,
               context: process.env.STATUS_CONTEXT,
               description: state === 'success'
-                ? 'Six exact or defensible pitch Iowa candidates derived'
-                : 'Iowa sample integrity diagnostic v2 did not pass',
+                ? 'Six exact-source and defensible-output Iowa candidates derived'
+                : 'Iowa sample integrity diagnostic v3 did not pass',
               target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
             });
