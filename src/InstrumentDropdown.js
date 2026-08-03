@@ -9,8 +9,8 @@ function InstrumentDropdown({ selectedInstrument, onSelectInstrument }) {
     <div>
       <label htmlFor="instrument-dropdown">Choose Instrument: </label>
       <select id="instrument-dropdown" value={selectedInstrument} onChange={handleChange}>
-        <option value="guitar">Guitar (6 strings)</option>
-        <option value="bass">Bass (4 strings)</option>
+        <option value="guitar">Guitar family</option>
+        <option value="bass">Bass family</option>
       </select>
     </div>
   );
