@@ -3,36 +3,66 @@ const STRING_LINE_PATTERN = /^\s*([A-Ga-g])([#b♯♭]?)(-?\d+)?\s*\|(.*)$/;
 export const ASCII_INSTRUMENT_PROFILES = {
   guitar: {
     id: "guitar",
+    profileId: "six-string-guitar",
     label: "six-string guitar",
     stringCount: 6,
     standardTuning: ["E", "B", "G", "D", "A", "E"],
     allowCustomTuningWithoutOctaves: true,
   },
+  sevenStringGuitar: {
+    id: "guitar",
+    profileId: "seven-string-guitar",
+    label: "seven-string guitar",
+    stringCount: 7,
+    standardTuning: ["E", "B", "G", "D", "A", "E", "B"],
+    standardOctaves: [4, 3, 3, 3, 2, 2, 1],
+    requireEveryOctave: true,
+    requireExactStandardOctaves: true,
+    allowCustomTuningWithoutOctaves: false,
+    stringIdentities: [
+      { shortName: "high E", spokenName: "High E string" },
+      { shortName: "B", spokenName: "B string" },
+      { shortName: "G", spokenName: "G string" },
+      { shortName: "D", spokenName: "D string" },
+      { shortName: "A", spokenName: "A string" },
+      { shortName: "low E", spokenName: "Low E string" },
+      { shortName: "low B", spokenName: "Low B string" },
+    ],
+  },
   bass: {
     id: "bass",
+    profileId: "four-string-bass",
     label: "four-string bass",
     stringCount: 4,
     standardTuning: ["G", "D", "A", "E"],
     allowCustomTuningWithoutOctaves: true,
   },
-};
-
-export const UNSUPPORTED_ASCII_INSTRUMENT_PROFILES = {
-  sevenStringGuitar: {
-    id: "seven-string-guitar",
-    label: "seven-string guitar",
-    stringCount: 7,
-    standardTuning: ["E", "B", "G", "D", "A", "E", "B"],
-    allowCustomTuningWithoutOctaves: false,
-  },
   fiveStringBass: {
-    id: "five-string-bass",
+    id: "bass",
+    profileId: "five-string-bass",
     label: "five-string bass",
     stringCount: 5,
     standardTuning: ["G", "D", "A", "E", "B"],
+    standardOctaves: [2, 2, 1, 1, 0],
+    requireEveryOctave: true,
+    requireExactStandardOctaves: true,
     allowCustomTuningWithoutOctaves: false,
+    stringIdentities: [
+      { shortName: "G", spokenName: "G string" },
+      { shortName: "D", spokenName: "D string" },
+      { shortName: "A", spokenName: "A string" },
+      { shortName: "E", spokenName: "E string" },
+      { shortName: "low B", spokenName: "Low B string" },
+    ],
   },
 };
+
+export const SUPPORTED_ASCII_PROFILE_KEYS_BY_FAMILY = {
+  guitar: ["guitar", "sevenStringGuitar"],
+  bass: ["bass", "fiveStringBass"],
+};
+
+export const UNSUPPORTED_ASCII_INSTRUMENT_PROFILES = {};
 
 const PITCH_CLASS = {
   C: 0,
@@ -158,6 +188,9 @@ function validateTuningSegment(segment, profile) {
   const exactStandard = tuning.every(
     (pitch, index) => pitch === profile.standardTuning[index]
   );
+  const exactStandardOctaves =
+    !Array.isArray(profile.standardOctaves) ||
+    octaves.every((octave, index) => octave === profile.standardOctaves[index]);
   const hasEveryOctave = octaves.every((octave) => octave !== null);
   const hasSomeOctave = octaves.some((octave) => octave !== null);
 
@@ -176,12 +209,32 @@ function validateTuningSegment(segment, profile) {
       };
     }
 
+    if (
+      profile.requireExactStandardOctaves &&
+      (!exactStandard || !exactStandardOctaves)
+    ) {
+      return {
+        valid: false,
+        code: "UNVERIFIED_TUNING_PROFILE",
+        message: `This checkpoint supports ${profile.label} only in exact standard tuning with the complete expected octave sequence.`,
+      };
+    }
+
+    const exactStandardProfile = exactStandard && exactStandardOctaves;
     return {
       valid: true,
-      confidence: exactStandard ? 110 : 90,
-      warnings: exactStandard
+      confidence: exactStandardProfile ? 110 : 90,
+      warnings: exactStandardProfile
         ? []
         : [`Custom ${profile.label} tuning was preserved from octave-qualified labels.`],
+    };
+  }
+
+  if (profile.requireEveryOctave) {
+    return {
+      valid: false,
+      code: "MISSING_TUNING_OCTAVES",
+      message: `This checkpoint requires every ${profile.label} string label to include its octave so pitch and string order are explicit.`,
     };
   }
 
