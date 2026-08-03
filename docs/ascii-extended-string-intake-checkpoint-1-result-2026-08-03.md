@@ -12,6 +12,8 @@ Accepted application source in ancestry: `51741c03a9eaa339940c84d53e0f0f00e6413a
 
 Verified engine source: `3a6f44eeae7a8c9f19abff19c1cfd714f07a2164`
 
+Hosted publication source: `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe`
+
 ## Implemented bounded support
 
 The shared ASCII importer now supports:
@@ -90,14 +92,75 @@ Evidence artifact: `8868244463`, retained for one day by policy.
 
 The build retained one inherited ESLint warning in `src/compressedMusicXmlImporter.js` concerning control characters in a regular expression. This checkpoint did not modify that file, and the warning did not prevent the production build.
 
+## Hosted identity
+
+Publication source `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe` adds only the unique acceptance identity and its focused tests beyond the verified engine and result record.
+
+The hosted identity is:
+
+`Guitar Eyes extended-string ASCII intake proof 4A`
+
+The static title and first heading carry that identity. Historical in-application proof labels remain compiled evidence but are hidden from the accessibility tree in this hosted acceptance build so VoiceOver encounters one build identity.
+
+## Publication inspection failures and proven correction
+
+The application source repeatedly passed tests and production builds. Three publication attempts stopped before deployment because the workflow inspected minified HTML as if it preserved source formatting:
+
+1. run `30845148497` used ordinary `grep` across a newline;
+2. run `30845340154` assumed a space before the CSS opening brace;
+3. stale queued run `30845684336` assumed the minifier preserved combined-selector order.
+
+These were workflow-inspection failures, not application, test, or build failures. No failed run deployed anything.
+
+The proven inspection method is:
+
+1. source identity tests establish that both historical-label selectors share the hidden rule;
+2. built and hosted inspection independently confirms both selector tokens survive;
+3. built and hosted inspection independently confirms a `display:none` declaration survives;
+4. inspection does not assume whitespace, selector order, or source formatting after minification.
+
+## Successful publication and live read-back
+
+Exact publication source: `88aa0c2cf60d2eedf2bb419292e5679e9862e3fe`
+
+Successful publication run: `30845766066`
+
+Status context: `guitar-eyes/ascii-extended-string-intake-4a`
+
+Results:
+
+1. exact publication authority and sixteen-file boundary passed;
+2. focused build-identity tests passed;
+3. production Pages build passed;
+4. minifier-safe artifact inspection passed;
+5. unique static title and first heading passed;
+6. both hidden historical-label tokens and hidden display declaration passed;
+7. compiled seven-string guitar and five-string bass profiles passed;
+8. compiled safety errors and Low B identity passed;
+9. compiled Guitar-family and Bass-family selector wording passed;
+10. accepted Read current position and Audition current position controls passed;
+11. sampled Iowa assets were absent;
+12. GitHub Pages deployment passed;
+13. hosted HTML and JavaScript read-back passed.
+
+Publication evidence artifact: `8868630902`, retained for one day by policy.
+
+Pages artifact: `8868624677`, retained for one day by policy.
+
 ## Repository restoration
 
-The temporary verification workflow existed only on fork `main` as a trigger. After the corrected run completed, fork `main` was restored and independently verified identical to:
+Every temporary verification or publication workflow existed only on fork `main` as a trigger and checked out an immutable feature source.
+
+After successful publication, fork `main` was restored and independently verified identical to:
 
 `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-No pull request, merge, upstream modification, sampled-audio reopening, teacher-mode implementation, or deployment occurred during the verification checkpoint.
+The comparison showed zero commits ahead, zero behind, and zero changed files.
+
+No pull request, merge, upstream modification, sampled-audio reopening, or teacher-mode implementation occurred.
 
 ## Remaining acceptance boundary
 
-Automated and production-build verification is complete. A uniquely identified hosted candidate and bounded real-iPhone test remain required before this format support can be treated as real-device accepted.
+Automated verification, production build, publication, and hosted read-back are complete.
+
+The remaining requirement is one bounded real-iPhone test of the exact seven-string guitar and five-string bass fixtures. The test concerns intake, semantic speech, family detection, duration, focus recovery, and preservation of accepted reader controls. It does not reopen sampled-audio testing or require a sound-quality judgment.
