@@ -7,6 +7,20 @@ export const IOWA_GUITAR_SAMPLE_USAGE = {
     "University of Iowa Electronic Music Studios Musical Instrument Samples recordings may be downloaded and used for projects without restrictions.",
 };
 
+export const IOWA_GUITAR_SAMPLE_PROOF_IDENTITY =
+  "Guitar Eyes Iowa systemic sample repair proof 1K";
+export const IOWA_GUITAR_SAMPLE_SELECTION_METHOD =
+  "catalog-ordered-signal-validated-v4";
+export const IOWA_GUITAR_SAMPLE_NORMALIZATION = {
+  targetActiveRmsDbfs: -30,
+  toleranceDb: 1.25,
+  maximumSetSpreadDb: 1.75,
+  peakLimit: 0.88,
+  maximumGain: 12,
+  highpassCutoffHz: 35,
+};
+export const IOWA_GUITAR_SAMPLE_SET_ACTIVE_LOUDNESS_SPREAD_DB = 0.584369;
+
 export const IOWA_GUITAR_SAMPLE_MANIFEST = [
   {
     stringIndex: 0,
@@ -17,9 +31,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "3c04d367aa3cdf9fa4c9cd6ba3591704de6da5917a714057b307699d1ed6128b",
     sourceNoteCount: 8,
     sourceTargetOrdinal: 1,
+    selectedOnsetSeconds: 7.349116,
+    selectedDurationSeconds: 1.396236,
     derivedFilename: "string-1-e4.wav",
     derivedBytes: 123192,
-    derivedSha256: "171eb3d47ff0cf66a713ede7ad88adbb2865408d1fbf4d2290bb8b4d7f31807c",
+    derivedSha256: "afd9213ebe96c6b60b54482c3584907660fe51bf6be321a36b2612e20f3ed1a5",
+    activeRmsDbfs: -30.000285,
+    peakDbfs: -13.514411,
+    targetPitchScore: 0.994422,
+    estimatedMidi: 64,
   },
   {
     stringIndex: 1,
@@ -30,9 +50,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "5afbcddce7bb8a2135232872984a6d2403ff3da1c1daaf03dacb17f29b454489",
     sourceNoteCount: 1,
     sourceTargetOrdinal: 1,
+    selectedOnsetSeconds: 1.857596,
+    selectedDurationSeconds: 1.558776,
     derivedFilename: "string-2-b3.wav",
-    derivedBytes: 81720,
-    derivedSha256: "c4ebccb75a70f5bae1d7d1f2ff0dd2fa2e138e43a957816e8e9f1f26d4d3dab5",
+    derivedBytes: 137528,
+    derivedSha256: "d44296468f64c774924dd4b8376b817a92c1c739f1b747ea72a20ef4540d2ffa",
+    activeRmsDbfs: -30.584623,
+    peakDbfs: -19.592993,
+    targetPitchScore: 0.90604,
+    estimatedMidi: 58,
   },
   {
     stringIndex: 2,
@@ -43,9 +69,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "6e9bcd0b29470ba131aa43d08e51f94b9daaf00a16fff07f52be95196d48bece",
     sourceNoteCount: 5,
     sourceTargetOrdinal: 2,
+    selectedOnsetSeconds: 11.284898,
+    selectedDurationSeconds: 0.792517,
     derivedFilename: "string-3-g-sharp3.wav",
     derivedBytes: 69944,
-    derivedSha256: "5edab1d772b1c62729beb2e7bb185d05e4410a3038411bc27acf635f70ef3abf",
+    derivedSha256: "4180df7c5957373b6c7ab126bb0168874dbe9fce8d63b2d9dfcbecd1fcadf1a5",
+    activeRmsDbfs: -30.000294,
+    peakDbfs: -17.158321,
+    targetPitchScore: 0.992523,
+    estimatedMidi: 55,
   },
   {
     stringIndex: 3,
@@ -56,9 +88,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "464a66a5fbd4c8f835bcddfeb9c875ee2d75e81e156cfe80a362473681c9ffa7",
     sourceNoteCount: 10,
     sourceTargetOrdinal: 3,
+    selectedOnsetSeconds: 31.904218,
+    selectedDurationSeconds: 1.7039,
     derivedFilename: "string-4-e3.wav",
-    derivedBytes: 114488,
-    derivedSha256: "c083b9438e60c9fb31f99b894985ff50da47e9fef6d5b261d69a10310accdffc",
+    derivedBytes: 150328,
+    derivedSha256: "41f7bc2e06910fede6ed87ab9ac4887637adba3a630a76a8fcb6cbf1e263d914",
+    activeRmsDbfs: -30.000254,
+    peakDbfs: -20.450998,
+    targetPitchScore: 0.991059,
+    estimatedMidi: 52,
   },
   {
     stringIndex: 4,
@@ -69,9 +107,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "a298fddd7cc2d5e83eb63852360040dc87b63caa1638cf82589f8614e158525c",
     sourceNoteCount: 3,
     sourceTargetOrdinal: 3,
+    selectedOnsetSeconds: 23.608889,
+    selectedDurationSeconds: 1.62263,
     derivedFilename: "string-5-b2.wav",
     derivedBytes: 143160,
-    derivedSha256: "8e1b25ac7bc3902383396119a94ee3ee442ecd54b5052294f8d03d4336f54ec4",
+    derivedSha256: "27b15bd33535a0e94475a7090e2923fff7be02737b0a05f9f99b86c23e01bd13",
+    activeRmsDbfs: -30.000265,
+    peakDbfs: -17.737134,
+    targetPitchScore: 0.994941,
+    estimatedMidi: 47,
   },
   {
     stringIndex: 5,
@@ -82,9 +126,15 @@ export const IOWA_GUITAR_SAMPLE_MANIFEST = [
     sourceSha256: "faef0e44dff6fcf99b2bd1cb50ab1ed519980e6c70951069cdbce38597c58b23",
     sourceNoteCount: 8,
     sourceTargetOrdinal: 1,
+    selectedOnsetSeconds: 10.866939,
+    selectedDurationSeconds: 1.013107,
     derivedFilename: "string-6-e2.wav",
-    derivedBytes: 165176,
-    derivedSha256: "3f549ab4210bd5901ccbd43bff34d981cd679450e6dc7d3d734577a0ee27a683",
+    derivedBytes: 89400,
+    derivedSha256: "c06ca04b0b82d6d0e30648fc84d3633041b1dc0978ae7bdd6df959cbae22c76f",
+    activeRmsDbfs: -30.000291,
+    peakDbfs: -16.578061,
+    targetPitchScore: 0.666894,
+    estimatedMidi: 41,
   },
 ];
 
@@ -95,8 +145,7 @@ const ENTRIES_BY_STRING_INDEX = new Map(
 export const MAX_IOWA_SAMPLE_SHIFT_SEMITONES = 3;
 
 function publicBaseUrl() {
-  const value = String(process.env.PUBLIC_URL || "").replace(/\/$/, "");
-  return value;
+  return String(process.env.PUBLIC_URL || "").replace(/\/$/, "");
 }
 
 export function iowaGuitarSampleUrl(entry) {
