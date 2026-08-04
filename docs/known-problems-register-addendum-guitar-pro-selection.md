@@ -1,12 +1,12 @@
-# Known Problems and Proven Solutions: Guitar Pro Selection Addendum
+# Known Problems and Proven Solutions: Guitar Pro Selection and Version Intake Addendum
 
 Repository: `BlindAnatomist/guitar-eyes`
 
 Status: active repository memory
 
-Date: July 27, 2026
+Last reconciled: August 4, 2026
 
-This addendum must be read with `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md` before changing Guitar Pro intake, track selection, or VoiceOver reading order.
+This addendum must be read with `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md` before changing Guitar Pro intake, version detection, track selection, or VoiceOver reading order.
 
 ---
 
@@ -31,10 +31,10 @@ The report did not establish that the separate Guitar or Bass selector caused th
 
 ### Proven solution
 
-1. Read the declared track count from `Content/score.gpif` inside the shared archive.
-2. Preserve that count in serializable archive-version evidence.
-3. Compare the archive declaration with alphaTab's decoded track count.
-4. Retry decoding once inside the existing lazy worker when the first result contradicts the archive.
+1. Read declared track evidence from the source container when the format provides it.
+2. Preserve that evidence in the serializable intermediate.
+3. Compare source structural evidence with alphaTab's decoded track count.
+4. Retry decoding once inside the existing lazy worker when the first result contradicts the source.
 5. Reject a persistent mismatch with `GUITAR_PRO_TRACK_COUNT_MISMATCH` rather than silently loading incomplete data.
 6. Cross-check the accepted intermediate again before building inventory.
 7. Begin a genuine multi-track selector with no radio option selected.
@@ -47,7 +47,7 @@ The complete automated and production-build gates passed, the exact hosted asset
 
 ### Derived standard
 
-When the container format provides independent structural evidence, a decoder result that contradicts it is unsafe input, not a harmless simplification.
+When a source format provides independent structural evidence, a decoder result that contradicts it is unsafe input, not a harmless simplification.
 
 ---
 
@@ -85,21 +85,64 @@ The complete inherited and new automated suite passed, the production build and 
 
 > That worked
 
-This establishes that the repaired backward-swipe path returned to the selected-track details in the tested sequence.
-
 ### Derived standard
 
 When a user needs to review a choice before committing it, the confirmation details belong immediately adjacent to the commit action in ordinary reading order. Focus management is not a substitute for coherent document order.
 
 ---
 
+## GE-016 — Guitar Pro generation-specific routes can diverge semantically
+
+State: `local-proven`
+
+### Risk
+
+Implementing GP3, GP4, GP5, GPX, and GP7 as unrelated readers or allowing alphaTab's generation-specific objects to escape the importer boundary can create multiple musical interpretations, inconsistent version announcements, and format-specific VoiceOver regressions.
+
+### Failed-do-not-repeat approaches
+
+1. Do not build a separate semantic reader for each Guitar Pro generation.
+2. Do not infer a source version only from a file extension when internal evidence is available.
+3. Do not claim GP7 support from a GP8-style project archive or claim legacy support from recognition alone.
+4. Do not allow alphaTab renderer, notation, playback, soundfont, or worker machinery into the application architecture.
+5. Do not use unlicensed or provenance-unknown third-party fixtures merely because they are convenient.
+6. Do not accept semantic parity from one format and assume the other generations behave identically.
+
+### Proven solution
+
+1. Use lawful project-authored fixtures for GP3, GP4, GP5, GPX, and GP7 shared `.gp`.
+2. Preserve generation method, external generator patch, audit evidence, SHA-256 hashes, and third-party notices.
+3. Detect and validate source-version evidence before normalization.
+4. Use alphaTab `1.8.4` lazily as a bounded low-level decoder only.
+5. Transfer a serializable version-neutral intermediate across the importer boundary.
+6. Normalize every supported generation into the same shared semantic tablature document.
+7. Keep explicit track inventory and selection behavior generation-neutral.
+8. Compare all five fixtures for the same six semantic positions, including string, fret, duration, rest, and version identity.
+9. Run focused generation and parity suites, the complete inherited suite, production build, bundle-boundary inspection, hosted read-back, and real-iPhone VoiceOver acceptance.
+10. State support as bounded to the verified corpus and profiles rather than arbitrary compatibility.
+
+### Acceptance result
+
+The clean convergence preserved the five lawful binaries and provenance, passed 10 focused suites and 53 focused tests, all 47 suites and 302 tests, production build, lazy-decoder and no-playback-asset boundaries, hosted read-back, and real-iPhone testing of all five versions and all six positions in each file.
+
+### Derived standard
+
+Different source generations may require different validation and decoding, but they must converge before application semantics. Generation-specific evidence belongs at the intake boundary; musical meaning belongs in the shared semantic document.
+
+---
+
 ## Evidence
 
-- Accepted application source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`.
+- Accepted earlier selection source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`.
+- Clean convergence application source: `2a8e5951ec4ced3ce63b2df85d82e54c0ba79ea0`.
 - `docs/guitar-pro-real-iphone-checkpoint-3d-result-and-3e-repair.md`.
 - `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`.
+- `docs/real-world-guitar-pro-source-gate-final-result-2026-08-03.md`.
+- `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`.
+- `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`.
+- `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`.
 - `docs/implementation-status.md`.
 
-## Boundaries
+## Boundary
 
-These results apply only to the verified project-authored GP8-style shared-archive fixtures. They do not establish general GP7 support, GP3 through GP6 support, arbitrary Guitar Pro compatibility, rendering, playback, soundfonts, audio workers, or support for other deferred tablature formats.
+These results establish the accepted project-authored GP3, GP4, GP5, GPX, and GP7 corpus and profiles. They do not establish arbitrary Guitar Pro compatibility, rendering, playback, soundfonts, audio workers, or support for PowerTab, TuxGuitar, TablEdit, or another deferred format family.
