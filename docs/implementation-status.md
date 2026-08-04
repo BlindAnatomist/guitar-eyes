@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Last updated: July 28, 2026
+Last reconciled: August 4, 2026.
 
 ## Repository authority
 
@@ -10,38 +10,56 @@ Working fork: `BlindAnatomist/guitar-eyes`
 
 Clean upstream-tracking branch: `main`
 
-Current implementation branch: `work/audible-playback-output-foundation`
+Clean fork `main` authority: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-Authoritative upstream commit: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
+Accepted format-only operational branch: `work/accepted-format-intake-convergence`
 
-Accepted semantic foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`
+Clean accepted 4C base: `030e1f6af2de23e41ad993ab0292893b072664eb`
 
-Verified, hosted, and real-iPhone-accepted convergence source: `72159d25958fffd941c95351c6781cf579e1d622`
+Clean convergence application source: `2a8e5951ec4ced3ce63b2df85d82e54c0ba79ea0`
 
-Verified ASCII intake source: `08f8ab16135570d0e53b829daa5c153a15751a45`
+Documentation-only closure commits do not replace the accepted application source.
 
-Verified MusicXML source: `715547a123b2a6e862a8020858df96cb34c63526`
+Fork `main` remains reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
-Verified, hosted, and real-iPhone-accepted Guitar Pro application source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
+## Current state
 
-Verified Playback Timing Foundation 1 engine source: `2b038b15afa09877f6d8dcf615bc060243578096`
+Accepted Format-Intake Convergence 5B is passed and closed.
 
-Completed playback-timing record: `work/playback-timing-foundation` at `b0f6ad7c801b26b8f5e26407ac835a17668cbbdd`
+The clean convergence combines the accepted format-only reader, extended-string ASCII intake, MusicXML and compressed MXL intake, and the accepted real-world Guitar Pro 3 through 7 intake.
 
-Fork `main` remains exactly reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
+Automated and hosted evidence:
+
+1. exact whitelist assembly;
+2. preserved hashes for the five Guitar Pro binaries and generator patch;
+3. 10 focused suites and 53 focused tests;
+4. all 47 suites and all 302 tests;
+5. production build;
+6. lazy alphaTab bundle boundary;
+7. format-only reader surface;
+8. absence of soundfont, synth, audio-worklet, and Iowa sample assets;
+9. exact hosted publication and live HTML/JavaScript read-back;
+10. fork `main` restored and preserved exactly.
+
+Real-device evidence:
+
+On August 4, 2026, John Washburn tested all five accepted Guitar Pro fixtures on the clean convergence proof with iPhone Safari and VoiceOver. He traversed all six positions in each file and reported that the files read correctly, the application recognized and named the corresponding Guitar Pro versions while loading, and everything appeared to work correctly.
+
+The exact convergence acceptance record is:
+
+- `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`.
 
 ## Governing architecture
 
-Guitar Eyes is one musical system with one semantic tablature document and one deterministic temporal projection:
+Guitar Eyes is one musical system with one shared semantic tablature document:
 
 1. iPhone presents semantic musical positions sequentially for Safari and VoiceOver.
-2. Desktop presents the same positions spatially as strings by synchronized positions.
+2. Desktop presents the same semantic positions spatially.
 3. Every supported importer normalizes into the same semantic document.
-4. The playback-timing engine consumes the semantic document without reparsing a source format.
-5. Audible output consumes the same semantic string identity and accepted timeline.
-6. Teacher mode must consume those same authorities.
-7. No reader, teacher, player, or format may create a second musical or timing interpretation.
-8. Third-party decoder models remain behind importer adapters and do not become the application architecture.
+4. No reader, future teacher, player, or format may create a second musical interpretation.
+5. Third-party decoder models remain behind importer adapters and do not become the application architecture.
+
+The historical playback-timing and audible-output experiments remain evidence, not the active product baseline. The accepted convergence intentionally excludes procedural audio, Iowa samples, playback controls, and playback language.
 
 ## Accepted reader contracts
 
@@ -52,211 +70,120 @@ Every future checkpoint must preserve:
 3. Read current as the only action that announces full playing instructions.
 4. Omission of ordinary unplayed strings.
 5. Speech for open strings, frets, explicit muted notes, attached techniques, chords, rests, and supported duration.
-6. W, H, Q, E, and S duration mapping for supported ASCII.
-7. Measure and position-within-measure speech.
-8. Multiple tablature blocks.
-9. Automatic supported four-string bass and six-string guitar detection.
-10. Native iPhone Files-picker focus recovery.
-11. No browser-level upload filter that blocks selection before validation.
-12. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
-13. Explicit inventory and selection for supported multi-track Guitar Pro archives.
-14. Selected-track details immediately before `Load selected track` in VoiceOver reading order.
-15. Timing derived from the semantic document rather than raw display text.
-16. Safe rejection instead of guessed duration or pitch.
-17. Audible output only after explicit owner activation.
-18. Audition must not move reader position or VoiceOver focus.
-
-## Passed convergence recovery checkpoint 1
-
-Exact source: `72159d25958fffd941c95351c6781cf579e1d622`
-
-Evidence:
-
-1. 17 of 17 automated suites.
-2. 81 of 81 automated tests.
-3. Production build and compiled-artifact checks.
-4. Corrected Pages publication and hosted read-back.
-5. Exact restoration of fork `main`.
-6. Real-iPhone Safari and VoiceOver acceptance.
-
-Jason Washburn's optional desktop acceptance remains deferred unless he agrees to participate. His absence is not an active blocker.
-
-## Passed ASCII intake checkpoint 1
-
-Exact source: `08f8ab16135570d0e53b829daa5c153a15751a45`
-
-Accepted capability includes six-string guitar and four-string bass, multiple blocks, optional octave labels, accidentals, custom tuning, frets, open and muted notes, deterministic attached techniques, W/H/Q/E/S rhythm lines, explicit aligned measures, false-position prevention, unsupported string-count recognition, and prose false-positive prevention.
-
-Verification:
-
-- 18 of 18 suites;
-- 101 of 101 tests;
-- production build;
-- compiled-fragment checks.
-
-## Passed MusicXML intake checkpoint 2
-
-Exact verified implementation source: `715547a123b2a6e862a8020858df96cb34c63526`
-
-Accepted scope is uncompressed `score-partwise` MusicXML with one unambiguous six-string guitar tablature part, explicit tuning, explicit string/fret coordinates, single-voice sequential timing, measures, exact duration, chord onsets, timed rests, and supported technical notation.
-
-Evidence includes importer and picker-repair suites, production builds, hosted read-back, real-iPhone file selection, picker-return focus, note and duration mapping, chord and rest speech, quiet navigation, and exact restoration of fork `main`.
-
-Detailed record:
-
-- `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`.
-
-## Passed Guitar Pro shared-archive checkpoint 3
-
-Exact accepted application source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`
-
-Accepted bounded capability:
-
-1. Project-authored single-track `.gp` archive with GP8 semantic evidence loads as six-string guitar.
-2. Project-authored two-track `.gp` archive exposes Proof Guitar and Proof Bass.
-3. No track is silently selected.
-4. `Load selected track` remains disabled until explicit selection.
-5. Explicit bass selection normalizes into the shared semantic document.
-6. The accepted intermediate is reused after selection without a second alphaTab decode.
-7. Archive-declared track count is cross-checked against decoder output.
-8. The separate Guitar/Bass selector does not filter Guitar Pro tracks.
-9. Selected-track details immediately precede the load action in VoiceOver order.
-10. The route remains lazy and contains no renderer, notation fonts, soundfonts, player, renderer workers, or audio worklets.
-
-Evidence includes the direct binary gate, 3E archive-integrity and explicit-selection verification, successful real-iPhone Proof Bass loading, 3F reading-order verification, and the owner's exact 3F result: `That worked`.
-
-Detailed records:
-
-- `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`;
-- `docs/guitar-pro-real-iphone-checkpoint-3d-result-and-3e-repair.md`;
-- `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`.
-
-## Passed Playback Timing Foundation 1
-
-Exact accepted engine source: `2b038b15afa09877f6d8dcf615bc060243578096`
-
-State: `passed`
-
-Accepted capability:
-
-1. Pure `buildPlaybackTimeline` engine consumes only the semantic document.
-2. Output is schema-versioned `playback-timeline` data.
-3. Existing position and block order are preserved.
-4. Tempo accepts integer 20–300 BPM.
-5. 120 BPM is the explicit checkpoint default.
-6. Tempo source is recorded as explicit or checkpoint default.
-7. Guitar Pro exact fractions are preferred.
-8. MusicXML duration fractions are reconstructed from divisions.
-9. Accepted decimal quarter-note units are reduced exactly when no stronger evidence exists.
-10. Exact reduced fractions drive cumulative musical time.
-11. Chords remain one onset.
-12. Rests consume their duration.
-13. Position, measure, and total offsets are exposed as fractions, quarter-note units, and milliseconds.
-14. Playback order is `source-order`.
-15. Repeats and alternate endings are not expanded.
-16. Missing or unsafe duration rejects with stable error codes.
-17. The semantic document is not mutated.
-18. The module imports no React, browser, worker, renderer, player, or audio dependency.
-
-Verification:
-
-1. Exact successful run: `30383944688`.
-2. Complete inherited and new automated suite passed.
-3. Optimized production build compiled successfully.
-4. Exact five-file source boundary passed.
-5. No forbidden soundfont, audio-worklet, synth-worker, renderer-worker, or Bravura asset was emitted.
-6. Fork `main` was restored and independently verified identical to clean authority.
-
-Detailed records:
-
-- `docs/playback-timing-foundation-checkpoint-1-plan-2026-07-28.md`;
-- `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`.
-
-## Current authorized checkpoint: Audible Playback Output Foundation 1
-
-Plan:
-
-- `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`.
-
-State: `implementation-in-progress`
-
-Current bounded source includes:
-
-1. `buildPositionSoundEvents`, a pure adapter from one semantic position and accepted timeline to pitched, muted, or rest sound events;
-2. exact standard six-string guitar and four-string bass pitch profiles;
-3. explicit tuning MIDI and explicit tuning-plus-octave support;
-4. rejection of custom tuning without octave evidence;
-5. fret-to-MIDI transposition and frequency derivation;
-6. chord strings scheduled at one semantic onset;
-7. explicit muted strings represented without invented pitch;
-8. one project-owned procedural plucked-string Web Audio engine;
-9. lazy `AudioContext` creation or resume only inside explicit audition;
-10. prior-node cleanup before repeated audition or reader navigation;
-11. one stable `Audition current position` action between Read current and Next;
-12. a persistent restrained audition status separate from full-position speech;
-13. no reader-position or focus movement;
-14. direct engine, adapter, reader, and accepted-corpus tests;
-15. an in-reader proof identity: `Audible current-position procedural plucked-string proof 1A`.
-
-Required source gate before John:
-
-1. exact branch-head and bounded-diff verification;
-2. complete inherited and new automated suite;
-3. optimized production build;
-4. source and build inspection proving no alphaSynth, soundfont, sample asset, audio worklet, renderer worker, or new third-party playback dependency;
-5. exact temporary Pages publication and live asset read-back;
-6. restoration of fork `main`;
-7. bounded real-iPhone audition test using `musicxml-chord-rest-two-measures.musicxml`.
-
-The iPhone acceptance must establish only:
-
-1. explicit activation produces audible sound for a pitched note or chord;
-2. a chord is perceived as simultaneous rather than sequential;
-3. a semantic rest reports that no pitched sound was played;
-4. repeated audition stops and replaces the prior sound without moving the reader;
-5. VoiceOver focus remains on `Audition current position`;
-6. Previous and Next remain quiet;
-7. Read current remains the only full-position instruction action.
-
-This checkpoint does not establish full-document playback, realistic guitar or bass timbre, technique-specific synthesis, looping, transport controls, automatic reader progression, tempo controls, repeat expansion, teacher mode, or practice scoring.
+6. Accepted duration and measure semantics.
+7. Multiple tablature blocks.
+8. Automatic supported guitar and bass detection.
+9. Native iPhone Files-picker focus recovery on success and failure.
+10. No browser-level upload filter that blocks selection before validation.
+11. Desktop spatial structure and non-interception of VoiceOver Control+Option commands.
+12. Explicit inventory and selection for supported multi-track Guitar Pro input.
+13. Selected-track details immediately before `Load selected track` in VoiceOver reading order.
+14. Safe rejection instead of guessed version, duration, tuning, track, or pitch.
+15. No playback controls or playback language in the accepted format-only baseline.
 
 ## Current format support
 
-### Actually imported into the semantic document
+### ASCII `.txt` and `.tab`
 
-1. ASCII `.txt` and `.tab` six-string guitar.
-2. ASCII `.txt` and `.tab` four-string bass.
-3. Uncompressed `.musicxml` and `.xml` six-string guitar tablature within the accepted profile.
-4. Verified project-authored `.gp` shared archives with GP8 semantic evidence, including the accepted single-track guitar and two-track guitar/bass proofs.
+Accepted profiles:
 
-### Recognized but not imported
+1. six-string guitar within the accepted general profile;
+2. seven-string guitar only in exact standard octave-qualified tuning `E4 B3 G3 D3 A2 E2 B1`;
+3. eight-string guitar only in exact standard octave-qualified tuning `E4 B3 G3 D3 A2 E2 B1 F#1`;
+4. four-string bass within the accepted general profile;
+5. five-string bass only in exact standard octave-qualified tuning `G2 D2 A1 E1 B0`;
+6. six-string bass only in exact standard octave-qualified tuning `C3 G2 D2 A1 E1 B0`.
 
-1. Five-string bass ASCII.
-2. Seven-string guitar ASCII.
-3. Compressed MusicXML `.mxl`.
-4. Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, and `.gpx`.
-5. Arbitrary or unverified `.gp` files.
-6. PowerTab `.ptb` and `.pt2`.
-7. TuxGuitar `.tg`.
-8. TablEdit `.tef`.
+Accepted ASCII semantics include multiple blocks, supported duration lines, aligned measures, tuning evidence, frets, open and muted notes, attached techniques, rests, chords where represented by aligned onsets, and false-positive prevention.
 
-Recognition must not be described as reading support.
+### MusicXML
 
-## Boundaries that remain unchanged
+Accepted routes:
 
-1. Do not claim general GP7 support.
-2. Do not claim GP3 through GP6 support without lawful verified fixtures and direct tests.
-3. Do not claim arbitrary Guitar Pro compatibility from project-authored proofs.
-4. Do not add alphaTab rendering or alphaSynth playback by implication.
-5. Do not silently select a track.
-6. Do not create a second musical or timing model.
-7. Deferred formats require separate routes.
-8. Do not begin full playback or teacher mode from this audition proof.
+1. uncompressed `.musicxml`;
+2. uncompressed `.xml`;
+3. compressed `.mxl`.
+
+The MusicXML support remains bounded to the accepted tablature profile and evidence. It is not a claim of arbitrary orchestral MusicXML compatibility.
+
+### Guitar Pro
+
+Accepted lawful corpus and version routes:
+
+1. Guitar Pro 3 `.gp3`;
+2. Guitar Pro 4 `.gp4`;
+3. Guitar Pro 5 `.gp5`;
+4. Guitar Pro 6 `.gpx`;
+5. Guitar Pro 7 shared `.gp`.
+
+The route uses alphaTab `1.8.4` only as a lazy low-level decoder. Source-version evidence is normalized into one version-neutral intermediate and then into the shared semantic document.
+
+Accepted behavior includes:
+
+1. explicit version identification;
+2. six-position semantic parity across all five fixtures;
+3. supported guitar and bass normalization;
+4. explicit inventory and selection for multi-track files;
+5. no silent track selection;
+6. archive and decoder structural cross-checks where available;
+7. reuse of the accepted decoded intermediate after selection;
+8. no renderer, notation font, soundfont, player, renderer worker, audio worklet, or alphaSynth machinery.
+
+This support is verified for the project-authored five-file corpus and accepted profiles. It does not establish arbitrary compatibility with every file produced by every Guitar Pro release.
+
+## Historical accepted checkpoints
+
+The current convergence inherits the accepted results recorded for:
+
+1. shared semantic-core convergence;
+2. ASCII intake;
+3. MusicXML intake;
+4. compressed MusicXML intake;
+5. Guitar Pro explicit-track selection and reading order;
+6. ASCII extended-string intake;
+7. real-world Guitar Pro 3 through 7 intake;
+8. clean format-intake convergence.
+
+Historical playback-timing, procedural-audio, and sampled-audio branches are not inherited into the active format-only application source.
+
+## Unsupported or separately deferred
+
+Unless a later lawful checkpoint proves support, the following remain unsupported:
+
+1. arbitrary extended-string tunings without complete accepted evidence;
+2. missing-octave inference for strict extended-string profiles;
+3. arbitrary or malformed Guitar Pro files outside the accepted profiles;
+4. PowerTab `.ptb` and `.pt2`;
+5. TuxGuitar `.tg`;
+6. TablEdit `.tef`;
+7. other unexamined proprietary tablature formats;
+8. full-document playback;
+9. teacher mode;
+10. practice scoring;
+11. bookmarks;
+12. AI-generated instruction.
+
+Recognition must never be described as reading support.
+
+## Next lawful phase
+
+Before implementing another format family:
+
+1. create a new work branch from the final documentation-closure head of `work/accepted-format-intake-convergence`;
+2. select one format family only;
+3. establish lawful fixtures and provenance before implementation;
+4. audit available decoders and licensing;
+5. define a bounded semantic profile;
+6. preserve all inherited reader, focus, and selection contracts;
+7. require focused tests, the complete inherited suite, production build, artifact inspection, hosted proof, and real-iPhone acceptance;
+8. close and document the checkpoint before beginning another format family.
+
+No merge to `main`, playback reopening, teacher-mode work, or upstream modification is implied by beginning format investigation.
 
 ## Testing responsibility
 
 Dependency work, source implementation, automated testing, builds, artifact inspection, documentation, repository administration, and hosted read-back proceed without John.
 
-John is needed only after the exact hosted audible proof passes every non-device gate.
+John is needed only after an exact hosted candidate passes every non-device gate and requires bounded real-iPhone VoiceOver judgment.
 
 Jason Washburn is not involved unless he separately agrees to desktop testing.
