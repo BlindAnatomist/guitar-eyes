@@ -2,59 +2,68 @@
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
+Last reconciled: August 4, 2026.
+
 ## Repository authority
 
 - Preserve `Phlypper/guitar-eyes` completely untouched.
-- Preserve fork `main` as a clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+- Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
-- Preserve `work/iphone-voiceover-tablature-audit` as evidence of the failed diverged convergence attempt. Do not continue feature work there.
-- Preserve `work/convergence-from-accepted-semantic-core` as the accepted convergence record.
-- The completed tablature-intake record is `work/tablature-intake-expansion` at `aa302dcee880df4a0947d3e374171554e4855022`.
-- The completed playback-timing record is `work/playback-timing-foundation` at `b0f6ad7c801b26b8f5e26407ac835a17668cbbdd`.
-- The current branch is `work/audible-playback-output-foundation`, created from that completed timing record.
-- Documentation-only closure commits do not replace an accepted application or engine source.
+- Preserve failed and superseded branches as evidence; do not resume feature work from them.
+- The accepted format-only operational baseline is `work/accepted-format-intake-convergence`.
+- The clean accepted 4C base is `030e1f6af2de23e41ad993ab0292893b072664eb`.
+- The clean convergence application source is `2a8e5951ec4ced3ce63b2df85d82e54c0ba79ea0`.
+- Documentation-only closure commits do not replace an accepted application source.
+- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/accepted-format-intake-convergence`, not from fork `main` and not from a historical development branch.
 
-## Accepted source identities
+## Current product boundary
 
-- Shared semantic foundation: `85396dc7066a2552b1c4f87f04f7b4f99b2c4a7e`.
-- Verified, hosted, and real-iPhone-accepted convergence source: `72159d25958fffd941c95351c6781cf579e1d622`.
-- Verified ASCII intake source: `08f8ab16135570d0e53b829daa5c153a15751a45`.
-- Verified uncompressed MusicXML source: `715547a123b2a6e862a8020858df96cb34c63526`.
-- Verified, hosted, and real-iPhone-accepted Guitar Pro application source: `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d`.
-- Verified Playback Timing Foundation 1 engine source: `2b038b15afa09877f6d8dcf615bc060243578096`.
+Guitar Eyes is currently a format-only semantic tablature reader.
+
+The accepted baseline includes:
+
+1. ASCII `.txt` and `.tab`:
+   - six-string guitar within the accepted general profile;
+   - seven-string guitar in exact standard octave-qualified tuning `E4 B3 G3 D3 A2 E2 B1`;
+   - eight-string guitar in exact standard octave-qualified tuning `E4 B3 G3 D3 A2 E2 B1 F#1`;
+   - four-string bass within the accepted general profile;
+   - five-string bass in exact standard octave-qualified tuning `G2 D2 A1 E1 B0`;
+   - six-string bass in exact standard octave-qualified tuning `C3 G2 D2 A1 E1 B0`.
+2. Uncompressed `.musicxml` and `.xml` six-string guitar tablature within the accepted bounded profile.
+3. Compressed MusicXML `.mxl` through the accepted compressed-import route.
+4. Guitar Pro 3 `.gp3`.
+5. Guitar Pro 4 `.gp4`.
+6. Guitar Pro 5 `.gp5`.
+7. Guitar Pro 6 `.gpx`.
+8. Guitar Pro 7 shared `.gp` archives within the verified version-neutral intake boundary.
+
+The Guitar Pro claim is bounded by the lawful project-authored five-file corpus, direct semantic parity tests, production verification, hosted read-back, and real-iPhone VoiceOver acceptance. It is not a claim of arbitrary compatibility with every Guitar Pro file.
+
+Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
 ## Required continuity reading
 
-Before changing implementation, accessibility, repository administration, deployment, workflows, importers, dependencies, playback, teacher mode, or future AI work, read:
+Before changing implementation, accessibility, repository administration, deployment, workflows, importers, dependencies, playback, teacher mode, or future AI work, read at minimum:
 
-1. `docs/implementation-status.md`;
-2. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
-3. `docs/known-problems-register-addendum-guitar-pro-selection.md`;
-4. `docs/known-problems-register-addendum-execution-gates.md`;
-5. `docs/solved-problems-and-reusable-procedures.md`;
-6. `docs/shared-semantic-core-plan.md`;
-7. `docs/shared-semantic-core-implementation.md`;
-8. `docs/real-world-tab-format-corpus-checkpoint-1.md`;
-9. `docs/rhythm-duration-checkpoint-1.md`;
-10. `docs/measure-recognition-checkpoint-1.md`;
-11. `docs/convergence-lineage-recovery-2026-07-26.md`;
-12. `docs/convergence-recovery-source-checkpoint-1.md`;
-13. `docs/convergence-recovery-local-execution-gate-2026-07-26.md`;
-14. `docs/convergence-recovery-publication-result-2026-07-26.md`;
-15. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
-16. `docs/tablature-intake-expansion-plan-2026-07-26.md`;
-17. `docs/tablature-intake-expansion-checkpoint-1-audit.md`;
-18. `docs/ascii-intake-expansion-checkpoint-1-result-2026-07-26.md`;
-19. `docs/musicxml-intake-checkpoint-2-result-2026-07-26.md`;
-20. `docs/musicxml-intake-checkpoint-2-publication-2026-07-26.md`;
-21. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
-22. `docs/guitar-pro-structured-import-evaluation-2026-07-27.md`;
-23. `docs/guitar-pro-real-iphone-checkpoint-3d-result-and-3e-repair.md`;
-24. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
-25. `docs/playback-timing-foundation-checkpoint-1-plan-2026-07-28.md`;
-26. `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`;
-27. `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`;
-28. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+1. `BRANCH_AUTHORITY.md`;
+2. `docs/implementation-status.md`;
+3. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
+4. `docs/known-problems-register-addendum-guitar-pro-selection.md`;
+5. `docs/known-problems-register-addendum-execution-gates.md`;
+6. `docs/solved-problems-and-reusable-procedures.md`;
+7. `docs/shared-semantic-core-plan.md`;
+8. `docs/shared-semantic-core-implementation.md`;
+9. `docs/convergence-lineage-recovery-2026-07-26.md`;
+10. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
+11. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
+12. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
+13. `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`;
+14. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
+15. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
+16. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
+17. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+
+Read additional checkpoint records named by those files when the work touches their mechanism.
 
 Do not rely on chat memory alone or rediscover a procedure already preserved in repository evidence.
 
@@ -62,135 +71,74 @@ Do not rely on chat memory alone or rediscover a procedure already preserved in 
 
 Every future change must preserve:
 
+- one shared semantic tablature document as the sole musical authority;
 - automatic supported guitar and bass detection;
 - multiple complete tablature blocks;
-- W, H, Q, E, and S duration mapping and speech;
+- accepted duration mapping and speech;
 - aligned explicit measures;
 - measure and position-within-measure speech;
 - Previous position, Read current position, Next position in that relative order;
 - quiet Previous and Next movement;
 - quiet tablature-block movement;
-- Read current position as the only action that announces full playing instructions in a semantic reader;
+- Read current position as the only action that announces full playing instructions;
 - omission of ordinary unplayed strings from speech;
 - speech for open strings, frets, explicit mute notation, attached techniques, rests, chords, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure;
 - no browser-level `accept` restriction that blocks selection before validation;
 - Jason Washburn's recognizable desktop spatial concept and non-interception of VoiceOver Control+Option commands;
-- explicit inventory and explicit selection for supported multi-track Guitar Pro archives;
-- no silent track selection;
-- selected-track details immediately before `Load selected track` in VoiceOver reading order.
+- explicit inventory and explicit selection for supported multi-track Guitar Pro files;
+- no silent Guitar Pro track selection;
+- selected-track details immediately before `Load selected track` in VoiceOver reading order;
+- format/version identification that is evidence-based and never stronger than the verified source;
+- no playback controls or playback language in the accepted format-only reader.
 
-## Single semantic and temporal architecture
+## Single semantic architecture
 
-The semantic tablature document is the sole musical authority for source format, instrument, blocks, strings, positions, durations, measures, chords, rests, techniques, warnings, and preserved unsupported material.
+The semantic tablature document is the sole authority for source format, instrument, blocks, strings, positions, durations, measures, chords, rests, techniques, warnings, and preserved unsupported material.
 
-Desktop, iPhone, timing, teacher mode, and audible playback may present or consume that document differently, but none may create a second musical interpretation.
+Desktop and iPhone may present that document differently, but neither may create a second musical interpretation.
 
-The accepted playback timeline is the sole deterministic temporal projection of the semantic document. Teacher mode and audible playback must consume that timeline rather than recalculate timing independently.
+Third-party decoders may decode source formats, but their models must remain behind importer boundaries. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models remain outside the accepted architecture.
 
-A third-party parser may decode a source format, but its model must not escape the importer boundary. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models remain outside the architecture.
+## New-format rule
 
-## Accepted tablature intake
+Recognition is not reading support.
 
-### ASCII
+A new format family requires its own bounded checkpoint with:
 
-Exact source `08f8ab16135570d0e53b829daa5c153a15751a45` supports verified six-string guitar and four-string bass ASCII, multiple blocks, duration lines, explicit measures, custom tuning, attached techniques, and safe unsupported-string-count recognition.
+1. lawful, original, public-domain, or clearly licensed fixtures;
+2. documented provenance and deterministic hashes;
+3. source/version detection that does not guess;
+4. normalization into the shared semantic document;
+5. preservation of all accepted reader and focus contracts;
+6. focused importer and semantic-parity tests;
+7. the complete inherited suite;
+8. a production build and asset-boundary inspection;
+9. hosted proof only after source gates pass;
+10. bounded real-iPhone VoiceOver acceptance before support is claimed;
+11. a clean convergence or closure record before the next format family begins.
 
-### MusicXML
+Do not mix multiple unproven format families into one implementation checkpoint.
 
-Uncompressed `score-partwise` MusicXML is accepted within the bounded six-string guitar profile recorded in `docs/implementation-status.md`, including exact duration, measures, chord onsets, timed rests, supported technical notation, picker selection, picker-return focus, and quiet navigation.
+## Deferred format families
 
-### Guitar Pro
+Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
-Exact source `d6f9a0862c32bc3fa0b14834e027fefb1276bd8d` is accepted only for the verified project-authored `.gp` shared archives containing GP8 semantic evidence.
-
-The accepted Guitar Pro route uses alphaTab `1.8.4` only as a lazy low-level decoder, transfers a bounded serializable intermediate, supports verified four-string bass and six-string guitar tracks, requires explicit multi-track selection, cross-checks archive track count, reuses the accepted intermediate after selection, and emits no renderer, notation font, soundfont, player, or audio machinery.
-
-Do not claim general GP7 support, GP3 through GP6 support, or arbitrary `.gp` compatibility.
-
-## Passed checkpoint: Playback Timing Foundation 1
-
-Exact accepted engine source: `2b038b15afa09877f6d8dcf615bc060243578096`.
-
-Result record:
-
-- `docs/playback-timing-foundation-checkpoint-1-result-2026-07-28.md`.
-
-The accepted timing engine consumes only the semantic document, preserves source order, derives exact quarter-note fractions, treats chords as one onset and rests as timed positions, calculates position and measure offsets, rejects missing duration, and imports no browser or audio dependency.
-
-Verification run `30383944688` passed the complete inherited and new suite, production build, and source/asset boundary inspection. Fork `main` was restored exactly afterward.
-
-## Current authorized checkpoint: Audible Playback Output Foundation 1
-
-Authoritative plan:
-
-- `docs/audible-playback-output-foundation-checkpoint-1-plan-2026-07-28.md`.
-
-The checkpoint may:
-
-1. derive current-position pitch events from semantic string identity and the accepted playback timeline;
-2. use explicit tuning MIDI, explicit tuning plus octave, or an exact accepted standard guitar or bass tuning profile;
-3. reject custom tuning without octave evidence rather than guess;
-4. create a project-owned procedural plucked-string sound through native Web Audio;
-5. create or resume the audio context only during explicit owner activation;
-6. audition one current semantic position;
-7. schedule chord strings at one onset;
-8. preserve rests as silent timed outcomes;
-9. render explicit muted notes as short non-pitched events;
-10. add one stable `Audition current position` action between Read current and Next;
-11. preserve reader position and VoiceOver focus;
-12. stop prior audition nodes before a repeated audition or navigation;
-13. run the complete inherited and new suite and production build once after source review;
-14. publish one exact hosted proof only after the source gate passes;
-15. require bounded real-iPhone audibility and focus acceptance before closing.
-
-The checkpoint must not add:
-
-- full-document playback;
-- Play, Pause, Stop, seeking, scrubber, or progress controls;
-- automatic reader progression;
-- focus or VoiceOver movement during sound;
-- looping;
-- metronome or count-in;
-- tempo controls or source tempo extraction;
-- repeat expansion;
-- technique-specific synthesis;
-- sampled instruments;
-- alphaSynth;
-- soundfonts;
-- AudioWorklets;
-- renderer workers;
-- third-party playback libraries;
-- teacher mode;
-- practice scoring;
-- bookmarks;
-- new file formats;
-- a second musical model.
-
-## Deferred format work
-
-The following are not imported unless a later lawful, verified checkpoint says otherwise:
-
-- five-string bass ASCII;
-- seven-string guitar ASCII;
-- compressed MusicXML `.mxl`;
-- Guitar Pro `.gtp`, `.gp3`, `.gp4`, `.gp5`, and `.gpx`;
-- arbitrary or unverified `.gp` files;
 - PowerTab `.ptb` and `.pt2`;
 - TuxGuitar `.tg`;
-- TablEdit `.tef`.
-
-Recognition must never be described as reading support.
+- TablEdit `.tef`;
+- arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
+- other proprietary or container formats not yet separately evaluated.
 
 ## Fixture and copyright policy
 
-Use only original, public-domain, or clearly licensed evidence. Preserve project-authored fixture source, generation method, license, and deterministic verification. Do not copy an upstream fixture merely because source code around it is licensed.
+Use only original, public-domain, or clearly licensed evidence. Preserve fixture source, generation method, license, hashes, and deterministic verification. Do not copy an upstream fixture merely because surrounding source code is licensed.
 
 ## Zero-dollar automation
 
 No paid GitHub usage, paid runner, paid service, or overage is authorized.
 
-Use the least expensive capable environment. GitHub-hosted workflows are intentional checkpoints, not an exploratory debugging loop. Before adding or expanding a workflow, follow `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+Use the least expensive capable environment. GitHub-hosted workflows are intentional checkpoints, not exploratory debugging loops. Before adding or expanding a workflow, follow `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Inspect a failed run before acting. Classify only the step that actually ran. Prefer named diagnostic assertions over opaque combined shell guards. Do not use Actions bot commits as ordinary implementation transport.
 
@@ -198,10 +146,8 @@ Inspect a failed run before acting. Classify only the step that actually ran. Pr
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
-Audio must begin only from explicit owner activation. The audition action must retain a stable name, must not move focus, and must not alter the reader's current position. Status speech must remain separate from the full-position announcement channel.
+Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, and version-neutral format solutions already recorded in repository memory.
 
-Use the committed-target focus, native-picker return, accessible build identity, speech-separation, and ordinary reading-order solutions already recorded in the known-problems ledgers.
-
-Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone audibility and VoiceOver judgment.
+Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 
 Jason Washburn's desktop testing remains optional unless he agrees to participate. His absence is not an active blocker.
