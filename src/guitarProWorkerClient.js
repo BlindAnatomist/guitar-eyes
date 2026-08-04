@@ -119,6 +119,7 @@ export async function decodeGuitarProArchiveProofFile(
     worker.postMessage(
       {
         requestId: id,
+        fileName: String(file.name || ""),
         bytes,
       },
       [bytes]

@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
-import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
+import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
 
 jest.mock("./guitarProReaderDocuments", () => ({
-  buildGuitarProArchiveProofReaderDocuments: jest.fn(),
+  buildGuitarProReaderDocuments: jest.fn(),
 }));
 
 const originalMatchMedia = window.matchMedia;
@@ -94,7 +94,7 @@ function proofDocument() {
   });
 }
 
-function proofReaderDocuments() {
+function proofReaderDocuments(sourceFormatLabel = "Guitar Pro 8 tablature") {
   const semanticDocument = proofDocument();
   return {
     desktopBlocks: [semanticDocument.strings.map((string) => string.sourceLine)],
@@ -104,14 +104,15 @@ function proofReaderDocuments() {
     requestedInstrument: "guitar",
     resolvedInstrument: "guitar",
     instrumentWasDetected: false,
-    supportOutcome: "checkpoint-proof",
-    sourceFormat: "guitar-pro-archive",
-    sourceFormatLabel: "Guitar Pro archive tablature",
+    supportOutcome: "checkpoint-foundation",
+    sourceFormat: "guitar-pro",
+    sourceFormatLabel,
+    requiresTrackSelection: false,
   };
 }
 
 beforeEach(() => {
-  buildGuitarProArchiveProofReaderDocuments.mockReset();
+  buildGuitarProReaderDocuments.mockReset();
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback) => window.setTimeout(callback, 0);
   }
@@ -132,15 +133,17 @@ afterEach(() => {
   }
 });
 
-describe("Guitar Pro checkpoint application path", () => {
-  test("loads a GP proof into the iPhone reader and preserves picker-return focus", async () => {
+describe("Guitar Pro application path", () => {
+  test("loads a GP8 file into the iPhone reader and preserves picker-return focus", async () => {
     useTouchDevice();
-    buildGuitarProArchiveProofReaderDocuments.mockResolvedValue(proofReaderDocuments());
+    buildGuitarProReaderDocuments.mockResolvedValue(proofReaderDocuments());
     render(<App />);
 
-    const file = new File([new Uint8Array([1, 2, 3])], "guitar-pro-shared-archive-proof.gp", {
-      type: "application/octet-stream",
-    });
+    const file = new File(
+      [new Uint8Array([1, 2, 3])],
+      "guitar-pro-shared-archive-proof.gp",
+      { type: "application/octet-stream" }
+    );
     fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
       target: { files: [file] },
     });
@@ -150,9 +153,11 @@ describe("Guitar Pro checkpoint application path", () => {
       name: "iPhone tablature reader",
     });
 
-    expect(buildGuitarProArchiveProofReaderDocuments).toHaveBeenCalledWith(file);
+    expect(buildGuitarProReaderDocuments).toHaveBeenCalledWith(file);
     expect(
-      screen.getByText(/Imported Guitar Pro archive tablature\. Loaded 1 synchronized position/i)
+      screen.getByText(
+        /Imported Guitar Pro 8 tablature\. Loaded 1 synchronized position/i
+      )
     ).toBeInTheDocument();
     expect(screen.getByText(/Low E string, fret 3/i)).toBeInTheDocument();
 
@@ -160,82 +165,112 @@ describe("Guitar Pro checkpoint application path", () => {
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
-
-test("moves VoiceOver focus into track selection and reuses the decoded archive", async () => {
-  useTouchDevice();
-  const intermediate = {
-    schemaVersion: 1,
-    sourceVersion: "GP8",
-    versionEvidence: GP8_VERSION_EVIDENCE,
-    title: "Two-track proof",
-    tracks: [],
-  };
-  const inventory = {
-    supportedCount: 2,
-    supportedItems: [
-      {
-        id: "guitar-pro-track-1-staff-1",
-        trackIndex: 0,
-        staffIndex: 0,
-        selectionLabel: "Lead Guitar. six-string guitar. Tuning high to low: E4, B3, G3, D3, A2, E2. 1 measure.",
-        supported: true,
-      },
-      {
-        id: "guitar-pro-track-2-staff-1",
-        trackIndex: 1,
-        staffIndex: 0,
-        selectionLabel: "Bass. four-string bass. Tuning high to low: G2, D2, A1, E1. 1 measure.",
-        supported: true,
-      },
-    ],
-    items: [],
-  };
-  buildGuitarProArchiveProofReaderDocuments
-    .mockResolvedValueOnce({
-      requiresTrackSelection: true,
-      trackInventory: inventory,
-      guitarProIntermediate: intermediate,
-    })
-    .mockResolvedValueOnce(proofReaderDocuments());
-  render(<App />);
-
-  const file = new File([new Uint8Array([1, 2, 3])], "two-tracks.gp", {
-    type: "application/octet-stream",
-  });
-  fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
-    target: { files: [file] },
-  });
-
-  const selectorHeading = await screen.findByRole("heading", {
-    level: 2,
-    name: "Choose a Guitar Pro track",
-  });
-  fireEvent.focus(window);
-  await waitFor(() => expect(document.activeElement).toBe(selectorHeading));
-
-  fireEvent.click(screen.getByRole("radio", { name: /Bass\. four-string bass/i }));
-  fireEvent.click(screen.getByRole("button", { name: "Load selected track" }));
-
-  expect(buildGuitarProArchiveProofReaderDocuments).toHaveBeenNthCalledWith(2, file, {
-    intermediate,
-    selection: { trackIndex: 1, staffIndex: 0 },
-  });
-  const readerHeading = await screen.findByRole("heading", {
-    level: 2,
-    name: "iPhone tablature reader",
-  });
-  await waitFor(() => expect(document.activeElement).toBe(readerHeading));
-});
-  test("routes GP decoder failure through the durable iPhone upload error", async () => {
+  test("routes GP5 through the same reader path instead of rejecting the extension", async () => {
     useTouchDevice();
-    buildGuitarProArchiveProofReaderDocuments.mockRejectedValue(
-      Object.assign(new Error("The Guitar Pro archive is corrupt."), {
-        code: "CORRUPT_GUITAR_PRO_ARCHIVE",
+    buildGuitarProReaderDocuments.mockResolvedValue(
+      proofReaderDocuments("Guitar Pro 5 tablature")
+    );
+    render(<App />);
+
+    const file = new File([new Uint8Array([1])], "older.gp5", {
+      type: "application/octet-stream",
+    });
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      await screen.findByText(
+        /Imported Guitar Pro 5 tablature\. Loaded 1 synchronized position/i
+      )
+    ).toBeInTheDocument();
+    expect(buildGuitarProReaderDocuments).toHaveBeenCalledWith(file);
+  });
+
+  test("moves VoiceOver focus into track selection and reuses the decoded file", async () => {
+    useTouchDevice();
+    const intermediate = {
+      schemaVersion: 1,
+      sourceVersion: "GP8",
+      versionEvidence: GP8_VERSION_EVIDENCE,
+      title: "Two-track proof",
+      tracks: [],
+    };
+    const inventory = {
+      supportedCount: 2,
+      supportedItems: [
+        {
+          id: "guitar-pro-track-1-staff-1",
+          trackIndex: 0,
+          staffIndex: 0,
+          selectionLabel:
+            "Lead Guitar. six-string guitar. Tuning high to low: E4, B3, G3, D3, A2, E2. 1 measure.",
+          supported: true,
+        },
+        {
+          id: "guitar-pro-track-2-staff-1",
+          trackIndex: 1,
+          staffIndex: 0,
+          selectionLabel:
+            "Bass. four-string bass. Tuning high to low: G2, D2, A1, E1. 1 measure.",
+          supported: true,
+        },
+      ],
+      items: [],
+    };
+    buildGuitarProReaderDocuments
+      .mockResolvedValueOnce({
+        requiresTrackSelection: true,
+        trackInventory: inventory,
+        guitarProIntermediate: intermediate,
+        sourceFormatLabel: "Guitar Pro 8 tablature",
+      })
+      .mockResolvedValueOnce(proofReaderDocuments());
+    render(<App />);
+
+    const file = new File([new Uint8Array([1, 2, 3])], "two-tracks.gp", {
+      type: "application/octet-stream",
+    });
+    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      await screen.findByText(
+        /Guitar Pro 8 tablature contains 2 supported tablature tracks/i
+      )
+    ).toBeInTheDocument();
+    const selectorHeading = await screen.findByRole("heading", {
+      level: 2,
+      name: "Choose a Guitar Pro track",
+    });
+    fireEvent.focus(window);
+    await waitFor(() => expect(document.activeElement).toBe(selectorHeading));
+
+    fireEvent.click(screen.getByRole("radio", { name: /Bass\. four-string bass/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Load selected track" }));
+
+    expect(buildGuitarProReaderDocuments).toHaveBeenNthCalledWith(2, file, {
+      intermediate,
+      selection: { trackIndex: 1, staffIndex: 0 },
+    });
+    const readerHeading = await screen.findByRole("heading", {
+      level: 2,
+      name: "iPhone tablature reader",
+    });
+    await waitFor(() => expect(document.activeElement).toBe(readerHeading));
+  });
+
+  test("routes decoder failure through the durable iPhone upload error", async () => {
+    useTouchDevice();
+    buildGuitarProReaderDocuments.mockRejectedValue(
+      Object.assign(new Error("The Guitar Pro internal version evidence is corrupt."), {
+        code: "CORRUPT_GUITAR_PRO_FILE",
       })
     );
     render(<App />);
 
-    const file = new File([new Uint8Array([9])], "broken.gp", {
+    const file = new File([new Uint8Array([9])], "broken.gp5", {
       type: "application/octet-stream",
     });
     fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
@@ -247,29 +282,14 @@ test("moves VoiceOver focus into track selection and reuses the decoded archive"
       name: "Tablature could not be loaded",
     });
 
-    expect(screen.getByText("The Guitar Pro archive is corrupt.")).toBeInTheDocument();
     expect(
-      screen.getByText(/selected Guitar Pro checkpoint file could not be imported/i)
+      screen.getByText("The Guitar Pro internal version evidence is corrupt.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/selected Guitar Pro file could not be imported/i)
     ).toBeInTheDocument();
 
     fireEvent.focus(window);
     await waitFor(() => expect(document.activeElement).toBe(heading));
-  });
-
-  test("keeps GP5 recognized but unsupported and never calls the Guitar Pro archive proof decoder", async () => {
-    useTouchDevice();
-    render(<App />);
-
-    const file = new File([new Uint8Array([1])], "older.gp5", {
-      type: "application/octet-stream",
-    });
-    fireEvent.change(screen.getByLabelText("Upload tablature file:"), {
-      target: { files: [file] },
-    });
-
-    expect(
-      await screen.findByText(/does not yet import this Guitar Pro version/i)
-    ).toBeInTheDocument();
-    expect(buildGuitarProArchiveProofReaderDocuments).not.toHaveBeenCalled();
   });
 });

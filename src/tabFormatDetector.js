@@ -24,13 +24,13 @@ const FORMAT_DEFINITIONS = {
   },
   "guitar-pro-proof": {
     id: "guitar-pro-proof",
-    label: "Guitar Pro .gp checkpoint file",
-    support: "checkpoint-proof",
+    label: "Guitar Pro tablature",
+    support: "checkpoint-foundation",
     isText: false,
   },
-  "guitar-pro-legacy": {
-    id: "guitar-pro-legacy",
-    label: "Guitar Pro tablature",
+  "guitar-pro-2": {
+    id: "guitar-pro-2",
+    label: "Guitar Pro 2 tablature",
     support: "planned",
     isText: false,
   },
@@ -61,25 +61,60 @@ const FORMAT_DEFINITIONS = {
 };
 
 const EXTENSION_FORMATS = new Map([
-  ["txt", "ascii-text"],
-  ["tab", "ascii-text"],
-  ["musicxml", "musicxml"],
-  ["xml", "musicxml"],
-  ["mxl", "compressed-musicxml"],
-  ["gp", "guitar-pro-proof"],
-  ["gtp", "guitar-pro-legacy"],
-  ["gp3", "guitar-pro-legacy"],
-  ["gp4", "guitar-pro-legacy"],
-  ["gp5", "guitar-pro-legacy"],
-  ["gpx", "guitar-pro-legacy"],
-  ["ptb", "powertab"],
-  ["pt2", "powertab"],
-  ["tg", "tuxguitar"],
-  ["tef", "tabledit"],
+  ["txt", { id: "ascii-text" }],
+  ["tab", { id: "ascii-text" }],
+  ["musicxml", { id: "musicxml" }],
+  ["xml", { id: "musicxml" }],
+  ["mxl", { id: "compressed-musicxml" }],
+  [
+    "gp3",
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 3 tablature",
+      sourceFamily: "GP3",
+    },
+  ],
+  [
+    "gp4",
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 4 tablature",
+      sourceFamily: "GP4",
+    },
+  ],
+  [
+    "gp5",
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 5 tablature",
+      sourceFamily: "GP5",
+    },
+  ],
+  [
+    "gpx",
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 6 tablature",
+      sourceFamily: "GP6",
+    },
+  ],
+  [
+    "gp",
+    {
+      id: "guitar-pro-proof",
+      label: "Guitar Pro 7 or 8 tablature",
+      sourceFamily: "GP7_OR_GP8",
+    },
+  ],
+  ["gtp", { id: "guitar-pro-2" }],
+  ["ptb", { id: "powertab" }],
+  ["pt2", { id: "powertab" }],
+  ["tg", { id: "tuxguitar" }],
+  ["tef", { id: "tabledit" }],
 ]);
 
-function definition(id) {
-  return { ...FORMAT_DEFINITIONS[id] };
+function definition(id, overrides = {}) {
+  return { ...FORMAT_DEFINITIONS[id], ...overrides };
 }
 
 function extensionFromName(fileName) {
@@ -110,7 +145,12 @@ export function detectTabFileFormat(fileName, sourceText = "") {
 
   const extension = extensionFromName(fileName);
   const extensionFormat = EXTENSION_FORMATS.get(extension);
-  return definition(extensionFormat || "unknown");
+  return extensionFormat
+    ? definition(extensionFormat.id, {
+        ...extensionFormat,
+        extension: extension ? `.${extension}` : "",
+      })
+    : definition("unknown");
 }
 
 export function shouldReadTabFileAsText(format) {
@@ -122,9 +162,9 @@ export function unsupportedTabFormatMessage(format) {
     case "compressed-musicxml":
       return "The compressed MusicXML file could not be imported. Guitar Eyes requires a valid .mxl ZIP container whose META-INF/container.xml identifies a supported MusicXML tablature score.";
     case "guitar-pro-proof":
-      return "A Guitar Pro .gp archive was recognized. This branch contains an unhosted project-fixture proof only; general Guitar Pro shared-archive support has not yet been accepted.";
-    case "guitar-pro-legacy":
-      return "A Guitar Pro tablature file was recognized. Guitar Eyes does not yet import this Guitar Pro version; direct support requires an original, public-domain, or clearly licensed fixture and version-specific evidence.";
+      return "The Guitar Pro file could not be imported. Guitar Eyes requires valid GP3, GP4, GP5, GP6 GPX, or supported GP7/GP8 internal version evidence plus a tablature track that preserves string, fret, and duration identity.";
+    case "guitar-pro-2":
+      return "A Guitar Pro 2 .gtp file was recognized. Guitar Eyes does not import GP2 files; support requires a separate lawful fixture and version-specific decoder evidence.";
     case "powertab":
       return "A PowerTab file was recognized. Guitar Eyes does not yet import PowerTab files; support requires a separately verified parser or owner-performed conversion.";
     case "tuxguitar":
@@ -132,6 +172,6 @@ export function unsupportedTabFormatMessage(format) {
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, or an authorized checkpoint fixture.";
+      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, or an authorized Guitar Pro family.";
   }
 }

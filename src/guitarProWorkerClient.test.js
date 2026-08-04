@@ -38,9 +38,9 @@ class MockWorker {
   }
 }
 
-function fileOfSize(size = 4) {
+function fileOfSize(size = 4, name = "proof.gp") {
   return {
-    name: "proof.gp",
+    name,
     size,
     arrayBuffer: jest.fn(async () => new Uint8Array(size).buffer),
   };
@@ -52,20 +52,21 @@ function expectWorkerError(error, code) {
 }
 
 describe("decodeGuitarProArchiveProofFile", () => {
-  test("transfers bytes once and terminates after a matching success response", async () => {
+  test("transfers bytes and filename once, then terminates after a matching success response", async () => {
     const worker = new MockWorker();
-    const file = fileOfSize(8);
+    const file = fileOfSize(8, "legacy-proof.gp5");
     const promise = decodeGuitarProArchiveProofFile(file, {
       workerFactory: () => worker,
     });
 
     await Promise.resolve();
     expect(file.arrayBuffer).toHaveBeenCalledTimes(1);
+    expect(worker.message).toMatchObject({ fileName: "legacy-proof.gp5" });
     expect(worker.message).not.toHaveProperty("sourceVersion");
     expect(worker.message.bytes).toBeInstanceOf(ArrayBuffer);
     expect(worker.transfer).toEqual([worker.message.bytes]);
 
-    const expected = { schemaVersion: 1, sourceVersion: "GP8", tracks: [] };
+    const expected = { schemaVersion: 1, sourceVersion: "GP5", tracks: [] };
     worker.emitMessage({
       requestId: worker.message.requestId,
       ok: true,
@@ -106,12 +107,12 @@ describe("decodeGuitarProArchiveProofFile", () => {
     worker.emitMessage({
       requestId: worker.message.requestId,
       ok: false,
-      error: { message: "Corrupt archive", code: "CORRUPT_GUITAR_PRO_ARCHIVE" },
+      error: { message: "Corrupt file", code: "CORRUPT_GUITAR_PRO_FILE" },
     });
 
     await expect(promise).rejects.toMatchObject({
-      message: "Corrupt archive",
-      code: "CORRUPT_GUITAR_PRO_ARCHIVE",
+      message: "Corrupt file",
+      code: "CORRUPT_GUITAR_PRO_FILE",
     });
     expect(worker.terminated).toBe(true);
   });

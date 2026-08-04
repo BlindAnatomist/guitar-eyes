@@ -1,0 +1,148 @@
+diff --git a/guitarpro/src/io/gpif_export.rs b/guitarpro/src/io/gpif_export.rs
+index 8a42621..71eb7b5 100644
+--- a/guitarpro/src/io/gpif_export.rs
++++ b/guitarpro/src/io/gpif_export.rs
+@@ -112,7 +112,7 @@ fn direction_sign_str(d: &DirectionSign) -> &'static str {
+ // Note export
+ // ---------------------------------------------------------------------------
+ 
+-fn build_note_xml(note: &Note, note_id: i32) -> String {
++fn build_note_xml(note: &Note, note_id: i32, string_count: i8) -> String {
+     let mut s = format!("<Note id=\"{note_id}\"><Properties>");
+ 
+     s.push_str(&format!(
+@@ -126,7 +126,7 @@ fn build_note_xml(note: &Note, note_id: i32) -> String {
+     // `saturating_sub` guards rest/tie sentinel `string == 0` from underflow.
+     s.push_str(&format!(
+         "<Property name=\"String\"><String>{}</String></Property>",
+-        note.string.saturating_sub(1)
++        if note.string > 0 && note.string <= string_count { string_count - note.string } else { panic!("GPIF note string must be within the track string count") }
+     ));
+ 
+     if note.effect.palm_mute {
+@@ -225,6 +225,7 @@ struct BeatExport {
+ 
+ fn build_beat_xml(
+     beat: &Beat,
++    string_count: i8,
+     beat_id: i32,
+     rhythm_id: i32,
+     next_note_id: &mut i32,
+@@ -242,7 +243,7 @@ fn build_beat_xml(
+             let note_id = *next_note_id;
+             *next_note_id += 1;
+             note_ids.push(note_id);
+-            note_xmls.push(build_note_xml(note, note_id));
++            note_xmls.push(build_note_xml(note, note_id, string_count));
+         }
+     }
+ 
+@@ -443,7 +444,7 @@ impl SongGpifExportOps for Song {
+             let b = track.color & 0xFF;
+             xml.push_str(&format!("<Color>{r} {g} {b}</Color>"));
+             xml.push_str("<Properties>");
+-            let pitches: Vec<String> = track.strings.iter().map(|(_, p)| p.to_string()).collect();
++            let pitches: Vec<String> = track.strings.iter().rev().map(|(_, p)| p.to_string()).collect();
+             xml.push_str(&format!(
+                 "<Property name=\"Tuning\"><Pitches>{}</Pitches></Property>",
+                 pitches.join(" ")
+@@ -521,6 +522,7 @@ impl SongGpifExportOps for Song {
+ 
+                         let export = build_beat_xml(
+                             beat,
++                            track.strings.len() as i8,
+                             beat_id,
+                             rhythm_id,
+                             &mut next_note_id,
+diff --git a/guitarpro/src/model/legacy/measure.rs b/guitarpro/src/model/legacy/measure.rs
+index 846c31d..1e83917 100644
+--- a/guitarpro/src/model/legacy/measure.rs
++++ b/guitarpro/src/model/legacy/measure.rs
+@@ -240,15 +240,24 @@ impl SongMeasureOps for Song {
+         //self.current_voice_number = Some(1);
+         if version.0 < 5 {
+             self.write_voice(data, track, measure, 0, version)?;
++        } else if version.0 == 5 {
++            let voice_count = self.tracks[track].measures[measure]
++                .voices
++                .len()
++                .min(MAX_VOICES);
++            for v in 0..voice_count {
++                self.write_voice(data, track, measure, v, version)?;
++            }
++            for _ in voice_count..MAX_VOICES {
++                write_i32(data, 0);
++            }
++            write_byte(
++                data,
++                from_line_break(&self.tracks[track].measures[measure].line_break),
++            );
+         } else {
+             for v in 0..self.tracks[track].measures[measure].voices.len() {
+                 self.write_voice(data, track, measure, v, version)?;
+-            } //self.current_voice_number = Some(v+1);
+-            if version.0 == 5 {
+-                write_byte(
+-                    data,
+-                    from_line_break(&self.tracks[track].measures[measure].line_break),
+-                );
+             }
+         }
+         //self.current_voice_number = None;
+diff --git a/guitarpro/src/model/legacy/page.rs b/guitarpro/src/model/legacy/page.rs
+index 538ee95..bccc385 100644
+--- a/guitarpro/src/model/legacy/page.rs
++++ b/guitarpro/src/model/legacy/page.rs
+@@ -171,17 +171,17 @@ impl SongPageOps for Song {
+         );
+ 
+         write_i16(data, self.page_setup.header_and_footer as i16);
+-        write_int_size_string(data, &self.page_setup.title);
+-        write_int_size_string(data, &self.page_setup.subtitle);
+-        write_int_size_string(data, &self.page_setup.artist);
+-        write_int_size_string(data, &self.page_setup.album);
+-        write_int_size_string(data, &self.page_setup.words);
+-        write_int_size_string(data, &self.page_setup.music);
+-        write_int_size_string(data, &self.page_setup.word_and_music);
++        write_int_byte_size_string(data, &self.page_setup.title);
++        write_int_byte_size_string(data, &self.page_setup.subtitle);
++        write_int_byte_size_string(data, &self.page_setup.artist);
++        write_int_byte_size_string(data, &self.page_setup.album);
++        write_int_byte_size_string(data, &self.page_setup.words);
++        write_int_byte_size_string(data, &self.page_setup.music);
++        write_int_byte_size_string(data, &self.page_setup.word_and_music);
+         let c: Vec<&str> = self.page_setup.copyright.split('\n').collect();
+-        write_int_size_string(data, c[0]);
+-        write_int_size_string(data, c[1]);
+-        write_int_size_string(data, &self.page_setup.page_number);
++        write_int_byte_size_string(data, c[0]);
++        write_int_byte_size_string(data, c[1]);
++        write_int_byte_size_string(data, &self.page_setup.page_number);
+         Ok(())
+     }
+ }
+diff --git a/guitarpro/src/model/legacy/rse.rs b/guitarpro/src/model/legacy/rse.rs
+index 8696879..7bf2297 100644
+--- a/guitarpro/src/model/legacy/rse.rs
++++ b/guitarpro/src/model/legacy/rse.rs
+@@ -225,6 +225,7 @@ impl SongRseOps for Song {
+         for i in 0..equalizer.knobs.len() {
+             write_signed_byte(data, self.pack_volume_value(equalizer.knobs[i]));
+         }
++        write_signed_byte(data, self.pack_volume_value(equalizer.gain));
+     }
+     fn pack_volume_value(&self, value: f32) -> i8 {
+         (-value * 10f32).round() as i8 //int(-round(value, 1) * 10)
+diff --git a/guitarpro/src/model/legacy/song.rs b/guitarpro/src/model/legacy/song.rs
+index 313b6a3..f8e03a0 100644
+--- a/guitarpro/src/model/legacy/song.rs
++++ b/guitarpro/src/model/legacy/song.rs
+@@ -303,7 +303,7 @@ impl Song {
+         }
+         if version.0 >= 5 {
+             self.write_page_setup(&mut data)?;
+-            write_int_size_string(&mut data, &self.tempo_name);
++            write_int_byte_size_string(&mut data, &self.tempo_name);
+         }
+         write_i32(&mut data, self.tempo.to_i32_gp("tempo")?);
+         if version > (5, 0, 0) {

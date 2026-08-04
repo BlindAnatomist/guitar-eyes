@@ -375,6 +375,13 @@ function parseContainerXml(sourceText) {
   return fullPath;
 }
 
+function containsControlCharacter(value) {
+  return Array.from(value).some((character) => {
+    const code = character.charCodeAt(0);
+    return code <= 0x1f || code === 0x7f;
+  });
+}
+
 function requireSafeRootPath(path) {
   requireArchive(
     !path.startsWith("/") && !path.startsWith("\\") && !path.includes("\\"),
@@ -382,7 +389,7 @@ function requireSafeRootPath(path) {
     "UNSAFE_MXL_ROOTFILE_PATH"
   );
   requireArchive(
-    !/[\u0000-\u001f\u007f]/.test(path),
+    !containsControlCharacter(path),
     "The compressed MusicXML rootfile path contains a control character.",
     "UNSAFE_MXL_ROOTFILE_PATH"
   );

@@ -173,26 +173,39 @@ async function readEntry(bytes, view, entry, maxBytes, inflateRaw) {
   return output;
 }
 
-function requiredUniqueEntry(entries, name) {
+function optionalUniqueEntry(entries, name) {
   const matches = entries.filter((entry) => entry.name === name);
-  if (matches.length === 0) {
-    throw new GuitarProArchiveError(
-      `The Guitar Pro archive is missing ${name}.`,
-      "MISSING_GUITAR_PRO_VERSION_EVIDENCE"
-    );
-  }
   if (matches.length > 1) {
     throw new GuitarProArchiveError(
       `The Guitar Pro archive contains duplicate ${name} entries.`,
       "DUPLICATE_GUITAR_PRO_VERSION_EVIDENCE"
     );
   }
-  return matches[0];
+  return matches[0] || null;
+}
+
+function requiredUniqueEntry(entries, name) {
+  const entry = optionalUniqueEntry(entries, name);
+  if (!entry) {
+    throw new GuitarProArchiveError(
+      `The Guitar Pro archive is missing ${name}.`,
+      "MISSING_GUITAR_PRO_VERSION_EVIDENCE"
+    );
+  }
+  return entry;
 }
 
 function tagText(xml, tag) {
   const match = xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([^<]+)</${tag}>`));
   return match ? match[1].trim() : null;
+}
+
+function isGpifDocument(xml) {
+  const value = String(xml || "").trim();
+  return (
+    /^(?:<\?xml[\s\S]*?\?>\s*)?<GPIF(?:\s|>)/u.test(value) &&
+    /<\/GPIF>\s*$/u.test(value)
+  );
 }
 
 function declaredTrackCount(gpifXml) {
@@ -263,19 +276,66 @@ export async function inspectGuitarProArchiveVersion(
 ) {
   const bytes = input instanceof Uint8Array ? input : new Uint8Array(input || 0);
   const { entries, view } = parseCentralDirectory(bytes, limits);
-  const versionEntry = requiredUniqueEntry(entries, "VERSION");
+  const versionEntry = optionalUniqueEntry(entries, "VERSION");
   const gpifEntry = requiredUniqueEntry(entries, "Content/score.gpif");
-  const versionBytes = await readEntry(bytes, view, versionEntry, limits.maxVersionBytes, inflateRaw);
-  const gpifBytes = await readEntry(bytes, view, gpifEntry, limits.maxGpifBytes, inflateRaw);
-  const rootVersion = decodeUtf8(versionBytes, "The Guitar Pro VERSION entry").trim();
+  const gpifBytes = await readEntry(
+    bytes,
+    view,
+    gpifEntry,
+    limits.maxGpifBytes,
+    inflateRaw
+  );
   const gpifXml = decodeUtf8(gpifBytes, "The Guitar Pro score.gpif entry");
+  requireBounds(
+    isGpifDocument(gpifXml),
+    "The Guitar Pro score.gpif entry is not a complete GPIF document.",
+    "INVALID_GUITAR_PRO_GPIF"
+  );
+
   const gpVersion = tagText(gpifXml, "GPVersion");
   const encodingDescription = tagText(gpifXml, "EncodingDescription");
+
+  if (!versionEntry) {
+    if (gpVersion !== null || encodingDescription !== null) {
+      throw new GuitarProArchiveError(
+        "A versioned Guitar Pro shared archive is missing its VERSION entry.",
+        "MISSING_GUITAR_PRO_VERSION_EVIDENCE"
+      );
+    }
+    const trackCount = declaredTrackCount(gpifXml);
+
+    return {
+      schemaVersion: 1,
+      archiveFamily: "GUITAR_PRO_SHARED_ZIP",
+      packageVariant: "GP7_GPIF_ONLY",
+      rootVersion: null,
+      gpVersion: null,
+      encodingDescription: null,
+      sourceVersion: "GP7",
+      versionText: "Guitar Pro 7 GPIF-only shared archive",
+      signature: "Content/score.gpif",
+      entryCount: entries.length,
+      declaredTrackCount: trackCount,
+    };
+  }
+
+  const versionBytes = await readEntry(
+    bytes,
+    view,
+    versionEntry,
+    limits.maxVersionBytes,
+    inflateRaw
+  );
+  const rootVersion = decodeUtf8(
+    versionBytes,
+    "The Guitar Pro VERSION entry"
+  ).trim();
   const sourceVersion = classifyVersionEvidence(
     rootVersion,
     gpVersion,
     encodingDescription
   );
+  const trackCount = declaredTrackCount(gpifXml);
 
   return {
     schemaVersion: 1,
@@ -285,6 +345,6 @@ export async function inspectGuitarProArchiveVersion(
     encodingDescription,
     sourceVersion,
     entryCount: entries.length,
-    declaredTrackCount: declaredTrackCount(gpifXml),
+    declaredTrackCount: trackCount,
   };
 }

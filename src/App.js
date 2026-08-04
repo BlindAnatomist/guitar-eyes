@@ -9,7 +9,7 @@ import { flushSync } from "react-dom";
 import { readCompressedMusicXmlFile } from "./compressedMusicXmlImporter";
 import DesktopSemanticReader from "./DesktopSemanticReader";
 import GuitarProTrackSelector from "./GuitarProTrackSelector";
-import { buildGuitarProArchiveProofReaderDocuments } from "./guitarProReaderDocuments";
+import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
@@ -27,7 +27,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Guitar Pro multi-track binary proof 3D";
+const TEST_BUILD_LABEL = "Clean format-intake convergence foundation 5B";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -172,12 +172,15 @@ function App() {
   };
 
   const showGuitarProTrackSelection = (file, readerDocuments) => {
+    const sourceFormatLabel =
+      readerDocuments.sourceFormatLabel || "Guitar Pro tablature";
     const session = {
       file,
       intermediate: readerDocuments.guitarProIntermediate,
       inventory: readerDocuments.trackInventory,
+      sourceFormatLabel,
     };
-    const status = `This Guitar Pro archive contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
+    const status = `${sourceFormatLabel} contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
 
     if (readingMode === "iphone") {
       pendingIphoneFocusTargetRef.current = "track-selection";
@@ -256,7 +259,7 @@ function App() {
 
     if (initialFormat.id === "guitar-pro-proof") {
       try {
-        readerDocuments = await buildGuitarProArchiveProofReaderDocuments(file);
+        readerDocuments = await buildGuitarProReaderDocuments(file);
         if (readerDocuments.requiresTrackSelection) {
           showGuitarProTrackSelection(file, readerDocuments);
           return;
@@ -265,9 +268,9 @@ function App() {
         finishUnreadableUpload(
           messageFromError(
             error,
-            "The Guitar Pro checkpoint file could not be prepared for the Guitar Eyes readers."
+            "The Guitar Pro file could not be prepared for the Guitar Eyes readers."
           ),
-          "The selected Guitar Pro checkpoint file could not be imported."
+          "The selected Guitar Pro file could not be imported."
         );
         return;
       }
@@ -436,7 +439,7 @@ function App() {
 
     let readerDocuments;
     try {
-      readerDocuments = await buildGuitarProArchiveProofReaderDocuments(session.file, {
+      readerDocuments = await buildGuitarProReaderDocuments(session.file, {
         intermediate: session.intermediate,
         selection,
       });
@@ -465,7 +468,11 @@ function App() {
       return;
     }
 
-    const status = `Imported Guitar Pro archive tablature. Loaded ${nextDocument.positions.length} synchronized positions`;
+    const sourceFormatLabel =
+      readerDocuments.sourceFormatLabel ||
+      session.sourceFormatLabel ||
+      "Guitar Pro tablature";
+    const status = `Imported ${sourceFormatLabel}. Loaded ${nextDocument.positions.length} synchronized positions`;
     if (readingMode === "iphone") {
       commitIphoneOutcome({
         target: "reader",

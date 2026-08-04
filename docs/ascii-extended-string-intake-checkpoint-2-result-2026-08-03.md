@@ -12,6 +12,10 @@ Accepted format-only source in ancestry: `aca0cd79cc274ea598cc9e67c26e13e41e6101
 
 Verified engine source: `4b3e89ba068db36a364cb824ccd1cc513f3734cf`
 
+Accepted hosted application source: `030e1f6af2de23e41ad993ab0292893b072664eb`
+
+State: `passed`
+
 ## Implemented bounded support
 
 The existing shared ASCII importer now supports two additional exact standard profiles:
@@ -100,18 +104,76 @@ The same immutable source was checked again. The workflow did not repeat the com
 
 All resume steps passed.
 
-## Source-gate verdict
+## Successful format-only publication
 
-The engine source `4b3e89ba068db36a364cb824ccd1cc513f3734cf` is accepted by automated tests and production build for the bounded checkpoint.
+Publication source: `030e1f6af2de23e41ad993ab0292893b072664eb`
 
-Real-iPhone VoiceOver acceptance and a uniquely identified hosted candidate remain required before Checkpoint 2 is complete.
+Publication run: `30849520264`
+
+Hosted identity:
+
+`Guitar Eyes format-only extended-string ASCII intake proof 4C`
+
+The publication boundary contained only:
+
+1. this result record;
+2. `public/index.html`;
+3. `src/buildIdentity.test.js`;
+4. `src/checkpointBuildIdentity.test.js`.
+
+Publication results:
+
+1. exact four-file publication boundary passed;
+2. focused build-identity, checkpoint, and format-only tests passed;
+3. production Pages build passed;
+4. exact static identity and format-only flag passed;
+5. compiled eight-string guitar and six-string bass profiles passed;
+6. Low F sharp and High C spoken identities passed;
+7. sampled Iowa assets remained absent;
+8. GitHub Pages deployment passed;
+9. hosted HTML identity read-back passed;
+10. hosted JavaScript profile read-back passed.
+
+## Successful real-iPhone acceptance
+
+The owner tested the hosted 4C proof on a real iPhone with Safari, VoiceOver, and the iPhone Files picker.
+
+The exact report was:
+
+> That worked everything was fine. Focus was good. The tuning was accurate so like I said it all worked.
+
+Within the bounded test, this accepts:
+
+1. Files-picker focus recovery;
+2. complete eight-string guitar reading;
+3. complete six-string bass reading;
+4. correct Guitar/Bass family behavior;
+5. accurate exact-standard tuning representation;
+6. quarter-note duration and semantic position behavior;
+7. continued absence of playback and audition controls.
+
+Detailed record:
+
+- `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`.
+
+## Final verdict
+
+ASCII Extended-String Intake Checkpoint 2 is passed and closed.
+
+The accepted application source is:
+
+`030e1f6af2de23e41ad993ab0292893b072664eb`
+
+Documentation-only closure commits do not replace that application source.
+
+The checkpoint does not establish arbitrary eight-string guitar tuning, arbitrary six-string bass tuning, missing-octave inference, another instrument family, another file format, playback, realistic timbre, or teacher mode.
 
 ## Repository restoration
 
-The temporary gate workflow existed only on fork `main` and checked out immutable feature sources. After successful verification, fork `main` was restored and independently verified identical to:
+The temporary verification and publication workflows existed only on fork `main` and checked out immutable feature sources. After each successful operation, fork `main` was restored and independently verified identical to:
 
 `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-The comparison showed zero commits ahead, zero behind, and zero changed files.
+The final comparison showed zero commits ahead, zero behind, and zero changed files.
 
-No pull request, merge, upstream modification, playback reopening, teacher-mode work, or deployment occurred during the source gate.
+No pull request, merge, upstream modification, playback reopening, or teacher-mode work occurred.
