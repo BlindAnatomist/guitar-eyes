@@ -1,185 +1,176 @@
 # Solved Problems and Reusable Procedures
 
-Last updated: July 25, 2026
+Last reconciled: August 4, 2026
 
 ## Purpose
 
-This document records recurring development, deployment, accessibility, and repository-administration problems that have already been solved in Guitar Eyes.
+This document records recurring development, deployment, accessibility, format-intake, and repository-administration problems already solved in Guitar Eyes.
 
-Future work must inspect this file before proposing a workaround, declaring a limitation, asking the user to repeat a manual procedure, or spending time rediscovering a known solution.
-
-Each entry should preserve:
-
-1. the observed problem;
-2. the confirmed cause;
-3. approaches that failed or created unnecessary work;
-4. the solution that worked;
-5. the conditions under which that solution is safe to reuse;
-6. any remaining limitation.
+Future work must inspect this file before proposing a workaround, declaring a limitation, asking the owner to repeat a manual procedure, or spending time rediscovering a known solution.
 
 ## Repository authority must remain intact
-
-### Problem
-
-The working fork must support active development and hosted previews without modifying Jason Washburn's upstream repository or allowing fork `main` to drift away from upstream.
 
 ### Confirmed solution
 
 1. Preserve `Phlypper/guitar-eyes` completely untouched.
-2. Preserve `BlindAnatomist/guitar-eyes` `main` as the clean upstream-tracking branch.
-3. Perform implementation work only on a dedicated work branch, currently `work/iphone-voiceover-tablature-audit`.
-4. Do not open a pull request unless the user explicitly authorizes one.
-5. Verify final branch authority by comparing fork `main` with the authoritative upstream commit.
+2. Preserve `BlindAnatomist/guitar-eyes` `main` at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+3. Perform active work only on a dedicated work branch.
+4. Treat `work/accepted-format-intake-convergence` as the accepted format-only baseline.
+5. Begin future format work from its final documentation-closure head.
+6. Do not open a pull request or merge without explicit owner authorization.
+7. Verify final branch authority through exact commit and ancestry comparisons.
 
 ### Reuse rule
 
-Do not solve development or preview problems by leaving implementation commits on fork `main`.
+Do not solve development or preview problems by leaving implementation commits on fork `main`, and do not branch new work from a historical or superseded feature branch.
 
 ## GitHub Pages branch protection blocked deployment
 
 ### Observed problem
 
-The Pages build succeeded, but publication failed with:
-
-`Branch "work/iphone-voiceover-tablature-audit" is not allowed to deploy to github-pages due to environment protection rules.`
-
-The `github-pages` environment allowed only `main`.
-
-### Failed or wasteful approaches
-
-1. Treating the failure as a source, test, or build problem.
-2. Asking the user to navigate GitHub environment settings manually with VoiceOver.
-3. Attempting an unauthenticated environment-policy mutation.
-4. Assuming the preview branch itself had to be permanently authorized.
+The Pages environment permitted only `main`, while fork `main` had to remain identical to upstream.
 
 ### Confirmed solution
 
-A controlled temporary-main publication procedure worked:
-
-1. Place a temporary workflow commit on fork `main`.
-2. Have that workflow explicitly check out the work branch.
-3. Test and build the work branch.
-4. Publish the resulting artifact through the already-authorized `main` deployment context.
-5. Read back the hosted site and assets.
-6. Restore fork `main` to the exact upstream commit.
-7. Compare fork `main` with upstream to confirm zero drift.
-8. Remove any permanently failing work-branch deployment workflow.
-
-### Result
-
-The bounded proof was published at:
-
-`https://blindanatomist.github.io/guitar-eyes/`
-
-Fork `main` was restored to the exact upstream commit, and upstream remained untouched.
+1. Use a bounded temporary publisher only for an intentional hosted checkpoint.
+2. Have the publisher explicitly check out the exact verified work-branch commit.
+3. Make tests and production build prerequisites.
+4. Inspect the built and deployed artifacts.
+5. Restore fork `main` immediately to `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
+6. Compare fork `main` with upstream to confirm zero drift.
+7. Remove temporary workflow machinery from the accepted convergence.
 
 ### Reuse rule
 
-This procedure may be repeated for future previews when GitHub Pages continues to authorize only `main`, provided restoration and comparison are completed in the same bounded operation.
+A deployment workaround is incomplete until repository authority is restored and independently verified.
 
 ## GitHub connector whole-file writes are not a blocker
 
-### Observed problem
-
-The GitHub connector's normal contents actions replace a complete UTF-8 file rather than applying a small inline patch.
-
-### Incorrect conclusion
-
-It is incorrect to say that this prevents creating a comprehensive document or making a precise repository update.
-
 ### Confirmed solutions
 
-Choose the safest available method for the task:
-
-1. For a new document, use the repository `create_file` action directly.
-2. For a small existing text file, fetch the current content and blob SHA, preserve all existing text, make the intended edit locally in the response workflow, and submit the complete revised file through `update_file`.
-3. For a coordinated multi-file change, use Git blob, tree, commit, and ref actions when available so the changes land in one commit.
-4. When a local checkout and authenticated GitHub CLI are available, use ordinary `git` editing and commit workflows rather than treating connector granularity as a product limitation.
-5. After any whole-file replacement, fetch or otherwise verify the resulting file and confirm that unrelated content was preserved.
+1. Create new documents directly with the repository file action.
+2. For an existing text file, fetch current content and blob SHA, preserve unrelated text, and replace the complete file deliberately.
+3. For coordinated changes, use repository blob/tree/commit/ref operations when available.
+4. Otherwise make sequential bounded file commits on the same authorized branch and verify the final head and contents.
+5. Fetch the resulting files and confirm unrelated content was preserved.
 
 ### Reuse rule
 
-Never present whole-file replacement as a reason to omit a needed document, reduce the requested scope, or ask the user to perform the work manually.
+Never present whole-file replacement as a reason to omit a needed document, reduce scope, or transfer repository editing to the owner.
 
 ## Raw ASCII tablature is not an acceptable iPhone VoiceOver model
 
-### Observed problem
-
-Character-by-character exposure makes VoiceOver traverse dashes, separators, and disconnected fret digits rather than musical ideas.
-
 ### Confirmed solution
 
-1. Preserve the desktop spatial grid reader.
-2. Add a separate iPhone semantic reader.
-3. Parse a valid six-string tablature block into synchronized musical positions.
-4. Distinguish fretted notes, open strings, silent strings, technique notation, and unsupported material.
-5. Expose Previous position, Next position, and Read current position controls.
-6. Keep raw spacing characters out of the ordinary iPhone VoiceOver swipe order.
-7. Use deliberate focus placement and restrained live announcements after upload and navigation actions.
+1. Preserve the desktop spatial presentation.
+2. Present a separate iPhone semantic reader.
+3. Parse complete tablature runs into synchronized musical positions.
+4. Distinguish fretted notes, open strings, inactive strings, explicit mutes, techniques, rests, chords, duration, and unsupported material.
+5. Expose Previous position, Read current position, Next position.
+6. Keep raw spacing characters out of ordinary iPhone VoiceOver order.
+7. Use durable committed-target focus after file-picker return.
 
 ### Reuse rule
 
-Future playback, teacher mode, pattern analysis, and optional AI instruction must consume the semantic tablature model rather than reparsing the raw display independently.
+Future formats, playback, teacher mode, pattern analysis, and AI instruction must consume the semantic tablature document rather than reparsing display text.
 
 ## Product extension must share one semantic music model
 
-### Risk being prevented
-
-Playback, accessibility, teacher mode, riff detection, lesson planning, and AI could otherwise become separate systems that disagree about the music and require later architectural backtracking.
-
 ### Required architecture
 
-The semantic tablature model is the single authoritative representation used by:
+The semantic tablature document is the single musical authority used by every reader and any future teacher, playback, analysis, bookmark, or AI layer.
 
-1. the desktop spatial grid;
-2. the iPhone semantic reader;
-3. spoken teacher instructions;
-4. note, chord, position, measure, and passage playback;
-5. repeated-measure, chord-shape, riff, and variation detection;
-6. user-defined bookmarks and named sections;
-7. optional AI-generated lesson organization.
-
-### Cost-control principle
-
-Core reading, navigation, playback, section selection, looping, exact repetition detection, chord-shape recognition, and basic riff or variation suggestions should be deterministic and usable without AI.
-
-AI should be optional and used for higher-level pedagogical judgments, such as naming uncertain sections, recommending learning order, explaining relationships among patterns, or producing a reusable lesson plan from already-parsed semantic data.
-
-## Metered execution scope must not be inferred from diff size
-
-Cross-repository source: Val Music Vault `VMV-007`.
-
-### Observed problem
-
-A focused source repair can be described as small while the assigned Work session silently includes broad reconstruction, a complete regression gate, packaging, hosted verification, documentation, fixture preparation, workflow administration, and handoff work. The diff may be small while the execution envelope consumes substantial time and Work credits.
-
-### Failed or wasteful approaches
-
-1. Promising low Work-credit use because the expected code change is small.
-2. Bundling tasks that Chat and connected tools can perform into the metered implementation session.
-3. Using Work for manual iPhone testing, repository records, hosted read-backs, or link delivery.
-4. Discovering connector or workflow limitations only after the metered assignment has begun.
-5. Weakening required evidence merely to make the task appear cheaper.
-
-### Confirmed procedure
-
-Before starting a metered execution session:
-
-1. Define the exact source-change boundary.
-2. Identify the minimum repository reconstruction required for that boundary.
-3. Separate verification that requires the authenticated working environment from tasks Chat and connectors can perform.
-4. Identify unavailable external actions before the session begins.
-5. Keep owner-operated and real-iPhone testing outside Work.
-6. State the precise stopping point.
-7. Classify the complete assignment as focused or verification-heavy independently of diff size.
-8. Never predict a credit percentage or promise low usage without reliable platform evidence.
+Third-party decoder models remain behind importer adapters. Different file generations may have distinct validation routes, but they must normalize before application semantics.
 
 ### Reuse rule
 
-Use the least expensive capable environment for each part without weakening build, accessibility, repository-authority, deployment, or real-device evidence. Exhaust Chat, connector, CLI, and REST routes before transferring a tool limitation to the owner.
+No new format may create its own reader-specific musical interpretation.
 
-## Maintenance rule for this ledger
+## Version-neutral Guitar Pro intake
 
-When a problem takes more than one serious attempt to solve, recurs across threads, requires a non-obvious workaround, or is likely to be mistaken for a platform limitation, update this document before closing the checkpoint.
+### Observed problem
 
-A future worker must not rely on chat memory alone. Repository documentation is authoritative.
+GP3, GP4, GP5, GPX, and GP7 use different source generations and containers. Treating each as a separate application model would multiply semantic and accessibility failure points.
+
+### Confirmed procedure
+
+1. Establish a lawful project-authored cross-version corpus.
+2. Preserve provenance, hashes, audit records, and generator evidence.
+3. Validate source-version evidence without relying only on extensions.
+4. Decode lazily through alphaTab `1.8.4`.
+5. Transfer a bounded serializable version-neutral intermediate.
+6. Normalize into the shared semantic document.
+7. Preserve explicit multi-track inventory and selection.
+8. Compare equivalent semantic positions across every generation.
+9. Run focused tests, the complete inherited suite, build, bundle inspection, hosted read-back, and real-iPhone acceptance.
+10. Claim only the bounded compatibility actually proved.
+
+### Reuse rule
+
+Generation-specific evidence stays at the importer boundary. Reader behavior stays generation-neutral.
+
+## Verification gates must compare exact authority
+
+### Observed problems
+
+1. Compact shell guards failed without identifying which assertion was false.
+2. A convergence publication gate incorrectly required an inherited workflow directory to be absent rather than proving the candidate introduced no workflow-file differences.
+
+### Confirmed procedure
+
+1. Compare the candidate with the exact accepted base.
+2. Use named assertions with expected and actual values.
+3. Separate ancestry, changed-file, workflow, test, build, and artifact gates.
+4. Classify only the step that ran.
+5. Correct only the false assertion.
+6. Run still-unperformed expensive gates once.
+7. Preserve failed attempts as evidence.
+
+### Reuse rule
+
+Repository authority is relational. Do not replace exact-base comparison with a remembered or aesthetically “clean” repository shape.
+
+## Metered execution scope must not be inferred from diff size
+
+### Confirmed procedure
+
+Before metered execution:
+
+1. define the exact source-change boundary;
+2. identify minimum authoritative reconstruction;
+3. separate authenticated-environment work from connector and Chat work;
+4. identify unavailable external actions before execution;
+5. keep owner-operated iPhone testing outside metered work;
+6. state the precise stopping point;
+7. classify the complete assignment independently of diff size;
+8. never predict a credit percentage without platform evidence.
+
+### Reuse rule
+
+Use the least expensive capable environment without weakening source, build, accessibility, repository-authority, deployment, or real-device evidence.
+
+## Documentation closure before the next feature family
+
+### Observed problem
+
+After successful convergence, central authority files can continue naming an abandoned checkpoint or listing newly accepted formats as unsupported. A later worker may then branch from the wrong source or repeat completed work.
+
+### Confirmed procedure
+
+1. Complete device acceptance.
+2. Record the owner's exact report without strengthening it.
+3. Reconcile `BRANCH_AUTHORITY.md`, `AGENTS.md`, and `docs/implementation-status.md`.
+4. Update the relevant known-problems addenda.
+5. Preserve historical documents as history rather than rewriting their original checkpoint facts.
+6. State the accepted application source separately from documentation-only closure commits.
+7. Begin the next feature family only from the final documentation-closure head.
+
+### Reuse rule
+
+A technically successful checkpoint is not operationally closed while central repository memory contradicts it.
+
+## Maintenance rule
+
+When a problem takes more than one serious attempt, recurs across threads, requires a non-obvious workaround, or can be mistaken for a platform limitation, update repository memory before closing the checkpoint.
+
+A future worker must not rely on chat memory alone.
