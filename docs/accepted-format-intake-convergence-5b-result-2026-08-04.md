@@ -51,14 +51,25 @@ The corrected publication gate passed:
 
 The first publication attempt did not deploy. It failed only because its authority check incorrectly required the inherited `.github/workflows` directory not to exist. The corrected gate instead proved that the convergence introduced no workflow-file differences.
 
-## Remaining acceptance boundary
+## Real-iPhone acceptance
 
-The clean convergence requires only a brief real-iPhone regression with representative GP3, GPX, and GP7 files. The test concerns:
+On August 4, 2026, John Washburn tested all five project-authored Guitar Pro fixtures on the clean convergence proof with iPhone Safari and VoiceOver.
 
-- correct version identification;
-- Files-picker focus recovery;
-- the same six semantic positions previously accepted;
-- accurate string, fret, duration, and rest speech;
-- continued absence of all playback controls and language.
+He traversed all six semantic positions in every file and reported that:
 
-No merge to `main`, additional format implementation, playback reopening, or teacher-mode work is authorized by this result.
+- each file loaded;
+- Guitar Eyes recognized and named the corresponding Guitar Pro version while loading;
+- all six positions in every file read correctly;
+- everything appeared to work correctly in the bounded test.
+
+The exact acceptance record is:
+
+- `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`.
+
+## Closure
+
+Accepted Format-Intake Convergence 5B is passed and closed.
+
+The clean convergence is now the authoritative format-only baseline for future format investigation.
+
+No merge to `main`, playback reopening, teacher-mode work, upstream modification, or additional format implementation was performed or authorized by this result.
