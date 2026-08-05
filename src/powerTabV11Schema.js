@@ -81,6 +81,12 @@ export function requireOptionalArray(value, label) {
 }
 
 export function fixedArray(value, count, label) {
+  if (Array.isArray(value)) {
+    fail(
+      `${label} must use object-indexed entries rather than a JSON array.`,
+      "INVALID_POWERTAB_FIXED_ARRAY"
+    );
+  }
   const object = requireObject(value, label);
   const expectedKeys = Array.from({ length: count }, (_, index) =>
     String(index)
@@ -99,7 +105,6 @@ export function fixedArray(value, count, label) {
   }
   return expectedKeys.map((key) => object[key]);
 }
-
 
 export function scoreTitle(scoreInfo) {
   if (!isObject(scoreInfo)) return "PowerTab tablature";
