@@ -76,7 +76,7 @@ jobs:
               "docs/powertab-pt2-v11-hosted-producer-run-1-failure-2026-08-05.md",
               "docs/powertab-pt2-v11-hosted-producer-run-2-failure-2026-08-05.md",
               "docs/powertab-pt2-v11-hosted-producer-run-3-timeout-2026-08-05.md",
-              "docs/powertab-pt2-v11-hosted-producer-run-4-focus-failure-2026-08-05.md",
+              "docs/powertab-pt2-v11-hosted-producer-run-4-gui-blocker-2026-08-05.md",
           }
           actual_files = set(filter(None, git("diff", "--name-only", f"{source_base}..HEAD").splitlines()))
           assert actual_files == expected_files, (
@@ -87,7 +87,7 @@ jobs:
           fixture_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
           assert fixture_hash == os.environ["FIXTURE_SHA256"]
 
-          expected_trigger = "PowerTab v11 producer gate: direct X focus run 5 on 2026-08-05.\n"
+          expected_trigger = "PowerTab v11 producer gate: MIDI-dialog dismissal run 5 on 2026-08-05.\n"
           trigger = pathlib.Path(".github/powertab-editor-evidence-trigger").read_text(encoding="utf-8")
           assert trigger == expected_trigger
 
