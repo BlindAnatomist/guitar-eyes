@@ -140,8 +140,8 @@ for attempt in $(seq 1 60); do
 done
 
 xwininfo -root -tree > "$WINDOW_LOG" 2>&1 || true
-import -window root "$EVIDENCE_DIR/before-save.png" \
-  2> "$EVIDENCE_DIR/screenshot-before.log" || true
+import -window root "$EVIDENCE_DIR/before-dialog-dismissal.png" \
+  2> "$EVIDENCE_DIR/screenshot-before-dialog-dismissal.log" || true
 
 if [ -z "$WINDOW_ID" ]; then
   echo "Power Tab Editor window was not found." >&2
@@ -150,8 +150,35 @@ if [ -z "$WINDOW_ID" ]; then
 fi
 
 xdotool getwindowname "$WINDOW_ID" > "$EVIDENCE_DIR/window-title.txt" 2>&1 || true
+
+: > "$EVIDENCE_DIR/midi-dialog-dismissal.log"
+for attempt in $(seq 1 12); do
+  MIDI_ID="$(xdotool search --onlyvisible --name '^Midi Error$' 2>/dev/null | tail -n 1 || true)"
+  if [ -z "$MIDI_ID" ]; then
+    break
+  fi
+  printf 'attempt=%s window=%s\n' "$attempt" "$MIDI_ID" \
+    >> "$EVIDENCE_DIR/midi-dialog-dismissal.log"
+  xdotool windowfocus --sync "$MIDI_ID" \
+    2>> "$EVIDENCE_DIR/midi-dialog-dismissal.log" || true
+  xdotool key --window "$MIDI_ID" --clearmodifiers Return \
+    2>> "$EVIDENCE_DIR/midi-dialog-dismissal.log" || true
+  sleep 1
+done
+
+REMAINING_MIDI="$(xdotool search --onlyvisible --name '^Midi Error$' 2>/dev/null || true)"
+printf '%s\n' "$REMAINING_MIDI" > "$EVIDENCE_DIR/remaining-midi-dialogs.txt"
+if [ -n "$REMAINING_MIDI" ]; then
+  echo "Visible MIDI error dialogs remained after bounded dismissal." >&2
+  exit 26
+fi
+
+xwininfo -root -tree > "$EVIDENCE_DIR/window-inventory-ready-to-save.txt" 2>&1 || true
+import -window root "$EVIDENCE_DIR/ready-to-save.png" \
+  2> "$EVIDENCE_DIR/screenshot-ready-to-save.log" || true
+
 xdotool windowfocus --sync "$WINDOW_ID"
-sleep 5
+sleep 2
 xdotool key --window "$WINDOW_ID" --clearmodifiers ctrl+s
 
 rewritten=0
