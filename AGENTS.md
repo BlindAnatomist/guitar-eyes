@@ -15,10 +15,13 @@ Last reconciled: August 5, 2026.
 - The clean convergence application source is `2a8e5951ec4ced3ce63b2df85d82e54c0ba79ea0`.
 - Documentation-only closure commits do not replace an accepted application source.
 - Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/accepted-format-intake-convergence`, not from fork `main` and not from a historical development branch.
+- The current provisional PowerTab line is `work/powertab-pt2-v11-source-checkpoint`.
+- Its reconciled source-and-evidence head is `6c17997eba96e16aa248d8fd5a0e632ba5f370ce`.
+- That provisional line does not replace the accepted format baseline and must not be merged, published, or described as accepted PowerTab support without the remaining evidence gates.
 
 ## Current product boundary
 
-Guitar Eyes is currently a format-only semantic tablature reader.
+Guitar Eyes is currently an accepted format-only semantic tablature reader.
 
 The accepted baseline includes:
 
@@ -38,6 +41,8 @@ The accepted baseline includes:
 8. Guitar Pro 7 shared `.gp` archives within the verified version-neutral intake boundary.
 
 The Guitar Pro claim is bounded by the lawful project-authored five-file corpus, direct semantic parity tests, production verification, hosted read-back, and real-iPhone VoiceOver acceptance. It is not a claim of arbitrary compatibility with every Guitar Pro file.
+
+A source-checkpoint-provisional `.pt2` version-11 importer exists only on the isolated PowerTab work branch. It has not passed locked installation, the complete suite, production build, editor-exported fixture proof, hosted verification, or real-device acceptance. It is not part of the accepted product boundary.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -63,6 +68,14 @@ Before changing implementation, accessibility, repository administration, deploy
 16. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
 17. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
 18. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+
+When work touches PowerTab, also read:
+
+19. `docs/powertab-intake-evaluation-2026-08-05.md`;
+20. `docs/known-problems-register-addendum-powertab-source-evidence.md`;
+21. `docs/powertab-pt2-v11-source-checkpoint-result-2026-08-05.md`;
+22. `docs/powertab-pt2-v11-source-checkpoint-closure-2026-08-05.md`;
+23. `docs/implementation-status-addendum-powertab-pt2-v11-2026-08-05.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -93,6 +106,8 @@ Every future change must preserve:
 - format/version identification that is evidence-based and never stronger than the verified source;
 - no playback controls or playback language in the accepted format-only reader.
 
+Any provisional PowerTab path must preserve those same contracts. Where PowerTab exposes players rather than Guitar Pro tracks, the existing explicit-selection mechanism may use player-specific labels, but no player may be silently selected when a genuine choice exists.
+
 ## Single semantic architecture
 
 The semantic tablature document is the sole authority for source format, instrument, blocks, strings, positions, durations, measures, chords, rests, techniques, warnings, and preserved unsupported material.
@@ -100,6 +115,8 @@ The semantic tablature document is the sole authority for source format, instrum
 Desktop and iPhone may present that document differently, but neither may create a second musical interpretation.
 
 Third-party decoders may decode source formats, but their models must remain behind importer boundaries. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models remain outside the accepted architecture.
+
+Power Tab Editor source may be consulted as structural evidence, but no Power Tab Editor source file, compiled component, Qt interface, renderer, notation font, MIDI engine, playback code, or runtime asset may enter Guitar Eyes without a separate licensing and architecture decision.
 
 ## New-format rule
 
@@ -121,11 +138,14 @@ A new format family requires its own bounded checkpoint with:
 
 Do not mix multiple unproven format families into one implementation checkpoint.
 
+A source-derived fixture may prove parser consistency but not producer compatibility. When a format is authored by a specific application, acceptance requires evidence from an exact application-produced fixture unless a stronger lawful source of compatibility evidence is established.
+
 ## Deferred format families
 
 Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
-- PowerTab `.ptb` and `.pt2`;
+- legacy PowerTab `.ptb`;
+- PowerTab `.pt2` versions 1 through 10, newer unverified versions, arbitrary version-11 files, and public `.pt2` support beyond the provisional source checkpoint;
 - TuxGuitar `.tg`;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
@@ -134,6 +154,8 @@ Unless a later lawful checkpoint proves otherwise, the following remain unsuppor
 ## Fixture and copyright policy
 
 Use only original, public-domain, or clearly licensed evidence. Preserve fixture source, generation method, license, hashes, and deterministic verification. Do not copy an upstream fixture merely because surrounding source code is licensed.
+
+A source-derived PowerTab fixture must remain marked as such. Do not call it an editor export, and do not use it alone to claim compatibility with Power Tab Editor output.
 
 ## Zero-dollar automation
 
