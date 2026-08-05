@@ -1,1 +1,104 @@
-TEMP
+{
+  "schemaVersion": 2,
+  "project": "Guitar Eyes",
+  "created": "2026-08-05",
+  "family": "powertab-pt2",
+  "supportState": "editor-export-confirmed-parser-parity-pending",
+  "license": "CC0-1.0",
+  "provenance": {
+    "musicalContent": "Project-authored original six-position guitar specimen",
+    "serializerEvidence": "Power Tab Editor 2.0.22 source plus exact packaged application round trip",
+    "upstreamRepository": "powertab/powertabeditor",
+    "upstreamRelease": "2.0.22",
+    "upstreamCommit": "13cab27c7127d301f2747671071e53eb203dc940",
+    "sourceDerived": {
+      "generationMethod": "Canonical compact JSON plus newline, gzip level 9, deterministic mtime 0",
+      "editorExported": false
+    },
+    "editorExport": {
+      "editorExported": true,
+      "method": "Opened the source-derived .pt2 in the exact installed GUI and invoked the ordinary Save command with Ctrl+S",
+      "workflowRun": 31037072445,
+      "triggeringCommit": "407070c33b66a045d69205bdcad6f40baf8738ab",
+      "runner": "GitHub-hosted ubuntu-24.04 under Wine 9.0 and Xvfb",
+      "windowTitle": "powertab-v11-editor-resaved-six-position.pt2 - Power Tab Editor 2.0.21 (v2.0.22-0-g13cab27)",
+      "installerSha256": "523f12b26b457afa1ea8b15cf0daa2dfd1d82106da723150f662d8bee6a48037",
+      "installedExecutableSha256": "d6bc20f65edbbb509d15cf5e8e10a18ebbf14a48212ea3b417173f9b290046b1"
+    },
+    "acceptanceRestriction": "Producer identity and exact editor export are confirmed. Parser parity, complete suite, production build, hosted candidate, and real-iPhone Safari and VoiceOver acceptance remain separate gates."
+  },
+  "files": {
+    "source": {
+      "path": "powertab-v11-original-six-position.source.json",
+      "canonicalJsonBytes": 3628,
+      "sha256": "256a825e6e91afe13065523abeeafbdae97724562057ac87b40f4b70ea6476a5"
+    },
+    "binary": {
+      "path": "powertab-v11-original-six-position.pt2",
+      "bytes": 971,
+      "sha256": "669f9b71e7f8ba3c9ce939b98076bbddc17fb977b63b7f647f4bd01cfa072e71",
+      "editorExported": false
+    },
+    "base64Mirror": {
+      "path": "powertab-v11-original-six-position.pt2.base64",
+      "purpose": "Text-safe deterministic repository and test transport for the source-derived checkpoint"
+    },
+    "editorBinary": {
+      "path": "powertab-v11-editor-export-six-position.pt2",
+      "bytes": 973,
+      "sha256": "6494d78b001a43322362d962b21ce88029f3c7c4cf231b9e8da5af2a3bf85835",
+      "editorExported": true
+    },
+    "editorBase64Mirror": {
+      "path": "powertab-v11-editor-export-six-position.pt2.base64",
+      "purpose": "Text-safe mirror of the exact editor-resaved binary"
+    },
+    "editorDecompressedAudit": {
+      "path": "powertab-v11-editor-export-six-position.json",
+      "bytes": 3651,
+      "sha256": "c5082b9f7dec3401b74373b037ae7fb438f77e2db86f85c10322f6313d52f5bd",
+      "internalVersion": 11
+    },
+    "structuralComparison": {
+      "path": "powertab-v11-editor-export-six-position.comparison.json",
+      "differenceCount": 12,
+      "summary": "The exact editor converted twelve semantically empty arrays to null; no musical content changed."
+    },
+    "generator": {
+      "path": "../../scripts/generate-powertab-v11-proof.mjs"
+    }
+  },
+  "score": {
+    "title": "Guitar Eyes PowerTab v11 Proof",
+    "player": "Proof Guitar",
+    "instrument": "six-string guitar",
+    "tuningHighToLowMidi": [
+      64,
+      59,
+      55,
+      50,
+      45,
+      40
+    ],
+    "measures": 2,
+    "positions": 6,
+    "features": [
+      "quarter note",
+      "eighth notes",
+      "half note",
+      "open strings",
+      "fretted notes",
+      "palm mute",
+      "timed rest",
+      "two-note chord"
+    ],
+    "expectedPositions": [
+      "Measure 1: low E fret 3, quarter note",
+      "Measure 1: A open, eighth note",
+      "Measure 1: A fret 2, eighth note",
+      "Measure 1: D open with palm mute, half note",
+      "Measure 2: rest, half note",
+      "Measure 2: high E open and B fret 1 chord, half note"
+    ]
+  }
+}
