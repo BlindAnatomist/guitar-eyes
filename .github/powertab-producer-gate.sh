@@ -150,7 +150,7 @@ if [ -z "$WINDOW_ID" ]; then
 fi
 
 xdotool getwindowname "$WINDOW_ID" > "$EVIDENCE_DIR/window-title.txt" 2>&1 || true
-xdotool windowactivate --sync "$WINDOW_ID"
+xdotool windowfocus --sync "$WINDOW_ID"
 sleep 5
 xdotool key --window "$WINDOW_ID" --clearmodifiers ctrl+s
 
