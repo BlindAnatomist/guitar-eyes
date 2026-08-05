@@ -115,7 +115,9 @@ jobs:
               pathlib.Path(os.environ["EDITOR_BASE64"]).read_text(encoding="utf-8").strip(),
               validate=True,
           )
-          require_equal("base64 mirror bytes", mirror, binary)
+          if mirror != binary:
+              raise AssertionError("base64 mirror does not reproduce the editor binary")
+          print(f"PASS base64 mirror: {len(mirror)} bytes")
 
           decompressed = gzip.decompress(binary)
           decompressed_hash = hashlib.sha256(decompressed).hexdigest()
@@ -128,11 +130,10 @@ jobs:
 
           audit_path = "fixtures/powertab-v11/powertab-v11-editor-export-six-position.json"
           audit_blob = git("rev-parse", f"HEAD:{audit_path}")
-          require_equal(
-              "editor JSON repository blob",
-              audit_blob,
-              "80f30b94288cf5c7828b025db133373b93929abc",
-          )
+          expected_audit_blob = subprocess.check_output(
+              ["git", "hash-object", "--stdin"], input=decompressed
+          ).decode("ascii").strip()
+          require_equal("editor JSON repository blob", audit_blob, expected_audit_blob)
           audit = pathlib.Path(os.environ["EDITOR_JSON"]).read_bytes()
           require_equal("editor JSON audit content", audit, decompressed)
 
@@ -161,7 +162,7 @@ jobs:
           require_equal("manifest producer run", manifest["provenance"]["editorExport"]["workflowRun"], 31037072445)
           require_equal("manifest editor binary hash", manifest["files"]["editorBinary"]["sha256"], binary_hash)
 
-          expected_trigger = "PowerTab v11 editor parity run 7 on 2026-08-05.\n"
+          expected_trigger = "PowerTab v11 editor parity run 8 on 2026-08-05.\n"
           trigger = pathlib.Path(".github/powertab-editor-evidence-trigger").read_text(encoding="utf-8")
           require_equal("trigger content", trigger, expected_trigger)
 
