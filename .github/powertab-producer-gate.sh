@@ -3,12 +3,12 @@ set -Eeuo pipefail
 
 WORK="$RUNNER_TEMP/powertab-producer-work"
 INSTALLER="$WORK/powertabeditor-windows-2.0.22.exe"
-EXTRACTED="$WORK/extracted"
 WINEPREFIX_DIR="$WORK/wine-prefix"
+INSTALL_SCRIPT="$WORK/install-under-wine.sh"
 GUI_SCRIPT="$WORK/gui-run.sh"
 APP_LOG="$EVIDENCE_DIR/powertabeditor.log"
 WINDOW_LOG="$EVIDENCE_DIR/window-inventory.txt"
-mkdir -p "$WORK" "$EXTRACTED" "$EVIDENCE_DIR"
+mkdir -p "$WORK" "$EVIDENCE_DIR"
 
 if command -v wine >/dev/null 2>&1; then
   WINE_BIN="$(command -v wine)"
@@ -33,14 +33,61 @@ if [ "$actual_installer_hash" != "$INSTALLER_SHA256" ]; then
   exit 21
 fi
 
-innoextract --silent --output-dir "$EXTRACTED" "$INSTALLER" \
-  > "$EVIDENCE_DIR/innoextract.log" 2>&1
-APP_EXE="$(find "$EXTRACTED" -type f -iname 'powertabeditor.exe' -print -quit)"
+export WINEARCH=win64
+export WINEPREFIX="$WINEPREFIX_DIR"
+export WINEDEBUG=-all
+
+cat > "$INSTALL_SCRIPT" <<'INSTALL'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+export WINEARCH=win64
+export WINEPREFIX="$WINEPREFIX_DIR"
+export WINEDEBUG=-all
+
+if command -v wineboot >/dev/null 2>&1; then
+  wineboot --init > "$EVIDENCE_DIR/wineboot.log" 2>&1 || true
+else
+  "$WINE_BIN" wineboot.exe --init > "$EVIDENCE_DIR/wineboot.log" 2>&1 || true
+fi
+
+if command -v winepath >/dev/null 2>&1; then
+  INSTALL_LOG_WINDOWS="$(winepath -w "$EVIDENCE_DIR/official-installer.log")"
+else
+  INSTALL_LOG_WINDOWS="$(python3 - <<'PY'
+import os
+print("Z:" + (os.environ["EVIDENCE_DIR"] + "/official-installer.log").replace("/", "\\"))
+PY
+)"
+fi
+
+set +e
+timeout 300 "$WINE_BIN" "$INSTALLER" \
+  /VERYSILENT \
+  /SUPPRESSMSGBOXES \
+  /NORESTART \
+  /SP- \
+  /CURRENTUSER \
+  '/DIR=C:\PowerTabEditor' \
+  "/LOG=$INSTALL_LOG_WINDOWS" \
+  > "$EVIDENCE_DIR/official-installer-stdout.log" 2>&1
+code=$?
+set -e
+printf '%s\n' "$code" > "$EVIDENCE_DIR/official-installer-exit-code.txt"
+exit "$code"
+INSTALL
+chmod +x "$INSTALL_SCRIPT"
+export WINE_BIN INSTALLER WINEPREFIX_DIR EVIDENCE_DIR
+xvfb-run -a -s '-screen 0 1280x900x24' "$INSTALL_SCRIPT"
+
+APP_EXE="$(find "$WINEPREFIX_DIR/drive_c" -type f -iname 'powertabeditor.exe' -print -quit)"
 if [ -z "$APP_EXE" ] || [ ! -f "$APP_EXE" ]; then
-  echo "Packaged powertabeditor.exe was not found." >&2
-  find "$EXTRACTED" -maxdepth 5 -type f | sort >&2
+  echo "Installed powertabeditor.exe was not found." >&2
+  find "$WINEPREFIX_DIR/drive_c" -maxdepth 6 -type f | sort > "$EVIDENCE_DIR/installed-file-inventory.txt" || true
   exit 22
 fi
+find "$(dirname "$APP_EXE")" -maxdepth 3 -type f -printf '%P\t%s\n' | sort \
+  > "$EVIDENCE_DIR/installed-application-inventory.txt"
 sha256sum "$APP_EXE" > "$EVIDENCE_DIR/powertabeditor-executable-sha256.txt"
 printf '%s\n' "$APP_EXE" > "$EVIDENCE_DIR/powertabeditor-executable-path.txt"
 
@@ -62,12 +109,6 @@ set -Eeuo pipefail
 export WINEARCH=win64
 export WINEPREFIX="$WINEPREFIX_DIR"
 export WINEDEBUG=-all
-
-if command -v wineboot >/dev/null 2>&1; then
-  wineboot --init > "$EVIDENCE_DIR/wineboot.log" 2>&1 || true
-else
-  "$WINE_BIN" wineboot.exe --init > "$EVIDENCE_DIR/wineboot.log" 2>&1 || true
-fi
 
 "$WINE_BIN" "$APP_EXE" --version > "$EVIDENCE_DIR/powertabeditor-version.txt" 2>&1
 grep -q '2\.0\.22' "$EVIDENCE_DIR/powertabeditor-version.txt"
@@ -110,11 +151,11 @@ fi
 
 xdotool getwindowname "$WINDOW_ID" > "$EVIDENCE_DIR/window-title.txt" 2>&1 || true
 xdotool windowactivate --sync "$WINDOW_ID"
-sleep 4
+sleep 5
 xdotool key --window "$WINDOW_ID" --clearmodifiers ctrl+s
 
 rewritten=0
-for attempt in $(seq 1 20); do
+for attempt in $(seq 1 25); do
   current_mtime="$(stat -c %Y "$EDITOR_FILE")"
   if [ "$current_mtime" -gt 946684800 ]; then
     rewritten=1
@@ -138,7 +179,6 @@ if [ "$rewritten" != "1" ]; then
 fi
 GUI
 chmod +x "$GUI_SCRIPT"
-
 export WINE_BIN APP_EXE APP_LOG WINDOW_LOG WINEPREFIX_DIR EDITOR_FILE EVIDENCE_DIR
 xvfb-run -a -s '-screen 0 1280x900x24' "$GUI_SCRIPT"
 
