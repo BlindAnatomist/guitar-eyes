@@ -202,7 +202,6 @@ Only the following PowerTab implementation, evidence, regression, license, and g
 - `src/App.powerTab.test.js`
 - `src/App.test.js`
 - `src/GuitarProTrackSelector.test.js`
-- `src/GuitarProTrackSelector.test.js`
 - `src/powerTabReaderDocuments.test.js`
 - `src/powerTabSourceNormalizer.test.js`
 - `src/powerTabTrackInventory.test.js`
@@ -210,7 +209,7 @@ Only the following PowerTab implementation, evidence, regression, license, and g
 - `src/structuredTabReaderDocuments.test.js`
 - `src/tabFormatDetector.test.js`
 
-The duplicate appearance of no path is authorized. The convergence implementation must normalize this list before comparing it to the candidate tree.
+Every path in this whitelist is unique. The convergence gate must compare the candidate tree against this exact normalized set.
 
 ## Candidate-specific build identity
 
