@@ -7,7 +7,6 @@ import {
   requireBoolean,
   requireInteger,
   requireObject,
-  requireOptionalArray,
   requireString,
 } from "./powerTabV11Schema";
 
