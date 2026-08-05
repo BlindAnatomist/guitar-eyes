@@ -2,7 +2,7 @@
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
-Last reconciled: August 4, 2026.
+Last reconciled: August 5, 2026.
 
 ## Repository authority
 
@@ -50,18 +50,19 @@ Before changing implementation, accessibility, repository administration, deploy
 3. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
 4. `docs/known-problems-register-addendum-guitar-pro-selection.md`;
 5. `docs/known-problems-register-addendum-execution-gates.md`;
-6. `docs/solved-problems-and-reusable-procedures.md`;
-7. `docs/shared-semantic-core-plan.md`;
-8. `docs/shared-semantic-core-implementation.md`;
-9. `docs/convergence-lineage-recovery-2026-07-26.md`;
-10. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
-11. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
-12. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
-13. `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`;
-14. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
-15. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
-16. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
-17. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+6. `docs/known-problems-register-addendum-semantic-convergence.md`;
+7. `docs/solved-problems-and-reusable-procedures.md`;
+8. `docs/shared-semantic-core-plan.md`;
+9. `docs/shared-semantic-core-checkpoint-2.md`;
+10. `docs/convergence-lineage-recovery-2026-07-26.md`;
+11. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
+12. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
+13. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
+14. `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`;
+15. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
+16. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
+17. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
+18. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
