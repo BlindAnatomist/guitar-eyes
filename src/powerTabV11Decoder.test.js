@@ -189,7 +189,7 @@ describe("PowerTab v11 decoder", () => {
 
     expect(manifest).toMatchObject({
       schemaVersion: 2,
-      supportState: "editor-export-confirmed-parser-parity-pending",
+      supportState: "editor-export-parity-verified",
       provenance: {
         musicalContent: "Project-authored original six-position guitar specimen",
         sourceDerived: { editorExported: false },
@@ -201,6 +201,18 @@ describe("PowerTab v11 decoder", () => {
             "523f12b26b457afa1ea8b15cf0daa2dfd1d82106da723150f662d8bee6a48037",
           installedExecutableSha256:
             "d6bc20f65edbbb509d15cf5e8e10a18ebbf14a48212ea3b417173f9b290046b1",
+        },
+        parityVerification: {
+          workflowRun: 31040496589,
+          triggeringCommit: "978b5e364e159fb3113b0986ce24b3f87891db22",
+          focusedSuites: 3,
+          focusedTests: 23,
+          fullSuites: 53,
+          fullTests: 328,
+          optimizedBuild: "passed",
+          bundleFiles: 26,
+          bundleBytes: 7021085,
+          trackedCheckoutClean: true,
         },
       },
     });
