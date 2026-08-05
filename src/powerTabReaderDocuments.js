@@ -23,7 +23,7 @@ export async function buildPowerTabReaderDocuments(
       .join(" ");
     throw new PowerTabImportError(
       reasons ||
-        "The PowerTab file contains no supported four-string bass or six-string guitar player.",
+        "The PowerTab file contains no supported six-string guitar player in the fixture-proven profile.",
       "NO_SUPPORTED_POWERTAB_PLAYER"
     );
   }
@@ -43,7 +43,6 @@ export async function buildPowerTabReaderDocuments(
       requiresTrackSelection: true,
       trackInventory,
       powerTabIntermediate: resolvedIntermediate,
-      guitarProIntermediate: resolvedIntermediate,
     };
   }
 
@@ -61,12 +60,11 @@ export async function buildPowerTabReaderDocuments(
     requestedInstrument: semanticDocument.instrument,
     resolvedInstrument: semanticDocument.instrument,
     instrumentWasDetected: false,
-    supportOutcome: "checkpoint-foundation",
+    supportOutcome: "source-checkpoint-provisional",
     sourceFormat: "powertab-pt2",
     sourceFormatLabel: "PowerTab 2 version 11 tablature",
     requiresTrackSelection: false,
     trackInventory,
     powerTabIntermediate: null,
-    guitarProIntermediate: null,
   };
 }

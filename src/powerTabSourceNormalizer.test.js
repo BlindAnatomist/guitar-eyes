@@ -80,4 +80,31 @@ describe("PowerTab v11 semantic normalization", () => {
     });
     expect(JSON.stringify(document)).not.toMatch(/guitar-pro/iu);
   });
+
+  test("does not rewrite user-authored titles or player names", () => {
+    const value = intermediate();
+    value.title = "Guitar Pro comparison study";
+    value.tracks[0].name = "Guitar Pro named player";
+    value.tracks[0].shortName = "Guitar Pro named player";
+
+    const document = normalizeVerifiedPowerTabIntermediate(value);
+
+    expect(document.title).toBe("Guitar Pro comparison study");
+    expect(document.sourceTrackName).toBe("Guitar Pro named player");
+    expect(document.sourceFormat).toBe("powertab-pt2");
+  });
+
+
+  test("rejects contradictory declared player evidence", () => {
+    const value = intermediate();
+    value.versionEvidence = {
+      ...value.versionEvidence,
+      declaredPlayerCount: 2,
+    };
+
+    expect(() => normalizeVerifiedPowerTabIntermediate(value)).toThrow(
+      /source evidence is missing, unsupported, or contradictory/i
+    );
+  });
+
 });

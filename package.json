@@ -18,9 +18,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "generate:guitar-pro-archive-proof": "node scripts/generate-guitar-pro-shared-archive-proof.mjs",
+    "eject": "react-scripts eject",
     "generate:guitar-pro-multi-track-proof": "node scripts/generate-guitar-pro-multi-track-proof.mjs",
-    "generate:powertab-v11-proof": "node scripts/generate-powertab-v11-proof.mjs",
-    "eject": "react-scripts eject"
+    "generate:powertab-v11-proof": "node scripts/generate-powertab-v11-proof.mjs"
   },
   "eslintConfig": {
     "extends": [

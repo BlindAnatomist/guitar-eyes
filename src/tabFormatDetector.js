@@ -34,6 +34,12 @@ const FORMAT_DEFINITIONS = {
     support: "planned",
     isText: false,
   },
+  "powertab-pt2": {
+    id: "powertab-pt2",
+    label: "PowerTab 2 tablature",
+    support: "source-checkpoint-provisional",
+    isText: false,
+  },
   "powertab-legacy": {
     id: "powertab-legacy",
     label: "legacy PowerTab tablature",
@@ -111,9 +117,9 @@ const EXTENSION_FORMATS = new Map([
   [
     "pt2",
     {
-      id: "guitar-pro-proof",
-      label: "PowerTab 2 version 11 tablature",
-      sourceFamily: "PT2_V11",
+      id: "powertab-pt2",
+      label: "PowerTab 2 tablature",
+      sourceFamily: "PT2",
     },
   ],
   ["tg", { id: "tuxguitar" }],
@@ -168,10 +174,6 @@ export function shouldReadTabFileAsText(format) {
 }
 
 export function unsupportedTabFormatMessage(format) {
-  if (format?.sourceFamily === "PT2_V11") {
-    return "The PowerTab 2 file could not be imported. Guitar Eyes requires a valid gzip-compressed .pt2 document with exact internal version 11, explicit player assignments, and preserved string, fret, tuning, measure, and duration identity.";
-  }
-
   switch (format?.id) {
     case "compressed-musicxml":
       return "The compressed MusicXML file could not be imported. Guitar Eyes requires a valid .mxl ZIP container whose META-INF/container.xml identifies a supported MusicXML tablature score.";
@@ -179,6 +181,8 @@ export function unsupportedTabFormatMessage(format) {
       return "The Guitar Pro file could not be imported. Guitar Eyes requires valid GP3, GP4, GP5, GP6 GPX, or supported GP7/GP8 internal version evidence plus a tablature track that preserves string, fret, and duration identity.";
     case "guitar-pro-2":
       return "A Guitar Pro 2 .gtp file was recognized. Guitar Eyes does not import GP2 files; support requires a separate lawful fixture and version-specific decoder evidence.";
+    case "powertab-pt2":
+      return "The PowerTab 2 file could not be imported. Guitar Eyes requires a valid gzip-compressed .pt2 document with exact internal version 11, explicit player assignments, and preserved string, fret, tuning, measure, and duration identity.";
     case "powertab-legacy":
       return "A legacy PowerTab .ptb file was recognized. Guitar Eyes does not import .ptb files; the binary PowerTab 1.x family requires a separate parser, licensing decision, and version-specific fixtures.";
     case "tuxguitar":

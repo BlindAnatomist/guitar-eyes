@@ -27,7 +27,7 @@ describe("PowerTab reader documents", () => {
 
     expect(result).toMatchObject({
       desktopSource: "semantic",
-      supportOutcome: "checkpoint-foundation",
+      supportOutcome: "source-checkpoint-provisional",
       sourceFormat: "powertab-pt2",
       sourceFormatLabel: "PowerTab 2 version 11 tablature",
       requiresTrackSelection: false,
@@ -61,7 +61,7 @@ describe("PowerTab reader documents", () => {
       requiresTrackSelection: true,
       supportOutcome: "track-selection-required",
       semanticDocument: null,
-      guitarProIntermediate: value,
+      powerTabIntermediate: value,
     });
 
     const selected = await buildPowerTabReaderDocuments(null, {

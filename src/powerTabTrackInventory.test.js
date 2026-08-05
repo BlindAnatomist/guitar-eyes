@@ -59,4 +59,19 @@ describe("PowerTab player inventory", () => {
     expect(inventory.requiresSelection).toBe(true);
     expect(inventory.autoSelection).toBeNull();
   });
+
+  test("keeps four-string material outside the first fixture-proven profile", () => {
+    const value = decoded();
+    value.tracks[0].staves[0].tuningMidiHighToLow = [43, 38, 33, 28];
+
+    const inventory = buildPowerTabTrackInventory(value);
+
+    expect(inventory.supportedCount).toBe(0);
+    expect(inventory.items[0]).toMatchObject({
+      supported: false,
+      reasonCode: "UNSUPPORTED_STRING_COUNT",
+    });
+    expect(inventory.items[0].reason).toMatch(/fixture-proven six-string guitar/i);
+  });
+
 });

@@ -26,9 +26,11 @@ function validatePowerTabSourceEvidence(intermediate) {
     evidence.upstreamRelease !== "2.0.22" ||
     evidence.upstreamCommit !==
       "13cab27c7127d301f2747671071e53eb203dc940" ||
+    !Array.isArray(intermediate.tracks) ||
     !Number.isInteger(evidence.declaredPlayerCount) ||
     evidence.declaredPlayerCount < 1 ||
-    evidence.decodedTrackCount !== intermediate.tracks?.length
+    evidence.declaredPlayerCount !== intermediate.tracks.length ||
+    evidence.decodedTrackCount !== intermediate.tracks.length
   ) {
     fail(
       "The PowerTab v11 source evidence is missing, unsupported, or contradictory."
@@ -54,28 +56,44 @@ function compatibilityIntermediate(intermediate) {
   };
 }
 
-function restorePowerTabMetadata(value, evidence) {
+function restorePowerTabMetadata(value, evidence, key = null) {
   if (Array.isArray(value)) {
-    return value.map((item) => restorePowerTabMetadata(item, evidence));
+    return value.map((item) => restorePowerTabMetadata(item, evidence, key));
   }
   if (!value || typeof value !== "object") {
-    if (value === "guitar-pro-archive") return "powertab-pt2";
-    return typeof value === "string"
-      ? value
-          .replace(/guitar-pro/gu, "powertab")
-          .replace(/Normalized Guitar Pro/gu, "Normalized PowerTab")
-          .replace(/Guitar Pro/gu, "PowerTab")
-      : value;
+    if (
+      (key === "source" || key === "sourceFormat") &&
+      value === "guitar-pro-archive"
+    ) {
+      return "powertab-pt2";
+    }
+    if (
+      key === "sourceLayoutLabel" &&
+      value === "Normalized Guitar Pro spatial layout"
+    ) {
+      return "Normalized PowerTab spatial layout";
+    }
+    return value;
   }
 
   const restored = {};
-  Object.entries(value).forEach(([key, child]) => {
-    if (key === "versionEvidence") {
-      restored[key] = evidence;
-    } else if (key === "sourceVersion") {
-      restored[key] = PT2_SOURCE_VERSION;
+  Object.entries(value).forEach(([childKey, child]) => {
+    if (childKey === "versionEvidence") {
+      restored[childKey] = evidence;
+    } else if (childKey === "sourceVersion") {
+      restored[childKey] = PT2_SOURCE_VERSION;
+    } else if (childKey === "warnings" && Array.isArray(child)) {
+      restored[childKey] = child.map((warning) =>
+        typeof warning === "string"
+          ? warning.replace(/Guitar Pro/gu, "PowerTab")
+          : warning
+      );
     } else {
-      restored[key] = restorePowerTabMetadata(child, evidence);
+      restored[childKey] = restorePowerTabMetadata(
+        child,
+        evidence,
+        childKey
+      );
     }
   });
   return restored;

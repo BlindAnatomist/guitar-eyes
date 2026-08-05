@@ -119,11 +119,11 @@ describe("detectTabFileFormat", () => {
   test("routes modern .pt2 through the bounded PowerTab v11 importer", () => {
     const format = detectTabFileFormat("score.pt2");
     expect(format).toMatchObject({
-      id: "guitar-pro-proof",
-      support: "checkpoint-foundation",
+      id: "powertab-pt2",
+      support: "source-checkpoint-provisional",
       isText: false,
-      sourceFamily: "PT2_V11",
-      label: "PowerTab 2 version 11 tablature",
+      sourceFamily: "PT2",
+      label: "PowerTab 2 tablature",
     });
     expect(shouldReadTabFileAsText(format)).toBe(false);
     expect(unsupportedTabFormatMessage(format)).toMatch(/exact internal version 11/i);

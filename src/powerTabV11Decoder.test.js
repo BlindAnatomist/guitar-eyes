@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { createHash } from "crypto";
 import { gunzipSync } from "zlib";
 import {
   decodePowerTabV11Bytes,
@@ -35,6 +36,20 @@ function fixtureBytes() {
       )
       .trim(),
     "base64"
+  );
+}
+
+function fixtureManifest() {
+  return JSON.parse(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "fixtures",
+        "powertab-v11",
+        "manifest.json"
+      ),
+      "utf8"
+    )
   );
 }
 
@@ -105,6 +120,60 @@ describe("PowerTab v11 decoder", () => {
     expect(intermediate.tracks[0].staves[0].bars).toHaveLength(2);
   });
 
+  test("verifies deterministic fixture hashes and provisional provenance", () => {
+    const source = fixtureSource();
+    const manifest = fixtureManifest();
+    const canonical = `${JSON.stringify(source)}\n`;
+    const binary = fixtureBytes();
+
+    expect(manifest.provenance).toMatchObject({
+      musicalContent: "Project-authored original six-position guitar specimen",
+      editorExported: false,
+    });
+    expect(source.score.score_info.song_data.author_info).toBeNull();
+    expect(createHash("sha256").update(canonical).digest("hex")).toBe(
+      manifest.files.source.sha256
+    );
+    expect(Buffer.byteLength(canonical)).toBe(
+      manifest.files.source.canonicalJsonBytes
+    );
+    expect(createHash("sha256").update(binary).digest("hex")).toBe(
+      manifest.files.binary.sha256
+    );
+    expect(binary.byteLength).toBe(manifest.files.binary.bytes);
+  });
+
+  test("rejects notation outside the fixture-proven profile", () => {
+    const duration = fixtureSource();
+    duration.score.systems[0].staves[0].voices["0"].positions[0].duration =
+      "Whole";
+    expectCode(
+      () => decodePowerTabV11Document(duration),
+      "UNSUPPORTED_POWERTAB_DURATION"
+    );
+
+    const repeat = fixtureSource();
+    repeat.score.systems[0].barlines[0].bar_type = "RepeatStart";
+    expectCode(
+      () => decodePowerTabV11Document(repeat),
+      "UNSUPPORTED_POWERTAB_BARLINE"
+    );
+
+    const key = fixtureSource();
+    key.score.systems[0].barlines[0].key_signature.num_accidentals = 1;
+    expectCode(
+      () => decodePowerTabV11Document(key),
+      "UNSUPPORTED_POWERTAB_KEY_SIGNATURE"
+    );
+
+    const score = fixtureSource();
+    score.score.chord_diagrams.push({});
+    expectCode(
+      () => decodePowerTabV11Document(score),
+      "UNSUPPORTED_POWERTAB_SCORE_STRUCTURE"
+    );
+  });
+
   test("rejects non-v11 documents rather than guessing", () => {
     const source = fixtureSource();
     source.version = 10;
@@ -150,31 +219,6 @@ describe("PowerTab v11 decoder", () => {
     expectCode(
       () => decodePowerTabV11Document(noteSource),
       "UNSUPPORTED_POWERTAB_NOTE_TECHNIQUE"
-    );
-  });
-
-
-  test("rejects unsupported meter, overflowing measures, and score-level chord diagrams", () => {
-    const meter = fixtureSource();
-    meter.score.systems[0].barlines[0].time_signature.meter_type = "CutTime";
-    expectCode(
-      () => decodePowerTabV11Document(meter),
-      "UNSUPPORTED_POWERTAB_TIME_SIGNATURE"
-    );
-
-    const overflow = fixtureSource();
-    overflow.score.systems[0].staves[0].voices["0"].positions[3].duration =
-      "Whole";
-    expectCode(
-      () => decodePowerTabV11Document(overflow),
-      "POWERTAB_MEASURE_DURATION_OVERFLOW"
-    );
-
-    const diagrams = fixtureSource();
-    diagrams.score.chord_diagrams = [{}];
-    expectCode(
-      () => decodePowerTabV11Document(diagrams),
-      "UNSUPPORTED_POWERTAB_SCORE_STRUCTURE"
     );
   });
 

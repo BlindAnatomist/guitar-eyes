@@ -18,13 +18,13 @@
   "files": {
     "source": {
       "path": "powertab-v11-original-six-position.source.json",
-      "canonicalJsonBytes": 3680,
-      "sha256": "59210a2dc289d6aa25d084cce7aa9c64ba3349ac13b3f1eca155fdcdede3859f"
+      "canonicalJsonBytes": 3628,
+      "sha256": "256a825e6e91afe13065523abeeafbdae97724562057ac87b40f4b70ea6476a5"
     },
     "binary": {
       "path": "powertab-v11-original-six-position.pt2",
-      "bytes": 999,
-      "sha256": "f31bc6343b70f216a6a3c65f1b450a179245f460c1da8786837d184fd995589d"
+      "bytes": 971,
+      "sha256": "669f9b71e7f8ba3c9ce939b98076bbddc17fb977b63b7f647f4bd01cfa072e71"
     },
     "base64Mirror": {
       "path": "powertab-v11-original-six-position.pt2.base64",
@@ -38,7 +38,14 @@
     "title": "Guitar Eyes PowerTab v11 Proof",
     "player": "Proof Guitar",
     "instrument": "six-string guitar",
-    "tuningHighToLowMidi": [64, 59, 55, 50, 45, 40],
+    "tuningHighToLowMidi": [
+      64,
+      59,
+      55,
+      50,
+      45,
+      40
+    ],
     "measures": 2,
     "positions": 6,
     "features": [

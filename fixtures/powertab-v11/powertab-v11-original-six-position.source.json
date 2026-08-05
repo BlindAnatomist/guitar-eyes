@@ -5,14 +5,11 @@
       "song_data": {
         "title": "Guitar Eyes PowerTab v11 Proof",
         "subtitle": "Project-authored six-position semantic proof",
-        "artist": "The Blind Anatomist",
+        "artist": "Guitar Eyes",
         "audio_release_info": null,
         "video_release_info": null,
-        "bootleg_release_info": null,
-        "author_info": {
-          "composer": "The Blind Anatomist",
-          "lyricist": ""
-        },
+        "bootleg_relaese_info": null,
+        "author_info": null,
         "arranger": "",
         "transcriber": "Guitar Eyes",
         "copyright": "CC0-1.0 project-authored test material",

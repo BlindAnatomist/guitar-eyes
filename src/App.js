@@ -9,7 +9,7 @@ import { flushSync } from "react-dom";
 import { readCompressedMusicXmlFile } from "./compressedMusicXmlImporter";
 import DesktopSemanticReader from "./DesktopSemanticReader";
 import GuitarProTrackSelector from "./GuitarProTrackSelector";
-import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
+import { buildStructuredTabReaderDocuments } from "./structuredTabReaderDocuments";
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
@@ -27,7 +27,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "Clean format-intake convergence foundation 5B";
+const TEST_BUILD_LABEL = "PowerTab 2 version 11 source checkpoint";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -57,7 +57,7 @@ function App() {
   const [statusMessage, setStatusMessage] = useState("");
   const [iphoneError, setIphoneError] = useState("");
   const [desktopError, setDesktopError] = useState("");
-  const [guitarProSelectionSession, setGuitarProSelectionSession] = useState(null);
+  const [structuredSelectionSession, setStructuredSelectionSession] = useState(null);
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
 
   const iphoneHeadingRef = useRef(null);
@@ -171,16 +171,18 @@ function App() {
     });
   };
 
-  const showGuitarProTrackSelection = (file, readerDocuments) => {
+  const showStructuredTrackSelection = (file, readerDocuments) => {
     const sourceFormatLabel =
       readerDocuments.sourceFormatLabel || "Guitar Pro tablature";
     const session = {
       file,
-      intermediate: readerDocuments.guitarProIntermediate,
+      intermediate: readerDocuments.selectionIntermediate,
       inventory: readerDocuments.trackInventory,
       sourceFormatLabel,
     };
-    const status = `${sourceFormatLabel} contains ${readerDocuments.trackInventory.supportedCount} supported tablature tracks. Choose one to continue.`;
+    const pluralLabel =
+      readerDocuments.trackInventory.selectorLabels?.plural || "tracks";
+    const status = `${sourceFormatLabel} contains ${readerDocuments.trackInventory.supportedCount} supported tablature ${pluralLabel}. Choose one to continue.`;
 
     if (readingMode === "iphone") {
       pendingIphoneFocusTargetRef.current = "track-selection";
@@ -189,7 +191,7 @@ function App() {
         setSemanticDocument(null);
         setIphoneError("");
         setDesktopError("");
-        setGuitarProSelectionSession(session);
+        setStructuredSelectionSession(session);
         setIsReadingFile(false);
         setStatusMessage(status);
         setIphoneFocusRequest((current) => current + 1);
@@ -201,7 +203,7 @@ function App() {
     setSemanticDocument(null);
     setIphoneError("");
     setDesktopError("");
-    setGuitarProSelectionSession(session);
+    setStructuredSelectionSession(session);
     setIsReadingFile(false);
     setStatusMessage(status);
     focusSoon(trackSelectionHeadingRef);
@@ -243,7 +245,7 @@ function App() {
     setDesktopError("");
     setSemanticDocument(null);
     setDesktopBlocks([]);
-    setGuitarProSelectionSession(null);
+    setStructuredSelectionSession(null);
 
     if (!file) {
       finishUnreadableUpload(
@@ -257,20 +259,24 @@ function App() {
     let detectedFormat = initialFormat;
     let readerDocuments;
 
-    if (initialFormat.id === "guitar-pro-proof") {
+    if (["guitar-pro-proof", "powertab-pt2"].includes(initialFormat.id)) {
+      const formatName =
+        initialFormat.id === "powertab-pt2"
+          ? "PowerTab 2"
+          : "Guitar Pro";
       try {
-        readerDocuments = await buildGuitarProReaderDocuments(file);
+        readerDocuments = await buildStructuredTabReaderDocuments(file);
         if (readerDocuments.requiresTrackSelection) {
-          showGuitarProTrackSelection(file, readerDocuments);
+          showStructuredTrackSelection(file, readerDocuments);
           return;
         }
       } catch (error) {
         finishUnreadableUpload(
           messageFromError(
             error,
-            "The Guitar Pro file could not be prepared for the Guitar Eyes readers."
+            `The ${formatName} file could not be prepared for the Guitar Eyes readers.`
           ),
-          "The selected Guitar Pro file could not be imported."
+          `The selected ${formatName} file could not be imported.`
         );
         return;
       }
@@ -428,29 +434,33 @@ function App() {
     }
   };
 
-  const handleGuitarProTrackSelection = async (selection) => {
-    const session = guitarProSelectionSession;
+  const handleStructuredTrackSelection = async (selection) => {
+    const session = structuredSelectionSession;
     if (!session) return;
 
+    const labels = session.inventory?.selectorLabels || {};
+    const formatName = labels.formatName || "Guitar Pro";
+    const selectionName = labels.singular || "track";
+
     setIsReadingFile(true);
-    setStatusMessage("Preparing the selected Guitar Pro track.");
+    setStatusMessage(`Preparing the selected ${formatName} ${selectionName}.`);
     setIphoneError("");
     setDesktopError("");
 
     let readerDocuments;
     try {
-      readerDocuments = await buildGuitarProReaderDocuments(session.file, {
+      readerDocuments = await buildStructuredTabReaderDocuments(session.file, {
         intermediate: session.intermediate,
         selection,
       });
     } catch (error) {
-      setGuitarProSelectionSession(null);
+      setStructuredSelectionSession(null);
       finishUnreadableUpload(
         messageFromError(
           error,
-          "The selected Guitar Pro track could not be prepared for the Guitar Eyes readers."
+          `The selected ${formatName} ${selectionName} could not be prepared for the Guitar Eyes readers.`
         ),
-        "The selected Guitar Pro track could not be imported."
+        `The selected ${formatName} ${selectionName} could not be imported.`
       );
       return;
     }
@@ -458,12 +468,12 @@ function App() {
     const nextDocument = readerDocuments.semanticDocument;
     const nextDesktopBlocks = readerDocuments.desktopBlocks;
     const resolvedInstrument = readerDocuments.resolvedInstrument;
-    setGuitarProSelectionSession(null);
+    setStructuredSelectionSession(null);
 
     if (!nextDocument) {
       finishUnreadableUpload(
-        "The selected Guitar Pro track did not produce a semantic reader document.",
-        "The selected Guitar Pro track could not be imported."
+        `The selected ${formatName} ${selectionName} did not produce a semantic reader document.`,
+        `The selected ${formatName} ${selectionName} could not be imported.`
       );
       return;
     }
@@ -471,7 +481,7 @@ function App() {
     const sourceFormatLabel =
       readerDocuments.sourceFormatLabel ||
       session.sourceFormatLabel ||
-      "Guitar Pro tablature";
+      `${formatName} tablature`;
     const status = `Imported ${sourceFormatLabel}. Loaded ${nextDocument.positions.length} synchronized positions`;
     if (readingMode === "iphone") {
       commitIphoneOutcome({
@@ -499,7 +509,7 @@ function App() {
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {
-      if (guitarProSelectionSession) {
+      if (structuredSelectionSession) {
         pendingIphoneFocusTargetRef.current = "track-selection";
         setIphoneFocusRequest((current) => current + 1);
       } else if (semanticDocument) {
@@ -513,7 +523,7 @@ function App() {
     }
 
     pendingIphoneFocusTargetRef.current = null;
-    if (guitarProSelectionSession) {
+    if (structuredSelectionSession) {
       focusSoon(trackSelectionHeadingRef);
     } else if (semanticDocument || desktopBlocks.length > 0) {
       desktopFocusPendingRef.current = true;
@@ -570,11 +580,11 @@ function App() {
         {statusMessage}
       </div>
 
-      {guitarProSelectionSession && (
+      {structuredSelectionSession && (
         <GuitarProTrackSelector
           ref={trackSelectionHeadingRef}
-          inventory={guitarProSelectionSession.inventory}
-          onSubmit={handleGuitarProTrackSelection}
+          inventory={structuredSelectionSession.inventory}
+          onSubmit={handleStructuredTrackSelection}
           disabled={isReadingFile}
         />
       )}

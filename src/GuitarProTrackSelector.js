@@ -26,10 +26,12 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
   );
   const [selectedId, setSelectedId] = useState("");
   const labels = { ...DEFAULT_LABELS, ...(inventory?.selectorLabels || {}) };
-  const selectorId = `${String(labels.formatName || "tablature")
+  const formatId = String(labels.formatName || "tablature")
     .toLowerCase()
     .replace(/[^a-z0-9]+/gu, "-")
-    .replace(/^-|-$/gu, "")}-track-selector`;
+    .replace(/^-|-$/gu, "");
+  const selectorId = `${formatId}-track-selector`;
+  const headingId = `${selectorId}-heading`;
 
   useEffect(() => {
     setSelectedId("");
@@ -54,8 +56,8 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
   };
 
   return (
-    <section className="guitar-pro-track-selector" aria-labelledby={selectorId}>
-      <h2 id={selectorId} ref={headingRef} tabIndex="-1">
+    <section className="guitar-pro-track-selector" aria-labelledby={headingId}>
+      <h2 id={headingId} ref={headingRef} tabIndex="-1">
         {labels.heading}
       </h2>
       <p>
@@ -76,7 +78,7 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
                 <input
                   id={item.id}
                   type="radio"
-                  name={`${selectorId}-choice`}
+                  name={`${formatId}-track`}
                   value={item.id}
                   checked={selectedId === item.id}
                   onChange={() => setSelectedId(item.id)}
@@ -87,7 +89,7 @@ const GuitarProTrackSelector = forwardRef(function GuitarProTrackSelector(
           </div>
         </fieldset>
         <p
-          id={`${selectorId}-selected-summary`}
+          id={`${formatId}-selected-track-summary`}
           className="guitar-pro-selected-track-summary"
         >
           {selectedTrackSummary}

@@ -6,76 +6,12 @@ import {
   POSITION_TECHNIQUES,
   fail,
   fixedArray,
-  isObject,
   requireArray,
   requireInteger,
   requireObject,
   requireOptionalArray,
   requireString,
-} from "./powerTabV11Shared";
-
-export function scoreTitle(scoreInfo) {
-  if (!isObject(scoreInfo)) return "PowerTab tablature";
-  const songTitle = scoreInfo.song_data?.title;
-  if (typeof songTitle === "string" && songTitle.trim()) {
-    return songTitle.trim();
-  }
-  const lessonTitle = scoreInfo.lesson_data?.title;
-  if (typeof lessonTitle === "string" && lessonTitle.trim()) {
-    return lessonTitle.trim();
-  }
-  return "PowerTab tablature";
-}
-
-export function parsePlayer(player, index) {
-  const value = requireObject(player, `Player ${index + 1}`);
-  const tuning = requireObject(value.tuning, `Player ${index + 1} tuning`);
-  const notes = requireArray(
-    tuning.notes,
-    `Player ${index + 1} tuning notes`
-  ).map((note, noteIndex) =>
-    requireInteger(
-      note,
-      `Player ${index + 1} tuning note ${noteIndex + 1}`,
-      0,
-      127
-    )
-  );
-  if (notes.length < 3 || notes.length > 8) {
-    fail(
-      `Player ${index + 1} reports ${notes.length} strings; PowerTab v11 permits three through eight.`,
-      "INVALID_POWERTAB_TUNING"
-    );
-  }
-
-  const capo = requireInteger(
-    tuning.capo ?? 0,
-    `Player ${index + 1} capo`,
-    0,
-    12
-  );
-  if (capo !== 0) {
-    fail(
-      `Player ${index + 1} uses capo ${capo}; capo semantics are outside the bounded v11 profile.`,
-      "UNSUPPORTED_POWERTAB_CAPO"
-    );
-  }
-  requireInteger(
-    tuning.offset ?? 0,
-    `Player ${index + 1} notation offset`,
-    -12,
-    12
-  );
-
-  return {
-    index,
-    description:
-      typeof value.description === "string" && value.description.trim()
-        ? value.description.trim()
-        : `Player ${index + 1}`,
-    tuningMidiHighToLow: notes,
-  };
-}
+} from "./powerTabV11Schema";
 
 function parseProperties(value, label) {
   return requireOptionalArray(value, label).map((property, index) =>
@@ -144,22 +80,15 @@ function parseNote(note, noteIndex, context, stringCount) {
       "UNSUPPORTED_POWERTAB_NOTE_STRUCTURE"
     );
   }
-  if (value.tapped_harmonic != null) {
-    requireInteger(
-      value.tapped_harmonic,
-      `${context}, note ${noteIndex + 1} tapped harmonic fret`,
-      0,
-      99
+  if (
+    value.tapped_harmonic != null ||
+    value.artificial_harmonic != null ||
+    value.bend != null
+  ) {
+    fail(
+      `${context}, note ${noteIndex + 1} contains a harmonic or bend outside the bounded fixture-proven profile.`,
+      "UNSUPPORTED_POWERTAB_NOTE_STRUCTURE"
     );
-  }
-  if (value.artificial_harmonic != null) {
-    requireObject(
-      value.artificial_harmonic,
-      `${context}, note ${noteIndex + 1} artificial harmonic`
-    );
-  }
-  if (value.bend != null) {
-    requireObject(value.bend, `${context}, note ${noteIndex + 1} bend`);
   }
 
   return {
@@ -203,17 +132,7 @@ function parsePosition(position, positionIndex, context, stringCount) {
       "UNSUPPORTED_POWERTAB_POSITION_PROPERTY"
     );
   }
-  if (properties.includes("Dotted") && properties.includes("DoubleDotted")) {
-    fail(
-      `${context}, position ${positionIndex + 1} is both dotted and double-dotted.`,
-      "CONTRADICTORY_POWERTAB_DURATION"
-    );
-  }
-  const dots = properties.includes("DoubleDotted")
-    ? 2
-    : properties.includes("Dotted")
-      ? 1
-      : 0;
+  const dots = 0;
   const isRest = properties.includes("Rest");
   const multibarRest = requireInteger(
     value.multibar_rest ?? 0,
@@ -315,4 +234,3 @@ export function parseVoices(staff, context, stringCount) {
     }
   );
 }
-

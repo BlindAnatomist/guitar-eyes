@@ -8,18 +8,6 @@ async function loadBrowserWorkerFactory() {
   return module.createGuitarProBrowserWorker;
 }
 
-async function buildPowerTabDocuments(file, options) {
-  const module = await import("./powerTabReaderDocuments");
-  return module.buildPowerTabReaderDocuments(file, options);
-}
-
-function isPowerTabRequest(file, options) {
-  return (
-    /\.pt2$/iu.test(String(file?.name || "")) ||
-    options?.intermediate?.sourceVersion === "PT2_V11"
-  );
-}
-
 function sourceLabel(intermediate) {
   switch (intermediate?.sourceVersion) {
     case "GP3":
@@ -39,24 +27,20 @@ function sourceLabel(intermediate) {
   }
 }
 
-export async function buildGuitarProReaderDocuments(file, options = {}) {
-  if (isPowerTabRequest(file, options)) {
-    return buildPowerTabDocuments(file, options);
-  }
-
-  const {
+export async function buildGuitarProReaderDocuments(
+  file,
+  {
     workerFactory = null,
     decode = decodeGuitarProArchiveProofFile,
     normalize = normalizeVerifiedGuitarProIntermediate,
     inventory = buildGuitarProTrackInventory,
     intermediate = null,
     selection = null,
-  } = options;
-
+  } = {}
+) {
   let resolvedIntermediate = intermediate;
   if (!resolvedIntermediate) {
-    const resolvedWorkerFactory =
-      workerFactory || (await loadBrowserWorkerFactory());
+    const resolvedWorkerFactory = workerFactory || (await loadBrowserWorkerFactory());
     resolvedIntermediate = await decode(file, {
       workerFactory: resolvedWorkerFactory,
     });

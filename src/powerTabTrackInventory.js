@@ -1,7 +1,7 @@
 import { PowerTabImportError } from "./powerTabErrors";
 import { POWERTAB_LIMITS } from "./powerTabLimits";
 
-const SUPPORTED_STRING_COUNTS = new Set([4, 6]);
+const SUPPORTED_STRING_COUNTS = new Set([6]);
 const PITCH_NAMES = [
   "C",
   "C#",
@@ -51,20 +51,17 @@ function inventoryItem(track, staff, trackIndex, staffIndex) {
     reason = "Percussion does not contain supported fretted tablature.";
   } else if (!SUPPORTED_STRING_COUNTS.has(stringCount)) {
     reasonCode = "UNSUPPORTED_STRING_COUNT";
-    reason = `This ${stringCount}-string player is outside the current four-string bass and six-string guitar profile.`;
+    reason = `This ${stringCount}-string player is outside the current fixture-proven six-string guitar profile.`;
   } else if (measureCount === 0) {
     reasonCode = "NO_MEASURES";
     reason = "This player contains no assigned tablature measures.";
   }
 
-  const instrument =
-    stringCount === 4 ? "bass" : stringCount === 6 ? "guitar" : null;
+  const instrument = stringCount === 6 ? "guitar" : null;
   const instrumentLabel =
-    instrument === "bass"
-      ? "four-string bass"
-      : instrument === "guitar"
-        ? "six-string guitar"
-        : `${stringCount}-string fretted player`;
+    instrument === "guitar"
+      ? "six-string guitar"
+      : `${stringCount}-string fretted player`;
   const trackName = String(
     track?.name || track?.shortName || `Player ${trackIndex + 1}`
   ).trim();

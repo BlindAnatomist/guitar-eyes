@@ -1,13 +1,77 @@
 import { POWERTAB_LIMITS } from "./powerTabLimits";
-import {
-  decompressGzip,
-  fileNameOf,
-  parseJson,
-  validateGzipHeader,
-} from "./powerTabV11Container";
-import { scoreTitle } from "./powerTabV11Notation";
-import { fail, requireArray, requireObject, requireOptionalArray } from "./powerTabV11Shared";
-import { buildTracks } from "./powerTabV11Systems";
+import { PowerTabImportError } from "./powerTabErrors";
+import { buildTracks } from "./powerTabV11SystemParser";
+import { fail, requireArray, requireObject, scoreTitle } from "./powerTabV11Schema";
+
+function fileNameOf(file) {
+  return String(file?.name || "PowerTab.pt2");
+}
+
+function validateGzipHeader(bytes) {
+  if (
+    !(bytes instanceof Uint8Array) ||
+    bytes.length < 10 ||
+    bytes[0] !== 0x1f ||
+    bytes[1] !== 0x8b ||
+    bytes[2] !== 0x08
+  ) {
+    fail(
+      "The selected .pt2 file is not a valid gzip container.",
+      "INVALID_POWERTAB_GZIP"
+    );
+  }
+}
+
+async function decompressGzip(bytes, limits) {
+  if (typeof DecompressionStream !== "function") {
+    fail(
+      "This browser does not provide the bounded gzip decoder required for PowerTab .pt2 files.",
+      "POWERTAB_GZIP_UNAVAILABLE"
+    );
+  }
+
+  try {
+    const stream = new Blob([bytes])
+      .stream()
+      .pipeThrough(new DecompressionStream("gzip"));
+    const decompressed = new Uint8Array(await new Response(stream).arrayBuffer());
+    if (decompressed.byteLength > limits.maxDecompressedBytes) {
+      fail(
+        `The decompressed PowerTab document exceeds the ${limits.maxDecompressedBytes}-byte safety limit.`,
+        "POWERTAB_DECOMPRESSED_SIZE_LIMIT"
+      );
+    }
+    return decompressed;
+  } catch (error) {
+    if (error instanceof PowerTabImportError) throw error;
+    fail(
+      "The selected .pt2 gzip container could not be decompressed safely.",
+      "INVALID_POWERTAB_GZIP"
+    );
+  }
+}
+
+function parseJson(bytes) {
+  let text;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    fail(
+      "The decompressed PowerTab document is not valid UTF-8.",
+      "INVALID_POWERTAB_UTF8"
+    );
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    fail(
+      "The decompressed PowerTab document is not valid JSON.",
+      "INVALID_POWERTAB_JSON"
+    );
+  }
+}
+
 
 export function decodePowerTabV11Document(root, { limits = POWERTAB_LIMITS } = {}) {
   const document = requireObject(root, "PowerTab document");
@@ -20,15 +84,6 @@ export function decodePowerTabV11Document(root, { limits = POWERTAB_LIMITS } = {
     );
   }
   const score = requireObject(document.score, "PowerTab score");
-  if (
-    requireOptionalArray(score.chord_diagrams, "PowerTab score chord diagrams")
-      .length > 0
-  ) {
-    fail(
-      "The PowerTab score contains chord diagrams outside the bounded v11 profile.",
-      "UNSUPPORTED_POWERTAB_SCORE_STRUCTURE"
-    );
-  }
   const tracks = buildTracks(score, limits);
 
   return {

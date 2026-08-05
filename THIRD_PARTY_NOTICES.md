@@ -14,7 +14,7 @@ Project site: `https://www.alphatab.net/`
 
 Source repository: `https://github.com/CoderLine/alphaTab`
 
-Published package: `https://www.npmjs.com/package/@coderline/alphaTab/v/1.8.4`
+Published package: `https://www.npmjs.com/package/@coderline/alphatab/v/1.8.4`
 
 License text: `https://www.mozilla.org/MPL/2.0/`
 
