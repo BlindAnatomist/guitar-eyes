@@ -1,6 +1,11 @@
 import fs from "fs";
+import { TextDecoder as NodeTextDecoder } from "util";
 import { gunzipSync } from "zlib";
 import { decodePowerTabV11Bytes } from "../src/powerTabV11Decoder";
+
+if (typeof globalThis.TextDecoder !== "function") {
+  globalThis.TextDecoder = NodeTextDecoder;
+}
 
 test("exact editor-resaved PowerTab file preserves the six-position semantic proof", async () => {
   const file = process.env.POWERTAB_EDITOR_EVIDENCE_FILE;
