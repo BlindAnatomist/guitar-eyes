@@ -1,92 +1,47 @@
-import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
-import { normalizeVerifiedGuitarProIntermediate } from "./guitarProSourceNormalizer";
-import { buildGuitarProTrackInventory } from "./guitarProTrackInventory";
-import { decodeGuitarProArchiveProofFile } from "./guitarProWorkerClient";
+import { buildGuitarProSpecificReaderDocuments } from "./guitarProSpecificReaderDocuments";
 
-async function loadBrowserWorkerFactory() {
-  const module = await import("./guitarProBrowserWorkerFactory");
-  return module.createGuitarProBrowserWorker;
+function isPowerTabRequest(file, options) {
+  return (
+    /\.pt2$/iu.test(String(file?.name || "")) ||
+    options?.intermediate?.sourceVersion === "PT2_V11"
+  );
 }
 
-function sourceLabel(intermediate) {
-  switch (intermediate?.sourceVersion) {
-    case "GP3":
-      return "Guitar Pro 3 tablature";
-    case "GP4":
-      return "Guitar Pro 4 tablature";
-    case "GP5":
-      return "Guitar Pro 5 tablature";
-    case "GP6":
-      return "Guitar Pro 6 tablature";
-    case "GP7":
-      return "Guitar Pro 7 tablature";
-    case "GP8":
-      return "Guitar Pro 8 tablature";
-    default:
-      return "Guitar Pro tablature";
-  }
-}
+async function buildPowerTabCompatibilityReaderDocuments(file, options) {
+  const module = await import("./powerTabReaderDocuments");
+  try {
+    const result = await module.buildPowerTabReaderDocuments(file, options);
+    if (!result?.requiresTrackSelection) return result;
 
-export async function buildGuitarProReaderDocuments(
-  file,
-  {
-    workerFactory = null,
-    decode = decodeGuitarProArchiveProofFile,
-    normalize = normalizeVerifiedGuitarProIntermediate,
-    inventory = buildGuitarProTrackInventory,
-    intermediate = null,
-    selection = null,
-  } = {}
-) {
-  let resolvedIntermediate = intermediate;
-  if (!resolvedIntermediate) {
-    const resolvedWorkerFactory = workerFactory || (await loadBrowserWorkerFactory());
-    resolvedIntermediate = await decode(file, {
-      workerFactory: resolvedWorkerFactory,
-    });
-  }
-
-  const sourceFormatLabel = sourceLabel(resolvedIntermediate);
-  const trackInventory = inventory(resolvedIntermediate);
-  if (trackInventory.requiresSelection && !selection) {
+    return {
+      ...result,
+      guitarProIntermediate: result.powerTabIntermediate,
+    };
+  } catch (error) {
     return {
       desktopBlocks: [],
       desktopSource: "semantic",
       semanticDocument: null,
-      semanticError: null,
+      semanticError: error,
       requestedInstrument: null,
       resolvedInstrument: null,
       instrumentWasDetected: false,
-      supportOutcome: "track-selection-required",
-      sourceFormat: "guitar-pro",
-      sourceFormatLabel,
-      requiresTrackSelection: true,
-      trackInventory,
-      guitarProIntermediate: resolvedIntermediate,
+      supportOutcome: "powertab-import-error",
+      sourceFormat: "powertab-pt2",
+      sourceFormatLabel: "PowerTab 2 version 11 tablature",
+      requiresTrackSelection: false,
+      trackInventory: null,
+      guitarProIntermediate: null,
     };
   }
+}
 
-  const resolvedSelection = selection || trackInventory.autoSelection;
-  const semanticDocument = normalize(resolvedIntermediate, {
-    selection: resolvedSelection,
-  });
-  const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
+export async function buildGuitarProReaderDocuments(file, options = {}) {
+  if (isPowerTabRequest(file, options)) {
+    return buildPowerTabCompatibilityReaderDocuments(file, options);
+  }
 
-  return {
-    desktopBlocks,
-    desktopSource: "semantic",
-    semanticDocument,
-    semanticError: null,
-    requestedInstrument: semanticDocument.instrument,
-    resolvedInstrument: semanticDocument.instrument,
-    instrumentWasDetected: false,
-    supportOutcome: "checkpoint-foundation",
-    sourceFormat: "guitar-pro",
-    sourceFormatLabel,
-    requiresTrackSelection: false,
-    trackInventory,
-    guitarProIntermediate: null,
-  };
+  return buildGuitarProSpecificReaderDocuments(file, options);
 }
 
 export const buildGuitarProArchiveProofReaderDocuments =
