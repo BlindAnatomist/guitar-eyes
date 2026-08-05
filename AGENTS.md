@@ -50,19 +50,20 @@ Before changing implementation, accessibility, repository administration, deploy
 3. `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
 4. `docs/known-problems-register-addendum-guitar-pro-selection.md`;
 5. `docs/known-problems-register-addendum-execution-gates.md`;
-6. `docs/known-problems-register-addendum-semantic-convergence.md`;
-7. `docs/solved-problems-and-reusable-procedures.md`;
-8. `docs/shared-semantic-core-plan.md`;
-9. `docs/shared-semantic-core-checkpoint-2.md`;
-10. `docs/convergence-lineage-recovery-2026-07-26.md`;
-11. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
-12. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
-13. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
-14. `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`;
-15. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
-16. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
-17. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
-18. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+6. `docs/cross-repository-execution-governance-reconciliation-2026-08-05.md`;
+7. `docs/known-problems-register-addendum-semantic-convergence.md`;
+8. `docs/solved-problems-and-reusable-procedures.md`;
+9. `docs/shared-semantic-core-plan.md`;
+10. `docs/shared-semantic-core-checkpoint-2.md`;
+11. `docs/convergence-lineage-recovery-2026-07-26.md`;
+12. `docs/convergence-recovery-real-iphone-acceptance-2026-07-26.md`;
+13. `docs/musicxml-intake-checkpoint-2-real-iphone-acceptance-2026-07-27.md`;
+14. `docs/guitar-pro-real-iphone-checkpoint-3e-result-and-3f-reading-order-repair.md`;
+15. `docs/ascii-extended-string-intake-checkpoint-2-real-iphone-acceptance-2026-08-03.md`;
+16. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
+17. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
+18. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
+19. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -139,15 +140,57 @@ Use only original, public-domain, or clearly licensed evidence. Preserve fixture
 
 No paid GitHub usage, paid runner, paid service, or overage is authorized.
 
-Use the least expensive capable environment. GitHub-hosted workflows are intentional checkpoints, not exploratory debugging loops. Before adding or expanding a workflow, follow `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+Use the least expensive capable environment. GitHub-hosted workflows are intentional acceptance checkpoints, not exploratory debugging loops. Before adding or expanding a workflow, follow `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md` and the execution-gate addendum.
 
 Inspect a failed run before acting. Classify only the step that actually ran. Prefer named diagnostic assertions over opaque combined shell guards. Do not use Actions bot commits as ordinary implementation transport.
+
+### Mandatory hosted-run circuit breaker
+
+1. After the first failed hosted run, stop workflow activity and audit the complete affected boundary.
+2. Search the canonical known-problems register, every relevant addendum, and the cross-repository execution reconciliation.
+3. Batch all known corrections outside Actions.
+4. Permit at most one corrective hosted run.
+5. If that corrective run exposes another defect of any kind, the circuit is open.
+6. Once open, do not add, edit, trigger, rerun, or replace another workflow on that branch unless:
+   - the work is moved to a capable unmetered environment; or
+   - the owner explicitly authorizes one identified exception after being told the circuit is open, what exact defect remains, what evidence is already preserved, and why the replacement method is materially different.
+7. Remove temporary workflows when their bounded purpose ends or the circuit opens.
+
+Owner authorization to finish a feature is not authorization for unlimited hosted corrections.
+
+### Failure-preserving acceptance
+
+Any permitted workflow that generates or transforms lasting source, fixtures, manifests, canonical exports, or evidence must fail forward:
+
+1. run dependency-free authority and structural checks before installation;
+2. preserve valid lasting work before later broad tests when technically possible;
+3. remove temporary scripts, workflows, and triggers without deleting the lasting work;
+4. run focused proof before complete proof;
+5. preserve the lasting commit after a later failure;
+6. repair forward directly on the branch;
+7. never regenerate accepted evidence merely to repair a later source, test, formatter, build, documentation, or publication defect.
+
+The canonical PowerTab editor export is lasting evidence and must not be regenerated to repeat downstream testing.
+
+### Transport and formatter rules
+
+- After two failures with one connector or transport method, stop that method and choose a materially different route.
+- Move intact files as intact objects; do not reconstruct complete files from overlapping fragments when a deterministic download, attachment, or upload route exists.
+- Use the simplest safe route for transport and a capable environment for transformation and proof.
+- When a pinned formatter exists, format to a fixed point, inspect the stable diff, then run acceptance.
+- Do not invent a formatter command when the repository does not declare one.
+
+### Bounded owner action
+
+A narrow owner-operated dashboard or file action is permitted when the exact target and control are known, authorization already exists, assistant tools cannot perform the same exact operation, and the action is VoiceOver-manageable without transferring diagnosis or architectural judgment.
+
+Provide the exact address, exact control, expected confirmation, prohibited alternatives, and stop condition. Independently verify the result afterward.
 
 ## Accessibility and evidence
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
-Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, and version-neutral format solutions already recorded in repository memory.
+Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, and bounded-owner-action solutions already recorded in repository memory.
 
 Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 

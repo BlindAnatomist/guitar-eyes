@@ -69,7 +69,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByRole("option", { name: "Bass family" })).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText(/Test build: Clean format-intake convergence foundation 5B/i)
+      screen.getByText(/Test build: PowerTab 2 version 11 source checkpoint/i)
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })

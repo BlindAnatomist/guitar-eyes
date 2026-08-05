@@ -1,0 +1,92 @@
+{
+  "source": {
+    "compressedBytes": 971,
+    "compressedSha256": "669f9b71e7f8ba3c9ce939b98076bbddc17fb977b63b7f647f4bd01cfa072e71",
+    "decompressedBytes": 3628,
+    "decompressedSha256": "256a825e6e91afe13065523abeeafbdae97724562057ac87b40f4b70ea6476a5",
+    "internalVersion": 11
+  },
+  "editor": {
+    "compressedBytes": 973,
+    "compressedSha256": "6494d78b001a43322362d962b21ce88029f3c7c4cf231b9e8da5af2a3bf85835",
+    "decompressedBytes": 3651,
+    "decompressedSha256": "c5082b9f7dec3401b74373b037ae7fb438f77e2db86f85c10322f6313d52f5bd",
+    "internalVersion": 11
+  },
+  "jsonEqual": false,
+  "differenceCount": 12,
+  "differences": [
+    {
+      "path": "$.score.chord_diagrams",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].alternate_endings",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].chords",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].directions",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].staves[0].dynamics",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].staves[0].voices.0.irregular_groupings",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].staves[0].voices.0.positions[4].notes",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].staves[0].voices.1.irregular_groupings",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].staves[0].voices.1.positions",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].tempo_markers",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.systems[0].text_items",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    },
+    {
+      "path": "$.score.view_filters",
+      "kind": "type",
+      "source": "list",
+      "editor": "NoneType"
+    }
+  ]
+}
