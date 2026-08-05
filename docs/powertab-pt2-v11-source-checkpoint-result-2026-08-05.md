@@ -121,7 +121,7 @@ The existing Guitar Pro selector component was parameterized with format-specifi
 
 The following zero-dollar local checks completed:
 
-1. Node syntax validation of 19 changed or added JavaScript modules.
+1. Node syntax validation of 23 changed or added JavaScript modules.
 2. Deterministic fixture regeneration and manifest verification.
 3. Direct gzip decoding of the committed `.pt2` mirror.
 4. Exact recovery of:
