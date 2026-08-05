@@ -109,4 +109,45 @@ describe("GuitarProTrackSelector", () => {
     );
     expect(screen.getByRole("button", { name: "Load selected track" })).toBeDisabled();
   });
+
+  test("uses PowerTab player language without creating a second selector component", () => {
+    const onSubmit = jest.fn();
+    const powerTabInventory = {
+      ...inventory,
+      selectorLabels: {
+        formatName: "PowerTab",
+        singular: "player",
+        plural: "players",
+        heading: "Choose a PowerTab player",
+        loadAction: "Load selected player",
+        selectedPrefix: "Selected player details",
+        noneSelected: "No player selected.",
+        unavailableHeading: "Other players not available",
+        controlNote:
+          "The separate Guitar or Bass control does not filter PowerTab players.",
+      },
+    };
+
+    render(
+      <GuitarProTrackSelector inventory={powerTabInventory} onSubmit={onSubmit} />
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Choose a PowerTab player" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("group", {
+        name: "Available tablature players, 2 choices",
+      })
+    ).toBeInTheDocument();
+    expect(screen.getByText("No player selected.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Lead Guitar/i }));
+    const load = screen.getByRole("button", { name: "Load selected player" });
+    expect(load).toBeEnabled();
+    expect(screen.getByText(/Selected player details: Lead Guitar/i)).toBeInTheDocument();
+
+    fireEvent.click(load);
+    expect(onSubmit).toHaveBeenCalledWith({ trackIndex: 0, staffIndex: 0 });
+  });
 });
