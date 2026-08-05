@@ -115,7 +115,7 @@ The checkpoint preserves:
 - quiet movement and dedicated Read current position behavior;
 - no playback controls or playback language.
 
-The existing Guitar Pro selector component was parameterized with format-specific labels rather than duplicated. The existing exported Guitar Pro builder name now acts as the application-facing structured-binary dispatcher. Its prior Guitar Pro implementation is preserved byte-for-byte in a format-specific module, while `.pt2` is loaded lazily only for a `.pt2` filename or exact `PT2_V11` intermediate evidence.
+The existing Guitar Pro selector component was parameterized with format-specific labels rather than duplicated. The existing exported Guitar Pro builder name now acts as the application-facing structured-binary dispatcher. Its prior Guitar Pro behavior is preserved in a format-specific module, while `.pt2` is loaded lazily only for a `.pt2` filename or exact `PT2_V11` intermediate evidence.
 
 This approach avoids replacing or rewriting the accepted App merely to add another structured importer.
 
