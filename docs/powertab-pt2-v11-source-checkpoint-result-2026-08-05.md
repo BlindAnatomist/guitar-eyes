@@ -102,7 +102,7 @@ The fixture is deliberately marked `editorExported: false`. It was generated fro
 
 ## Application and accessibility preservation
 
-The accepted application route remains one semantic document with two presentations.
+The accepted App source remains byte-identical. The accepted application route remains one semantic document with two presentations.
 
 The checkpoint preserves:
 
@@ -115,7 +115,9 @@ The checkpoint preserves:
 - quiet movement and dedicated Read current position behavior;
 - no playback controls or playback language.
 
-The existing Guitar Pro selector component was parameterized with format-specific labels rather than duplicated. The existing Guitar Pro builder remains unchanged. A narrow structured-format router lazily loads the PowerTab builder only for `.pt2` or exact `PT2_V11` intermediate evidence.
+The existing Guitar Pro selector component was parameterized with format-specific labels rather than duplicated. The existing exported Guitar Pro builder name now acts as the application-facing structured-binary dispatcher. Its prior Guitar Pro implementation is preserved byte-for-byte in a format-specific module, while `.pt2` is loaded lazily only for a `.pt2` filename or exact `PT2_V11` intermediate evidence.
+
+This approach avoids replacing or rewriting the accepted App merely to add another structured importer.
 
 ## Focused source checks completed
 
@@ -139,6 +141,7 @@ The following zero-dollar local checks completed:
    - non-default key signature;
    - root chord-diagram structure.
 7. Metadata-adapter execution proving that internal Guitar Pro compatibility labels are converted without rewriting user-authored titles or player names.
+8. Dispatcher probes proving that Guitar Pro remains on its preserved builder and `.pt2` selection retries are routed by exact `PT2_V11` evidence.
 
 Focused Jest coverage was added for detection, corruption, version rejection, fixture hashes, decoder structure, inventory, selection, semantic normalization, shared reader parity, application routing, and durable iPhone result focus.
 
