@@ -6,7 +6,6 @@ import {
   POSITION_TECHNIQUES,
   fail,
   fixedArray,
-  requireArray,
   requireInteger,
   requireObject,
   requireOptionalArray,
@@ -152,7 +151,7 @@ function parsePosition(position, positionIndex, context, stringCount) {
     );
   }
 
-  const notes = requireArray(
+  const notes = requireOptionalArray(
     value.notes,
     `${context}, position ${positionIndex + 1} notes`
   ).map((note, noteIndex) =>
@@ -210,7 +209,7 @@ export function parseVoices(staff, context, stringCount) {
           "UNSUPPORTED_POWERTAB_IRREGULAR_GROUPING"
         );
       }
-      const positions = requireArray(
+      const positions = requireOptionalArray(
         value.positions,
         `${context}, voice ${voiceIndex + 1} positions`
       ).map((position, positionIndex) =>
