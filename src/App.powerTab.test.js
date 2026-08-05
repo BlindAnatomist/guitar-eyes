@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
-import { buildStructuredTabReaderDocuments } from "./structuredTabReaderDocuments";
+import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
 import { normalizeGuitarProIntermediate } from "./guitarProNormalizer";
 
-jest.mock("./structuredTabReaderDocuments", () => ({
-  buildStructuredTabReaderDocuments: jest.fn(),
+jest.mock("./guitarProReaderDocuments", () => ({
+  buildGuitarProReaderDocuments: jest.fn(),
 }));
 
 const originalMatchMedia = window.matchMedia;
@@ -27,7 +27,7 @@ function useTouchDevice() {
 }
 
 function semanticProof() {
-  return normalizeGuitarProIntermediate({
+  const document = normalizeGuitarProIntermediate({
     schemaVersion: 1,
     sourceVersion: "GP8",
     versionEvidence: {
@@ -90,12 +90,13 @@ function semanticProof() {
       },
     ],
   });
+  document.sourceFormat = "powertab-pt2";
+  document.sourceVersion = "PT2_V11";
+  return document;
 }
 
 function powerTabDocuments() {
   const semanticDocument = semanticProof();
-  semanticDocument.sourceFormat = "powertab-pt2";
-  semanticDocument.sourceVersion = "PT2_V11";
   return {
     desktopBlocks: [semanticDocument.strings.map((string) => string.sourceLine)],
     desktopSource: "semantic",
@@ -112,7 +113,7 @@ function powerTabDocuments() {
 }
 
 beforeEach(() => {
-  buildStructuredTabReaderDocuments.mockReset();
+  buildGuitarProReaderDocuments.mockReset();
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback) => window.setTimeout(callback, 0);
   }
@@ -136,7 +137,7 @@ afterEach(() => {
 describe("PowerTab v11 application path", () => {
   test("routes .pt2 into the shared semantic reader and preserves picker-return focus", async () => {
     useTouchDevice();
-    buildStructuredTabReaderDocuments.mockResolvedValue(powerTabDocuments());
+    buildGuitarProReaderDocuments.mockResolvedValue(powerTabDocuments());
     render(<App />);
 
     const file = new File([new Uint8Array([0x1f, 0x8b])], "proof.pt2", {
@@ -150,7 +151,7 @@ describe("PowerTab v11 application path", () => {
       level: 2,
       name: "iPhone tablature reader",
     });
-    expect(buildStructuredTabReaderDocuments).toHaveBeenCalledWith(file);
+    expect(buildGuitarProReaderDocuments).toHaveBeenCalledWith(file);
     expect(
       screen.getByText(
         /Imported PowerTab 2 version 11 tablature\. Loaded 1 synchronized position/i
@@ -162,7 +163,7 @@ describe("PowerTab v11 application path", () => {
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
-  test("uses explicit PowerTab player selection language and reuses the decoded intermediate", async () => {
+  test("uses explicit PowerTab player labels and reuses the decoded intermediate", async () => {
     useTouchDevice();
     const intermediate = {
       schemaVersion: 1,
@@ -203,11 +204,11 @@ describe("PowerTab v11 application path", () => {
           "The separate Guitar or Bass control does not filter PowerTab players.",
       },
     };
-    buildStructuredTabReaderDocuments
+    buildGuitarProReaderDocuments
       .mockResolvedValueOnce({
         requiresTrackSelection: true,
         trackInventory: inventory,
-        selectionIntermediate: intermediate,
+        guitarProIntermediate: intermediate,
         sourceFormatLabel: "PowerTab 2 version 11 tablature",
       })
       .mockResolvedValueOnce(powerTabDocuments());
@@ -222,7 +223,7 @@ describe("PowerTab v11 application path", () => {
 
     expect(
       await screen.findByText(
-        /PowerTab 2 version 11 tablature contains 2 supported tablature players/i
+        /PowerTab 2 version 11 tablature contains 2 supported tablature tracks/i
       )
     ).toBeInTheDocument();
     const selectorHeading = await screen.findByRole("heading", {
@@ -232,10 +233,12 @@ describe("PowerTab v11 application path", () => {
     fireEvent.focus(window);
     await waitFor(() => expect(document.activeElement).toBe(selectorHeading));
 
-    fireEvent.click(screen.getByRole("radio", { name: /Second Guitar\. six-string guitar/i }));
+    fireEvent.click(
+      screen.getByRole("radio", { name: /Second Guitar\. six-string guitar/i })
+    );
     fireEvent.click(screen.getByRole("button", { name: "Load selected player" }));
 
-    expect(buildStructuredTabReaderDocuments).toHaveBeenNthCalledWith(2, file, {
+    expect(buildGuitarProReaderDocuments).toHaveBeenNthCalledWith(2, file, {
       intermediate,
       selection: { trackIndex: 1, staffIndex: 0 },
     });
@@ -247,13 +250,20 @@ describe("PowerTab v11 application path", () => {
     ).toBeInTheDocument();
   });
 
-  test("uses PowerTab-specific failure status and durable error focus", async () => {
+  test("routes PowerTab decoder failure through the durable generic upload error", async () => {
     useTouchDevice();
-    buildStructuredTabReaderDocuments.mockRejectedValue(
-      Object.assign(new Error("The PowerTab document reports internal version 10."), {
-        code: "UNTESTED_POWERTAB_VERSION",
-      })
-    );
+    buildGuitarProReaderDocuments.mockResolvedValue({
+      desktopBlocks: [],
+      semanticDocument: null,
+      semanticError: new Error(
+        "The PowerTab document reports internal version 10. This checkpoint accepts exact version 11 only."
+      ),
+      resolvedInstrument: null,
+      instrumentWasDetected: false,
+      supportOutcome: "powertab-import-error",
+      sourceFormat: "powertab-pt2",
+      sourceFormatLabel: "PowerTab 2 version 11 tablature",
+    });
     render(<App />);
 
     const file = new File([new Uint8Array([0x1f, 0x8b])], "older.pt2", {
@@ -268,7 +278,7 @@ describe("PowerTab v11 application path", () => {
       name: "Tablature could not be loaded",
     });
     expect(
-      screen.getByText(/selected PowerTab 2 file could not be imported/i)
+      screen.getByText(/accepts exact version 11 only/i)
     ).toBeInTheDocument();
 
     fireEvent.focus(window);
