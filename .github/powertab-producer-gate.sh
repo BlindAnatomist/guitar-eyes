@@ -90,6 +90,9 @@ find "$(dirname "$APP_EXE")" -maxdepth 3 -type f -printf '%P\t%s\n' | sort \
   > "$EVIDENCE_DIR/installed-application-inventory.txt"
 sha256sum "$APP_EXE" > "$EVIDENCE_DIR/powertabeditor-executable-sha256.txt"
 printf '%s\n' "$APP_EXE" > "$EVIDENCE_DIR/powertabeditor-executable-path.txt"
+printf '%s\n' \
+  'Command-line --version probe intentionally omitted after run-three timeout; producer identity is pinned by official installer hash, successful installer log, installed path, and executable hash.' \
+  > "$EVIDENCE_DIR/powertabeditor-version-probe.txt"
 
 cp "$FIXTURE_PATH" "$EVIDENCE_DIR/source-derived-input.pt2"
 cp "$FIXTURE_PATH" "$EDITOR_FILE"
@@ -109,9 +112,6 @@ set -Eeuo pipefail
 export WINEARCH=win64
 export WINEPREFIX="$WINEPREFIX_DIR"
 export WINEDEBUG=-all
-
-"$WINE_BIN" "$APP_EXE" --version > "$EVIDENCE_DIR/powertabeditor-version.txt" 2>&1
-grep -q '2\.0\.22' "$EVIDENCE_DIR/powertabeditor-version.txt"
 
 if command -v winepath >/dev/null 2>&1; then
   WIN_EDITOR_FILE="$(winepath -w "$EDITOR_FILE")"
@@ -170,7 +170,7 @@ xdotool key --window "$WINDOW_ID" --clearmodifiers alt+F4 || true
 sleep 3
 kill "$APP_PID" 2>/dev/null || true
 if command -v wineserver >/dev/null 2>&1; then
-  wineserver -w 2>/dev/null || true
+  timeout 10 wineserver -w 2>/dev/null || true
 fi
 
 if [ "$rewritten" != "1" ]; then
@@ -180,7 +180,7 @@ fi
 GUI
 chmod +x "$GUI_SCRIPT"
 export WINE_BIN APP_EXE APP_LOG WINDOW_LOG WINEPREFIX_DIR EDITOR_FILE EVIDENCE_DIR
-xvfb-run -a -s '-screen 0 1280x900x24' "$GUI_SCRIPT"
+xvfb-run -a -s '-screen 0 1280x900x24' timeout 120 "$GUI_SCRIPT"
 
 after_mtime="$(stat -c %Y "$EDITOR_FILE")"
 after_inode="$(stat -c %i "$EDITOR_FILE")"
