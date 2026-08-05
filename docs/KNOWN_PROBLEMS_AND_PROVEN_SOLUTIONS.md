@@ -4,7 +4,7 @@ Repository: `BlindAnatomist/guitar-eyes`
 
 Status: active repository memory
 
-Last reconciled: July 26, 2026
+Last reconciled: August 5, 2026
 
 ## Purpose
 
@@ -12,19 +12,30 @@ This is the first document to inspect before diagnosing or repairing implementat
 
 Do not treat chat memory, a passing build, or a recently modified branch as authoritative when repository ancestry and accepted evidence are available.
 
+The mandatory cross-repository execution reconciliation is:
+
+`docs/cross-repository-execution-governance-reconciliation-2026-08-05.md`
+
+The detailed hosted-run, fail-forward, transport, formatter, and bounded-owner-action rules are in:
+
+`docs/known-problems-register-addendum-execution-gates.md`
+
 ## Required use
 
-Before changing implementation, deployment, accessibility, testing, or repository administration:
+Before changing implementation, deployment, accessibility, testing, workflows, transport, or repository administration:
 
 1. Read this file.
 2. Read `docs/implementation-status.md` and `AGENTS.md`.
-3. Inspect the accepted source checkpoint and compare branch ancestry.
-4. Search this file for a matching symptom, mechanism, or failed approach.
-5. Start from an existing proven solution when the same mechanism applies.
-6. Preserve inherited tests and add coverage rather than replacing the accepted contract.
-7. Record new failures and confirmed solutions here before closing the work.
+3. Read `docs/known-problems-register-addendum-execution-gates.md` and the cross-repository execution reconciliation before any GitHub Actions, Work, Codex, connector-heavy, file-transfer, formatting, packaging, generation, or publication task.
+4. Inspect the accepted source checkpoint and compare branch ancestry.
+5. Search this file and every relevant addendum for a matching symptom, mechanism, or failed approach.
+6. Start from an existing proven solution when the same mechanism applies.
+7. Preserve inherited tests and add coverage rather than replacing the accepted contract.
+8. Record new failures and confirmed solutions here or in the governing addendum before closing the work.
 
 A browser DOM test is evidence, not proof of real VoiceOver behavior. Real-device findings must be preserved exactly and must not be rewritten as stronger claims than the test supports.
+
+Accurate documentation of each individual failure is not enough. When repeated failures reveal a process pattern, the governing rules must change what the next worker is allowed to do.
 
 ## Entry states
 
@@ -406,8 +417,50 @@ Before using Work, Codex, GitHub Actions, or another metered environment:
 5. never infer credit use from diff size;
 6. preserve required evidence rather than weakening the gate.
 
+### XR-HOSTED-CIRCUIT-BREAKER-001
+
+State: `cross-repository-proven`
+
+After one failed hosted run, diagnose and batch corrections outside Actions. Permit at most one corrective run. If that run exposes another defect, the circuit is open and no further workflow activity is permitted without a capable unmetered environment or one explicitly authorized, materially different exception.
+
+Detailed rule: GE-018 in `docs/known-problems-register-addendum-execution-gates.md`.
+
+### XR-PERSISTENT-ACCEPTANCE-001
+
+State: `cross-repository-proven`
+
+Acceptance must fail forward. Preserve valid lasting source, fixtures, manifests, canonical exports, and evidence before later broad tests when possible; remove temporary machinery without deleting lasting work; and repair later failures directly instead of regenerating accepted output.
+
+Detailed rule: GE-019 in `docs/known-problems-register-addendum-execution-gates.md`.
+
+### XR-INTACT-FILE-TRANSPORT-001
+
+State: `cross-repository-proven`
+
+After two failures with one connector or transport method, stop that method. Move intact files as intact objects, use the simplest safe transport, and reserve capable environments for transformation and proof.
+
+Detailed rule: GE-020 in `docs/known-problems-register-addendum-execution-gates.md`.
+
+### XR-FORMATTER-FIXED-POINT-001
+
+State: `cross-repository-proven`
+
+When a pinned formatter exists, format to a fixed point, inspect the stable diff, then run acceptance. Formatting is preparation and must not be discovered through repeated hosted runs.
+
+Detailed rule: GE-021 in `docs/known-problems-register-addendum-execution-gates.md`.
+
+### XR-BOUNDED-OWNER-ACTION-001
+
+State: `cross-repository-proven`
+
+One exact, authorized, VoiceOver-manageable owner dashboard or file action may be safer than prolonged connector improvisation when assistant tools cannot perform the same exact operation. The assistant retains responsibility for exact instructions and independent verification.
+
+Detailed rule: GE-022 in `docs/known-problems-register-addendum-execution-gates.md`.
+
 ## Maintenance rule
 
-When a problem recurs, takes more than one serious attempt, requires a non-obvious workaround, or can be mistaken for a platform limitation, update this file before closing the checkpoint.
+When a problem recurs, takes more than one serious attempt, requires a non-obvious workaround, or can be mistaken for a platform limitation, update this file or the governing addendum before closing the checkpoint.
+
+Do not delete failed approaches merely because the current implementation works. A failed approach is durable protection against repeating the same waste.
 
 A future worker must not rely on chat memory alone.
