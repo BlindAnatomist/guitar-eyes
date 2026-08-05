@@ -40,3 +40,42 @@ Treating source-derived evidence as an editor-exported fixture can turn an inter
 ### Derived standard
 
 A fixture can prove parser consistency without proving producer compatibility. The provenance of the producing application is part of the format contract, not an administrative footnote.
+
+## GE-PT2-002 — A graphical producer can block canonical evidence even when the format is understood
+
+State: `active`
+
+### Symptom
+
+The pinned Power Tab Editor release can open files from positional command-line arguments, but it exposes no noninteractive save, conversion, or export option. The available environment may also lack Windows, macOS, Wine, Snap, Flatpak, Qt, or another route for running the exact graphical application.
+
+### Risk
+
+Pressure to continue can encourage one of three invalid substitutions:
+
+1. relabeling a source-derived container as an editor export;
+2. treating an official fixture from an older internal version as proof of the current version;
+3. widening support before the producer path has been exercised.
+
+### Failed-do-not-repeat approaches
+
+1. Do not infer save behavior from the ability to open a file from the command line.
+2. Do not treat producer-maintained version-2 or version-4 fixtures as version-11 evidence.
+3. Do not reconstruct an editor export from serializer source and then cite the reconstruction as producer output.
+4. Do not dispatch paid or unauthorized automation merely to bypass a missing runtime.
+5. Do not ask an iPhone-only tester to operate an unavailable desktop application.
+
+### Proven containment
+
+1. Audit the exact release assets and execution environment.
+2. Audit the exact command-line parser for a real export route.
+3. Search the pinned producer repository for committed fixtures.
+4. Record each fixture's Git blob, byte count, hash, decompressed hash, and internal version.
+5. Use older official fixtures only as format-family and version-gating evidence.
+6. Stop the acceptance gate if no exact editor-produced current-version fixture can be obtained.
+7. Preserve the provisional implementation without publishing or widening it.
+8. Record the exact unblock procedure for a suitable Windows, macOS, Snap, or Flatpak environment.
+
+### Derived standard
+
+A missing producer runtime is an evidence blocker, not permission to redefine what counts as producer evidence. Honest stoppage preserves more progress than a counterfeit completion.
