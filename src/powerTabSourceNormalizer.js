@@ -62,10 +62,17 @@ function restorePowerTabMetadata(value, evidence, key = null) {
   }
   if (!value || typeof value !== "object") {
     if (
-      (key === "source" || key === "sourceFormat") &&
+      (key === "source" || key === "sourceFormat" || key === "format") &&
       value === "guitar-pro-archive"
     ) {
       return "powertab-pt2";
+    }
+    if (
+      key === "id" &&
+      typeof value === "string" &&
+      value.startsWith("guitar-pro-")
+    ) {
+      return value.replace(/^guitar-pro-/u, "powertab-");
     }
     if (
       key === "sourceLayoutLabel" &&
@@ -101,9 +108,13 @@ function restorePowerTabMetadata(value, evidence, key = null) {
 
 function mapNormalizerError(error) {
   if (!(error instanceof GuitarProImportError)) throw error;
-  const message = String(error.message || "The PowerTab score could not be normalized.")
-    .replace(/Guitar Pro/gu, "PowerTab");
-  const code = String(error.code || "POWERTAB_IMPORT_ERROR").replace(/GUITAR_PRO/gu, "POWERTAB");
+  const message = String(
+    error.message || "The PowerTab score could not be normalized."
+  ).replace(/Guitar Pro/gu, "PowerTab");
+  const code = String(error.code || "POWERTAB_IMPORT_ERROR").replace(
+    /GUITAR_PRO/gu,
+    "POWERTAB"
+  );
   throw new PowerTabImportError(message, code);
 }
 
