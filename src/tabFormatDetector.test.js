@@ -116,10 +116,22 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/valid GP3, GP4, GP5, GP6 GPX/i);
   });
 
+  test("routes modern .pt2 through the bounded PowerTab v11 importer", () => {
+    const format = detectTabFileFormat("score.pt2");
+    expect(format).toMatchObject({
+      id: "powertab-pt2",
+      support: "source-checkpoint-provisional",
+      isText: false,
+      sourceFamily: "PT2",
+      label: "PowerTab 2 tablature",
+    });
+    expect(shouldReadTabFileAsText(format)).toBe(false);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/exact internal version 11/i);
+  });
+
   test.each([
     ["song.gtp", "guitar-pro-2"],
-    ["song.ptb", "powertab"],
-    ["song.pt2", "powertab"],
+    ["song.ptb", "powertab-legacy"],
     ["song.tg", "tuxguitar"],
     ["song.tef", "tabledit"],
   ])("recognizes %s as unsupported %s", (fileName, expectedId) => {
