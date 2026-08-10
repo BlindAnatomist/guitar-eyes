@@ -1,0 +1,81 @@
+{
+  "title": "Guitar Eyes Historical PTB Proof",
+  "artist": "Guitar Eyes",
+  "player": "Proof Guitar",
+  "tuningName": "Standard",
+  "tuningMidiHighToLow": [
+    64,
+    59,
+    55,
+    50,
+    45,
+    40
+  ],
+  "measureBoundaries": [
+    0,
+    50,
+    100
+  ],
+  "positions": [
+    {
+      "coordinate": 10,
+      "duration": 4,
+      "notes": [
+        {
+          "stringIndexHighToLow": 5,
+          "fret": 3
+        }
+      ]
+    },
+    {
+      "coordinate": 20,
+      "duration": 8,
+      "notes": [
+        {
+          "stringIndexHighToLow": 4,
+          "fret": 0
+        }
+      ]
+    },
+    {
+      "coordinate": 30,
+      "duration": 8,
+      "notes": [
+        {
+          "stringIndexHighToLow": 4,
+          "fret": 2
+        }
+      ]
+    },
+    {
+      "coordinate": 40,
+      "duration": 2,
+      "notes": [
+        {
+          "stringIndexHighToLow": 3,
+          "fret": 0
+        }
+      ]
+    },
+    {
+      "coordinate": 60,
+      "duration": 2,
+      "rest": true,
+      "notes": []
+    },
+    {
+      "coordinate": 70,
+      "duration": 2,
+      "notes": [
+        {
+          "stringIndexHighToLow": 0,
+          "fret": 0
+        },
+        {
+          "stringIndexHighToLow": 1,
+          "fret": 1
+        }
+      ]
+    }
+  ]
+}
