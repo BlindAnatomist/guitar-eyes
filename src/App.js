@@ -259,11 +259,17 @@ function App() {
     let detectedFormat = initialFormat;
     let readerDocuments;
 
-    if (["guitar-pro-proof", "powertab-pt2"].includes(initialFormat.id)) {
+    if (
+      ["guitar-pro-proof", "powertab-pt2", "powertab-legacy"].includes(
+        initialFormat.id
+      )
+    ) {
       const formatName =
-        initialFormat.id === "powertab-pt2"
-          ? "PowerTab 2"
-          : "Guitar Pro";
+        initialFormat.id === "powertab-legacy"
+          ? "PowerTab 1.7"
+          : initialFormat.id === "powertab-pt2"
+            ? "PowerTab 2"
+            : "Guitar Pro";
       try {
         readerDocuments = await buildStructuredTabReaderDocuments(file);
         if (readerDocuments.requiresTrackSelection) {
