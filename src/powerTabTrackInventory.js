@@ -2,7 +2,7 @@ import { PowerTabImportError } from "./powerTabErrors";
 import { POWERTAB_LIMITS } from "./powerTabLimits";
 
 const SUPPORTED_SOURCE_VERSIONS = new Set([
-  "PT2_V11",
+  ...Array.from({ length: 11 }, (_, index) => `PT2_V${index + 1}`),
   "PTB_V10",
   "PTB_V102",
   "PTB_V15",
@@ -26,6 +26,20 @@ const PITCH_NAMES = [
 
 function fail(message, code = "POWERTAB_TRACK_INVENTORY_ERROR") {
   throw new PowerTabImportError(message, code);
+}
+
+function validateModernSourceVersion(intermediate) {
+  if (!/^PT2_V(?:[1-9]|1[01])$/u.test(intermediate.sourceVersion)) return;
+  const internalVersion = intermediate.versionEvidence?.internalVersion;
+  if (
+    !Number.isInteger(internalVersion) ||
+    intermediate.sourceVersion !== `PT2_V${internalVersion}`
+  ) {
+    fail(
+      "The PowerTab .pt2 source version contradicts the decoded internal-version evidence.",
+      "POWERTAB_VERSION_EVIDENCE_MISMATCH"
+    );
+  }
 }
 
 function pitchLabel(midi) {
@@ -114,6 +128,7 @@ export function buildPowerTabTrackInventory(
       "INVALID_POWERTAB_TRACK_INVENTORY"
     );
   }
+  validateModernSourceVersion(intermediate);
   if (!Array.isArray(intermediate.tracks)) {
     fail(
       "The PowerTab decoder did not return a player list.",
