@@ -20,7 +20,8 @@
     "generate:guitar-pro-archive-proof": "node scripts/generate-guitar-pro-shared-archive-proof.mjs",
     "eject": "react-scripts eject",
     "generate:guitar-pro-multi-track-proof": "node scripts/generate-guitar-pro-multi-track-proof.mjs",
-    "generate:powertab-v11-proof": "node scripts/generate-powertab-v11-proof.mjs"
+    "generate:powertab-v11-proof": "node scripts/generate-powertab-v11-proof.mjs",
+    "generate:powertab-pt2-historical-proofs": "node scripts/generate-powertab-pt2-historical-proofs.mjs"
   },
   "eslintConfig": {
     "extends": [
