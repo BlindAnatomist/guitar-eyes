@@ -109,7 +109,7 @@ describe("legacy PowerTab application intake", () => {
     );
     const heading = screen.getByRole("heading", {
       level: 2,
-      name: /Guitar Eyes PTB 1\.7 Proof/i,
+      name: "iPhone tablature reader",
     });
     await act(async () => {
       await new Promise((resolve) => window.setTimeout(resolve, 20));

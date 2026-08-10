@@ -1,4 +1,4 @@
-import { buildDesktopSemanticBlocks } from "./desktopSemanticAdapter";
+import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { decodePowerTabLegacyV17File } from "./powerTabLegacyV17Decoder";
 import { PowerTabImportError } from "./powerTabErrors";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
@@ -50,7 +50,7 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
     ...options,
     selection,
   });
-  const desktopBlocks = buildDesktopSemanticBlocks(semanticDocument);
+  const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {
     desktopBlocks,
@@ -65,6 +65,6 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
     sourceFormatLabel,
     requiresTrackSelection: false,
     trackInventory,
-    powerTabIntermediate: intermediate,
+    powerTabIntermediate: null,
   };
 }

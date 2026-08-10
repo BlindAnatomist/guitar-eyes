@@ -22,6 +22,18 @@ function fixtureBytes() {
   );
 }
 
+function readableFile(binary, name) {
+  return {
+    name,
+    size: binary.length,
+    arrayBuffer: async () =>
+      binary.buffer.slice(
+        binary.byteOffset,
+        binary.byteOffset + binary.byteLength
+      ),
+  };
+}
+
 function expectCode(callback, code) {
   try {
     callback();
@@ -133,17 +145,13 @@ describe("legacy PowerTab v1.7 decoder", () => {
 
   test("requires the legacy .ptb extension at the file boundary", async () => {
     const binary = fixtureBytes();
-    const file = new File([binary], "proof.ptb", {
-      type: "application/octet-stream",
-    });
-    await expect(decodePowerTabLegacyV17File(file)).resolves.toMatchObject({
-      sourceVersion: "PTB_V17",
-    });
+    await expect(
+      decodePowerTabLegacyV17File(readableFile(binary, "proof.ptb"))
+    ).resolves.toMatchObject({ sourceVersion: "PTB_V17" });
 
-    const wrong = new File([binary], "proof.pt2", {
-      type: "application/octet-stream",
-    });
-    await expect(decodePowerTabLegacyV17File(wrong)).rejects.toMatchObject({
+    await expect(
+      decodePowerTabLegacyV17File(readableFile(binary, "proof.pt2"))
+    ).rejects.toMatchObject({
       code: "INVALID_POWERTAB_LEGACY_EXTENSION",
     });
   });
