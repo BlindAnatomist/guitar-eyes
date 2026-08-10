@@ -7,6 +7,10 @@ const LEGACY_POWERTAB_SOURCE_VERSIONS = new Set([
   "PTB_V17",
 ]);
 
+function isModernPowerTabSourceVersion(sourceVersion) {
+  return /^PT2_V(?:[1-9]|1[01])$/u.test(String(sourceVersion || ""));
+}
+
 function powerTabRequestKind(file, options) {
   const fileName = String(file?.name || "");
   const sourceVersion = options?.intermediate?.sourceVersion;
@@ -16,7 +20,7 @@ function powerTabRequestKind(file, options) {
   ) {
     return "legacy";
   }
-  if (/\.pt2$/iu.test(fileName) || sourceVersion === "PT2_V11") {
+  if (/\.pt2$/iu.test(fileName) || isModernPowerTabSourceVersion(sourceVersion)) {
     return "modern";
   }
   return null;
