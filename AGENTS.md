@@ -10,11 +10,12 @@ Last reconciled: August 10, 2026.
 - Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 - Preserve failed and superseded branches as evidence; do not resume feature work from them.
-- The accepted format-only operational baseline is `work/powertab-pt2-v11-clean-convergence`.
-- The accepted exact hosted and real-device source is `c2ada9bbdf118abddc894094734314f9b6048ea6`.
-- The previous accepted format-only baseline is `work/accepted-format-intake-convergence` at `e64990ab3e446e5aa1d4eeefbf556a9dc71bd63d`.
+- The accepted format-only operational baseline is `work/powertab-legacy-ptb-v1-v3-intake`.
+- The accepted exact hosted and real-device source for the latest historical PowerTab checkpoint is `2682928366f587d5afac213e8e195ba0dfb602d8`.
+- The previous accepted legacy PowerTab 1.7 source is `937cf3892d279e54f98802f1eb649333f4b1935c` on `work/powertab-legacy-ptb-intake-evaluation`.
+- The previous accepted PowerTab `.pt2` source is `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 - Documentation-only closure commits do not silently broaden accepted runtime behavior.
-- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-pt2-v11-clean-convergence`, not from fork `main`, the previous accepted baseline, a forensic PowerTab branch, or a playback experiment.
+- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-legacy-ptb-v1-v3-intake`, not from fork `main`, an earlier accepted branch, a forensic PowerTab branch, or a playback experiment.
 
 ## Current product boundary
 
@@ -37,10 +38,14 @@ The accepted baseline includes:
 7. Guitar Pro 6 `.gpx`.
 8. Guitar Pro 7 shared `.gp` archives within the verified version-neutral intake boundary.
 9. PowerTab `.pt2` exact internal version 11 within the accepted bounded profile proven by the canonical editor export and real-iPhone acceptance.
+10. Legacy PowerTab `.ptb` file version 1 / PowerTab 1.0 within the accepted bounded historical profile.
+11. Legacy PowerTab `.ptb` file version 2 / PowerTab 1.0.2 within the accepted bounded historical profile.
+12. Legacy PowerTab `.ptb` file version 3 / PowerTab 1.5 within the accepted bounded historical profile.
+13. Legacy PowerTab `.ptb` file version 4 / PowerTab 1.7 within the accepted bounded profile.
 
 The Guitar Pro claim remains bounded by the lawful project-authored five-file corpus and accepted evidence. It is not a claim of arbitrary compatibility with every Guitar Pro file.
 
-The PowerTab claim remains bounded to exact `.pt2` internal version 11 and the accepted evidence profile. It is not a claim of legacy `.ptb`, older `.pt2` versions, arbitrary PowerTab files, or unaccepted instrument and notation profiles.
+The PowerTab claims remain bounded to the exact accepted `.pt2` internal-version-11 profile and the version-specific `.ptb` evidence profiles. They are not claims of arbitrary PowerTab compatibility, older `.pt2` versions, or unaccepted bass, alternate-tuning, multi-player, multi-voice, and notation profiles.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -69,7 +74,9 @@ Before changing implementation, accessibility, repository administration, deploy
 19. `docs/powertab-pt2-v11-completion-audit-and-continuation-ledger-2026-08-05.md`;
 20. `docs/powertab-pt2-v11-clean-convergence-result-2026-08-10.md`;
 21. `docs/powertab-pt2-v11-real-iphone-acceptance-2026-08-10.md`;
-22. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+22. `docs/powertab-ptb-v17-real-iphone-acceptance-2026-08-10.md`;
+23. `docs/powertab-ptb-v1-v3-real-iphone-acceptance-2026-08-10.md`;
+24. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -140,19 +147,19 @@ Do not mix multiple unproven format families into one implementation checkpoint.
 
 ## Next format priority
 
-Legacy PowerTab `.ptb` is the next format family to evaluate.
+Older PowerTab `.pt2` internal versions are the next PowerTab family to evaluate.
 
-The `.ptb` phase must begin as read-only investigation on a new branch from the final PowerTab-v11 documentation-closure head. Before implementation, determine lawful fixture provenance, format/version signatures, available decoder or upstream-source evidence, licensing, and whether `.ptb` itself contains materially distinct historical versions requiring separate claims.
+The older-`.pt2` phase must begin as read-only investigation on a new branch from the final documentation-closure head of `work/powertab-legacy-ptb-v1-v3-intake`. Before implementation, determine lawful fixture provenance, exact historical internal-version signatures, available decoder or upstream-source evidence, licensing, and whether older `.pt2` versions contain materially distinct structures requiring separate claims.
 
-Do not combine legacy `.ptb` with older `.pt2` versions, PowerTab bass expansion, alternate tunings, TuxGuitar, or TablEdit in the same initial checkpoint.
+Do not combine older `.pt2` work with PowerTab bass expansion, alternate tunings, TuxGuitar, or TablEdit in the same initial checkpoint.
 
 ## Deferred format families and profiles
 
 Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
-- legacy PowerTab `.ptb`;
-- older PowerTab `.pt2` internal versions;
-- arbitrary PowerTab bass, alternate-tuning, and notation profiles outside accepted evidence;
+- older PowerTab `.pt2` internal versions other than accepted internal version 11;
+- arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, and notation profiles outside accepted evidence;
+- arbitrary `.ptb` files outside the accepted version-specific profiles;
 - TuxGuitar `.tg`;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
@@ -165,6 +172,8 @@ Use only original, public-domain, or clearly licensed evidence. Preserve fixture
 ## Zero-dollar automation
 
 No paid GitHub usage, paid runner, paid service, or overage is authorized.
+
+Standard GitHub-hosted Actions for this public repository do not consume the private-repository allowance, but workflows must still avoid waste and must never introduce a paid runner or paid service.
 
 Use the least expensive capable environment. GitHub-hosted workflows are intentional acceptance checkpoints, not exploratory debugging loops. Before adding or expanding a workflow, follow `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md` and the execution-gate addendum.
 
@@ -218,11 +227,19 @@ A narrow owner-operated dashboard or file action is permitted when the exact tar
 
 Provide the exact address, exact control, expected confirmation, prohibited alternatives, and stop condition. Independently verify the result afterward.
 
+## Hosted publication read-back
+
+A Pages deployment is not fully verified merely because `deploy-pages` succeeds.
+
+When production code is split into lazy-loaded chunks, live read-back must inspect every deployed JavaScript asset named by the artifact manifest or equivalent complete inventory. Checking only script tags present in `index.html` can falsely report missing code that is present in a lazy chunk.
+
+Every real-device acceptance build must also have a unique static page title and first level-one heading before the React root. Do not reuse an older checkpoint identity on a newly deployed candidate.
+
 ## Accessibility and evidence
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
-Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, stream-recovery, authority-collapse, and bounded-owner-action solutions already recorded in repository memory.
+Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, stream-recovery, authority-collapse, bounded-owner-action, and complete-hosted-asset-read-back solutions already recorded in repository memory.
 
 Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 
