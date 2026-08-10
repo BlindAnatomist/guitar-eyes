@@ -1,9 +1,19 @@
 import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
 
+const LEGACY_POWERTAB_SOURCE_VERSIONS = new Set([
+  "PTB_V10",
+  "PTB_V102",
+  "PTB_V15",
+  "PTB_V17",
+]);
+
 function powerTabRequestKind(file, options) {
   const fileName = String(file?.name || "");
   const sourceVersion = options?.intermediate?.sourceVersion;
-  if (/\.ptb$/iu.test(fileName) || sourceVersion === "PTB_V17") {
+  if (
+    /\.ptb$/iu.test(fileName) ||
+    LEGACY_POWERTAB_SOURCE_VERSIONS.has(sourceVersion)
+  ) {
     return "legacy";
   }
   if (/\.pt2$/iu.test(fileName) || sourceVersion === "PT2_V11") {

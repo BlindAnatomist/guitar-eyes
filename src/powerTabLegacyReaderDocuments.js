@@ -1,16 +1,19 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
-import { decodePowerTabLegacyV17File } from "./powerTabLegacyV17Decoder";
+import { decodePowerTabLegacyFile } from "./powerTabLegacyDecoder";
 import { PowerTabImportError } from "./powerTabErrors";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
-import { normalizeVerifiedPowerTabLegacyIntermediate } from "./powerTabLegacySourceNormalizer";
+import { normalizeVerifiedPowerTabLegacyFamilyIntermediate } from "./powerTabLegacyFamilySourceNormalizer";
 
 export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
-  const decode = options.decode || decodePowerTabLegacyV17File;
+  const decode = options.decode || decodePowerTabLegacyFile;
   const inventoryBuilder = options.inventory || buildPowerTabTrackInventory;
   const normalize =
-    options.normalize || normalizeVerifiedPowerTabLegacyIntermediate;
+    options.normalize || normalizeVerifiedPowerTabLegacyFamilyIntermediate;
   const intermediate = options.intermediate || (await decode(file, options));
   const trackInventory = inventoryBuilder(intermediate, options);
+  const powerTabVersion = String(
+    intermediate?.versionEvidence?.powerTabVersion || "legacy"
+  );
 
   if (trackInventory.supportedCount === 0) {
     const reasons = trackInventory.items
@@ -19,13 +22,13 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
       .join(" ");
     throw new PowerTabImportError(
       reasons ||
-        "The legacy PowerTab 1.7 file contains no player within the bounded six-string guitar profile.",
+        `The PowerTab ${powerTabVersion} file contains no player within the bounded six-string guitar profile.`,
       "NO_SUPPORTED_POWERTAB_LEGACY_PLAYER"
     );
   }
 
   const sourceFormat = "powertab-legacy";
-  const sourceFormatLabel = "PowerTab 1.7 tablature";
+  const sourceFormatLabel = `PowerTab ${powerTabVersion} tablature`;
 
   if (trackInventory.requiresSelection && !options.selection) {
     return {

@@ -129,17 +129,17 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/exact internal version 11/i);
   });
 
-  test("routes legacy .ptb only into the provisional PowerTab 1.7 checkpoint", () => {
+  test("routes .ptb into the version-resolving legacy PowerTab family", () => {
     const format = detectTabFileFormat("song.ptb");
     expect(format).toMatchObject({
       id: "powertab-legacy",
       support: "source-checkpoint-provisional",
       isText: false,
-      sourceFamily: "PTB_V17",
-      label: "PowerTab 1.7 tablature",
+      sourceFamily: "PTB_LEGACY",
+      label: "legacy PowerTab tablature",
     });
     expect(shouldReadTabFileAsText(format)).toBe(false);
-    expect(unsupportedTabFormatMessage(format)).toMatch(/exact PowerTab 1\.7 ptab-4/i);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/file-version values 1 through 4/i);
   });
 
   test.each([

@@ -1,7 +1,13 @@
 import { PowerTabImportError } from "./powerTabErrors";
 import { POWERTAB_LIMITS } from "./powerTabLimits";
 
-const SUPPORTED_SOURCE_VERSIONS = new Set(["PT2_V11", "PTB_V17"]);
+const SUPPORTED_SOURCE_VERSIONS = new Set([
+  "PT2_V11",
+  "PTB_V10",
+  "PTB_V102",
+  "PTB_V15",
+  "PTB_V17",
+]);
 const SUPPORTED_STRING_COUNTS = new Set([6]);
 const PITCH_NAMES = [
   "C",
