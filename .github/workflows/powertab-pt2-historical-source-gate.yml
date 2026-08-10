@@ -1,0 +1,242 @@
+name: Historical PowerTab PT2 source gate
+
+on:
+  push:
+    branches:
+      - work/powertab-pt2-v1-v10-investigation
+    paths:
+      - .github/workflows/powertab-pt2-historical-source-gate.yml
+
+concurrency:
+  group: historical-powertab-pt2-source-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Materialize, test, and build historical PT2 checkpoint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify branch authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "work/powertab-pt2-v1-v10-investigation"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse 02f130f3c871de39d4c48c45d8c09f35980fba45^{commit})" = "02f130f3c871de39d4c48c45d8c09f35980fba45"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Generate historical PT2 fixtures
+        id: generate
+        shell: bash
+        run: |
+          set +e
+          npm run generate:powertab-pt2-historical-proofs > generation.log 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Verify generated fixture evidence
+        id: fixture_verify
+        shell: bash
+        run: |
+          set +e
+          if [ "${{ steps.generate.outputs.exit_code }}" = "0" ]; then
+            node <<'NODE' > fixture-verify.log 2>&1
+          const fs = require('fs');
+          const path = require('path');
+          const crypto = require('crypto');
+          const zlib = require('zlib');
+          const root = path.join(process.cwd(), 'fixtures', 'powertab-pt2-historical');
+          const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json'), 'utf8'));
+          if (!Array.isArray(manifest.fixtures) || manifest.fixtures.length !== 10) {
+            throw new Error('Expected exactly ten historical PT2 fixtures.');
+          }
+          const sha256 = (bytes) => crypto.createHash('sha256').update(bytes).digest('hex');
+          for (let version = 1; version <= 10; version += 1) {
+            const item = manifest.fixtures.find((entry) => entry.internalVersion === version);
+            if (!item || item.sourceVersion !== `PT2_V${version}`) {
+              throw new Error(`Missing exact manifest evidence for PT2_V${version}.`);
+            }
+            const binary = fs.readFileSync(path.join(root, item.binary.path));
+            const base64Text = fs.readFileSync(path.join(root, item.base64.path), 'utf8');
+            const transported = Buffer.from(base64Text.trim(), 'base64');
+            if (!binary.equals(transported)) {
+              throw new Error(`Base64 transport mismatch for PT2_V${version}.`);
+            }
+            if (sha256(binary) !== item.binary.sha256) {
+              throw new Error(`Binary SHA-256 mismatch for PT2_V${version}.`);
+            }
+            const jsonBytes = zlib.gunzipSync(binary);
+            const document = JSON.parse(jsonBytes.toString('utf8'));
+            if (document.version !== version) {
+              throw new Error(`Embedded version mismatch for PT2_V${version}.`);
+            }
+          }
+          console.log('Verified ten deterministic historical PT2 fixtures.');
+          NODE
+            code=$?
+          else
+            printf '%s\n' 'Skipped because fixture generation failed.' > fixture-verify.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Preserve generated fixture evidence
+        if: steps.generate.outputs.exit_code == '0' && steps.fixture_verify.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add fixtures/powertab-pt2-historical
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'test: materialize historical pt2 proof fixtures [skip ci]'
+          git push
+
+      - name: Install locked dependencies
+        id: install
+        shell: bash
+        run: |
+          set +e
+          npm ci --no-audit --no-fund > install.log 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run focused PowerTab tests
+        id: focused
+        shell: bash
+        run: |
+          set +e
+          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
+            CI=true npm test -- --watchAll=false --runInBand \
+              src/powerTabHistoricalPt2Compatibility.test.js \
+              src/powerTabPt2Decoder.test.js \
+              src/powerTabV11Decoder.test.js \
+              src/powerTabSourceNormalizer.test.js \
+              src/powerTabReaderDocuments.test.js \
+              src/powerTabTrackInventory.test.js \
+              src/structuredTabReaderDocuments.test.js > focused-test.log 2>&1
+            code=$?
+          else
+            printf '%s\n' 'Skipped because npm ci failed.' > focused-test.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Run complete inherited suite
+        id: full_test
+        shell: bash
+        run: |
+          set +e
+          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
+            CI=true npm test -- --watchAll=false --runInBand > full-test.log 2>&1
+            code=$?
+          else
+            printf '%s\n' 'Skipped because npm ci failed.' > full-test.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Build production application
+        id: build
+        shell: bash
+        run: |
+          set +e
+          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
+            npm run build > build.log 2>&1
+            code=$?
+          else
+            printf '%s\n' 'Skipped because npm ci failed.' > build.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Write source-gate result
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs
+          {
+            echo '# Historical PowerTab PT2 Source Gate Result'
+            echo
+            echo "Workflow source commit: \`$GITHUB_SHA\`"
+            echo
+            echo "Repository head after fail-forward fixture preservation: \`$(git rev-parse HEAD)\`"
+            echo
+            echo "- fixture generation exit code: \`${{ steps.generate.outputs.exit_code }}\`"
+            echo "- fixture verification exit code: \`${{ steps.fixture_verify.outputs.exit_code }}\`"
+            echo "- npm ci exit code: \`${{ steps.install.outputs.exit_code }}\`"
+            echo "- focused test exit code: \`${{ steps.focused.outputs.exit_code }}\`"
+            echo "- complete test exit code: \`${{ steps.full_test.outputs.exit_code }}\`"
+            echo "- production build exit code: \`${{ steps.build.outputs.exit_code }}\`"
+            echo
+            echo '## Fixture generation'
+            echo
+            tail -n 80 generation.log | sed 's/^/    /'
+            echo
+            echo '## Fixture verification'
+            echo
+            tail -n 120 fixture-verify.log | sed 's/^/    /'
+            echo
+            echo '## Installation'
+            echo
+            tail -n 100 install.log | sed 's/^/    /'
+            echo
+            echo '## Focused tests'
+            echo
+            tail -n 180 focused-test.log | sed 's/^/    /'
+            echo
+            echo '## Complete suite'
+            echo
+            tail -n 180 full-test.log | sed 's/^/    /'
+            echo
+            echo '## Production build'
+            echo
+            tail -n 140 build.log | sed 's/^/    /'
+          } > docs/powertab-pt2-v1-v10-source-gate-result-2026-08-10.md
+
+      - name: Preserve source-gate record
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/powertab-pt2-v1-v10-source-gate-result-2026-08-10.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'docs: record historical pt2 source gate [skip ci]'
+          git push
+
+      - name: Enforce source gate
+        shell: bash
+        run: |
+          if [ "${{ steps.generate.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.fixture_verify.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.install.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.focused.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.full_test.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.build.outputs.exit_code }}" != "0" ]; then
+            exit 1
+          fi
