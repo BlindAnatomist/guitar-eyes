@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 
 describe("checkpoint build identity", () => {
-  test("places one historical PowerTab 1.0, 1.0.2, and 1.5 identity before the React root", () => {
+  test("places one historical PowerTab PT2 internal-version-1-through-10 identity before the React root", () => {
     const html = fs.readFileSync(
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
     const title =
-      "<title>Test build Guitar Eyes historical PowerTab 1.0, 1.0.2, and 1.5 proof</title>";
+      "<title>Test build Guitar Eyes historical PowerTab PT2 internal versions 1 through 10 proof</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Guitar Eyes historical PowerTab 1.0, 1.0.2, and 1.5 proof.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Eyes historical PowerTab PT2 internal versions 1 through 10 proof.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
