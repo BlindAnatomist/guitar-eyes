@@ -1,13 +1,22 @@
 import { buildGuitarProReaderDocuments } from "./guitarProReaderDocuments";
 
-function isPowerTabRequest(file, options) {
-  return (
-    /\.pt2$/iu.test(String(file?.name || "")) ||
-    options?.intermediate?.sourceVersion === "PT2_V11"
-  );
+function powerTabRequestKind(file, options) {
+  const fileName = String(file?.name || "");
+  const sourceVersion = options?.intermediate?.sourceVersion;
+  if (/\.ptb$/iu.test(fileName) || sourceVersion === "PTB_V17") {
+    return "legacy";
+  }
+  if (/\.pt2$/iu.test(fileName) || sourceVersion === "PT2_V11") {
+    return "modern";
+  }
+  return null;
 }
 
-async function buildPowerTabReaderDocuments(file, options) {
+async function buildPowerTabReaderDocuments(file, options, kind) {
+  if (kind === "legacy") {
+    const module = await import("./powerTabLegacyReaderDocuments");
+    return module.buildPowerTabLegacyReaderDocuments(file, options);
+  }
   const module = await import("./powerTabReaderDocuments");
   return module.buildPowerTabReaderDocuments(file, options);
 }
@@ -26,8 +35,13 @@ function withSelectionIntermediate(readerDocuments) {
 
 export async function buildStructuredTabReaderDocuments(file, options = {}) {
   let readerDocuments;
-  if (isPowerTabRequest(file, options)) {
-    readerDocuments = await buildPowerTabReaderDocuments(file, options);
+  const powerTabKind = powerTabRequestKind(file, options);
+  if (powerTabKind) {
+    readerDocuments = await buildPowerTabReaderDocuments(
+      file,
+      options,
+      powerTabKind
+    );
   } else {
     readerDocuments =
       Object.keys(options).length === 0
