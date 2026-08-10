@@ -116,11 +116,11 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/valid GP3, GP4, GP5, GP6 GPX/i);
   });
 
-  test("routes modern .pt2 through the bounded PowerTab v11 importer", () => {
+  test("routes accepted modern .pt2 through the bounded PowerTab v11 importer", () => {
     const format = detectTabFileFormat("score.pt2");
     expect(format).toMatchObject({
       id: "powertab-pt2",
-      support: "source-checkpoint-provisional",
+      support: "supported",
       isText: false,
       sourceFamily: "PT2",
       label: "PowerTab 2 tablature",
@@ -129,9 +129,21 @@ describe("detectTabFileFormat", () => {
     expect(unsupportedTabFormatMessage(format)).toMatch(/exact internal version 11/i);
   });
 
+  test("routes legacy .ptb only into the provisional PowerTab 1.7 checkpoint", () => {
+    const format = detectTabFileFormat("song.ptb");
+    expect(format).toMatchObject({
+      id: "powertab-legacy",
+      support: "source-checkpoint-provisional",
+      isText: false,
+      sourceFamily: "PTB_V17",
+      label: "PowerTab 1.7 tablature",
+    });
+    expect(shouldReadTabFileAsText(format)).toBe(false);
+    expect(unsupportedTabFormatMessage(format)).toMatch(/exact PowerTab 1\.7 ptab-4/i);
+  });
+
   test.each([
     ["song.gtp", "guitar-pro-2"],
-    ["song.ptb", "powertab-legacy"],
     ["song.tg", "tuxguitar"],
     ["song.tef", "tabledit"],
   ])("recognizes %s as unsupported %s", (fileName, expectedId) => {
