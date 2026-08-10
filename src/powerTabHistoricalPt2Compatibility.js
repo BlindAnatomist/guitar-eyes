@@ -205,7 +205,12 @@ function canonicalizeBarline(barline, version, context) {
 }
 
 export function canonicalizeHistoricalPowerTabDocument(root) {
-  const document = structuredClone(root);
+  let document;
+  try {
+    document = JSON.parse(JSON.stringify(root));
+  } catch {
+    fail("The historical PowerTab document could not be copied as JSON.");
+  }
   const version = document?.version;
   if (!Number.isInteger(version) || version < 1 || version > 10) {
     fail(
