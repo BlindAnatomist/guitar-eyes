@@ -11,6 +11,11 @@
     45,
     40
   ],
+  "measureBoundaries": [
+    0,
+    50,
+    100
+  ],
   "positions": [
     {
       "coordinate": 10,

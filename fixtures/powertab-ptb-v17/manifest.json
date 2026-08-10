@@ -9,7 +9,7 @@
   "license": "CC0-1.0 project-authored musical content",
   "scope": "Provisional evidence only; this is not yet an accepted Guitar Eyes input format.",
   "provenance": {
-    "musicalContent": "Project-authored original six-position guitar specimen",
+    "musicalContent": "Project-authored original six-position, two-measure guitar specimen",
     "serializationEvidence": {
       "primaryRepository": "powertab/powertabeditor",
       "primaryRelease": "2.0.22",
@@ -24,32 +24,35 @@
     "generationMethod": "Deterministic project-authored Node.js serializer implementing only the exact PowerTab 1.7 MFC-style structures required by this fixture, based on the preserved legacy serialization source.",
     "validation": {
       "powerTabSourceEquivalentParser": "passed to exact EOF",
-      "tuxGuitarSourceEquivalentParser": "passed through the 593-byte legacy score payload where the inspected TuxGuitar reader closes",
-      "semanticParity": "passed for title, six-string tuning, position count, coordinates, durations, rest, and chord note count",
+      "tuxGuitarSourceEquivalentParser": "passed through the 618-byte legacy score payload where the inspected TuxGuitar reader closes",
+      "semanticParity": "passed for title, six-string tuning, internal measure barline, position count, coordinates, durations, rest, and chord note count",
       "actualPowerTabEditorOpen": false,
       "actualTuxGuitarOpen": false,
-      "reasonActualApplicationsRemainPending": "The available local execution container cannot reach external package sources. Repeated transport retries were intentionally avoided under the repository transport-switching rule."
+      "reasonActualApplicationsRemainPending": "The available local execution container does not contain the applications and cannot fetch/install the required packages through its ordinary network path. Repeated transport retries were intentionally avoided under the repository transport-switching rule."
     },
     "restriction": "Do not call this editor-verified or accepted until a capable environment opens the exact binary with Power Tab Editor 2.0.22 and an independent TuxGuitar ptb-4 reader, or equivalent stronger evidence is recorded."
   },
   "files": {
     "source": {
-      "path": "powertab-v17-original-six-position.source.json"
+      "path": "powertab-v17-original-six-position.source.json",
+      "sha256": "dd57f3bb1bb6dd3e32e1b58fa4d8d356cc47abac0855125af9db08ea7d24a365"
     },
     "binary": {
       "path": "powertab-v17-original-six-position.ptb",
-      "bytes": 698,
-      "sha256": "2ab81e18e0867c738a121586ca5e01a1d05c5162e1cadd9adc30f866ed8b9354",
+      "bytes": 723,
+      "sha256": "9cd2e677b8898900822afad4160acc004b5bbea70a57f0b62f412e5a52ce2216",
       "headerHex": "707461620400"
     },
     "base64Mirror": {
       "path": "powertab-v17-original-six-position.ptb.base64"
     },
     "generator": {
-      "path": "../../scripts/generate-powertab-ptb-v17-proof.mjs"
+      "path": "../../scripts/generate-powertab-ptb-v17-proof.mjs",
+      "sha256": "ae88ea95cd2eb7fd843bf7095a10886364af3ed381a6e9e71a53547e60770635"
     },
     "verifier": {
-      "path": "../../scripts/verify-powertab-ptb-v17-proof.mjs"
+      "path": "../../scripts/verify-powertab-ptb-v17-proof.mjs",
+      "sha256": "6cddfc8ed6a6d6020a3ebdb31a5732c25920c3a1c4c513476d49160d5016b775"
     }
   },
   "score": {
@@ -57,14 +60,16 @@
     "player": "Proof Guitar",
     "instrument": "six-string guitar",
     "tuningMidiHighToLow": [64, 59, 55, 50, 45, 40],
+    "measureBoundaries": [0, 50, 100],
+    "measures": 2,
     "positions": 6,
     "expectedPositions": [
-      "low E fret 3, quarter note",
-      "A open, eighth note",
-      "A fret 2, eighth note",
-      "D open, half note",
-      "rest, half note",
-      "high E open and B fret 1 chord, half note"
+      "Measure 1: low E fret 3, quarter note",
+      "Measure 1: A open, eighth note",
+      "Measure 1: A fret 2, eighth note",
+      "Measure 1: D open, half note",
+      "Measure 2: rest, half note",
+      "Measure 2: high E open and B fret 1 chord, half note"
     ]
   }
 }

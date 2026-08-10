@@ -11,6 +11,7 @@ const source = {
   player: 'Proof Guitar',
   tuningName: 'Standard',
   tuningMidiHighToLow: [64, 59, 55, 50, 45, 40],
+  measureBoundaries: [0, 50, 100],
   positions: [
     { coordinate: 10, duration: 4, notes: [{ stringIndexHighToLow: 5, fret: 3 }] },
     { coordinate: 20, duration: 8, notes: [{ stringIndexHighToLow: 4, fret: 0 }] },
@@ -66,12 +67,12 @@ class Writer {
   finish() { return Buffer.concat(this.parts); }
 }
 
-function writeBarline(w) {
-  w.u8(0); w.u8(0);
-  w.u8(0);
-  w.u32(0x1a018000);
-  w.u8(4);
-  w.i8(0x7f);
+function writeBarline(w, position = 0, type = 0) {
+  w.u8(position); w.u8(type); // position, bar type
+  w.u8(0);                // default key signature
+  w.u32(0x1a018000);      // default 4/4 time signature data
+  w.u8(4);                // pulses
+  w.i8(0x7f);             // no rehearsal sign
   w.mfcString('');
 }
 
@@ -97,24 +98,26 @@ function writePosition(w, position) {
 
 function writeStaff(w) {
   w.objectPrefix('CStaff');
-  w.u8(0x06);
+  w.u8(0x06);             // treble clef, six tablature strings
   w.u8(9); w.u8(9); w.u8(0); w.u8(0);
   w.count(source.positions.length);
   for (const position of source.positions) writePosition(w, position);
-  w.count(0);
+  w.count(0);             // second voice empty
 }
 
 function writeSystem(w) {
   w.objectPrefix('CSection');
   for (const value of [50, 20, 750, 0]) w.i32(value);
-  w.u8(0);
+  w.u8(0x20);             // final double bar, repeat count zero
   w.u8(20); w.u8(0); w.u8(0); w.u8(0);
-  writeBarline(w);
-  w.count(0);
-  w.count(0);
-  w.count(0);
+  writeBarline(w, 0, 0);
+  w.count(0);             // directions
+  w.count(0);             // chord text
+  w.count(0);             // rhythm slashes
   w.count(1); writeStaff(w);
-  w.count(0);
+  w.count(1);             // one internal barline splits the proof into two measures
+  w.objectPrefix('CMusicBar');
+  writeBarline(w, source.measureBoundaries[1], 0);
 }
 
 function writeGuitar(w) {
@@ -123,7 +126,7 @@ function writeGuitar(w) {
   w.mfcString(source.player);
   for (const value of [25, 104, 64, 0, 0, 0, 0, 0]) w.u8(value);
   w.mfcString(source.tuningName);
-  w.u8(1);
+  w.u8(1);                // display sharps, notation offset zero
   w.u8(source.tuningMidiHighToLow.length);
   for (const note of source.tuningMidiHighToLow) w.u8(note);
 }
@@ -147,14 +150,14 @@ function writeFont(w) {
 
 function generate() {
   const w = new Writer();
-  w.u32(0x62617470);
-  w.u16(4);
-  w.u8(0);
-  w.u8(1);
+  w.u32(0x62617470);      // little-endian bytes: ptab
+  w.u16(4);               // PowerTab 1.7
+  w.u8(0);                // song
+  w.u8(1);                // guitar content
   w.mfcString(source.title);
   w.mfcString(source.artist);
-  w.u8(3);
-  w.u8(0);
+  w.u8(3);                // not released
+  w.u8(0);                // known author
   w.mfcString(''); w.mfcString('');
   w.mfcString('');
   w.mfcString('Guitar Eyes');
