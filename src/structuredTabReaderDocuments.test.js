@@ -19,7 +19,7 @@ describe("buildStructuredTabReaderDocuments", () => {
     expect(buildGuitarProReaderDocuments).toHaveBeenCalledWith(file);
   });
 
-  test("loads PowerTab lazily and exposes one generic selection intermediate", async () => {
+  test("loads modern PowerTab lazily and exposes one generic selection intermediate", async () => {
     const intermediate = {
       schemaVersion: 1,
       sourceVersion: "PT2_V11",
@@ -49,26 +49,60 @@ describe("buildStructuredTabReaderDocuments", () => {
     expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
   });
 
-  test("routes a selection retry by exact intermediate version evidence", async () => {
+  test("loads legacy PowerTab v1.7 through its separate lazy reader", async () => {
     const intermediate = {
       schemaVersion: 1,
-      sourceVersion: "PT2_V11",
-      tracks: [],
+      sourceVersion: "PTB_V17",
+      tracks: [{ name: "Legacy Guitar", staves: [] }],
     };
     const inventory = {
       supportedCount: 2,
       requiresSelection: true,
-      supportedItems: [],
+      supportedItems: [
+        { id: "one", trackIndex: 0, staffIndex: 0, supported: true },
+        { id: "two", trackIndex: 1, staffIndex: 0, supported: true },
+      ],
       items: [],
     };
-    const file = new File([new Uint8Array([1])], "picker-return.tmp");
+    const file = new File([new Uint8Array([0x70, 0x74, 0x61, 0x62])], "proof.ptb");
 
     const result = await buildStructuredTabReaderDocuments(file, {
-      intermediate,
+      decode: jest.fn().mockResolvedValue(intermediate),
       inventory: jest.fn().mockReturnValue(inventory),
     });
 
-    expect(result.selectionIntermediate).toBe(intermediate);
+    expect(result).toMatchObject({
+      requiresTrackSelection: true,
+      sourceFormat: "powertab-legacy",
+      sourceFormatLabel: "PowerTab 1.7 tablature",
+      selectionIntermediate: intermediate,
+    });
     expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
   });
+
+  test.each(["PT2_V11", "PTB_V17"])(
+    "routes a selection retry by exact %s intermediate version evidence",
+    async (sourceVersion) => {
+      const intermediate = {
+        schemaVersion: 1,
+        sourceVersion,
+        tracks: [],
+      };
+      const inventory = {
+        supportedCount: 2,
+        requiresSelection: true,
+        supportedItems: [],
+        items: [],
+      };
+      const file = new File([new Uint8Array([1])], "picker-return.tmp");
+
+      const result = await buildStructuredTabReaderDocuments(file, {
+        intermediate,
+        inventory: jest.fn().mockReturnValue(inventory),
+      });
+
+      expect(result.selectionIntermediate).toBe(intermediate);
+      expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
+    }
+  );
 });
