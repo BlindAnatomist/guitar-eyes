@@ -1,13 +1,14 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "project": "Guitar Eyes",
   "created": "2026-08-10",
+  "updated": "2026-08-10",
   "family": "powertab-ptb",
   "fileVersion": 4,
   "powerTabVersion": "1.7",
-  "supportState": "source-derived-dual-static-parity",
+  "supportState": "dual-source-execution-parity-evidence-review",
   "license": "CC0-1.0 project-authored musical content",
-  "scope": "Provisional evidence only; this is not yet an accepted Guitar Eyes input format.",
+  "scope": "Evidence checkpoint only; legacy .ptb is not yet an accepted Guitar Eyes input format and no browser importer has been implemented.",
   "provenance": {
     "musicalContent": "Project-authored original six-position, two-measure guitar specimen",
     "serializationEvidence": {
@@ -17,20 +18,31 @@
       "legacyReader": "source/formats/powertab_old/powertabdocument",
       "legacyImporter": "source/formats/powertab_old/powertaboldimporter.cpp",
       "independentRepository": "helge17/tuxguitar",
+      "independentTagAlsoVerified": "2.0.1",
       "independentCommitInspected": "f7b7a896902191487b2c7d59b0ba573c6b496c92",
       "independentModule": "common/TuxGuitar-ptb",
-      "independentDetectedSignature": "ptab-4"
+      "independentDetectedSignature": "ptab-4",
+      "independentExactReaderBlob": "163098a3a8c07100ae49ce8179a813ae48da5380",
+      "independentDetectorBlob": "1ab1bad2c77e767d99d3b21658e2611b45d70ed0"
     },
     "generationMethod": "Deterministic project-authored Node.js serializer implementing only the exact PowerTab 1.7 MFC-style structures required by this fixture, based on the preserved legacy serialization source.",
     "validation": {
-      "powerTabSourceEquivalentParser": "passed to exact EOF",
-      "tuxGuitarSourceEquivalentParser": "passed through the 618-byte legacy score payload where the inspected TuxGuitar reader closes",
-      "semanticParity": "passed for title, six-string tuning, internal measure barline, position count, coordinates, durations, rest, and chord note count",
-      "actualPowerTabEditorOpen": false,
-      "actualTuxGuitarOpen": false,
-      "reasonActualApplicationsRemainPending": "The available local execution container does not contain the applications and cannot fetch/install the required packages through its ordinary network path. Repeated transport retries were intentionally avoided under the repository transport-switching rule."
+      "deterministicRegeneration": "passed; generator reproduces the exact 723-byte canonical binary and SHA-256",
+      "committedStaticDualParser": "passed to exact intended boundaries",
+      "powerTabEditorSourceFaithfulCompiledHarness": "passed; pinned 2.0.22 v1.7 deserialization order and field layouts parsed the complete document, including internal barline 50 and exact footer",
+      "tuxGuitarExactParserSourceExecution": "passed; exact PTInputStream.java and PTFileFormatDetector.java Git blobs executed locally with model/API stubs only, preserving parser bytes unchanged",
+      "semanticParity": "passed for title, artist, six-string tuning, internal barline at 50, six positions, coordinates, durations, one rest, six notes total, and final two-note chord",
+      "fullPowerTabEditorApplicationOpen": false,
+      "fullTuxGuitarApplicationOpen": false,
+      "reasonFullApplicationsRemainPending": "The available local environment does not contain those applications and its ordinary package-download route is unavailable. Repeated transport retries and exploratory hosted runs were intentionally avoided under repository execution-gate rules."
     },
-    "restriction": "Do not call this editor-verified or accepted until a capable environment opens the exact binary with Power Tab Editor 2.0.22 and an independent TuxGuitar ptb-4 reader, or equivalent stronger evidence is recorded."
+    "interruptionRecovery": {
+      "ruleApplied": "Reconstructed exact repository, branch, head, active or queued runs, preserved evidence, and remaining gate before resuming.",
+      "recoveredBranchHeadBeforeRepair": "d910f6fa1589330278c70d614cc20d8b5d93e911",
+      "defectFound": "The provisional evidence commit mixed the older 698-byte one-measure binary/base64 with the newer 723-byte two-measure source, generator, verifier, README, and manifest.",
+      "repairRule": "Fail forward from the preserved newer generation; do not rewrite newer provenance around the stale binary."
+    },
+    "restriction": "Do not call legacy .ptb accepted or implemented. This checkpoint is ready for owner evidence review before any Guitar Eyes importer work begins."
   },
   "files": {
     "source": {
