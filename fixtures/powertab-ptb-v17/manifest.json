@@ -6,9 +6,9 @@
   "family": "powertab-ptb",
   "fileVersion": 4,
   "powerTabVersion": "1.7",
-  "supportState": "browser-importer-implemented-source-checkpoint-pending",
+  "supportState": "accepted-bounded-browser-importer-and-real-device",
   "license": "CC0-1.0 project-authored musical content",
-  "scope": "A bounded browser importer for exact legacy PowerTab 1.7 ptab-4 now exists on the work branch, but .ptb is not yet an accepted Guitar Eyes input format. Automated source gates, build inspection, hosted proof, and bounded real-iPhone acceptance remain required.",
+  "scope": "Accepted only for the proven legacy PowerTab 1.7 ptab-4 browser profile: song files, guitar-only content, one standard-tuned six-string guitar player, one staff, one active voice, simple complete 4/4 measures, and the bounded structures demonstrated by the canonical fixture. This is not arbitrary .ptb compatibility.",
   "provenance": {
     "musicalContent": "Project-authored original six-position, two-measure guitar specimen",
     "serializationEvidence": {
@@ -32,10 +32,15 @@
       "powerTabEditorSourceFaithfulCompiledHarness": "passed; pinned 2.0.22 v1.7 deserialization order and field layouts parsed the complete document, including internal barline 50 and exact footer",
       "tuxGuitarExactParserSourceExecution": "passed; exact PTInputStream.java and PTFileFormatDetector.java Git blobs executed locally with model/API stubs only, preserving parser bytes unchanged",
       "semanticParity": "passed for title, artist, six-string tuning, internal barline at 50, six positions, coordinates, durations, one rest, six notes total, and final two-note chord",
-      "browserImporter": "implemented on the isolated work branch; automated source checkpoint pending",
+      "browserImporter": "passed complete automated gate: 57 test suites and 343 tests; production build passed",
+      "automatedVerificationRun": 31418445202,
+      "hostedCandidateRun": 31419032597,
+      "hostedCandidate": "passed build, bounded artifact inspection, Pages deployment, and live network read-back",
+      "realIphoneVoiceOver": "passed on August 10, 2026: load, PowerTab 1.7 identification, focus recovery, all six positions, measure transition, rest, final two-note chord, and Previous/Next navigation",
+      "acceptedHostedAndDeviceSource": "937cf3892d279e54f98802f1eb649333f4b1935c",
       "fullPowerTabEditorApplicationOpen": false,
       "fullTuxGuitarApplicationOpen": false,
-      "reasonFullApplicationsRemainPending": "The exact source-level execution evidence is already stronger than static inspection for both parser families. Full application UIs are not required to begin the bounded browser source gate and will not be substituted for actual Guitar Eyes acceptance."
+      "reasonFullApplicationsRemainPending": "Exact source-level execution evidence is stronger than static inspection for both parser families and the Guitar Eyes browser implementation has now passed its own automated, hosted, and real-device acceptance gates."
     },
     "interruptionRecovery": {
       "ruleApplied": "Reconstructed exact repository, branch, head, active or queued runs, preserved evidence, and remaining gate before resuming.",
@@ -43,7 +48,7 @@
       "defectFound": "The provisional evidence commit mixed the older 698-byte one-measure binary/base64 with the newer 723-byte two-measure source, generator, verifier, README, and manifest.",
       "repairRule": "Fail forward from the preserved newer generation; do not rewrite newer provenance around the stale binary."
     },
-    "restriction": "Do not call legacy .ptb accepted. The first browser importer is intentionally limited to exact ptab-4 PowerTab 1.7 song files in the project-authored six-string standard-tuning simple-4/4 profile; historical versions 1, 2, and 3 and unproven legacy structures must fail explicitly."
+    "restriction": "Accepted only for the exact bounded ptab-4 PowerTab 1.7 profile proven here. Historical file-version values 1, 2, and 3 and all unproven legacy structures must still fail explicitly; do not infer broader .ptb support from this acceptance."
   },
   "files": {
     "source": {
