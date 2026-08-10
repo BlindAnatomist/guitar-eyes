@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
 import { buildStructuredTabReaderDocuments } from "./structuredTabReaderDocuments";
 
@@ -111,10 +111,9 @@ describe("legacy PowerTab application intake", () => {
       level: 2,
       name: "iPhone tablature reader",
     });
-    await act(async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
-    });
-    expect(document.activeElement).toBe(heading);
+
+    fireEvent.focus(window);
+    await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByText(/Low E string, fret 3/i)).toBeInTheDocument();
   });
 });
