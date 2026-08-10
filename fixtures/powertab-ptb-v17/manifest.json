@@ -6,9 +6,9 @@
   "family": "powertab-ptb",
   "fileVersion": 4,
   "powerTabVersion": "1.7",
-  "supportState": "dual-source-execution-parity-evidence-review",
+  "supportState": "browser-importer-implemented-source-checkpoint-pending",
   "license": "CC0-1.0 project-authored musical content",
-  "scope": "Evidence checkpoint only; legacy .ptb is not yet an accepted Guitar Eyes input format and no browser importer has been implemented.",
+  "scope": "A bounded browser importer for exact legacy PowerTab 1.7 ptab-4 now exists on the work branch, but .ptb is not yet an accepted Guitar Eyes input format. Automated source gates, build inspection, hosted proof, and bounded real-iPhone acceptance remain required.",
   "provenance": {
     "musicalContent": "Project-authored original six-position, two-measure guitar specimen",
     "serializationEvidence": {
@@ -32,9 +32,10 @@
       "powerTabEditorSourceFaithfulCompiledHarness": "passed; pinned 2.0.22 v1.7 deserialization order and field layouts parsed the complete document, including internal barline 50 and exact footer",
       "tuxGuitarExactParserSourceExecution": "passed; exact PTInputStream.java and PTFileFormatDetector.java Git blobs executed locally with model/API stubs only, preserving parser bytes unchanged",
       "semanticParity": "passed for title, artist, six-string tuning, internal barline at 50, six positions, coordinates, durations, one rest, six notes total, and final two-note chord",
+      "browserImporter": "implemented on the isolated work branch; automated source checkpoint pending",
       "fullPowerTabEditorApplicationOpen": false,
       "fullTuxGuitarApplicationOpen": false,
-      "reasonFullApplicationsRemainPending": "The available local environment does not contain those applications and its ordinary package-download route is unavailable. Repeated transport retries and exploratory hosted runs were intentionally avoided under repository execution-gate rules."
+      "reasonFullApplicationsRemainPending": "The exact source-level execution evidence is already stronger than static inspection for both parser families. Full application UIs are not required to begin the bounded browser source gate and will not be substituted for actual Guitar Eyes acceptance."
     },
     "interruptionRecovery": {
       "ruleApplied": "Reconstructed exact repository, branch, head, active or queued runs, preserved evidence, and remaining gate before resuming.",
@@ -42,7 +43,7 @@
       "defectFound": "The provisional evidence commit mixed the older 698-byte one-measure binary/base64 with the newer 723-byte two-measure source, generator, verifier, README, and manifest.",
       "repairRule": "Fail forward from the preserved newer generation; do not rewrite newer provenance around the stale binary."
     },
-    "restriction": "Do not call legacy .ptb accepted or implemented. This checkpoint is ready for owner evidence review before any Guitar Eyes importer work begins."
+    "restriction": "Do not call legacy .ptb accepted. The first browser importer is intentionally limited to exact ptab-4 PowerTab 1.7 song files in the project-authored six-string standard-tuning simple-4/4 profile; historical versions 1, 2, and 3 and unproven legacy structures must fail explicitly."
   },
   "files": {
     "source": {
