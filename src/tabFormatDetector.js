@@ -37,13 +37,13 @@ const FORMAT_DEFINITIONS = {
   "powertab-pt2": {
     id: "powertab-pt2",
     label: "PowerTab 2 tablature",
-    support: "source-checkpoint-provisional",
+    support: "supported",
     isText: false,
   },
   "powertab-legacy": {
     id: "powertab-legacy",
-    label: "legacy PowerTab tablature",
-    support: "planned",
+    label: "PowerTab 1.7 tablature",
+    support: "source-checkpoint-provisional",
     isText: false,
   },
   tuxguitar: {
@@ -113,7 +113,14 @@ const EXTENSION_FORMATS = new Map([
     },
   ],
   ["gtp", { id: "guitar-pro-2" }],
-  ["ptb", { id: "powertab-legacy" }],
+  [
+    "ptb",
+    {
+      id: "powertab-legacy",
+      label: "PowerTab 1.7 tablature",
+      sourceFamily: "PTB_V17",
+    },
+  ],
   [
     "pt2",
     {
@@ -184,12 +191,12 @@ export function unsupportedTabFormatMessage(format) {
     case "powertab-pt2":
       return "The PowerTab 2 file could not be imported. Guitar Eyes requires a valid gzip-compressed .pt2 document with exact internal version 11, explicit player assignments, and preserved string, fret, tuning, measure, and duration identity.";
     case "powertab-legacy":
-      return "A legacy PowerTab .ptb file was recognized. Guitar Eyes does not import .ptb files; the binary PowerTab 1.x family requires a separate parser, licensing decision, and version-specific fixtures.";
+      return "The legacy PowerTab file could not be imported. This checkpoint accepts exact PowerTab 1.7 ptab-4 .ptb song files only, within the bounded six-string guitar, standard-tuning, simple 4/4 profile proven by the project fixture.";
     case "tuxguitar":
       return "A TuxGuitar file was recognized. Guitar Eyes does not yet import .tg files; TuxGuitar remains an external conversion route rather than a browser dependency.";
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, an authorized Guitar Pro family, or bounded PowerTab 2 version 11.";
+      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, an authorized Guitar Pro family, accepted PowerTab 2 version 11, or provisional PowerTab 1.7 legacy input.";
   }
 }
