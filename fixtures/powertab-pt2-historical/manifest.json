@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "fixtureFamily": "POWERTAB_PT2_HISTORICAL_SOURCE_DERIVED",
+  "sourceLicense": "CC0-1.0",
+  "sourcePath": "fixtures/powertab-v11/powertab-v11-original-six-position.source.json",
+  "upstreamRepository": "powertab/powertabeditor",
+  "upstreamRelease": "2.0.22",
+  "upstreamCommit": "13cab27c7127d301f2747671071e53eb203dc940",
+  "gzip": {
+    "level": 9,
+    "mtime": 0
+  },
+  "fixtures": [
+    {
+      "internalVersion": 1,
+      "sourceVersion": "PT2_V1",
+      "sourceMilestoneCommit": "8f780d0f36157e9209662908994c6c27ced184ff",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v1-six-position.json",
+        "bytes": 3263,
+        "sha256": "86c6989d0aa289fa8fb6e2e8caac593affe078c9fc14b09f20ac78e3087138e6"
+      },
+      "binary": {
+        "path": "powertab-pt2-v1-six-position.pt2",
+        "bytes": 870,
+        "sha256": "d048f53fbdde95494e4f427bcbce532b7808b535064ade32f1cacd2732f64227"
+      },
+      "base64": {
+        "path": "powertab-pt2-v1-six-position.pt2.base64",
+        "bytes": 1161,
+        "sha256": "57ad5d6963a6b1f69a292c2191a83fb70ba63ad990dcd623619691f72c9e93b3"
+      }
+    },
+    {
+      "internalVersion": 2,
+      "sourceVersion": "PT2_V2",
+      "sourceMilestoneCommit": "84236e64c72a6d933ef3ca3b358e28fef3786f07",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v2-six-position.json",
+        "bytes": 3279,
+        "sha256": "daec916c97886549da3257472d2a4694623bae6cd8a73870c0108380b53f21fc"
+      },
+      "binary": {
+        "path": "powertab-pt2-v2-six-position.pt2",
+        "bytes": 879,
+        "sha256": "9583c9e86ad356f392a2d22e3aac9bc976744dee71bfc1ee490e955ee699f8e5"
+      },
+      "base64": {
+        "path": "powertab-pt2-v2-six-position.pt2.base64",
+        "bytes": 1173,
+        "sha256": "c9dcfdbb5cd60ac55b06ce68e3bc339967733994b66ae2cabef5471ed83f6b93"
+      }
+    },
+    {
+      "internalVersion": 3,
+      "sourceVersion": "PT2_V3",
+      "sourceMilestoneCommit": "044c1d30ee6a0374e02154d47f7ebcc4b80296e8",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v3-six-position.json",
+        "bytes": 3283,
+        "sha256": "79fa48f4f765286d348a62e95f2ac5b2179b02abfd080b262cddcedca1790362"
+      },
+      "binary": {
+        "path": "powertab-pt2-v3-six-position.pt2",
+        "bytes": 883,
+        "sha256": "de6ed92d67df10c1e930fd1160bf9c92ba0179f4bb484e3c80dc12474f99d980"
+      },
+      "base64": {
+        "path": "powertab-pt2-v3-six-position.pt2.base64",
+        "bytes": 1181,
+        "sha256": "5c1749ce453fa65ff8c706924ebc16a97dabc71a3417c7c62cd016484175a534"
+      }
+    },
+    {
+      "internalVersion": 4,
+      "sourceVersion": "PT2_V4",
+      "sourceMilestoneCommit": "17a2e1bf49a417f2dc5244f7a9868d24edc839ce",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v4-six-position.json",
+        "bytes": 3397,
+        "sha256": "450676cb022dcb3ee5470f4bb7613a761e44ed821af2680dbae44c083b260a6d"
+      },
+      "binary": {
+        "path": "powertab-pt2-v4-six-position.pt2",
+        "bytes": 891,
+        "sha256": "ba239b8f4454e2d65f3409285387d7116fcd5d72ab93e8123e3a640364a27e30"
+      },
+      "base64": {
+        "path": "powertab-pt2-v4-six-position.pt2.base64",
+        "bytes": 1189,
+        "sha256": "ac99288d1197d753fb2ae98aab9f2d68975cfedd5a5649b567b4639726ef1ccd"
+      }
+    },
+    {
+      "internalVersion": 5,
+      "sourceVersion": "PT2_V5",
+      "sourceMilestoneCommit": "42d2f00195efd4bb7c5aae65b2d6e36a5b7db935",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v5-six-position.json",
+        "bytes": 3397,
+        "sha256": "4cbacf84f35f31cd4686ae05737104bed94a92dc36980c770c54bcb9e25204c6"
+      },
+      "binary": {
+        "path": "powertab-pt2-v5-six-position.pt2",
+        "bytes": 891,
+        "sha256": "0d956ddefea66824e6f2a426814737cd7c79dbfea53712c4b7caa17d19b277b4"
+      },
+      "base64": {
+        "path": "powertab-pt2-v5-six-position.pt2.base64",
+        "bytes": 1189,
+        "sha256": "273ca1ea2547f0dc1a17fb8bc270c0b912e04308988799e103f9b1de34d82d23"
+      }
+    },
+    {
+      "internalVersion": 6,
+      "sourceVersion": "PT2_V6",
+      "sourceMilestoneCommit": "0152c3320e48368e93752382d16fd4e1d71ef538",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v6-six-position.json",
+        "bytes": 3465,
+        "sha256": "e402f1ea461eb5a54ce620dc8957569e386f2b9c4f94c580fe3da5be2144df89"
+      },
+      "binary": {
+        "path": "powertab-pt2-v6-six-position.pt2",
+        "bytes": 914,
+        "sha256": "7642f2adc0ba7afc74824131bb13fa13d6b3d0d3d9e46734067456c5a8fa29ad"
+      },
+      "base64": {
+        "path": "powertab-pt2-v6-six-position.pt2.base64",
+        "bytes": 1221,
+        "sha256": "7ae39b4e6e77c149ffb9a1c2d0691d948321b10238cffe1d17b778d3925a94f6"
+      }
+    },
+    {
+      "internalVersion": 7,
+      "sourceVersion": "PT2_V7",
+      "sourceMilestoneCommit": "17219c446434f6ec0c6cb52e14770759219015de",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v7-six-position.json",
+        "bytes": 3585,
+        "sha256": "76c6037267b46d6db3a78ac272daed87d3a2b40a2268c94947ee255388c3c239"
+      },
+      "binary": {
+        "path": "powertab-pt2-v7-six-position.pt2",
+        "bytes": 924,
+        "sha256": "f9006556def098915396e642e2692b62f4270835a1604c2745ed35dc2ed1abf1"
+      },
+      "base64": {
+        "path": "powertab-pt2-v7-six-position.pt2.base64",
+        "bytes": 1233,
+        "sha256": "d45e313b9c87f6a2fd545be2b25b9597a94bef8f63d88116caccab168da7a924"
+      }
+    },
+    {
+      "internalVersion": 8,
+      "sourceVersion": "PT2_V8",
+      "sourceMilestoneCommit": "bca17cbb1b2ddfbd1f273bb9eda427044ed7a446",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v8-six-position.json",
+        "bytes": 3699,
+        "sha256": "3efd57a9a5a3fcce128cd788c48204d7ac784aace4fb8cbc28aabd68769c9384"
+      },
+      "binary": {
+        "path": "powertab-pt2-v8-six-position.pt2",
+        "bytes": 935,
+        "sha256": "e1c49ce45e55c080cacb73472429464f39aa60179928ee00de81b4c69a15b83d"
+      },
+      "base64": {
+        "path": "powertab-pt2-v8-six-position.pt2.base64",
+        "bytes": 1249,
+        "sha256": "cc228d3e76f313a3f77cbcac76462b23f1750870a68c5d06f72219fce4f8e51e"
+      }
+    },
+    {
+      "internalVersion": 9,
+      "sourceVersion": "PT2_V9",
+      "sourceMilestoneCommit": "228836ac7c18a59873d1c0231580c854d262e872",
+      "historicalSerialization": "integer-enums-bitset-flags",
+      "json": {
+        "path": "powertab-pt2-v9-six-position.json",
+        "bytes": 3719,
+        "sha256": "500d705739dfce6326d2f9711c655dfecdd3b6a272edfc25b31c37db289e2d47"
+      },
+      "binary": {
+        "path": "powertab-pt2-v9-six-position.pt2",
+        "bytes": 944,
+        "sha256": "ad98241d4382e984c206810155dae51e85fbc0985a25e496dbc1bf2868b09009"
+      },
+      "base64": {
+        "path": "powertab-pt2-v9-six-position.pt2.base64",
+        "bytes": 1261,
+        "sha256": "5ecfc82bd9bdb2f32514431bec82e0b69370e794e8abc97a07cb304bdaf09812"
+      }
+    },
+    {
+      "internalVersion": 10,
+      "sourceVersion": "PT2_V10",
+      "sourceMilestoneCommit": "ad7e051e1f1bb784c54b1ee564ef19682258dff8",
+      "historicalSerialization": "named-enums-named-flags",
+      "json": {
+        "path": "powertab-pt2-v10-six-position.json",
+        "bytes": 3655,
+        "sha256": "f7a75a728410c80ad23eeb3e64a49f1b82e5814b765ca6d375ff8deb261d82df"
+      },
+      "binary": {
+        "path": "powertab-pt2-v10-six-position.pt2",
+        "bytes": 978,
+        "sha256": "370622ec96393f11dfcef4bc6cc2ddff2e9036aa6f5e514b6bcf2b94d31ee841"
+      },
+      "base64": {
+        "path": "powertab-pt2-v10-six-position.pt2.base64",
+        "bytes": 1305,
+        "sha256": "ff26bd4fb074d48ae5798e8ce5557ddb7780d726bce4de12d6b466bc6791e1e1"
+      }
+    }
+  ]
+}
