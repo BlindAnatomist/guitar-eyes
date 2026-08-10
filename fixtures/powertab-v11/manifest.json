@@ -3,7 +3,7 @@
   "project": "Guitar Eyes",
   "created": "2026-08-05",
   "family": "powertab-pt2",
-  "supportState": "editor-export-parity-verified",
+  "supportState": "accepted",
   "license": "CC0-1.0",
   "provenance": {
     "musicalContent": "Project-authored original six-position guitar specimen",
@@ -37,7 +37,29 @@
       "bundleBytes": 7021085,
       "trackedCheckoutClean": true
     },
-    "acceptanceRestriction": "Producer identity, exact editor export, parser parity, complete suite, optimized build, bundle inspection, and tracked-checkout cleanliness are confirmed. Hosted candidate publication, live asset read-back, and real-iPhone Safari and VoiceOver acceptance remain separate gates."
+    "hostedAcceptance": {
+      "workflowRun": 31409792493,
+      "sourceCommit": "c2ada9bbdf118abddc894094734314f9b6048ea6",
+      "identityTests": 2,
+      "fullSuites": 53,
+      "fullTests": 328,
+      "optimizedBuild": "passed",
+      "bundleFiles": 26,
+      "forbiddenAssets": 0,
+      "pagesDeployment": "passed",
+      "liveAssetReadback": "passed",
+      "commitStatus": "success"
+    },
+    "realIPhoneAcceptance": {
+      "date": "2026-08-10",
+      "environment": "real iPhone Safari with VoiceOver",
+      "canonicalFileLoaded": true,
+      "focusRecovery": "passed by owner observation",
+      "semanticPositionsTraversed": 6,
+      "result": "passed",
+      "observation": "Palm mute was correctly identified; the shared reader also appended the generic phrase notation preserved but not yet interpreted. This is recorded as shared-reader wording debt rather than a PowerTab decode failure."
+    },
+    "acceptanceRestriction": "Accepted only for the bounded PowerTab .pt2 exact internal-version-11 profile proven by the canonical project-authored editor export, automated parity, complete inherited suite, optimized build and bundle inspection, hosted publication with live read-back, and bounded real-iPhone Safari and VoiceOver acceptance. This is not a claim of legacy .ptb, older .pt2 versions, arbitrary PowerTab compatibility, or untested instrument and notation profiles."
   },
   "files": {
     "source": {
