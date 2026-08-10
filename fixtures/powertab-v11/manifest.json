@@ -3,7 +3,8 @@
   "project": "Guitar Eyes",
   "created": "2026-08-05",
   "family": "powertab-pt2",
-  "supportState": "accepted",
+  "supportState": "editor-export-parity-verified",
+  "acceptanceState": "accepted",
   "license": "CC0-1.0",
   "provenance": {
     "musicalContent": "Project-authored original six-position guitar specimen",
