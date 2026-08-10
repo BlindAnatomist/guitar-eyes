@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { decodePowerTabLegacyV17Bytes } from "./powerTabLegacyV17Decoder";
 import { decodePowerTabV11Document } from "./powerTabV11Decoder";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
 
@@ -19,6 +20,19 @@ function decoded() {
   );
 }
 
+function decodedLegacy() {
+  return decodePowerTabLegacyV17Bytes(
+    fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "fixtures",
+        "powertab-ptb-v17",
+        "powertab-v17-original-six-position.ptb"
+      )
+    )
+  );
+}
+
 describe("PowerTab player inventory", () => {
   test("auto-selects exactly one supported player", () => {
     const inventory = buildPowerTabTrackInventory(decoded());
@@ -31,6 +45,20 @@ describe("PowerTab player inventory", () => {
         heading: "Choose a PowerTab player",
         loadAction: "Load selected player",
       },
+    });
+    expect(inventory.supportedItems[0].selectionLabel).toMatch(
+      /Proof Guitar\. six-string guitar\. Tuning high to low: E4, B3, G3, D3, A2, E2\. 2 measures\./u
+    );
+  });
+
+  test("uses the same inventory contract for verified legacy PowerTab v1.7", () => {
+    const inventory = buildPowerTabTrackInventory(decodedLegacy());
+
+    expect(inventory).toMatchObject({
+      sourceVersion: "PTB_V17",
+      supportedCount: 1,
+      requiresSelection: false,
+      autoSelection: { trackIndex: 0, staffIndex: 0 },
     });
     expect(inventory.supportedItems[0].selectionLabel).toMatch(
       /Proof Guitar\. six-string guitar\. Tuning high to low: E4, B3, G3, D3, A2, E2\. 2 measures\./u
@@ -73,5 +101,4 @@ describe("PowerTab player inventory", () => {
     });
     expect(inventory.items[0].reason).toMatch(/fixture-proven six-string guitar/i);
   });
-
 });
