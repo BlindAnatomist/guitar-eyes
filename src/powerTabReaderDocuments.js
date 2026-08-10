@@ -1,13 +1,20 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { PowerTabImportError } from "./powerTabErrors";
-import { decodePowerTabV11File } from "./powerTabV11Decoder";
+import { decodePowerTabPt2File } from "./powerTabPt2Decoder";
 import { normalizeVerifiedPowerTabIntermediate } from "./powerTabSourceNormalizer";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
+
+function sourceFormatLabel(intermediate) {
+  const version = intermediate?.versionEvidence?.internalVersion;
+  return Number.isInteger(version)
+    ? `PowerTab 2 version ${version} tablature`
+    : "PowerTab 2 tablature";
+}
 
 export async function buildPowerTabReaderDocuments(
   file,
   {
-    decode = decodePowerTabV11File,
+    decode = decodePowerTabPt2File,
     normalize = normalizeVerifiedPowerTabIntermediate,
     inventory = buildPowerTabTrackInventory,
     intermediate = null,
@@ -16,6 +23,7 @@ export async function buildPowerTabReaderDocuments(
 ) {
   const resolvedIntermediate = intermediate || (await decode(file));
   const trackInventory = inventory(resolvedIntermediate);
+  const resolvedSourceFormatLabel = sourceFormatLabel(resolvedIntermediate);
 
   if (trackInventory.supportedCount === 0) {
     const reasons = trackInventory.items
@@ -39,7 +47,7 @@ export async function buildPowerTabReaderDocuments(
       instrumentWasDetected: false,
       supportOutcome: "track-selection-required",
       sourceFormat: "powertab-pt2",
-      sourceFormatLabel: "PowerTab 2 version 11 tablature",
+      sourceFormatLabel: resolvedSourceFormatLabel,
       requiresTrackSelection: true,
       trackInventory,
       powerTabIntermediate: resolvedIntermediate,
@@ -62,7 +70,7 @@ export async function buildPowerTabReaderDocuments(
     instrumentWasDetected: false,
     supportOutcome: "source-checkpoint-provisional",
     sourceFormat: "powertab-pt2",
-    sourceFormatLabel: "PowerTab 2 version 11 tablature",
+    sourceFormatLabel: resolvedSourceFormatLabel,
     requiresTrackSelection: false,
     trackInventory,
     powerTabIntermediate: null,
