@@ -2,6 +2,11 @@ name: iPhone extension verification
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - work/powertab-legacy-ptb-v1-v3-intake
+    paths-ignore:
+      - docs/proof-automated-results.md
 
 concurrency:
   group: iphone-extension-verification-${{ github.ref }}
