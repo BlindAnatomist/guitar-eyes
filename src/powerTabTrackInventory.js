@@ -1,6 +1,7 @@
 import { PowerTabImportError } from "./powerTabErrors";
 import { POWERTAB_LIMITS } from "./powerTabLimits";
 
+const SUPPORTED_SOURCE_VERSIONS = new Set(["PT2_V11", "PTB_V17"]);
 const SUPPORTED_STRING_COUNTS = new Set([6]);
 const PITCH_NAMES = [
   "C",
@@ -100,7 +101,7 @@ export function buildPowerTabTrackInventory(
   if (
     !intermediate ||
     intermediate.schemaVersion !== 1 ||
-    intermediate.sourceVersion !== "PT2_V11"
+    !SUPPORTED_SOURCE_VERSIONS.has(intermediate.sourceVersion)
   ) {
     fail(
       "The PowerTab decoder returned an unsupported intermediate schema.",
