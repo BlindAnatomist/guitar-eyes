@@ -4,6 +4,21 @@ import { PowerTabImportError } from "./powerTabErrors";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
 import { normalizeVerifiedPowerTabLegacyFamilyIntermediate } from "./powerTabLegacyFamilySourceNormalizer";
 
+const LEGACY_VERSION_LABELS = new Map([
+  ["PTB_V10", "1.0"],
+  ["PTB_V102", "1.0.2"],
+  ["PTB_V15", "1.5"],
+  ["PTB_V17", "1.7"],
+]);
+
+function powerTabVersionLabel(intermediate) {
+  return String(
+    intermediate?.versionEvidence?.powerTabVersion ||
+      LEGACY_VERSION_LABELS.get(intermediate?.sourceVersion) ||
+      "legacy"
+  );
+}
+
 export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
   const decode = options.decode || decodePowerTabLegacyFile;
   const inventoryBuilder = options.inventory || buildPowerTabTrackInventory;
@@ -11,9 +26,7 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
     options.normalize || normalizeVerifiedPowerTabLegacyFamilyIntermediate;
   const intermediate = options.intermediate || (await decode(file, options));
   const trackInventory = inventoryBuilder(intermediate, options);
-  const powerTabVersion = String(
-    intermediate?.versionEvidence?.powerTabVersion || "legacy"
-  );
+  const powerTabVersion = powerTabVersionLabel(intermediate);
 
   if (trackInventory.supportedCount === 0) {
     const reasons = trackInventory.items
