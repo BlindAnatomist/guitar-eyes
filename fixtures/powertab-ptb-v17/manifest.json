@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "project": "Guitar Eyes",
+  "created": "2026-08-10",
+  "family": "powertab-ptb",
+  "fileVersion": 4,
+  "powerTabVersion": "1.7",
+  "supportState": "source-derived-dual-static-parity",
+  "license": "CC0-1.0 project-authored musical content",
+  "scope": "Provisional evidence only; this is not yet an accepted Guitar Eyes input format.",
+  "provenance": {
+    "musicalContent": "Project-authored original six-position guitar specimen",
+    "serializationEvidence": {
+      "primaryRepository": "powertab/powertabeditor",
+      "primaryRelease": "2.0.22",
+      "primaryCommit": "13cab27c7127d301f2747671071e53eb203dc940",
+      "legacyReader": "source/formats/powertab_old/powertabdocument",
+      "legacyImporter": "source/formats/powertab_old/powertaboldimporter.cpp",
+      "independentRepository": "helge17/tuxguitar",
+      "independentCommitInspected": "f7b7a896902191487b2c7d59b0ba573c6b496c92",
+      "independentModule": "common/TuxGuitar-ptb",
+      "independentDetectedSignature": "ptab-4"
+    },
+    "generationMethod": "Deterministic project-authored Node.js serializer implementing only the exact PowerTab 1.7 MFC-style structures required by this fixture, based on the preserved legacy serialization source.",
+    "validation": {
+      "powerTabSourceEquivalentParser": "passed to exact EOF",
+      "tuxGuitarSourceEquivalentParser": "passed through the 593-byte legacy score payload where the inspected TuxGuitar reader closes",
+      "semanticParity": "passed for title, six-string tuning, position count, coordinates, durations, rest, and chord note count",
+      "actualPowerTabEditorOpen": false,
+      "actualTuxGuitarOpen": false,
+      "reasonActualApplicationsRemainPending": "The available local execution container cannot reach external package sources. Repeated transport retries were intentionally avoided under the repository transport-switching rule."
+    },
+    "restriction": "Do not call this editor-verified or accepted until a capable environment opens the exact binary with Power Tab Editor 2.0.22 and an independent TuxGuitar ptb-4 reader, or equivalent stronger evidence is recorded."
+  },
+  "files": {
+    "source": {
+      "path": "powertab-v17-original-six-position.source.json"
+    },
+    "binary": {
+      "path": "powertab-v17-original-six-position.ptb",
+      "bytes": 698,
+      "sha256": "2ab81e18e0867c738a121586ca5e01a1d05c5162e1cadd9adc30f866ed8b9354",
+      "headerHex": "707461620400"
+    },
+    "base64Mirror": {
+      "path": "powertab-v17-original-six-position.ptb.base64"
+    },
+    "generator": {
+      "path": "../../scripts/generate-powertab-ptb-v17-proof.mjs"
+    },
+    "verifier": {
+      "path": "../../scripts/verify-powertab-ptb-v17-proof.mjs"
+    }
+  },
+  "score": {
+    "title": "Guitar Eyes PTB 1.7 Proof",
+    "player": "Proof Guitar",
+    "instrument": "six-string guitar",
+    "tuningMidiHighToLow": [64, 59, 55, 50, 45, 40],
+    "positions": 6,
+    "expectedPositions": [
+      "low E fret 3, quarter note",
+      "A open, eighth note",
+      "A fret 2, eighth note",
+      "D open, half note",
+      "rest, half note",
+      "high E open and B fret 1 chord, half note"
+    ]
+  }
+}
