@@ -2,7 +2,7 @@
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
-Last reconciled: August 5, 2026.
+Last reconciled: August 10, 2026.
 
 ## Repository authority
 
@@ -10,11 +10,11 @@ Last reconciled: August 5, 2026.
 - Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 - Preserve failed and superseded branches as evidence; do not resume feature work from them.
-- The accepted format-only operational baseline is `work/accepted-format-intake-convergence`.
-- The clean accepted 4C base is `030e1f6af2de23e41ad993ab0292893b072664eb`.
-- The clean convergence application source is `2a8e5951ec4ced3ce63b2df85d82e54c0ba79ea0`.
-- Documentation-only closure commits do not replace an accepted application source.
-- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/accepted-format-intake-convergence`, not from fork `main` and not from a historical development branch.
+- The accepted format-only operational baseline is `work/powertab-pt2-v11-clean-convergence`.
+- The accepted exact hosted and real-device source is `c2ada9bbdf118abddc894094734314f9b6048ea6`.
+- The previous accepted format-only baseline is `work/accepted-format-intake-convergence` at `e64990ab3e446e5aa1d4eeefbf556a9dc71bd63d`.
+- Documentation-only closure commits do not silently broaden accepted runtime behavior.
+- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-pt2-v11-clean-convergence`, not from fork `main`, the previous accepted baseline, a forensic PowerTab branch, or a playback experiment.
 
 ## Current product boundary
 
@@ -29,15 +29,18 @@ The accepted baseline includes:
    - four-string bass within the accepted general profile;
    - five-string bass in exact standard octave-qualified tuning `G2 D2 A1 E1 B0`;
    - six-string bass in exact standard octave-qualified tuning `C3 G2 D2 A1 E1 B0`.
-2. Uncompressed `.musicxml` and `.xml` six-string guitar tablature within the accepted bounded profile.
+2. Uncompressed `.musicxml` and `.xml` tablature within the accepted bounded profile.
 3. Compressed MusicXML `.mxl` through the accepted compressed-import route.
 4. Guitar Pro 3 `.gp3`.
 5. Guitar Pro 4 `.gp4`.
 6. Guitar Pro 5 `.gp5`.
 7. Guitar Pro 6 `.gpx`.
 8. Guitar Pro 7 shared `.gp` archives within the verified version-neutral intake boundary.
+9. PowerTab `.pt2` exact internal version 11 within the accepted bounded profile proven by the canonical editor export and real-iPhone acceptance.
 
-The Guitar Pro claim is bounded by the lawful project-authored five-file corpus, direct semantic parity tests, production verification, hosted read-back, and real-iPhone VoiceOver acceptance. It is not a claim of arbitrary compatibility with every Guitar Pro file.
+The Guitar Pro claim remains bounded by the lawful project-authored five-file corpus and accepted evidence. It is not a claim of arbitrary compatibility with every Guitar Pro file.
+
+The PowerTab claim remains bounded to exact `.pt2` internal version 11 and the accepted evidence profile. It is not a claim of legacy `.ptb`, older `.pt2` versions, arbitrary PowerTab files, or unaccepted instrument and notation profiles.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -63,18 +66,23 @@ Before changing implementation, accessibility, repository administration, deploy
 16. `docs/real-world-guitar-pro-proof-5a-iphone-acceptance-2026-08-04.md`;
 17. `docs/accepted-format-intake-convergence-5b-result-2026-08-04.md`;
 18. `docs/accepted-format-intake-convergence-5b-real-iphone-acceptance-2026-08-04.md`;
-19. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+19. `docs/powertab-pt2-v11-completion-audit-and-continuation-ledger-2026-08-05.md`;
+20. `docs/powertab-pt2-v11-clean-convergence-result-2026-08-10.md`;
+21. `docs/powertab-pt2-v11-real-iphone-acceptance-2026-08-10.md`;
+22. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
 Do not rely on chat memory alone or rediscover a procedure already preserved in repository evidence.
+
+If a problem resembles a mechanism already solved in Guitar Eyes, Val Music Vault, Hollow & Hoard, or another owner repository, inspect the exact current source and governing record before treating the problem as novel. Search authoritative external documentation, public GitHub repositories, or the wider Internet when local and cross-repository evidence do not already resolve it.
 
 ## Accepted reader behavior is authoritative
 
 Every future change must preserve:
 
 - one shared semantic tablature document as the sole musical authority;
-- automatic supported guitar and bass detection;
+- automatic supported guitar and bass detection where evidence is sufficient;
 - multiple complete tablature blocks;
 - accepted duration mapping and speech;
 - aligned explicit measures;
@@ -102,6 +110,14 @@ Desktop and iPhone may present that document differently, but neither may create
 
 Third-party decoders may decode source formats, but their models must remain behind importer boundaries. alphaTab rendering, alphaSynth playback, cursors, notation UI, notation fonts, soundfonts, renderer workers, audio worklets, and third-party playback models remain outside the accepted architecture.
 
+## Shared technique-speech debt
+
+The generic shared-reader suffix `notation preserved but not yet interpreted` is known wording debt when the semantic layer already knows an attached technique by name.
+
+The accepted PowerTab iPhone test demonstrated this with `PalmMuting`: the importer correctly decoded the property to `palm mute` on the correct open D-string note, while the shared speech layer appended the generic suffix afterward.
+
+Do not repair this as a PowerTab-specific exception. Any future wording change must be made once in the shared speech layer and must preserve technique attachment across every supported format.
+
 ## New-format rule
 
 Recognition is not reading support.
@@ -122,11 +138,21 @@ A new format family requires its own bounded checkpoint with:
 
 Do not mix multiple unproven format families into one implementation checkpoint.
 
-## Deferred format families
+## Next format priority
+
+Legacy PowerTab `.ptb` is the next format family to evaluate.
+
+The `.ptb` phase must begin as read-only investigation on a new branch from the final PowerTab-v11 documentation-closure head. Before implementation, determine lawful fixture provenance, format/version signatures, available decoder or upstream-source evidence, licensing, and whether `.ptb` itself contains materially distinct historical versions requiring separate claims.
+
+Do not combine legacy `.ptb` with older `.pt2` versions, PowerTab bass expansion, alternate tunings, TuxGuitar, or TablEdit in the same initial checkpoint.
+
+## Deferred format families and profiles
 
 Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
-- PowerTab `.ptb` and `.pt2`;
+- legacy PowerTab `.ptb`;
+- older PowerTab `.pt2` internal versions;
+- arbitrary PowerTab bass, alternate-tuning, and notation profiles outside accepted evidence;
 - TuxGuitar `.tg`;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
@@ -170,7 +196,7 @@ Any permitted workflow that generates or transforms lasting source, fixtures, ma
 6. repair forward directly on the branch;
 7. never regenerate accepted evidence merely to repair a later source, test, formatter, build, documentation, or publication defect.
 
-The canonical PowerTab editor export is lasting evidence and must not be regenerated to repeat downstream testing.
+The canonical PowerTab editor export is accepted lasting evidence and must not be regenerated merely to repeat downstream testing.
 
 ### Transport and formatter rules
 
@@ -179,6 +205,12 @@ The canonical PowerTab editor export is lasting evidence and must not be regener
 - Use the simplest safe route for transport and a capable environment for transformation and proof.
 - When a pinned formatter exists, format to a fixed point, inspect the stable diff, then run acceptance.
 - Do not invent a formatter command when the repository does not declare one.
+
+### Stream interruption and authority reconstruction
+
+After a stream interruption or broken execution sequence, do not resume from conversational momentum. Reconstruct the exact repository, branch, commit, completed work, active or queued runs, preserved evidence, and remaining gate first.
+
+If source authority genuinely collapses, stop archaeological recovery once a bounded clean reconstruction from verified evidence is cheaper and more verifiable than continuing to untangle ambiguous history.
 
 ### Bounded owner action
 
@@ -190,7 +222,7 @@ Provide the exact address, exact control, expected confirmation, prohibited alte
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
-Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, and bounded-owner-action solutions already recorded in repository memory.
+Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, stream-recovery, authority-collapse, and bounded-owner-action solutions already recorded in repository memory.
 
 Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 
