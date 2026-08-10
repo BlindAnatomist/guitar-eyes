@@ -18,7 +18,7 @@ Accepted exact hosted and real-device source for the latest PowerTab checkpoint:
 
 Previous accepted PowerTab 1.7 `.ptb` source: `937cf3892d279e54f98802f1eb649333f4b1935c`.
 
-Previous accepted PowerTab `.pt2` source: `c2ada9bbdf118abdd426d932632946edd07d3c3` is not the PowerTab source; the accepted `.pt2` source remains `c2ada9bbdf118abdd426d932632946edd07d3c3` only if explicitly recorded elsewhere. The authoritative `.pt2` acceptance record and `BRANCH_AUTHORITY.md` govern exact lineage.
+Previous accepted PowerTab `.pt2` source: `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 
 Fork `main` remains reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
