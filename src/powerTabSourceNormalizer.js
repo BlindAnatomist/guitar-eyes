@@ -3,18 +3,41 @@ import {
   normalizeGuitarProIntermediate,
 } from "./guitarProNormalizer";
 import { PowerTabImportError } from "./powerTabErrors";
+import { HISTORICAL_PT2_MILESTONE_COMMITS } from "./powerTabHistoricalPt2Compatibility";
 
-const PT2_SOURCE_VERSION = "PT2_V11";
+const UPSTREAM_RELEASE = "2.0.22";
+const UPSTREAM_COMMIT = "13cab27c7127d301f2747671071e53eb203dc940";
 
 function fail(message, code = "INVALID_POWERTAB_VERSION_EVIDENCE") {
   throw new PowerTabImportError(message, code);
 }
 
+function sourceVersionForEvidence(evidence) {
+  const version = evidence?.internalVersion;
+  if (!Number.isInteger(version) || version < 1 || version > 11) return null;
+  return `PT2_V${version}`;
+}
+
+function validateHistoricalEvidence(evidence) {
+  const version = evidence.internalVersion;
+  if (version === 11) return true;
+  const expectedSerialization =
+    version < 10
+      ? "integer-enums-bitset-flags"
+      : "named-enums-named-flags";
+  return (
+    evidence.sourceMilestoneCommit === HISTORICAL_PT2_MILESTONE_COMMITS[version] &&
+    evidence.historicalSerialization === expectedSerialization
+  );
+}
+
 function validatePowerTabSourceEvidence(intermediate) {
   const evidence = intermediate?.versionEvidence;
+  const expectedSourceVersion = sourceVersionForEvidence(evidence);
   if (
     intermediate?.schemaVersion !== 1 ||
-    intermediate?.sourceVersion !== PT2_SOURCE_VERSION ||
+    expectedSourceVersion === null ||
+    intermediate?.sourceVersion !== expectedSourceVersion ||
     !evidence ||
     evidence.schemaVersion !== 1 ||
     evidence.containerFamily !== "POWERTAB_PT2_GZIP_JSON" ||
@@ -22,10 +45,9 @@ function validatePowerTabSourceEvidence(intermediate) {
     evidence.compression !== "gzip" ||
     evidence.serialization !== "json" ||
     evidence.rootKey !== "score" ||
-    evidence.internalVersion !== 11 ||
-    evidence.upstreamRelease !== "2.0.22" ||
-    evidence.upstreamCommit !==
-      "13cab27c7127d301f2747671071e53eb203dc940" ||
+    evidence.upstreamRelease !== UPSTREAM_RELEASE ||
+    evidence.upstreamCommit !== UPSTREAM_COMMIT ||
+    !validateHistoricalEvidence(evidence) ||
     !Array.isArray(intermediate.tracks) ||
     !Number.isInteger(evidence.declaredPlayerCount) ||
     evidence.declaredPlayerCount < 1 ||
@@ -33,7 +55,7 @@ function validatePowerTabSourceEvidence(intermediate) {
     evidence.decodedTrackCount !== intermediate.tracks.length
   ) {
     fail(
-      "The PowerTab v11 source evidence is missing, unsupported, or contradictory."
+      "The PowerTab .pt2 source evidence is missing, unsupported, or contradictory."
     );
   }
   return evidence;
@@ -56,9 +78,16 @@ function compatibilityIntermediate(intermediate) {
   };
 }
 
-function restorePowerTabMetadata(value, evidence, key = null) {
+function restorePowerTabMetadata(
+  value,
+  evidence,
+  sourceVersion,
+  key = null
+) {
   if (Array.isArray(value)) {
-    return value.map((item) => restorePowerTabMetadata(item, evidence, key));
+    return value.map((item) =>
+      restorePowerTabMetadata(item, evidence, sourceVersion, key)
+    );
   }
   if (!value || typeof value !== "object") {
     if (
@@ -88,7 +117,7 @@ function restorePowerTabMetadata(value, evidence, key = null) {
     if (childKey === "versionEvidence") {
       restored[childKey] = evidence;
     } else if (childKey === "sourceVersion") {
-      restored[childKey] = PT2_SOURCE_VERSION;
+      restored[childKey] = sourceVersion;
     } else if (childKey === "warnings" && Array.isArray(child)) {
       restored[childKey] = child.map((warning) =>
         typeof warning === "string"
@@ -99,6 +128,7 @@ function restorePowerTabMetadata(value, evidence, key = null) {
       restored[childKey] = restorePowerTabMetadata(
         child,
         evidence,
+        sourceVersion,
         childKey
       );
     }
@@ -123,6 +153,7 @@ export function normalizeVerifiedPowerTabIntermediate(
   options = {}
 ) {
   const evidence = validatePowerTabSourceEvidence(intermediate);
+  const sourceVersion = sourceVersionForEvidence(evidence);
   let normalized;
   try {
     normalized = normalizeGuitarProIntermediate(
@@ -132,5 +163,9 @@ export function normalizeVerifiedPowerTabIntermediate(
   } catch (error) {
     mapNormalizerError(error);
   }
-  return restorePowerTabMetadata(normalized, evidence);
+  return restorePowerTabMetadata(
+    normalized,
+    evidence,
+    sourceVersion
+  );
 }
