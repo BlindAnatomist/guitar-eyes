@@ -99,10 +99,10 @@ Every future change must preserve:
 - accepted duration mapping and speech;
 - aligned explicit measures;
 - measure and position-within-measure speech;
-- Previous position, Read/Play current position, Next position in that relative order;
+- Previous position, Read current position, Next position in that relative order;
 - quiet Previous and Next movement;
 - quiet tablature-block movement;
-- Read/Play current position as the only action that announces full playing instructions;
+- Read current position as the only action that announces full playing instructions;
 - omission of ordinary unplayed strings from speech;
 - speech for open strings, frets, explicit mute notation, attached techniques, rests, chords, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure;
@@ -112,7 +112,7 @@ Every future change must preserve:
 - no silent Guitar Pro track selection;
 - selected-track details immediately before `Load selected track` in VoiceOver reading order;
 - format/version identification that is evidence-based and never stronger than the verified source;
-- no full-document playback controls or full-document playback language in the accepted format-only reader.
+- no playback controls or playback language in the accepted format-only reader.
 
 ## Single semantic architecture
 
