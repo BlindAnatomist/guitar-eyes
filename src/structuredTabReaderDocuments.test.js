@@ -80,12 +80,48 @@ describe("buildStructuredTabReaderDocuments", () => {
     expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
   });
 
-  test.each(["PT2_V11", "PTB_V17"])(
+  test("loads TuxGuitar lazily and preserves its selection intermediate", async () => {
+    const intermediate = {
+      schemaVersion: 1,
+      sourceVersion: "TG_1_5",
+      versionEvidence: { formatVersion: "TuxGuitar File Format - 1.5" },
+      tracks: [{ name: "Tux Guitar", staves: [] }],
+    };
+    const inventory = {
+      supportedCount: 2,
+      requiresSelection: true,
+      selectorLabels: { formatName: "TuxGuitar", plural: "tracks" },
+      supportedItems: [
+        { id: "one", trackIndex: 0, staffIndex: 0, supported: true },
+        { id: "two", trackIndex: 1, staffIndex: 0, supported: true },
+      ],
+      items: [],
+    };
+    const file = new File([new Uint8Array([1])], "proof.tg");
+
+    const result = await buildStructuredTabReaderDocuments(file, {
+      decode: jest.fn().mockResolvedValue(intermediate),
+      inventory: jest.fn().mockReturnValue(inventory),
+    });
+
+    expect(result).toMatchObject({
+      requiresTrackSelection: true,
+      sourceFormat: "tuxguitar",
+      sourceFormatLabel: "TuxGuitar TuxGuitar File Format - 1.5 tablature",
+      selectionIntermediate: intermediate,
+    });
+    expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
+  });
+
+  test.each(["PT2_V11", "PTB_V17", "TG_1_5"])(
     "routes a selection retry by exact %s intermediate version evidence",
     async (sourceVersion) => {
       const intermediate = {
         schemaVersion: 1,
         sourceVersion,
+        versionEvidence: sourceVersion.startsWith("TG_")
+          ? { formatVersion: "TuxGuitar File Format - 1.5" }
+          : undefined,
         tracks: [],
       };
       const inventory = {
