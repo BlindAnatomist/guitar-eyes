@@ -26,6 +26,12 @@ function powerTabRequestKind(file, options) {
   return null;
 }
 
+function isTuxGuitarRequest(file, options) {
+  const fileName = String(file?.name || "");
+  const sourceVersion = String(options?.intermediate?.sourceVersion || "");
+  return /\.tg$/iu.test(fileName) || sourceVersion.startsWith("TG_");
+}
+
 async function buildPowerTabReaderDocuments(file, options, kind) {
   if (kind === "legacy") {
     const module = await import("./powerTabLegacyReaderDocuments");
@@ -33,6 +39,13 @@ async function buildPowerTabReaderDocuments(file, options, kind) {
   }
   const module = await import("./powerTabReaderDocuments");
   return module.buildPowerTabReaderDocuments(file, options);
+}
+
+async function buildTuxGuitarReaderDocuments(file, options) {
+  const module = await import("./tuxGuitarReaderDocuments");
+  return Object.keys(options).length === 0
+    ? module.buildTuxGuitarReaderDocuments(file)
+    : module.buildTuxGuitarReaderDocuments(file, options);
 }
 
 function withSelectionIntermediate(readerDocuments) {
@@ -56,6 +69,8 @@ export async function buildStructuredTabReaderDocuments(file, options = {}) {
       options,
       powerTabKind
     );
+  } else if (isTuxGuitarRequest(file, options)) {
+    readerDocuments = await buildTuxGuitarReaderDocuments(file, options);
   } else {
     readerDocuments =
       Object.keys(options).length === 0
