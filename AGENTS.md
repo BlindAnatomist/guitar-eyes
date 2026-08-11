@@ -10,13 +10,15 @@ Last reconciled: August 11, 2026.
 - Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 - Preserve failed and superseded branches as evidence; do not resume feature work from them.
-- The accepted format-only operational baseline is `work/powertab-pt2-v1-v10-investigation`.
-- The accepted exact hosted and real-device source for the latest historical PowerTab checkpoint is `930d00831cb71b4fad6f4771f3009be8cb28670e`.
+- The accepted format-only operational baseline is `work/tuxguitar-tg-intake-investigation`.
+- The accepted corrected TuxGuitar semantic source is `b3a8d229aee832a7f6ea994dfc7465ff07d608c3`.
+- The accepted corrected TuxGuitar hosted and real-device candidate source is `dee0ba8d63d22c47b6570778acf8dad7ed003942`.
+- The previous accepted historical PowerTab `.pt2` internal versions 1 through 10 source is `930d00831cb71b4fad6f4771f3009be8cb28670e` on `work/powertab-pt2-v1-v10-investigation`.
 - The previous accepted historical PowerTab `.ptb` 1.0 / 1.0.2 / 1.5 source is `2682928366f587d5afac213e8e195ba0dfb602d8` on `work/powertab-legacy-ptb-v1-v3-intake`.
 - The previous accepted legacy PowerTab 1.7 source is `937cf3892d279e54f98802f1eb649333f4b1935c` on `work/powertab-legacy-ptb-intake-evaluation`.
 - The previous accepted PowerTab `.pt2` internal-version-11 source is `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 - Documentation-only closure commits do not silently broaden accepted runtime behavior.
-- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-pt2-v1-v10-investigation`, not from fork `main`, an earlier accepted branch, a forensic PowerTab branch, or a playback experiment.
+- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/tuxguitar-tg-intake-investigation`, not from fork `main`, an earlier accepted branch, a forensic branch, or a playback experiment.
 
 ## Current product boundary
 
@@ -43,10 +45,18 @@ The accepted baseline includes:
 11. Legacy PowerTab `.ptb` file version 2 / PowerTab 1.0.2 within the accepted bounded historical profile.
 12. Legacy PowerTab `.ptb` file version 3 / PowerTab 1.5 within the accepted bounded historical profile.
 13. Legacy PowerTab `.ptb` file version 4 / PowerTab 1.7 within the accepted bounded profile.
+14. TuxGuitar `.tg` native 1.0 within the accepted bounded profile.
+15. TuxGuitar `.tg` native 1.1 within the accepted bounded profile.
+16. TuxGuitar `.tg` native 1.2 within the accepted bounded profile.
+17. TuxGuitar `.tg` native 1.3 within the accepted bounded profile.
+18. TuxGuitar `.tg` native 1.5 within the accepted bounded profile.
+19. Modern TuxGuitar native file format 2.0.0 within the accepted bounded profile, validated against TuxGuitar 2.1.0 producer authority.
 
 The Guitar Pro claim remains bounded by the lawful project-authored five-file corpus and accepted evidence. It is not a claim of arbitrary compatibility with every Guitar Pro file.
 
 The PowerTab claims remain bounded to the exact accepted `.pt2` internal-version 1-through-11 evidence profiles and the version-specific `.ptb` evidence profiles. They are not claims of arbitrary PowerTab compatibility or unaccepted bass, alternate-tuning, multi-player, multi-voice, and notation profiles.
+
+The TuxGuitar claim remains bounded to the accepted 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 evidence profiles. It is not a claim of arbitrary `.tg` compatibility, and native 0.7, 0.8, and 0.9 remain deferred archival work.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -81,7 +91,12 @@ Before changing implementation, accessibility, repository administration, deploy
 25. `docs/powertab-pt2-v1-v10-source-gate-result-2026-08-10.md`;
 26. `docs/powertab-pt2-v1-v10-hosted-proof-2026-08-10.md`;
 27. `docs/powertab-pt2-v1-v10-real-iphone-acceptance-2026-08-11.md`;
-28. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+28. `docs/tuxguitar-tg-intake-investigation-2026-08-11.md`;
+29. `docs/tuxguitar-tg-producer-source-correction-2026-08-11.md`;
+30. `docs/tuxguitar-tg-corrected-source-gate-result-2026-08-11.md`;
+31. `docs/tuxguitar-tg-corrected-hosted-proof-2026-08-11.md`;
+32. `docs/tuxguitar-tg-real-iphone-acceptance-2026-08-11.md`;
+33. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -108,8 +123,8 @@ Every future change must preserve:
 - durable iPhone Files-picker focus recovery for success and failure;
 - no browser-level `accept` restriction that blocks selection before validation;
 - Jason Washburn's recognizable desktop spatial concept and non-interception of VoiceOver Control+Option commands;
-- explicit inventory and explicit selection for supported multi-track Guitar Pro files;
-- no silent Guitar Pro track selection;
+- explicit inventory and explicit selection for supported multi-track files where the accepted profile proves it;
+- no silent track selection;
 - selected-track details immediately before `Load selected track` in VoiceOver reading order;
 - format/version identification that is evidence-based and never stronger than the verified source;
 - no playback controls or playback language in the accepted format-only reader.
@@ -152,11 +167,11 @@ Do not mix multiple unproven format families into one implementation checkpoint.
 
 ## Next format priority
 
-PowerTab `.pt2` internal versions 1 through 11 and all four known legacy `.ptb` file-version families now have bounded accepted coverage.
+PowerTab `.pt2` internal versions 1 through 11, all four known legacy `.ptb` file-version families, and bounded TuxGuitar `.tg` 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 now have accepted coverage.
 
-Do not reopen PowerTab merely to broaden claims by inference. Any future PowerTab bass, alternate-tuning, multi-player, multi-voice, technique, repeat, key-signature, meter, capo, or broader notation work requires its own independently evidenced checkpoint.
+Do not reopen PowerTab or TuxGuitar merely to broaden claims by inference. Any future bass, alternate-tuning, multi-track/player, multi-voice, technique, repeat, key-signature, meter, capo, effect, lyric, automation, or broader notation work requires its own independently evidenced checkpoint.
 
-The next new-format family must be selected separately and investigated read-only on a new branch from the final documentation-closure head of `work/powertab-pt2-v1-v10-investigation`. TuxGuitar `.tg` and TablEdit `.tef` remain candidates, not accepted priorities, until that separate selection is made.
+The next major dedicated-tab candidate is TablEdit `.tef`. It must be separately selected and investigated read-only on a new branch from the final documentation-closure head of `work/tuxguitar-tg-intake-investigation`.
 
 ## Deferred format families and profiles
 
@@ -164,7 +179,8 @@ Unless a later lawful checkpoint proves otherwise, the following remain unsuppor
 
 - arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, and notation profiles outside accepted evidence;
 - arbitrary `.ptb` or `.pt2` files outside the accepted version-specific profiles;
-- TuxGuitar `.tg`;
+- arbitrary `.tg` files outside the accepted TuxGuitar version-specific and semantic profiles;
+- TuxGuitar native 0.7, 0.8, and 0.9;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
 - other proprietary or container formats not yet separately evaluated.
