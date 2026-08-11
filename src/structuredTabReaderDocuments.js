@@ -55,6 +55,7 @@ function withSelectionIntermediate(readerDocuments) {
     ...readerDocuments,
     selectionIntermediate:
       readerDocuments.powerTabIntermediate ||
+      readerDocuments.tuxGuitarIntermediate ||
       readerDocuments.guitarProIntermediate ||
       null,
   };
