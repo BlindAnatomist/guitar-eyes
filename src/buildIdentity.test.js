@@ -2,15 +2,15 @@ import fs from "fs";
 import path from "path";
 
 describe("checkpoint build identity", () => {
-  test("places one TuxGuitar six-generation identity before the React root", () => {
+  test("places one corrected TuxGuitar six-generation identity before the React root", () => {
     const html = fs.readFileSync(
       path.join(process.cwd(), "public", "index.html"),
       "utf8"
     );
     const title =
-      "<title>Test build Guitar Eyes TuxGuitar TG 1.0 1.1 1.2 1.3 1.5 and 2.0 proof</title>";
+      "<title>Test build Guitar Eyes corrected TuxGuitar TG 1.0 1.1 1.2 1.3 1.5 and 2.0 proof</title>";
     const heading =
-      '<h1 id="test-build-heading">Test build: Guitar Eyes TuxGuitar TG 1.0, 1.1, 1.2, 1.3, 1.5, and 2.0 proof.</h1>';
+      '<h1 id="test-build-heading">Test build: Guitar Eyes corrected TuxGuitar TG 1.0, 1.1, 1.2, 1.3, 1.5, and 2.0 proof.</h1>';
     const root = '<div id="root"></div>';
 
     expect(html).toContain(title);
