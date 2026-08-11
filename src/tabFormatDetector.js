@@ -49,7 +49,7 @@ const FORMAT_DEFINITIONS = {
   tuxguitar: {
     id: "tuxguitar",
     label: "TuxGuitar tablature",
-    support: "planned",
+    support: "source-checkpoint-provisional",
     isText: false,
   },
   tabledit: {
@@ -129,7 +129,14 @@ const EXTENSION_FORMATS = new Map([
       sourceFamily: "PT2",
     },
   ],
-  ["tg", { id: "tuxguitar" }],
+  [
+    "tg",
+    {
+      id: "tuxguitar",
+      label: "TuxGuitar tablature",
+      sourceFamily: "TG",
+    },
+  ],
   ["tef", { id: "tabledit" }],
 ]);
 
@@ -189,14 +196,14 @@ export function unsupportedTabFormatMessage(format) {
     case "guitar-pro-2":
       return "A Guitar Pro 2 .gtp file was recognized. Guitar Eyes does not import GP2 files; support requires a separate lawful fixture and version-specific decoder evidence.";
     case "powertab-pt2":
-      return "The PowerTab 2 file could not be imported. Guitar Eyes requires a valid gzip-compressed .pt2 document with exact internal version 11, explicit player assignments, and preserved string, fret, tuning, measure, and duration identity.";
+      return "The PowerTab 2 file could not be imported. Guitar Eyes requires valid supported .pt2 internal-version evidence plus preserved string, fret, tuning, measure, and duration identity.";
     case "powertab-legacy":
       return "The legacy PowerTab file could not be imported. This checkpoint recognizes exact ptab file-version values 1 through 4 only, using version-specific bounded six-string guitar profiles; unsupported historical structures must fail explicitly rather than being guessed.";
     case "tuxguitar":
-      return "A TuxGuitar file was recognized. Guitar Eyes does not yet import .tg files; TuxGuitar remains an external conversion route rather than a browser dependency.";
+      return "The TuxGuitar file could not be imported. This checkpoint recognizes exact legacy .tg generations 1.0, 1.1, 1.2, 1.3, and 1.5 plus modern native file format 2.0.0 within the bounded six-string guitar profile; other structures must fail explicitly rather than being guessed.";
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:
-      return "Guitar Eyes could not identify this file as supported ASCII tablature, supported MusicXML tablature, an authorized Guitar Pro family, accepted PowerTab 2 version 11, or a recognized legacy PowerTab input.";
+      return "Guitar Eyes could not identify this file as a supported tablature format.";
   }
 }
