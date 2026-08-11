@@ -21,7 +21,10 @@
     "eject": "react-scripts eject",
     "generate:guitar-pro-multi-track-proof": "node scripts/generate-guitar-pro-multi-track-proof.mjs",
     "generate:powertab-v11-proof": "node scripts/generate-powertab-v11-proof.mjs",
-    "generate:powertab-pt2-historical-proofs": "node scripts/generate-powertab-pt2-historical-proofs.mjs"
+    "generate:powertab-pt2-historical-proofs": "node scripts/generate-powertab-pt2-historical-proofs.mjs",
+    "generate:tuxguitar-tg-proofs": "node scripts/generate-tuxguitar-tg-proofs.mjs",
+    "verify:tuxguitar-tg-proofs": "node scripts/verify-tuxguitar-tg-proofs.mjs",
+    "test:tuxguitar": "npm run generate:tuxguitar-tg-proofs && npm run verify:tuxguitar-tg-proofs && react-scripts test tuxGuitarCompatibility.test.js --watchAll=false"
   },
   "eslintConfig": {
     "extends": [
