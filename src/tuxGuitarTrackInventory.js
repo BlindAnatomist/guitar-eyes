@@ -1,0 +1,4 @@
+import { buildGuitarProTrackInventory, GuitarProTrackInventoryError } from "./guitarProTrackInventory";
+import { TuxGuitarImportError } from "./tuxGuitarDecoder";
+function rename(value){return String(value||"").replace(/Guitar Pro/gu,"TuxGuitar");}
+export function buildTuxGuitarTrackInventory(intermediate){try{const inv=buildGuitarProTrackInventory(intermediate);return {...inv,title:String(intermediate?.title||"TuxGuitar tablature").trim(),items:inv.items.map(i=>({...i,id:i.id.replace(/^guitar-pro-/u,"tuxguitar-"),reason:rename(i.reason)})),supportedItems:inv.supportedItems.map(i=>({...i,id:i.id.replace(/^guitar-pro-/u,"tuxguitar-"),reason:rename(i.reason)}))};}catch(error){if(!(error instanceof GuitarProTrackInventoryError))throw error;throw new TuxGuitarImportError(rename(error.message),String(error.code||"TUXGUITAR_TRACK_INVENTORY_ERROR").replace(/GUITAR_PRO/gu,"TUXGUITAR"));}}
