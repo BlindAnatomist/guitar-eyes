@@ -2,7 +2,7 @@
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
-Last reconciled: August 10, 2026.
+Last reconciled: August 11, 2026.
 
 ## Repository authority
 
@@ -10,12 +10,13 @@ Last reconciled: August 10, 2026.
 - Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 - Preserve failed and superseded branches as evidence; do not resume feature work from them.
-- The accepted format-only operational baseline is `work/powertab-legacy-ptb-v1-v3-intake`.
-- The accepted exact hosted and real-device source for the latest historical PowerTab checkpoint is `2682928366f587d5afac213e8e195ba0dfb602d8`.
+- The accepted format-only operational baseline is `work/powertab-pt2-v1-v10-investigation`.
+- The accepted exact hosted and real-device source for the latest historical PowerTab checkpoint is `930d00831cb71b4fad6f4771f3009be8cb28670e`.
+- The previous accepted historical PowerTab `.ptb` 1.0 / 1.0.2 / 1.5 source is `2682928366f587d5afac213e8e195ba0dfb602d8` on `work/powertab-legacy-ptb-v1-v3-intake`.
 - The previous accepted legacy PowerTab 1.7 source is `937cf3892d279e54f98802f1eb649333f4b1935c` on `work/powertab-legacy-ptb-intake-evaluation`.
-- The previous accepted PowerTab `.pt2` source is `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
+- The previous accepted PowerTab `.pt2` internal-version-11 source is `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 - Documentation-only closure commits do not silently broaden accepted runtime behavior.
-- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-legacy-ptb-v1-v3-intake`, not from fork `main`, an earlier accepted branch, a forensic PowerTab branch, or a playback experiment.
+- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/powertab-pt2-v1-v10-investigation`, not from fork `main`, an earlier accepted branch, a forensic PowerTab branch, or a playback experiment.
 
 ## Current product boundary
 
@@ -37,7 +38,7 @@ The accepted baseline includes:
 6. Guitar Pro 5 `.gp5`.
 7. Guitar Pro 6 `.gpx`.
 8. Guitar Pro 7 shared `.gp` archives within the verified version-neutral intake boundary.
-9. PowerTab `.pt2` exact internal version 11 within the accepted bounded profile proven by the canonical editor export and real-iPhone acceptance.
+9. PowerTab `.pt2` internal versions 1 through 11 within the accepted bounded, version-evidenced profiles.
 10. Legacy PowerTab `.ptb` file version 1 / PowerTab 1.0 within the accepted bounded historical profile.
 11. Legacy PowerTab `.ptb` file version 2 / PowerTab 1.0.2 within the accepted bounded historical profile.
 12. Legacy PowerTab `.ptb` file version 3 / PowerTab 1.5 within the accepted bounded historical profile.
@@ -45,7 +46,7 @@ The accepted baseline includes:
 
 The Guitar Pro claim remains bounded by the lawful project-authored five-file corpus and accepted evidence. It is not a claim of arbitrary compatibility with every Guitar Pro file.
 
-The PowerTab claims remain bounded to the exact accepted `.pt2` internal-version-11 profile and the version-specific `.ptb` evidence profiles. They are not claims of arbitrary PowerTab compatibility, older `.pt2` versions, or unaccepted bass, alternate-tuning, multi-player, multi-voice, and notation profiles.
+The PowerTab claims remain bounded to the exact accepted `.pt2` internal-version 1-through-11 evidence profiles and the version-specific `.ptb` evidence profiles. They are not claims of arbitrary PowerTab compatibility or unaccepted bass, alternate-tuning, multi-player, multi-voice, and notation profiles.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -76,7 +77,11 @@ Before changing implementation, accessibility, repository administration, deploy
 21. `docs/powertab-pt2-v11-real-iphone-acceptance-2026-08-10.md`;
 22. `docs/powertab-ptb-v17-real-iphone-acceptance-2026-08-10.md`;
 23. `docs/powertab-ptb-v1-v3-real-iphone-acceptance-2026-08-10.md`;
-24. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+24. `docs/powertab-pt2-v1-v10-investigation-ledger-2026-08-10.md`;
+25. `docs/powertab-pt2-v1-v10-source-gate-result-2026-08-10.md`;
+26. `docs/powertab-pt2-v1-v10-hosted-proof-2026-08-10.md`;
+27. `docs/powertab-pt2-v1-v10-real-iphone-acceptance-2026-08-11.md`;
+28. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -94,10 +99,10 @@ Every future change must preserve:
 - accepted duration mapping and speech;
 - aligned explicit measures;
 - measure and position-within-measure speech;
-- Previous position, Read current position, Next position in that relative order;
+- Previous position, Read/Play current position, Next position in that relative order;
 - quiet Previous and Next movement;
 - quiet tablature-block movement;
-- Read current position as the only action that announces full playing instructions;
+- Read/Play current position as the only action that announces full playing instructions;
 - omission of ordinary unplayed strings from speech;
 - speech for open strings, frets, explicit mute notation, attached techniques, rests, chords, and supported duration;
 - durable iPhone Files-picker focus recovery for success and failure;
@@ -107,7 +112,7 @@ Every future change must preserve:
 - no silent Guitar Pro track selection;
 - selected-track details immediately before `Load selected track` in VoiceOver reading order;
 - format/version identification that is evidence-based and never stronger than the verified source;
-- no playback controls or playback language in the accepted format-only reader.
+- no full-document playback controls or full-document playback language in the accepted format-only reader.
 
 ## Single semantic architecture
 
@@ -147,19 +152,18 @@ Do not mix multiple unproven format families into one implementation checkpoint.
 
 ## Next format priority
 
-Older PowerTab `.pt2` internal versions are the next PowerTab family to evaluate.
+PowerTab `.pt2` internal versions 1 through 11 and all four known legacy `.ptb` file-version families now have bounded accepted coverage.
 
-The older-`.pt2` phase must begin as read-only investigation on a new branch from the final documentation-closure head of `work/powertab-legacy-ptb-v1-v3-intake`. Before implementation, determine lawful fixture provenance, exact historical internal-version signatures, available decoder or upstream-source evidence, licensing, and whether older `.pt2` versions contain materially distinct structures requiring separate claims.
+Do not reopen PowerTab merely to broaden claims by inference. Any future PowerTab bass, alternate-tuning, multi-player, multi-voice, technique, repeat, key-signature, meter, capo, or broader notation work requires its own independently evidenced checkpoint.
 
-Do not combine older `.pt2` work with PowerTab bass expansion, alternate tunings, TuxGuitar, or TablEdit in the same initial checkpoint.
+The next new-format family must be selected separately and investigated read-only on a new branch from the final documentation-closure head of `work/powertab-pt2-v1-v10-investigation`. TuxGuitar `.tg` and TablEdit `.tef` remain candidates, not accepted priorities, until that separate selection is made.
 
 ## Deferred format families and profiles
 
 Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
-- older PowerTab `.pt2` internal versions other than accepted internal version 11;
 - arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, and notation profiles outside accepted evidence;
-- arbitrary `.ptb` files outside the accepted version-specific profiles;
+- arbitrary `.ptb` or `.pt2` files outside the accepted version-specific profiles;
 - TuxGuitar `.tg`;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
