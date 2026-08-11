@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Last reconciled: August 10, 2026.
+Last reconciled: August 11, 2026.
 
 ## Repository authority
 
@@ -12,13 +12,15 @@ Clean upstream-tracking branch: `main`
 
 Clean fork `main` authority: `60c2e5de0887b1bcdd426d932632946edd07d3c3`
 
-Current accepted format-only operational branch: `work/powertab-legacy-ptb-v1-v3-intake`
+Current accepted format-only operational branch: `work/powertab-pt2-v1-v10-investigation`
 
-Accepted exact hosted and real-device source for the latest PowerTab checkpoint: `2682928366f587d5afac213e8e195ba0dfb602d8`
+Accepted exact hosted and real-device source for the latest PowerTab checkpoint: `930d00831cb71b4fad6f4771f3009be8cb28670e`
+
+Previous accepted historical PowerTab 1.0 / 1.0.2 / 1.5 `.ptb` source: `2682928366f587d5afac213e8e195ba0dfb602d8`.
 
 Previous accepted PowerTab 1.7 `.ptb` source: `937cf3892d279e54f98802f1eb649333f4b1935c`.
 
-Previous accepted PowerTab `.pt2` source: `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
+Previous accepted PowerTab `.pt2` internal-version-11 source: `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 
 Fork `main` remains reserved as an upstream-tracking branch. `Phlypper/guitar-eyes` remains untouched. No pull request or merge is authorized.
 
@@ -36,7 +38,7 @@ Accepted format routes now include:
 6. Guitar Pro 5 `.gp5`;
 7. Guitar Pro 6 `.gpx`;
 8. Guitar Pro 7 shared `.gp` archives within the accepted version-neutral boundary;
-9. PowerTab `.pt2` exact internal version 11 within its accepted bounded profile;
+9. PowerTab `.pt2` internal versions 1 through 11 within accepted bounded, version-evidenced profiles;
 10. legacy PowerTab `.ptb` file version 1 / PowerTab 1.0 within its accepted bounded profile;
 11. legacy PowerTab `.ptb` file version 2 / PowerTab 1.0.2 within its accepted bounded profile;
 12. legacy PowerTab `.ptb` file version 3 / PowerTab 1.5 within its accepted bounded profile;
@@ -76,16 +78,69 @@ Every future checkpoint must preserve:
 
 ## PowerTab `.pt2`
 
-Accepted route: exact internal version 11 only.
+Accepted route: internal versions 1 through 11, each bounded by exact version evidence rather than inferred arbitrary compatibility.
 
-Evidence includes the canonical Power Tab Editor 2.0.22 export, exact fixture hashes, parser parity, complete inherited automated suite, optimized production build, artifact inspection, hosted Pages publication, live read-back, and real-iPhone Safari/VoiceOver acceptance.
+### Internal versions 1 through 10
 
-Older `.pt2` internal versions remain unsupported until separately investigated and accepted.
+The historical `.pt2` lineage was investigated against pinned Power Tab Editor 2.0.22 source at commit `13cab27c7127d301f2747671071e53eb203dc940`.
 
-Closure records:
+The implementation uses one historical compatibility/canonicalization layer rather than ten unrelated decoders. The important representation boundary is internal version 10:
+
+- versions 1 through 9 use historical integer enums and bitset property strings;
+- version 10 uses named enums and named flag arrays;
+- exact field-presence gates preserve the producer's schema milestones;
+- unsupported structures continue to fail explicitly rather than silently widen the accepted profile.
+
+Project-authored deterministic six-position fixtures for versions 1 through 10 are stored under `fixtures/powertab-pt2-historical/`. Their exact byte counts and hashes are governed by `manifest.json`.
+
+Producer-maintained upstream binaries for versions 2, 3, 4, and 6 remain independent external compatibility anchors and are not relabeled as project fixtures.
+
+The accepted historical implementation passed:
+
+1. deterministic fixture generation and regeneration;
+2. manifest and embedded-version verification;
+3. focused PowerTab tests;
+4. the complete inherited automated regression suite;
+5. optimized production build;
+6. artifact-boundary inspection;
+7. GitHub Pages publication;
+8. complete live JavaScript asset read-back including lazy-loaded chunks;
+9. real-iPhone Safari/VoiceOver acceptance.
+
+The owner tested all ten historical fixtures and reported: “OK, I tested all 10 of those and they all loaded properly and were recognized and voiceover. Focus worked fine. It was good.”
+
+Acceptance records:
+
+- `docs/powertab-pt2-v1-v10-investigation-ledger-2026-08-10.md`;
+- `docs/powertab-pt2-v1-v10-source-gate-result-2026-08-10.md`;
+- `docs/powertab-pt2-v1-v10-hosted-proof-2026-08-10.md`;
+- `docs/powertab-pt2-v1-v10-real-iphone-acceptance-2026-08-11.md`.
+
+### Internal version 11
+
+Internal version 11 remains accepted through the separately proven canonical Power Tab Editor 2.0.22 export, exact fixture hashes, parser parity, complete inherited suite, optimized build, artifact inspection, hosted Pages publication, live read-back, and real-iPhone Safari/VoiceOver acceptance.
+
+Version-11 records:
 
 - `docs/powertab-pt2-v11-clean-convergence-result-2026-08-10.md`;
 - `docs/powertab-pt2-v11-real-iphone-acceptance-2026-08-10.md`.
+
+### `.pt2` scope boundary
+
+Accepted internal-version coverage does not establish arbitrary compatibility with every `.pt2` file. Unless separately proven, unsupported profiles include:
+
+- bass scores outside accepted evidence;
+- alternate tunings outside accepted evidence;
+- multiple players;
+- multiple active voices;
+- broader techniques and notation structures;
+- capo;
+- repeats;
+- key changes;
+- meter changes;
+- broader chord-diagram semantics and other unproven structures.
+
+Unsupported structures must fail explicitly rather than be guessed.
 
 ## Legacy PowerTab `.ptb`
 
@@ -100,18 +155,7 @@ Accepted historical mapping:
 
 Canonical fixtures are stored under `fixtures/powertab-ptb-historical/`.
 
-The source evidence was derived from the pinned Power Tab Editor 2.0.22 compatibility reader and passed deterministic regeneration plus source-faithful execution of the historical deserialization layouts. No maintained independent parser clearly supporting file-version values 1 through 3 was located, so these accepted claims do not include independent-parser parity.
-
-The implementation then passed:
-
-1. the complete inherited automated regression suite;
-2. production build;
-3. bounded artifact inspection;
-4. Pages publication;
-5. live network read-back across every deployed JavaScript chunk, including lazy-loaded chunks;
-6. real-iPhone Safari/VoiceOver acceptance.
-
-The owner tested all three historical fixtures and reported: “They all worked fine and voiceover. Focus was good.”
+The implementation passed the complete inherited suite, production build, bounded artifact inspection, Pages publication, live read-back across every deployed JavaScript chunk, and real-iPhone Safari/VoiceOver acceptance.
 
 Acceptance record:
 
@@ -144,7 +188,7 @@ Unsupported structures must fail explicitly rather than be guessed.
 
 ## Known shared-reader wording debt
 
-Attached technique objects can still be spoken with the generic suffix `notation preserved but not yet interpreted`. The accepted PowerTab `.pt2` iPhone test demonstrated that this can be semantically stale when a technique such as palm mute is already identified.
+Attached technique objects can still be spoken with the generic suffix `notation preserved but not yet interpreted`. The accepted PowerTab `.pt2` version-11 iPhone test demonstrated that this can be semantically stale when a technique such as palm mute is already identified.
 
 Do not patch this in a PowerTab-specific importer. Any future wording repair belongs in the shared semantic speech layer and must preserve technique attachment across every format.
 
@@ -161,8 +205,8 @@ Each acceptance build must also carry a unique static title and first heading so
 Unless a later lawful checkpoint proves support, the following remain unsupported:
 
 1. arbitrary or malformed Guitar Pro files outside accepted profiles;
-2. older PowerTab `.pt2` internal versions other than accepted version 11;
-3. arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, technique, repeat, key-signature, meter, capo, or notation profiles outside accepted evidence;
+2. arbitrary PowerTab `.pt2` or `.ptb` files outside accepted version-specific profiles;
+3. arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, technique, repeat, key-signature, meter, capo, chord-diagram, or notation profiles outside accepted evidence;
 4. TuxGuitar `.tg`;
 5. TablEdit `.tef`;
 6. other unexamined proprietary tablature formats;
@@ -176,13 +220,11 @@ Recognition must never be described as reading support.
 
 ## Next lawful phase
 
-All four legacy `.ptb` file-version families now have bounded accepted browser and real-iPhone coverage.
+PowerTab `.pt2` internal versions 1 through 11 and all four known legacy `.ptb` file-version families now have bounded accepted browser and real-iPhone coverage.
 
-The next PowerTab investigation should evaluate older `.pt2` internal versions as a separate family rather than broadening internal version 11 by inference.
+The next format family has not yet been selected. A new-format phase must:
 
-Before implementing an older `.pt2` version:
-
-1. begin from the final documentation-closure head of `work/powertab-legacy-ptb-v1-v3-intake` on a new isolated branch;
+1. begin from the final documentation-closure head of `work/powertab-pt2-v1-v10-investigation` on a new isolated branch;
 2. perform read-only format/version, decoder, licensing, and fixture-provenance research first;
 3. acquire or create lawful representative fixtures before implementation;
 4. normalize into the existing shared semantic document;
@@ -190,7 +232,9 @@ Before implementing an older `.pt2` version:
 6. keep hosted Actions out of exploratory diagnosis and use them only for intentional acceptance checkpoints after source gates pass;
 7. require bounded real-iPhone VoiceOver acceptance before support is claimed.
 
-No merge to `main`, playback reopening, teacher-mode work, or upstream modification is implied by beginning another PowerTab investigation.
+TuxGuitar `.tg` and TablEdit `.tef` remain deferred candidates until a separate prioritization decision selects the next family.
+
+No merge to `main`, playback reopening, teacher-mode work, or upstream modification is implied by beginning another format investigation.
 
 ## Testing responsibility
 
