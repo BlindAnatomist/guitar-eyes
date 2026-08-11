@@ -107,7 +107,7 @@ describe("buildStructuredTabReaderDocuments", () => {
     expect(result).toMatchObject({
       requiresTrackSelection: true,
       sourceFormat: "tuxguitar",
-      sourceFormatLabel: "TuxGuitar TuxGuitar File Format - 1.5 tablature",
+      sourceFormatLabel: "TuxGuitar 1.5 tablature",
       selectionIntermediate: intermediate,
     });
     expect(buildGuitarProReaderDocuments).not.toHaveBeenCalled();
