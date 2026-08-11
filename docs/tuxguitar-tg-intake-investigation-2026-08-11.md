@@ -6,75 +6,37 @@ Repository: `BlindAnatomist/guitar-eyes`
 
 Branch: `work/tuxguitar-tg-intake-investigation`
 
-Accepted base and branch starting point: `10a0d7f40eedf701d55e519b8a311c1816d4e077`
+Accepted base: `10a0d7f40eedf701d55e519b8a311c1816d4e077`
 
-Status: read-only format and provenance investigation complete enough to define the first implementation checkpoint; no `.tg` application support is claimed by this record.
+Status: active provisional format-intake checkpoint. `.tg` must not be described as accepted support until corrected hosted and real-iPhone gates pass.
 
-## Governance preflight
+## Governance
 
-This investigation began only after reviewing the active repository authority and known-problems records, including:
+This branch descends from the final accepted PowerTab documentation-closure head. Fork `main` and `Phlypper/guitar-eyes` remain untouched. No pull request or merge is authorized.
 
-- `AGENTS.md`;
-- `BRANCH_AUTHORITY.md`;
-- `docs/implementation-status.md`;
-- `docs/KNOWN_PROBLEMS_AND_PROVEN_SOLUTIONS.md`;
-- `docs/known-problems-register-addendum-execution-gates.md`;
-- `docs/known-problems-register-addendum-semantic-convergence.md`;
-- `docs/known-problems-register-addendum-guitar-pro-selection.md`;
-- `docs/known-problems-register-addendum-powertab-source-evidence.md`;
-- `docs/known-problems-register-addendum-audible-execution.md`;
-- `docs/known-problems-register-addendum-duplicate-control-descriptions.md`;
-- `docs/cross-repository-execution-governance-reconciliation-2026-08-05.md`;
-- `docs/solved-problems-and-reusable-procedures.md`;
-- `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`;
-- the accepted shared-semantic-core and convergence records.
+The governing rules remain the canonical known-problems register, execution-gate addendum, semantic-convergence addendum, cross-repository execution reconciliation, zero-dollar policy, branch authority, and implementation status.
 
-The branch was created directly from the final PowerTab documentation-closure head. No GitHub Actions run, deployment, pull request, merge, or upstream modification was performed.
-
-## Governing architecture
-
-`.tg` must follow the existing pipeline:
-
-`source -> version/container validation -> bounded TuxGuitar intermediate -> shared semantic tablature document -> existing reader adapters`
-
-No TuxGuitar-specific iPhone reader, desktop reader, speech system, playback system, or alternate musical model is permitted.
-
-The existing `src/structuredTabReaderDocuments.js` is the correct high-level insertion boundary for `.tg`. The format is already reserved as `tuxguitar` in `src/tabFormatDetector.js`.
+TuxGuitar must normalize into the existing shared semantic tablature document. It may not create a separate iPhone reader, desktop reader, speech system, playback system, or musical model.
 
 ## Producer authority
 
-Producer repository inspected: `helge17/tuxguitar`.
+Pinned producer source for the active correction:
 
-Pinned producer release for this investigation: TuxGuitar `2.1.0`.
+- repository: `helge17/tuxguitar`;
+- release: `2.1.0`;
+- tag commit: `2c46e2a1cccdfdfa6e6f2692f241bd60bf418129`;
+- license: LGPL 2.1.
 
-TuxGuitar 2.0.0 introduced a new native `.tg` format that older TuxGuitar versions cannot read. Current TuxGuitar retains compatibility readers for historical native formats and explicitly permits exporting older `.tg` formats through File -> Export.
-
-TuxGuitar identifies its license as GNU Lesser General Public License 2.1. The preferred Guitar Eyes architecture is therefore an independently written bounded decoder informed by format behavior and source evidence rather than copying the producer's Java implementation into the browser application.
-
-## Modern `.tg` format
-
-The current native writer uses a ZIP container with exactly two files:
+Modern native `.tg` uses ZIP with exactly:
 
 1. `version.txt`;
 2. `content.xml`.
 
-The current embedded native file-format version is `2.0.0`.
+The current native file-format version remains `2.0.0`. The XML `<TGVersion>` element records producer application-version metadata and is not the native-format version gate.
 
-The TuxGuitar 2.1.0 reader:
+## Historical native-format map
 
-1. reads internal version evidence from `version.txt`;
-2. rejects native major versions below 2 in the modern reader;
-3. rejects future major versions above 2;
-4. treats a higher minor version as newer-format evidence rather than inferring compatibility from the `.tg` extension;
-5. parses `content.xml` only after the version gate.
-
-The producer requires the modern ZIP container to contain exactly those two archive entries. Missing, duplicate-by-count, or extra archive content is not accepted as the modern native container.
-
-The producer's XML path disables DOCTYPE declarations and XInclude. Guitar Eyes must preserve equivalent safe-XML behavior and must not evaluate embedded code, classes, entities, scripts, or executable material.
-
-## Historical native-format matrix in TuxGuitar 2.1.0
-
-Current compatibility readers are registered for:
+Current TuxGuitar compatibility readers cover:
 
 - 0.7;
 - 0.8;
@@ -85,7 +47,7 @@ Current compatibility readers are registered for:
 - 1.3;
 - 1.5.
 
-Current compatibility writers/exporters are registered for:
+Current compatibility writers/exporters cover:
 
 - 1.0;
 - 1.1;
@@ -93,124 +55,84 @@ Current compatibility writers/exporters are registered for:
 - 1.3;
 - 1.5.
 
-No native 1.4 compatibility module is present in the current compatibility registration.
+No native 1.4 compatibility module is registered.
 
-Historical internal signatures are not uniform. Evidence inspected includes:
+Versions 0.7 through 0.9 remain deferred archival work because current TuxGuitar reads but does not register writers for them.
 
-- 0.7 reader: `TG_DEVEL-0.01`;
-- 0.8: `TG_DEVEL-0.8`;
-- 0.9: `TuxGuitar File Format - 0.9`;
-- 1.0: `TuxGuitar File Format - 1.0`;
-- 1.1: `TuxGuitar File Format - 1.1`;
-- 1.2: `TuxGuitar File Format - 1.2`;
-- 1.3: `TuxGuitar File Format - 1.3`;
-- 1.5: `TuxGuitar File Format - 1.5`.
+## First compatibility corpus
 
-Therefore version detection must use internal evidence before normalization. File extension alone is never support proof.
+The provisional first corpus is:
 
-## First compatibility checkpoint
+1. native 1.0;
+2. native 1.1;
+3. native 1.2;
+4. native 1.3;
+5. native 1.5;
+6. modern native file format 2.0.0.
 
-The recommended first `.tg` implementation corpus is:
+All six project fixtures are deterministic, project-authored, source-derived evidence. None is a TuxGuitar application export and none may be described as one.
 
-1. current native 2.x container, bounded initially to exact major-version-2 evidence and the producer-proven profile;
-2. legacy native 1.0;
-3. legacy native 1.1;
-4. legacy native 1.2;
-5. legacy native 1.3;
-6. legacy native 1.5.
+The musical proof remains the existing CC0 six-position Guitar Eyes score: standard six-string guitar, four single-note events, one rest, one final two-note chord, two 4/4 measures, and one palm-mute marker.
 
-Versions 0.7, 0.8, and 0.9 are deferred to a separate archival checkpoint because current TuxGuitar can read them but does not register writers for them. They require separate lawful producer or historical-fixture provenance rather than inference from the later writers.
+## Modern producer-source correction
 
-This checkpoint does not create or imply a TuxGuitar 1.4 route.
+A later direct TuxGuitar 2.1.0 source audit found that the earlier green source gate and hosted proof contained a false modern compatibility loop:
 
-## Fixture provenance plan
+1. they treated XML application-version metadata as though it were the native file-format version;
+2. the modern fixture wrote semantic tick values into `preciseStart` instead of TuxGuitar precise units.
 
-Use one small project-authored musical proof score whose semantics are owned and known by Guitar Eyes.
+The active correction record is:
 
-Produce canonical `.tg` binaries with the pinned TuxGuitar producer path:
+`docs/tuxguitar-tg-producer-source-correction-2026-08-11.md`.
 
-- save the proof score in the current native format;
-- export the same score through the producer's registered 1.0, 1.1, 1.2, 1.3, and 1.5 native exporters.
+Correct modern beat-start evidence for the six-position proof is:
 
-For every binary preserve:
+- `2882880`;
+- `5765760`;
+- `7207200`;
+- `8648640`;
+- `14414400`;
+- `20180160`.
 
-- producer release and source authority;
-- generation method;
-- exact byte count;
-- SHA-256 hash;
-- internal version/signature evidence;
-- a structural audit;
-- the expected shared semantic positions;
-- any notices required for bundled third-party producer evidence.
+The corrected modern source-derived fixture uses:
 
-Do not call a hand-constructed serializer-shaped file a producer export. Do not adopt an upstream or third-party song fixture without an explicit file-level provenance and redistribution decision.
+- `version.txt`: `TuxGuitar_file_format 2.0.0`;
+- producer application metadata: 2.1.0;
+- exact two-entry ZIP structure;
+- strict bounded archive/XML validation;
+- the producer-required precise-start sequence.
 
-## Existing Guitar Eyes machinery to reuse
+## Application architecture
 
-Guitar Eyes already contains a bounded ZIP implementation in `src/compressedMusicXmlImporter.js` with:
+The provisional route is integrated at the structured-format boundary:
 
-- archive-size limits;
-- entry-count and central-directory limits;
-- ZIP64 rejection;
-- encryption rejection;
-- compression-method validation;
-- local/central filename and size consistency checks;
-- extraction-size limits;
-- safe relative-path handling;
-- entity/DOCTYPE rejection for XML parsing.
+- `.tg` is recognized by `src/tabFormatDetector.js`;
+- uploads route through the existing structured-format path;
+- `src/tuxGuitarDecoder.js` validates source/container evidence;
+- `src/tuxGuitarTrackInventory.js` preserves explicit track-selection architecture;
+- `src/tuxGuitarSourceNormalizer.js` converts the bounded intermediate into the shared semantic document;
+- `src/tuxGuitarReaderDocuments.js` supplies the same document to the accepted desktop/iPhone readers;
+- `src/structuredTabReaderDocuments.js` remains the common lazy structured-format insertion point.
 
-Modern `.tg` should reuse or extract the generic safe ZIP primitives from that accepted implementation rather than add a new archive dependency merely for TuxGuitar.
+The first proof profile remains intentionally narrow: one supported standard-tuned six-string guitar track, one active voice, 4/4 measures, basic fretted/open/rest/chord semantics, supported durations, and the demonstrated palm-mute marker. Unsupported structures must fail explicitly rather than be guessed.
 
-The structured-format route should remain lazy and normalize into the existing semantic document. Existing desktop and iPhone readers should not need TuxGuitar-specific musical interpretation.
+## Earlier non-device gates
 
-## Safe first semantic profile
+GitHub Actions source-gate run `31521371357` passed the earlier exact prepared source, focused tests, complete inherited suite, production build, and artifact inspection.
 
-The first producer-authored proof should remain deliberately small and comparable with prior format checkpoints:
+The earlier hosted proof then built, deployed, and read back candidate source `a50997d72010f10d2bfd415e0d44a6da2fea5c5b` successfully.
 
-- one supported six-string guitar track;
-- standard tuning;
-- one active voice;
-- a small sequence containing fretted notes, an open string, a simultaneous chord, a rest, and supported durations;
-- ordinary 4/4 measure structure;
-- no requirement to interpret every TuxGuitar effect or composition feature.
+Those results are retained as historical evidence of internal reproducibility and deployment integrity. They are superseded as modern producer-compatibility evidence by the producer-source correction above. The old hosted candidate must not be sent to the owner for real-device acceptance.
 
-Any additional track, alternate tuning, multiple active voices, unsupported technique, repeat structure, key/meter change, percussion/drum semantics, chord diagram, automation, embedded class/material, or other unproved structure must be rejected or preserved as explicitly unsupported rather than guessed.
+## Current stop condition
 
-If producer-authentic evidence shows that a broader structure is necessary even for this minimal score, the checkpoint must document that structure before implementation widens.
+Before `.tg` support can be claimed:
 
-## Security boundary
+1. corrected deterministic fixture verification must pass;
+2. corrected focused TuxGuitar tests must pass;
+3. the complete inherited suite must pass;
+4. production build and artifact inspection must pass;
+5. one intentional corrected hosted candidate must pass live read-back;
+6. bounded real-iPhone Safari and VoiceOver acceptance must pass.
 
-TuxGuitar 2.1.0 records a `.tg` security fix in its release history. This investigation does not infer an unproved exploit mechanism from that note.
-
-Guitar Eyes must nevertheless use a data-only decoder:
-
-- no Java class loading;
-- no object deserialization runtime;
-- no dynamic evaluation;
-- no script execution;
-- no external resource loading;
-- bounded archive and text sizes;
-- strict internal-version evidence;
-- explicit rejection of malformed or unsupported structures.
-
-## Execution boundary
-
-No GitHub Actions work is authorized for exploratory `.tg` diagnosis.
-
-The next work should occur in the least expensive capable environment and should stop before hosted acceptance until:
-
-1. canonical producer-authentic fixtures exist and are hashed/audited;
-2. source-version detection is deterministic;
-3. the bounded decoder and normalizer pass focused tests;
-4. inherited reader contracts remain intact;
-5. the complete automated suite and production build pass outside exploratory hosted execution where possible.
-
-Only then is one intentional hosted acceptance checkpoint appropriate. Real-iPhone Safari and VoiceOver acceptance remains required before `.tg` support can be claimed.
-
-## Current verdict
-
-Read-only format-family investigation: sufficient to proceed.
-
-Application implementation: not yet begun by this record.
-
-Recommended next action: materialize the producer-authentic six-file corpus for native 2.x, 1.0, 1.1, 1.2, 1.3, and 1.5, audit the binaries, then implement one version-evidenced TuxGuitar intake path into the existing shared semantic document.
+No playback, teacher mode, merge, pull request, upstream modification, or archival 0.7-0.9 expansion is authorized by this checkpoint.

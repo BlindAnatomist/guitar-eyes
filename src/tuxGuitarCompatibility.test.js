@@ -3,7 +3,7 @@ import path from "path";
 import { createHash } from "crypto";
 import { TextDecoder as NodeTextDecoder } from "util";
 import { describePlayablePosition } from "./positionDescription";
-import { decodeTuxGuitarFile, TuxGuitarImportError } from "./tuxGuitarDecoder";
+import { decodeTuxGuitarFile } from "./tuxGuitarDecoder";
 import { normalizeVerifiedTuxGuitarIntermediate } from "./tuxGuitarSourceNormalizer";
 import { buildTuxGuitarReaderDocuments } from "./tuxGuitarReaderDocuments";
 
@@ -11,6 +11,9 @@ if (typeof globalThis.TextDecoder !== "function") {
   globalThis.TextDecoder = NodeTextDecoder;
 }
 
+const UPSTREAM_RELEASE = "2.1.0";
+const UPSTREAM_COMMIT = "2c46e2a1cccdfdfa6e6f2692f241bd60bf418129";
+const PRECISE_STARTS = [2882880, 5765760, 7207200, 8648640, 14414400, 20180160];
 const CASES = [
   ["1.0", "10", "TG_1_0", "TuxGuitar File Format - 1.0"],
   ["1.1", "11", "TG_1_1", "TuxGuitar File Format - 1.1"],
@@ -26,12 +29,15 @@ function fixturePath(filename) {
 function fixtureBytes(code) {
   return fs.readFileSync(fixturePath(`tuxguitar-${code}-six-position.tg`));
 }
-function fixtureFile(code) {
-  const bytes = fixtureBytes(code);
+function asFile(name, bytes) {
   return {
-    name: `tuxguitar-${code}-six-position.tg`,
-    arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+    name,
+    arrayBuffer: async () =>
+      bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
   };
+}
+function fixtureFile(code) {
+  return asFile(`tuxguitar-${code}-six-position.tg`, fixtureBytes(code));
 }
 function legacyHeaderFile(header) {
   const bytes = [header.length];
@@ -39,11 +45,15 @@ function legacyHeaderFile(header) {
     const code = character.charCodeAt(0);
     bytes.push((code >> 8) & 0xff, code & 0xff);
   }
-  const buffer = Buffer.from(bytes);
-  return {
-    name: "historical.tg",
-    arrayBuffer: async () => buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
-  };
+  return asFile("historical.tg", Buffer.from(bytes));
+}
+function tamperAscii(bytes, original, replacement) {
+  expect(original).toHaveLength(replacement.length);
+  const copy = Buffer.from(bytes);
+  const offset = copy.indexOf(Buffer.from(original));
+  expect(offset).toBeGreaterThanOrEqual(0);
+  copy.write(replacement, offset, replacement.length, "utf8");
+  return copy;
 }
 function expectSixPositionIntermediate(intermediate, sourceVersion, formatVersion) {
   expect(intermediate).toMatchObject({
@@ -54,12 +64,20 @@ function expectSixPositionIntermediate(intermediate, sourceVersion, formatVersio
       schemaVersion: 1,
       extensionFamily: ".tg",
       formatVersion,
-      upstreamRelease: "2.0.1",
-      upstreamCommit: "533efa74e6a56bdae28bb776358305607c79cbff",
+      upstreamRelease: UPSTREAM_RELEASE,
+      upstreamCommit: UPSTREAM_COMMIT,
       declaredTrackCount: 1,
       decodedTrackCount: 1,
     },
   });
+  if (sourceVersion === "TG_2_0") {
+    expect(intermediate.versionEvidence.producerApplicationVersion).toBe("2.1.0");
+    expect(
+      intermediate.tracks[0].staves[0].bars.flatMap((bar) =>
+        bar.voices[0].beats.map((beat) => beat.sourcePreciseStart)
+      )
+    ).toEqual(PRECISE_STARTS);
+  }
   expect(intermediate.tracks[0]).toMatchObject({ name: "Proof Guitar", isPercussion: false });
   const staff = intermediate.tracks[0].staves[0];
   expect(staff.tuningMidiHighToLow).toEqual([64, 59, 55, 50, 45, 40]);
@@ -127,14 +145,14 @@ describe("bounded TuxGuitar .tg compatibility", () => {
     expect(result.desktopBlocks).toHaveLength(1);
   });
 
-  test("verifies every binary, base64 transport twin, byte count, and hash", () => {
+  test("verifies every binary, base64 transport twin, byte count, hash, and producer authority", () => {
     const manifest = JSON.parse(fs.readFileSync(fixturePath("manifest.json"), "utf8"));
     expect(manifest).toMatchObject({
       schemaVersion: 1,
       fixtureFamily: "TUXGUITAR_TG_SOURCE_DERIVED",
       sourceLicense: "CC0-1.0",
-      upstreamRelease: "2.0.1",
-      upstreamCommit: "533efa74e6a56bdae28bb776358305607c79cbff",
+      upstreamRelease: UPSTREAM_RELEASE,
+      upstreamCommit: UPSTREAM_COMMIT,
     });
     expect(manifest.fixtures).toHaveLength(6);
     for (const fixture of manifest.fixtures) {
@@ -148,6 +166,13 @@ describe("bounded TuxGuitar .tg compatibility", () => {
       expect(binary.byteLength).toBe(fixture.bytes);
       expect(createHash("sha256").update(binary).digest("hex")).toBe(fixture.sha256);
     }
+    expect(manifest.fixtures.find((fixture) => fixture.version === "2.0")).toMatchObject({
+      bytes: 2529,
+      sha256: "f9c3536a8db9f4ebf9216d4223ad3a7994f225b7e37faaf4bf3285fb8f7b200a",
+      producerApplicationVersion: "2.1.0",
+      contentXmlBytes: 2284,
+      contentXmlSha256: "aa3bb84a2894aef519fc37355c9ffb60a9ae048306b6cc2f91338227c62133e2",
+    });
   });
 
   test("recognizes but defers the producer's read-only 0.9 generation", async () => {
@@ -167,7 +192,7 @@ describe("bounded TuxGuitar .tg compatibility", () => {
     );
   });
 
-  test("uses a distinct container family for modern 2.0", async () => {
+  test("uses a distinct exact two-entry container for modern 2.0", async () => {
     const legacy = await decodeTuxGuitarFile(fixtureFile("15"));
     const modern = await decodeTuxGuitarFile(fixtureFile("20"));
     expect(legacy.versionEvidence.containerFamily).toBe("TUXGUITAR_LEGACY_BINARY");
@@ -176,6 +201,35 @@ describe("bounded TuxGuitar .tg compatibility", () => {
       versionText: "TuxGuitar_file_format 2.0.0",
       versionEntry: "version.txt",
       contentEntry: "content.xml",
+      producerApplicationVersion: "2.1.0",
+    });
+  });
+
+  test("rejects a modern source-derived file whose producer preciseStart evidence is wrong", async () => {
+    const bytes = tamperAscii(fixtureBytes("20"), "2882880", "2882881");
+    await expect(decodeTuxGuitarFile(asFile("wrong-time.tg", bytes))).rejects.toMatchObject({
+      name: "TuxGuitarImportError",
+      code: "INVALID_TUXGUITAR_PRECISE_START",
+    });
+  });
+
+  test("rejects modern application-version metadata outside the proven 2.0-2.1 producer range", async () => {
+    const bytes = tamperAscii(fixtureBytes("20"), 'minor="1"', 'minor="2"');
+    await expect(decodeTuxGuitarFile(asFile("future-producer.tg", bytes))).rejects.toMatchObject({
+      name: "TuxGuitarImportError",
+      code: "UNSUPPORTED_TUXGUITAR_PRODUCER_VERSION",
+    });
+  });
+
+  test("rejects a future modern native major version instead of inferring compatibility from .tg", async () => {
+    const bytes = tamperAscii(
+      fixtureBytes("20"),
+      "TuxGuitar_file_format 2.0.0",
+      "TuxGuitar_file_format 3.0.0"
+    );
+    await expect(decodeTuxGuitarFile(asFile("future-native.tg", bytes))).rejects.toMatchObject({
+      name: "TuxGuitarImportError",
+      code: "UNSUPPORTED_TUXGUITAR_VERSION",
     });
   });
 });
