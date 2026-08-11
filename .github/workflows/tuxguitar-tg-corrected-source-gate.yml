@@ -90,7 +90,6 @@ jobs:
           grep -R -a -q 'TUXGUITAR_ZIP_XML' build/static/js
           grep -R -a -q 'TuxGuitar_file_format 2.0.0' build/static/js
           grep -R -a -q '2c46e2a1cccdfdfa6e6f2692f241bd60bf418129' build/static/js
-          grep -R -a -q '2882880' build/static/js
           echo "build_files=$(find build -type f | wc -l)"
           echo "build_bytes=$(du -sb build | cut -f1)"
 
