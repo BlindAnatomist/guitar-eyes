@@ -1,38 +1,23 @@
-name: TuxGuitar bass verification exception
+name: iPhone extension verification
 
 on:
-  push:
-    branches:
-      - work/tuxguitar-standard-bass-profile
-    paths:
-      - .github/workflows/iphone-audit.yml
+  workflow_dispatch:
 
 concurrency:
-  group: tuxguitar-standard-bass-authorized-exception
+  group: iphone-extension-verification-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
-    name: Verify repaired TuxGuitar bass candidate
+    name: Test and build bounded iPhone proof
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Check out exact repaired candidate
+      - name: Check out requested source
         uses: actions/checkout@v4
-        with:
-          ref: 461c63c3f36f78d9e356442506441f68efd5be71
-
-      - name: Confirm exact candidate
-        shell: bash
-        run: |
-          set -euo pipefail
-          actual="$(git rev-parse HEAD)"
-          expected="461c63c3f36f78d9e356442506441f68efd5be71"
-          printf 'expected=%s\nactual=%s\n' "$expected" "$actual"
-          test "$actual" = "$expected"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -41,55 +26,96 @@ jobs:
           cache: npm
 
       - name: Install locked dependencies
+        id: install
         shell: bash
-        run: npm ci --no-audit --no-fund
+        run: |
+          set +e
+          npm ci --no-audit --no-fund > install.log 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
 
-      - name: Run focused TuxGuitar guitar and bass proof
+      - name: Run automated tests once
+        id: test
         shell: bash
-        run: CI=true npm test -- --watchAll=false --runTestsByPath src/tuxGuitarCompatibility.test.js src/tuxGuitarBassCompatibility.test.js
-
-      - name: Run complete inherited suite
-        shell: bash
-        run: CI=true npm test -- --watchAll=false
+        run: |
+          set +e
+          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
+            CI=true npm test -- --watchAll=false > test.log 2>&1
+            code=$?
+          else
+            printf '%s\n' 'Skipped because npm ci failed.' > test.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Build production application
-        shell: bash
-        run: npm run build
-
-      - name: Inspect bounded feature and production asset
+        id: build
         shell: bash
         run: |
-          set -euo pipefail
-          feature_files=(
-            src/tuxGuitarProfileDecoder.js
-            src/tuxGuitarStandardBassAdapter.js
-            src/tuxGuitarStandardBassLegacy.js
-            src/tuxGuitarStandardBassModern.js
-            src/tuxGuitarStandardBassShared.js
-            src/tuxGuitarStandardBassZip.js
-            src/tuxGuitarReaderDocuments.js
-          )
-          if grep -Ein 'AudioContext|AudioWorklet|alphaSynth|soundfont|\.sf2|\.mp3|\.wav|new Worker|fetch\(' "${feature_files[@]}"; then
-            echo 'Unexpected playback, worker, network, or audio machinery in the bounded bass source.' >&2
+          set +e
+          if [ "${{ steps.install.outputs.exit_code }}" = "0" ]; then
+            npm run build > build.log 2>&1
+            code=$?
+          else
+            printf '%s\n' 'Skipped because npm ci failed.' > build.log
+            code=125
+          fi
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Write repository verification result
+        shell: bash
+        run: |
+          mkdir -p docs
+          {
+            echo '# Bounded iPhone Proof Automated Results'
+            echo
+            echo "Generated from audit-branch commit: \`$GITHUB_SHA\`"
+            echo
+            echo "Node version: \`$(node --version)\`"
+            echo
+            echo "npm version: \`$(npm --version)\`"
+            echo
+            echo '## Result summary'
+            echo
+            echo "- npm ci exit code: \`${{ steps.install.outputs.exit_code }}\`"
+            echo "- automated test exit code: \`${{ steps.test.outputs.exit_code }}\`"
+            echo "- production build exit code: \`${{ steps.build.outputs.exit_code }}\`"
+            echo
+            echo 'Exit code 0 means success. Exit code 125 means the command was skipped because installation failed.'
+            echo
+            echo '## npm ci log'
+            echo
+            tail -n 120 install.log | sed 's/^/    /'
+            echo
+            echo '## Automated test log'
+            echo
+            tail -n 200 test.log | sed 's/^/    /'
+            echo
+            echo '## Production build log'
+            echo
+            tail -n 160 build.log | sed 's/^/    /'
+          } > docs/proof-automated-results.md
+
+      - name: Commit verification result to audit branch
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/proof-automated-results.md
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m 'docs: record intentional proof checkpoint [skip ci]'
+          git push
+
+      - name: Enforce verification result
+        shell: bash
+        run: |
+          if [ "${{ steps.install.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.test.outputs.exit_code }}" != "0" ] || \
+             [ "${{ steps.build.outputs.exit_code }}" != "0" ]; then
             exit 1
           fi
-          test -f build/index.html
-          test -n "$(find build/static/js -type f -name '*.js' -print -quit)"
-
-      - name: Record compact verification evidence
-        if: always()
-        shell: bash
-        run: |
-          {
-            echo 'candidate=461c63c3f36f78d9e356442506441f68efd5be71'
-            echo "node=$(node --version 2>/dev/null || true)"
-            echo "npm=$(npm --version 2>/dev/null || true)"
-          } > /tmp/tuxguitar-bass-exception-evidence.txt
-
-      - name: Upload short-retention evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tuxguitar-standard-bass-authorized-exception
-          retention-days: 1
-          path: /tmp/tuxguitar-bass-exception-evidence.txt
