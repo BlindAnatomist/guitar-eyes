@@ -1,6 +1,11 @@
 name: iPhone extension verification
 
 on:
+  push:
+    branches:
+      - work/tuxguitar-standard-bass-profile
+    paths:
+      - .github/workflows/iphone-audit.yml
   workflow_dispatch:
 
 concurrency:
