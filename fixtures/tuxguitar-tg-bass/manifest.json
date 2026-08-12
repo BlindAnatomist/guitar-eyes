@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "fixtureFamily": "TUXGUITAR_TG_STANDARD_BASS_SOURCE_DERIVED",
+  "sourceLicense": "CC0-1.0",
+  "sourcePath": "fixtures/tuxguitar-tg-bass/source.json",
+  "upstreamRepository": "helge17/tuxguitar",
+  "upstreamRelease": "2.1.0",
+  "upstreamCommit": "2c46e2a1cccdfdfa6e6f2692f241bd60bf418129",
+  "profile": {
+    "instrument": "bass",
+    "stringCount": 4,
+    "tuningMidiHighToLow": [
+      43,
+      38,
+      33,
+      28
+    ],
+    "clef": "bass"
+  },
+  "fixtures": [
+    {
+      "version": "1.0",
+      "file": "tuxguitar-10-standard-bass.tg",
+      "bytes": 241,
+      "sha256": "b03690ba0cb37c41a8ee93901862b9eda48b3e695f45a6375cfec3f50cdf0edd",
+      "container": "legacy-binary",
+      "producerExported": false
+    },
+    {
+      "version": "1.1",
+      "file": "tuxguitar-11-standard-bass.tg",
+      "bytes": 246,
+      "sha256": "38cf6b81c01ae086a75f687eb0054161748fa72b42fd2415150aaa03dc85ee94",
+      "container": "legacy-binary",
+      "producerExported": false
+    },
+    {
+      "version": "1.2",
+      "file": "tuxguitar-12-standard-bass.tg",
+      "bytes": 312,
+      "sha256": "12d81b67afd96ed9d09ab81a338453f61a77b3739b9572e0d1602f7ab2701eb3",
+      "container": "legacy-binary",
+      "producerExported": false
+    },
+    {
+      "version": "1.3",
+      "file": "tuxguitar-13-standard-bass.tg",
+      "bytes": 345,
+      "sha256": "8e7cc10d1f704d6652cfe85117e6bb9a775d60c08e0c23ef3141bfcfe711338a",
+      "container": "legacy-binary",
+      "producerExported": false
+    },
+    {
+      "version": "1.5",
+      "file": "tuxguitar-15-standard-bass.tg",
+      "bytes": 345,
+      "sha256": "f7260e3f23c53bfc3446fc7b090d8b9d83f675feb4a05200bc70af8605c36668",
+      "container": "legacy-binary",
+      "producerExported": false
+    },
+    {
+      "version": "2.0",
+      "file": "tuxguitar-20-standard-bass.tg",
+      "bytes": 2485,
+      "sha256": "1c10dec929f09a13cb219532d62db0c65e0697a7d502ed26e3a8aeea5cc4e2d3",
+      "container": "zip-xml",
+      "producerExported": false,
+      "producerApplicationVersion": "2.1.0",
+      "contentXmlBytes": 2240,
+      "contentXmlSha256": "2d8d000c9c3afb3e202a346c0601cd546bb37851eb495522bb6f429ec8742e75"
+    }
+  ]
+}

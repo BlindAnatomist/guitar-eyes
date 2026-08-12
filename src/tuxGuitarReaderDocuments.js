@@ -1,5 +1,6 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
-import { decodeTuxGuitarFile, TuxGuitarImportError } from "./tuxGuitarDecoder";
+import { TuxGuitarImportError } from "./tuxGuitarDecoder";
+import { decodeTuxGuitarProfileFile } from "./tuxGuitarProfileDecoder";
 import { normalizeVerifiedTuxGuitarIntermediate } from "./tuxGuitarSourceNormalizer";
 import { buildTuxGuitarTrackInventory } from "./tuxGuitarTrackInventory";
 
@@ -20,7 +21,7 @@ function sourceFormatLabel(intermediate) {
 export async function buildTuxGuitarReaderDocuments(
   file,
   {
-    decode = decodeTuxGuitarFile,
+    decode = decodeTuxGuitarProfileFile,
     normalize = normalizeVerifiedTuxGuitarIntermediate,
     inventory = buildTuxGuitarTrackInventory,
     intermediate = null,
@@ -37,7 +38,7 @@ export async function buildTuxGuitarReaderDocuments(
       .join(" ");
     throw new TuxGuitarImportError(
       reasons ||
-        "The TuxGuitar file contains no supported six-string guitar track in the first proof profile.",
+        "The TuxGuitar file contains no supported standard four-string bass or six-string guitar track in the proven profile.",
       "NO_SUPPORTED_TUXGUITAR_TRACK"
     );
   }
