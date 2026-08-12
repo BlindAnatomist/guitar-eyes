@@ -1,7 +1,10 @@
 import fs from "fs";
 import path from "path";
 import { createHash } from "crypto";
-import { TextDecoder as NodeTextDecoder } from "util";
+import {
+  TextDecoder as NodeTextDecoder,
+  TextEncoder as NodeTextEncoder,
+} from "util";
 import { decodeTuxGuitarFile } from "./tuxGuitarDecoder";
 import { decodeTuxGuitarProfileFile } from "./tuxGuitarProfileDecoder";
 import { normalizeVerifiedTuxGuitarIntermediate } from "./tuxGuitarSourceNormalizer";
@@ -11,6 +14,9 @@ import { describePlayablePosition } from "./positionDescription";
 
 if (typeof globalThis.TextDecoder !== "function") {
   globalThis.TextDecoder = NodeTextDecoder;
+}
+if (typeof globalThis.TextEncoder !== "function") {
+  globalThis.TextEncoder = NodeTextEncoder;
 }
 
 const UPSTREAM_RELEASE = "2.1.0";
