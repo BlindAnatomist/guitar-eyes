@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 6e60691d9870d0cf64a3f0445c12d18fb71627e3
+          fetch-depth: 0
 
       - name: Confirm exact authority and bounded source diff
         shell: bash
