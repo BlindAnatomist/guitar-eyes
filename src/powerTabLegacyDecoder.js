@@ -1,8 +1,13 @@
 import { PowerTabImportError } from "./powerTabErrors";
 import { decodePowerTabLegacyHistoricalBytes } from "./powerTabLegacyHistoricalDecoder";
 import { decodePowerTabLegacyV17Bytes } from "./powerTabLegacyV17Decoder";
+import { decodePowerTabLegacyStandardBassBytes } from "./powerTabLegacyStandardBassDecoder";
 
 const DEFAULT_MAX_FILE_BYTES = 5 * 1024 * 1024;
+const BASS_FALLBACK_CODES = new Set([
+  "UNSUPPORTED_POWERTAB_LEGACY_PLAYER_COUNT",
+  "UNSUPPORTED_POWERTAB_LEGACY_CONTENT_TYPE",
+]);
 
 function fail(message, code) {
   throw new PowerTabImportError(message, code);
@@ -35,6 +40,24 @@ function readVersion(bytes) {
   return bytes[4] | (bytes[5] << 8);
 }
 
+function decodeWithStandardBassFallback(primaryDecoder, bytes, options) {
+  try {
+    return primaryDecoder(bytes, options);
+  } catch (error) {
+    if (
+      !(error instanceof PowerTabImportError) ||
+      !BASS_FALLBACK_CODES.has(error.code)
+    ) {
+      throw error;
+    }
+    try {
+      return decodePowerTabLegacyStandardBassBytes(bytes, options);
+    } catch {
+      throw error;
+    }
+  }
+}
+
 export function decodePowerTabLegacyBytes(input, options = {}) {
   const bytes = asBytes(input);
   const maxFileBytes = options.maxFileBytes || DEFAULT_MAX_FILE_BYTES;
@@ -47,10 +70,18 @@ export function decodePowerTabLegacyBytes(input, options = {}) {
 
   const fileVersion = readVersion(bytes);
   if (fileVersion >= 1 && fileVersion <= 3) {
-    return decodePowerTabLegacyHistoricalBytes(bytes, options);
+    return decodeWithStandardBassFallback(
+      decodePowerTabLegacyHistoricalBytes,
+      bytes,
+      options
+    );
   }
   if (fileVersion === 4) {
-    return decodePowerTabLegacyV17Bytes(bytes, options);
+    return decodeWithStandardBassFallback(
+      decodePowerTabLegacyV17Bytes,
+      bytes,
+      options
+    );
   }
   fail(
     `The legacy PowerTab file reports unsupported file-version value ${fileVersion}. Guitar Eyes currently recognizes historical values 1 through 4 only.`,

@@ -1,0 +1,79 @@
+{
+  "title": "Guitar Eyes PowerTab Standard Bass Proof",
+  "artist": "Guitar Eyes",
+  "player": "Proof Bass",
+  "tuningName": "Bass-Standard",
+  "tuningMidiHighToLow": [
+    43,
+    38,
+    33,
+    28
+  ],
+  "measureBoundaries": [
+    0,
+    50,
+    100
+  ],
+  "positions": [
+    {
+      "coordinate": 10,
+      "duration": 4,
+      "notes": [
+        {
+          "stringIndexHighToLow": 3,
+          "fret": 3
+        }
+      ]
+    },
+    {
+      "coordinate": 20,
+      "duration": 8,
+      "notes": [
+        {
+          "stringIndexHighToLow": 2,
+          "fret": 0
+        }
+      ]
+    },
+    {
+      "coordinate": 30,
+      "duration": 8,
+      "notes": [
+        {
+          "stringIndexHighToLow": 2,
+          "fret": 2
+        }
+      ]
+    },
+    {
+      "coordinate": 40,
+      "duration": 2,
+      "notes": [
+        {
+          "stringIndexHighToLow": 1,
+          "fret": 0
+        }
+      ]
+    },
+    {
+      "coordinate": 60,
+      "duration": 2,
+      "rest": true,
+      "notes": []
+    },
+    {
+      "coordinate": 70,
+      "duration": 2,
+      "notes": [
+        {
+          "stringIndexHighToLow": 0,
+          "fret": 0
+        },
+        {
+          "stringIndexHighToLow": 1,
+          "fret": 1
+        }
+      ]
+    }
+  ]
+}
