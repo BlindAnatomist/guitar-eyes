@@ -47,6 +47,25 @@ function arraysEqual(left, right) {
   );
 }
 
+function noteCoordinatesFit(bars, stringCount) {
+  for (const bar of bars) {
+    for (const voice of Array.isArray(bar?.voices) ? bar.voices : []) {
+      for (const beat of Array.isArray(voice?.beats) ? voice.beats : []) {
+        for (const note of Array.isArray(beat?.notes) ? beat.notes : []) {
+          if (
+            !Number.isInteger(note?.stringNumberLowToHigh) ||
+            note.stringNumberLowToHigh < 1 ||
+            note.stringNumberLowToHigh > stringCount
+          ) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
 function inventoryItem(track, staff, trackIndex, staffIndex) {
   const tuning = Array.isArray(staff?.tuningMidiHighToLow)
     ? staff.tuningMidiHighToLow
@@ -54,8 +73,10 @@ function inventoryItem(track, staff, trackIndex, staffIndex) {
   const bars = Array.isArray(staff?.bars) ? staff.bars : [];
   const stringCount = tuning.length;
   const measureCount = bars.length;
-  const standardBass =
+  const standardBassTuning =
     stringCount === 4 && arraysEqual(tuning, STANDARD_BASS_MIDI);
+  const coherentCoordinates = noteCoordinatesFit(bars, stringCount);
+  const standardBass = standardBassTuning && coherentCoordinates;
   const supportedStringProfile = stringCount === 6 || standardBass;
   const supported =
     !track?.isPercussion && supportedStringProfile && measureCount > 0;
@@ -68,6 +89,10 @@ function inventoryItem(track, staff, trackIndex, staffIndex) {
   } else if (!SUPPORTED_STRING_COUNTS.has(stringCount)) {
     reasonCode = "UNSUPPORTED_STRING_COUNT";
     reason = `This ${stringCount}-string player is outside the current PowerTab profiles.`;
+  } else if (standardBassTuning && !coherentCoordinates) {
+    reasonCode = "UNSUPPORTED_STRING_COUNT";
+    reason =
+      "This four-string tuning contains note coordinates outside four strings and remains outside the fixture-proven six-string guitar profile and exact four-string bass profile.";
   } else if (stringCount === 4 && !standardBass) {
     reasonCode = "UNSUPPORTED_TUNING";
     reason =
