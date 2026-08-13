@@ -8,7 +8,8 @@ const SUPPORTED_SOURCE_VERSIONS = new Set([
   "PTB_V15",
   "PTB_V17",
 ]);
-const SUPPORTED_STRING_COUNTS = new Set([6]);
+const SUPPORTED_STRING_COUNTS = new Set([4, 6]);
+const STANDARD_BASS_MIDI = [43, 38, 33, 28];
 const PITCH_NAMES = [
   "C",
   "C#",
@@ -39,6 +40,13 @@ function plural(value, singular) {
   return value === 1 ? singular : `${singular}s`;
 }
 
+function arraysEqual(left, right) {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
 function inventoryItem(track, staff, trackIndex, staffIndex) {
   const tuning = Array.isArray(staff?.tuningMidiHighToLow)
     ? staff.tuningMidiHighToLow
@@ -46,10 +54,11 @@ function inventoryItem(track, staff, trackIndex, staffIndex) {
   const bars = Array.isArray(staff?.bars) ? staff.bars : [];
   const stringCount = tuning.length;
   const measureCount = bars.length;
+  const standardBass =
+    stringCount === 4 && arraysEqual(tuning, STANDARD_BASS_MIDI);
+  const supportedStringProfile = stringCount === 6 || standardBass;
   const supported =
-    !track?.isPercussion &&
-    SUPPORTED_STRING_COUNTS.has(stringCount) &&
-    measureCount > 0;
+    !track?.isPercussion && supportedStringProfile && measureCount > 0;
   let reason = "Available for the Guitar Eyes semantic readers.";
   let reasonCode = null;
 
@@ -58,17 +67,24 @@ function inventoryItem(track, staff, trackIndex, staffIndex) {
     reason = "Percussion does not contain supported fretted tablature.";
   } else if (!SUPPORTED_STRING_COUNTS.has(stringCount)) {
     reasonCode = "UNSUPPORTED_STRING_COUNT";
-    reason = `This ${stringCount}-string player is outside the current fixture-proven six-string guitar profile.`;
+    reason = `This ${stringCount}-string player is outside the current PowerTab profiles.`;
+  } else if (stringCount === 4 && !standardBass) {
+    reasonCode = "UNSUPPORTED_TUNING";
+    reason =
+      "This four-string player is outside the current exact standard G2 D2 A1 E1 PowerTab bass profile.";
   } else if (measureCount === 0) {
     reasonCode = "NO_MEASURES";
     reason = "This player contains no assigned tablature measures.";
   }
 
-  const instrument = stringCount === 6 ? "guitar" : null;
+  const instrument =
+    stringCount === 4 ? "bass" : stringCount === 6 ? "guitar" : null;
   const instrumentLabel =
-    instrument === "guitar"
-      ? "six-string guitar"
-      : `${stringCount}-string fretted player`;
+    instrument === "bass"
+      ? "four-string bass"
+      : instrument === "guitar"
+        ? "six-string guitar"
+        : `${stringCount}-string fretted player`;
   const trackName = String(
     track?.name || track?.shortName || `Player ${trackIndex + 1}`
   ).trim();
