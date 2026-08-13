@@ -3,6 +3,7 @@ import path from "path";
 import { describePlayablePosition } from "./positionDescription";
 import { decodePowerTabV11Document } from "./powerTabV11Decoder";
 import { normalizeVerifiedPowerTabIntermediate } from "./powerTabSourceNormalizer";
+import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
 
 function intermediate() {
   return decodePowerTabV11Document(
@@ -18,6 +19,30 @@ function intermediate() {
       )
     )
   );
+}
+
+function bassIntermediate() {
+  const value = intermediate();
+  value.tracks[0].name = "Proof Bass";
+  value.tracks[0].shortName = "Proof Bass";
+  value.tracks[0].staves[0].tuningMidiHighToLow = [43, 38, 33, 28];
+  const remap = new Map([
+    [1, 1],
+    [2, 2],
+    [3, 3],
+    [5, 3],
+    [6, 4],
+  ]);
+  value.tracks[0].staves[0].bars.forEach((bar) => {
+    bar.voices.forEach((voice) => {
+      voice.beats.forEach((beat) => {
+        beat.notes.forEach((note) => {
+          note.stringNumberLowToHigh = remap.get(note.stringNumberLowToHigh);
+        });
+      });
+    });
+  });
+  return value;
 }
 
 describe("PowerTab v11 semantic normalization", () => {
@@ -70,6 +95,40 @@ describe("PowerTab v11 semantic normalization", () => {
     );
   });
 
+  test("accepts exact standard four-string bass through inventory and semantics", () => {
+    const value = bassIntermediate();
+    const inventory = buildPowerTabTrackInventory(value);
+    const document = normalizeVerifiedPowerTabIntermediate(value);
+
+    expect(inventory).toMatchObject({
+      supportedCount: 1,
+      requiresSelection: false,
+      autoSelection: { trackIndex: 0, staffIndex: 0 },
+    });
+    expect(inventory.supportedItems[0]).toMatchObject({
+      instrument: "bass",
+      instrumentLabel: "four-string bass",
+      tuningMidiHighToLow: [43, 38, 33, 28],
+      tuningLabel: "G2, D2, A1, E1",
+      supported: true,
+    });
+    expect(document).toMatchObject({
+      type: "tablature-document",
+      sourceFormat: "powertab-pt2",
+      sourceVersion: "PT2_V11",
+      instrument: "bass",
+      instrumentLabel: "four-string bass",
+      stringCount: 4,
+      stringNamesHighToLow: ["G", "D", "A", "E"],
+      sourceTrackName: "Proof Bass",
+    });
+    expect(document.positions).toHaveLength(6);
+    expect(document.measures).toHaveLength(2);
+    expect(document.positions[4].isRest).toBe(true);
+    expect(document.positions[5].strings[0]).toMatchObject({ type: "open" });
+    expect(document.positions[5].strings[1]).toMatchObject({ type: "fret", fret: 1 });
+  });
+
   test("preserves exact v11 evidence rather than compatibility metadata", () => {
     const document = normalizeVerifiedPowerTabIntermediate(intermediate());
 
@@ -94,7 +153,6 @@ describe("PowerTab v11 semantic normalization", () => {
     expect(document.sourceFormat).toBe("powertab-pt2");
   });
 
-
   test("rejects contradictory declared player evidence", () => {
     const value = intermediate();
     value.versionEvidence = {
@@ -106,5 +164,4 @@ describe("PowerTab v11 semantic normalization", () => {
       /source evidence is missing, unsupported, or contradictory/i
     );
   });
-
 });
