@@ -1,4 +1,5 @@
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
+import { decodePowerTabLegacyBassFile } from "./powerTabLegacyBassDecoder";
 import { decodePowerTabLegacyFile } from "./powerTabLegacyDecoder";
 import { PowerTabImportError } from "./powerTabErrors";
 import { buildPowerTabTrackInventory } from "./powerTabTrackInventory";
@@ -11,6 +12,11 @@ const LEGACY_VERSION_LABELS = new Map([
   ["PTB_V17", "1.7"],
 ]);
 
+const BASS_FALLBACK_CODES = new Set([
+  "UNSUPPORTED_POWERTAB_LEGACY_PLAYER_COUNT",
+  "UNSUPPORTED_POWERTAB_LEGACY_CONTENT_TYPE",
+]);
+
 function powerTabVersionLabel(intermediate) {
   return String(
     intermediate?.versionEvidence?.powerTabVersion ||
@@ -19,12 +25,29 @@ function powerTabVersionLabel(intermediate) {
   );
 }
 
+async function decodeLegacyWithBassFallback(file, options, decode, decodeBass) {
+  try {
+    return await decode(file, options);
+  } catch (error) {
+    if (
+      !(error instanceof PowerTabImportError) ||
+      !BASS_FALLBACK_CODES.has(error.code)
+    ) {
+      throw error;
+    }
+    return decodeBass(file, options);
+  }
+}
+
 export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
   const decode = options.decode || decodePowerTabLegacyFile;
+  const decodeBass = options.decodeBass || decodePowerTabLegacyBassFile;
   const inventoryBuilder = options.inventory || buildPowerTabTrackInventory;
   const normalize =
     options.normalize || normalizeVerifiedPowerTabLegacyFamilyIntermediate;
-  const intermediate = options.intermediate || (await decode(file, options));
+  const intermediate =
+    options.intermediate ||
+    (await decodeLegacyWithBassFallback(file, options, decode, decodeBass));
   const trackInventory = inventoryBuilder(intermediate, options);
   const powerTabVersion = powerTabVersionLabel(intermediate);
 
@@ -35,7 +58,7 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
       .join(" ");
     throw new PowerTabImportError(
       reasons ||
-        `The PowerTab ${powerTabVersion} file contains no player within the bounded six-string guitar profile.`,
+        `The PowerTab ${powerTabVersion} file contains no player within the bounded six-string guitar or exact standard four-string bass profile.`,
       "NO_SUPPORTED_POWERTAB_LEGACY_PLAYER"
     );
   }
