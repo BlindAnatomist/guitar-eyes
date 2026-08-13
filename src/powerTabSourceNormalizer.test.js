@@ -119,7 +119,12 @@ describe("PowerTab v11 semantic normalization", () => {
       instrument: "bass",
       instrumentLabel: "four-string bass",
       stringCount: 4,
-      stringNamesHighToLow: ["G", "D", "A", "E"],
+      strings: [
+        { shortName: "G" },
+        { shortName: "D" },
+        { shortName: "A" },
+        { shortName: "E" },
+      ],
       sourceTrackName: "Proof Bass",
     });
     expect(document.positions).toHaveLength(6);
