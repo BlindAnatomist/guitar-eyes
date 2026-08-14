@@ -167,7 +167,11 @@ The previously accepted PowerTab six-string guitar checkpoint remains independen
 
 `Phlypper/guitar-eyes` was not modified.
 
-The fork's `main` working tree was restored to the exact upstream tree at `60c2e5de0887b1bcdd426d932632946edd07d3c3` after temporary publication machinery was removed. The fork `main` history retains temporary publication/cleanup commits, but the net file comparison against upstream is empty; no PowerTab bass runtime source was merged to `main` by this checkpoint.
+After temporary publication machinery was removed, fork `main` was restored to the exact upstream commit:
+
+`60c2e5de0887b1bcdd426d932632946edd07d3c3`
+
+Fork `main` and `Phlypper/guitar-eyes` `main` now point to that same commit. No PowerTab bass runtime source or temporary publication workflow remains on `main`.
 
 No merge to upstream or to product `main` is authorized by this record.
 
