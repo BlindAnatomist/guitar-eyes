@@ -2,7 +2,7 @@
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
-Last reconciled: August 11, 2026.
+Last reconciled: August 14, 2026.
 
 ## Repository authority
 
@@ -10,15 +10,18 @@ Last reconciled: August 11, 2026.
 - Preserve fork `main` as the clean upstream-tracking branch at `60c2e5de0887b1bcdd426d932632946edd07d3c3`.
 - Do not open a pull request or merge any work branch without the owner's explicit authorization.
 - Preserve failed and superseded branches as evidence; do not resume feature work from them.
-- The accepted format-only operational baseline is `work/tuxguitar-tg-intake-investigation`.
-- The accepted corrected TuxGuitar semantic source is `b3a8d229aee832a7f6ea994dfc7465ff07d608c3`.
-- The accepted corrected TuxGuitar hosted and real-device candidate source is `dee0ba8d63d22c47b6570778acf8dad7ed003942`.
+- The accepted format-only operational baseline is `work/accepted-bass-convergence`.
+- The accepted runtime convergence source is `67a062085c93d9fb546194d727c808960bbcaea9`.
+- The accepted TuxGuitar standard-bass closure is `1a874f34898d74f032cc2bc5a431ecb991be370d` on `work/tuxguitar-standard-bass-profile`.
+- The accepted PowerTab standard-bass closure is `8b7b7d6beb16e2675f03197fb4e701d3d1984a79` on `work/powertab-bass-clean`.
+- The previous accepted corrected TuxGuitar semantic source is `b3a8d229aee832a7f6ea994dfc7465ff07d608c3`.
+- The previous accepted corrected TuxGuitar hosted and real-device candidate source is `dee0ba8d63d22c47b6570778acf8dad7ed003942`.
 - The previous accepted historical PowerTab `.pt2` internal versions 1 through 10 source is `930d00831cb71b4fad6f4771f3009be8cb28670e` on `work/powertab-pt2-v1-v10-investigation`.
 - The previous accepted historical PowerTab `.ptb` 1.0 / 1.0.2 / 1.5 source is `2682928366f587d5afac213e8e195ba0dfb602d8` on `work/powertab-legacy-ptb-v1-v3-intake`.
 - The previous accepted legacy PowerTab 1.7 source is `937cf3892d279e54f98802f1eb649333f4b1935c` on `work/powertab-legacy-ptb-intake-evaluation`.
 - The previous accepted PowerTab `.pt2` internal-version-11 source is `c2ada9bbdf118abddc894094734314f9b6048ea6` on `work/powertab-pt2-v11-clean-convergence`.
 - Documentation-only closure commits do not silently broaden accepted runtime behavior.
-- Future format investigation must begin on a new work branch created from the final documentation-closure head of `work/tuxguitar-tg-intake-investigation`, not from fork `main`, an earlier accepted branch, a forensic branch, or a playback experiment.
+- Future feature or format investigation must begin on a new work branch created from the final documentation-closure head of `work/accepted-bass-convergence`, unless a later authority record explicitly supersedes it. Do not begin from fork `main`, either parent bass branch, an earlier accepted branch, a forensic branch, or a playback experiment.
 
 ## Current product boundary
 
@@ -54,9 +57,11 @@ The accepted baseline includes:
 
 The Guitar Pro claim remains bounded by the lawful project-authored five-file corpus and accepted evidence. It is not a claim of arbitrary compatibility with every Guitar Pro file.
 
-The PowerTab claims remain bounded to the exact accepted `.pt2` internal-version 1-through-11 evidence profiles and the version-specific `.ptb` evidence profiles. They are not claims of arbitrary PowerTab compatibility or unaccepted bass, alternate-tuning, multi-player, multi-voice, and notation profiles.
+The PowerTab `.pt2` claims remain bounded by exact internal-version evidence. Internal versions 1 through 10 retain their previously accepted profiles and do not inherit bass support from later convergence. Internal version 11 has separately accepted exact standard four-string bass support.
 
-The TuxGuitar claim remains bounded to the accepted 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 evidence profiles. It is not a claim of arbitrary `.tg` compatibility, and native 0.7, 0.8, and 0.9 remain deferred archival work.
+The four accepted legacy PowerTab `.ptb` families now have bounded exact standard four-string bass support in G2-D2-A1-E1 in addition to their previously accepted guitar profiles.
+
+The TuxGuitar claim remains bounded to accepted native 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 evidence profiles. Those six generations now have separately accepted bounded six-string guitar and exact standard four-string bass G2-D2-A1-E1 profiles. Native 0.7, 0.8, and 0.9 remain deferred archival work.
 
 Playback experiments, Iowa samples, procedural sound, playback controls, teacher mode, bookmarks, practice scoring, and AI instruction remain outside this accepted baseline.
 
@@ -96,7 +101,10 @@ Before changing implementation, accessibility, repository administration, deploy
 30. `docs/tuxguitar-tg-corrected-source-gate-result-2026-08-11.md`;
 31. `docs/tuxguitar-tg-corrected-hosted-proof-2026-08-11.md`;
 32. `docs/tuxguitar-tg-real-iphone-acceptance-2026-08-11.md`;
-33. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
+33. `docs/tuxguitar-standard-bass-real-iphone-acceptance-2026-08-13.md`;
+34. `docs/powertab-standard-bass-real-iphone-acceptance-2026-08-14.md`;
+35. `docs/accepted-bass-convergence-result-2026-08-14.md`;
+36. `.github/ZERO_DOLLAR_AUTOMATION_POLICY.md`.
 
 Read additional checkpoint records named by those files when the work touches their mechanism.
 
@@ -165,22 +173,38 @@ A new format family requires its own bounded checkpoint with:
 
 Do not mix multiple unproven format families into one implementation checkpoint.
 
+## Current convergence boundary
+
+The accepted TuxGuitar and PowerTab bass expansions were converged at runtime commit `67a062085c93d9fb546194d727c808960bbcaea9`.
+
+The convergence must preserve these exact limits:
+
+- PowerTab `.pt2` internal versions 1 through 10 remain outside the standard-bass claim;
+- PowerTab `.pt2` internal version 11 accepts exact standard four-string bass G2-D2-A1-E1;
+- PowerTab `.ptb` file versions 1 through 4 accept exact standard four-string bass G2-D2-A1-E1;
+- TuxGuitar native 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 accept exact standard four-string bass G2-D2-A1-E1;
+- no alternate or extended bass profile is inferred from string count alone.
+
+Integration run `31848478423` passed 22 focused convergence tests, all 424 inherited tests, and the production build. Do not replay the already accepted TuxGuitar-bass or PowerTab-bass fixture and real-device checkpoints merely because a later unrelated gate fails.
+
 ## Next format priority
 
-PowerTab `.pt2` internal versions 1 through 11, all four known legacy `.ptb` file-version families, and bounded TuxGuitar `.tg` 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 now have accepted coverage.
+PowerTab `.pt2` internal versions 1 through 11, all four known legacy `.ptb` file-version families, and bounded TuxGuitar `.tg` 1.0, 1.1, 1.2, 1.3, 1.5, and modern 2.0 now have accepted coverage within their documented profiles.
 
 Do not reopen PowerTab or TuxGuitar merely to broaden claims by inference. Any future bass, alternate-tuning, multi-track/player, multi-voice, technique, repeat, key-signature, meter, capo, effect, lyric, automation, or broader notation work requires its own independently evidenced checkpoint.
 
-The next major dedicated-tab candidate is TablEdit `.tef`. It must be separately selected and investigated read-only on a new branch from the final documentation-closure head of `work/tuxguitar-tg-intake-investigation`.
+The next major dedicated-tab candidate is TablEdit `.tef`. It remains unsupported. Any future TablEdit work must begin separately on a new branch from the final documentation-closure head of `work/accepted-bass-convergence`. This convergence checkpoint does not begin TablEdit investigation.
 
 ## Deferred format families and profiles
 
 Unless a later lawful checkpoint proves otherwise, the following remain unsupported:
 
+- PowerTab standard-bass support for `.pt2` internal versions 1 through 10;
 - arbitrary PowerTab bass, alternate-tuning, multi-player, multi-voice, and notation profiles outside accepted evidence;
 - arbitrary `.ptb` or `.pt2` files outside the accepted version-specific profiles;
 - arbitrary `.tg` files outside the accepted TuxGuitar version-specific and semantic profiles;
 - TuxGuitar native 0.7, 0.8, and 0.9;
+- alternate or extended-range TuxGuitar bass profiles outside accepted evidence;
 - TablEdit `.tef`;
 - arbitrary or unverified Guitar Pro files outside the accepted corpus and profiles;
 - other proprietary or container formats not yet separately evaluated.
@@ -225,7 +249,7 @@ Any permitted workflow that generates or transforms lasting source, fixtures, ma
 6. repair forward directly on the branch;
 7. never regenerate accepted evidence merely to repair a later source, test, formatter, build, documentation, or publication defect.
 
-The canonical PowerTab editor export is accepted lasting evidence and must not be regenerated merely to repeat downstream testing.
+The canonical PowerTab editor export and the accepted TuxGuitar and PowerTab bass fixture corpora are lasting evidence and must not be regenerated merely to repeat downstream testing.
 
 ### Transport and formatter rules
 
@@ -255,12 +279,14 @@ When production code is split into lazy-loaded chunks, live read-back must inspe
 
 Every real-device acceptance build must also have a unique static page title and first level-one heading before the React root. Do not reuse an older checkpoint identity on a newly deployed candidate.
 
+A failure in a post-deploy verification harness must be classified at the harness boundary. Preserve successful build and deployment evidence rather than rebuilding automatically when the identified defect is only in the verifier.
+
 ## Accessibility and evidence
 
 Automated tests do not replace bounded real-iPhone VoiceOver acceptance when a user-facing mechanism changes. Record the owner's exact observation without strengthening it.
 
 Use the committed-target focus, native-picker return, accessible build identity, speech-separation, ordinary reading-order, source-lineage, version-neutral format, hosted-run circuit-breaker, fail-forward materialization, intact-file transport, stream-recovery, authority-collapse, bounded-owner-action, and complete-hosted-asset-read-back solutions already recorded in repository memory.
 
-Do not bring John into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring him in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
+Do not bring the owner into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring the owner in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 
 Jason Washburn's desktop testing remains optional unless he agrees to participate. His absence is not an active blocker.
