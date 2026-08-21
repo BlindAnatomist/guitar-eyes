@@ -1,0 +1,30 @@
+export const JASON_PLAYGROUND_SOURCE = [
+  "GUITAR EYES INSTANT PLAYGROUND",
+  "Original project-authored C-G-A minor-F cadence",
+  "",
+  "Rhythm: Q Q Q Q Q Q H",
+  "",
+  "e|--0--3--0--1--|--0--3--0--|",
+  "B|--1--0--1--1--|--1--0--1--|",
+  "G|--0--0--2--2--|--0--0--0--|",
+  "D|--2--0--2--3--|--2--0--2--|",
+  "A|--3--2--0--3--|--3--2--3--|",
+  "E|-----3-----1--|-----3-----|",
+  "",
+  "Legend: Q quarter, H half.",
+  "Each shared vertical bar ends one explicit measure.",
+].join("\n");
+
+export function isJasonPlaygroundRequested(search) {
+  const query =
+    search ??
+    (typeof window === "undefined" || !window.location
+      ? ""
+      : window.location.search);
+  const parameters = new URLSearchParams(query);
+
+  if (!parameters.has("demo")) return false;
+
+  const value = parameters.get("demo");
+  return value === "" || value === "jason";
+}

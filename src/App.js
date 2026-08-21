@@ -13,6 +13,11 @@ import { buildStructuredTabReaderDocuments } from "./structuredTabReaderDocument
 import InfoSection from "./InfoSection";
 import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
+import JasonPlaygroundInvitation from "./JasonPlaygroundInvitation";
+import {
+  isJasonPlaygroundRequested,
+  JASON_PLAYGROUND_SOURCE,
+} from "./jasonPlayground";
 import LegacyDesktopReader from "./LegacyDesktopReader";
 import Upload from "./Upload";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
@@ -27,7 +32,7 @@ import {
 } from "./tabFormatDetector";
 import "./App.css";
 
-const TEST_BUILD_LABEL = "PowerTab 2 version 11 source checkpoint";
+const TEST_BUILD_LABEL = "Guitar Eyes one-link playground candidate 1";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -59,6 +64,8 @@ function App() {
   const [desktopError, setDesktopError] = useState("");
   const [structuredSelectionSession, setStructuredSelectionSession] = useState(null);
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
+  const [isPlaygroundMode] = useState(isJasonPlaygroundRequested);
+  const [playgroundStarted, setPlaygroundStarted] = useState(false);
 
   const iphoneHeadingRef = useRef(null);
   const desktopHeadingRef = useRef(null);
@@ -515,6 +522,60 @@ function App() {
     desktopFocusPendingRef.current = true;
   };
 
+  const startJasonPlayground = () => {
+    pendingIphoneFocusTargetRef.current = null;
+    desktopFocusPendingRef.current = false;
+    setStructuredSelectionSession(null);
+
+    let readerDocuments;
+    try {
+      readerDocuments = buildReaderDocuments(JASON_PLAYGROUND_SOURCE, "guitar");
+    } catch (error) {
+      finishUnreadableUpload(
+        messageFromError(
+          error,
+          "The built-in playground passage could not be prepared for the Guitar Eyes readers."
+        ),
+        "The built-in playground passage could not be opened."
+      );
+      return;
+    }
+
+    const nextDocument = readerDocuments.semanticDocument;
+    const nextDesktopBlocks = readerDocuments.desktopBlocks;
+
+    if (!nextDocument) {
+      finishUnreadableUpload(
+        "The built-in playground passage did not produce a semantic reader document.",
+        "The built-in playground passage could not be opened."
+      );
+      return;
+    }
+
+    setPlaygroundStarted(true);
+    const status = `Loaded the built-in original chord passage with ${nextDocument.positions.length} synchronized positions`;
+
+    if (readingMode === "iphone") {
+      commitIphoneOutcome({
+        target: "reader",
+        semanticDocument: nextDocument,
+        desktopBlocks: nextDesktopBlocks,
+        status: `${status} in iPhone reading mode.`,
+        resolvedInstrument: "guitar",
+      });
+      return;
+    }
+
+    setDesktopBlocks(nextDesktopBlocks);
+    setSemanticDocument(nextDocument);
+    setIphoneError("");
+    setDesktopError("");
+    setSelectedInstrument("guitar");
+    setIsReadingFile(false);
+    setStatusMessage(`${status} in desktop semantic reader mode.`);
+    desktopFocusPendingRef.current = true;
+  };
+
   const handleReadingModeChange = (event) => {
     const nextMode = event.target.value;
     setReadingMode(nextMode);
@@ -556,6 +617,10 @@ function App() {
         semantic foundation for desktop and iPhone access.
       </p>
       <p className="test-build-label">Test build: {TEST_BUILD_LABEL}.</p>
+
+      {isPlaygroundMode && !playgroundStarted && (
+        <JasonPlaygroundInvitation onStart={startJasonPlayground} />
+      )}
 
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>

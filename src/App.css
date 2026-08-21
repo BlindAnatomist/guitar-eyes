@@ -46,6 +46,7 @@
 .legacy-desktop-reader,
 .error-message,
 .desktop-instructions-control,
+.jason-playground,
 .guitar-pro-track-selector {
   margin-block: 1rem;
 }
@@ -78,6 +79,7 @@
 .error-message,
 .reader-warning,
 .desktop-keyboard-navigator,
+.jason-playground,
 .guitar-pro-track-selector {
   border: 2px solid currentColor;
   border-radius: 0.5rem;
