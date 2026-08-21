@@ -13,7 +13,7 @@ Work branch: `work/jason-playground`.
 
 ## Owner acceptance
 
-On August 21, 2026, John Washburn performed the final real-iPhone Safari and VoiceOver acceptance against the hosted one-link Jason playground.
+On August 21, 2026, the repository owner performed the final real-iPhone Safari and VoiceOver acceptance against the hosted one-link Jason playground.
 
 Result: PASS.
 
@@ -27,4 +27,4 @@ The final real-device acceptance gate is closed successfully.
 
 The playground has now passed the automated test suite, production build, hosted deployment/readback verification, and real-iPhone Safari/VoiceOver acceptance.
 
-No invitation or message to Jason is authorized by this record. Any external message remains subject to John's separate review and approval before sending.
+No invitation or message to Jason is authorized by this record. Any external message remains subject to separate owner review and approval before sending.
