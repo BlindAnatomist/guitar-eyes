@@ -57,6 +57,20 @@ installation, focused tests, complete suite, and production build. It stopped
 before deployment because its artifact inspector required source whitespace that
 the HTML minifier legitimately removed.
 
+## Real-iPhone acceptance
+
+Final real-iPhone Safari and VoiceOver acceptance was completed successfully on
+August 21, 2026.
+
+Result: PASS.
+
+Owner report: "that worked and it worked well."
+
+The detailed acceptance record is:
+`docs/jason-playground-real-iphone-acceptance-2026-08-21.md`.
+
+The final real-device acceptance gate is closed.
+
 ## Repository safety
 
 - Fork `main` is restored to
@@ -64,17 +78,6 @@ the HTML minifier legitimately removed.
 - The accepted base remains
   `e1eacbb877c584c34fcacee905ac38c65311ae29`.
 - The deployed application source is isolated on `work/jason-playground`.
-- No message or invitation was sent to Jason.
-
-## Remaining acceptance
-
-The owner must perform the final real-iPhone Safari and VoiceOver acceptance:
-
-1. Open the one-link playground URL.
-2. Activate **Start the Guitar Eyes demo**.
-3. Confirm focus lands on **iPhone tablature reader**.
-4. Try **Read current** and **Next** and listen for coherent movement through
-   the bundled passage.
-5. Switch to **Desktop grid reader** and confirm focus moves to that reader.
-6. Report any unexpected speech, silence, duplicated announcement, or focus
-   location before the link is shared with Jason.
+- No message or invitation has been sent to Jason.
+- Any message to Jason remains subject to separate owner review and approval
+  before sending.
