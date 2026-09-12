@@ -83,3 +83,13 @@ Reader diversity is presentation diversity, not semantic plurality. Every new fo
 ## Maintenance rule
 
 If a future change causes the desktop and iPhone readers to disagree about strings, positions, durations, measures, rests, chords, techniques, tuning, tracks, or warnings, stop the checkpoint. Repair the shared importer or semantic document rather than compensating independently in either reader.
+
+## Semantic evidence reliability — September 2026 candidate
+
+State: `candidate` (automated implementation proof; real-device acceptance pending).
+
+Missing modern TG fret evidence must not become zero. MusicXML notated and elapsed durations must have a supported explicit relationship; contradictory evidence cannot be selected by plausibility. GP four/six-string count alone cannot establish bass/guitar identity. Repair presence and lexical evidence at source boundaries and enforce common reader-admission invariants; do not add format-specific speech exceptions.
+
+Specification and exact implementation evidence: `docs/semantic-reliability-checkpoint-1-spec-2026-09.md` and `docs/semantic-reliability-checkpoint-1-result-2026-09.md` on `work/semantic-reliability-checkpoint-1`. These do not supersede accepted operational authority.
+
+The separate import/mode-switch focus concern now has controlled DOM reproduction in both reader directions and delayed inventory completion. It remains unrepaired; a passing defect-characterization test is not correct-behavior acceptance. Reuse committed-target/picker-return procedures and current-mode/request identity for a later bounded repair. Real VoiceOver consequences remain unverified.
