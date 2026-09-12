@@ -1,3 +1,4 @@
+import { integerEvidence } from "./semanticEvidence";
 function techniqueNamesForNote(note) {
   const techniques = [];
 
@@ -32,8 +33,8 @@ function techniqueNamesForBeat(beat) {
 
 function noteToIntermediate(note) {
   return {
-    stringNumberLowToHigh: Number(note?.string),
-    fret: Number(note?.fret),
+    stringNumberLowToHigh: integerEvidence(note?.string),
+    fret: integerEvidence(note?.fret),
     visible: note?.isVisible !== false,
     isDead: Boolean(note?.isDead),
     techniques: techniqueNamesForNote(note),
@@ -42,9 +43,9 @@ function noteToIntermediate(note) {
 
 function beatToIntermediate(beat) {
   return {
-    startTicks: Number(beat?.absoluteDisplayStart),
-    displayDurationTicks: Number(beat?.displayDuration),
-    durationDenominator: Number(beat?.duration),
+    startTicks: integerEvidence(beat?.absoluteDisplayStart),
+    displayDurationTicks: integerEvidence(beat?.displayDuration),
+    durationDenominator: integerEvidence(beat?.duration),
     dots: Number(beat?.dots ?? 0),
     tupletNumerator: Number(beat?.tupletNumerator ?? -1),
     tupletDenominator: Number(beat?.tupletDenominator ?? -1),
@@ -77,7 +78,7 @@ function barToIntermediate(bar, index) {
 
 function staffToIntermediate(staff) {
   return {
-    tuningMidiHighToLow: Array.from(staff?.tuning || [], Number),
+    tuningMidiHighToLow: Array.from(staff?.tuning || [], integerEvidence),
     bars: Array.from(staff?.bars || [], barToIntermediate),
   };
 }

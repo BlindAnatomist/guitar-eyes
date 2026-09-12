@@ -1,3 +1,4 @@
+import { verifiedStandardInstrument } from "./semanticEvidence";
 import { GUITAR_PRO_LIMITS } from "./guitarProLimits";
 
 const SUPPORTED_STRING_COUNTS = new Set([4, 6]);
@@ -34,7 +35,7 @@ function plural(value, singular, pluralValue = `${singular}s`) {
   return value === 1 ? singular : pluralValue;
 }
 
-function supportForStaff({ isPercussion, stringCount, measureCount }) {
+function supportForStaff({ isPercussion, stringCount, measureCount, instrument }) {
   if (isPercussion) {
     return {
       supported: false,
@@ -56,6 +57,10 @@ function supportForStaff({ isPercussion, stringCount, measureCount }) {
       reason: `This ${stringCount}-string staff is outside the current four-string bass and six-string guitar profile.`,
     };
   }
+  if (!instrument) {
+    return { supported: false, reasonCode: "UNVERIFIED_INSTRUMENT_PROFILE",
+      reason: "The tuning does not establish a verified guitar or bass profile. This fretted staff cannot be loaded." };
+  }
   if (measureCount === 0) {
     return {
       supported: false,
@@ -72,14 +77,14 @@ function supportForStaff({ isPercussion, stringCount, measureCount }) {
 
 function inventoryItem(track, staff, trackIndex, staffIndex) {
   const tuning = Array.isArray(staff?.tuningMidiHighToLow)
-    ? staff.tuningMidiHighToLow.map(Number)
+    ? staff.tuningMidiHighToLow.slice()
     : [];
   const bars = Array.isArray(staff?.bars) ? staff.bars : [];
   const stringCount = tuning.length;
   const measureCount = bars.length;
   const isPercussion = Boolean(track?.isPercussion);
-  const support = supportForStaff({ isPercussion, stringCount, measureCount });
-  const instrument = stringCount === 4 ? "bass" : stringCount === 6 ? "guitar" : null;
+  const instrument = isPercussion ? null : verifiedStandardInstrument(tuning);
+  const support = supportForStaff({ isPercussion, stringCount, measureCount, instrument });
   const instrumentLabel =
     instrument === "bass"
       ? "four-string bass"

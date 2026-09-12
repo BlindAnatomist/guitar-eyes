@@ -1,3 +1,4 @@
+import { validateSemanticDocument } from "./semanticDocumentValidation";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { decodePowerTabLegacyFile } from "./powerTabLegacyDecoder";
 import { PowerTabImportError } from "./powerTabErrors";
@@ -66,6 +67,7 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
     ...options,
     selection,
   });
+  validateSemanticDocument(semanticDocument);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

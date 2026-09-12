@@ -1,3 +1,4 @@
+import { integerEvidence } from "./semanticEvidence";
 import {
   decodeTuxGuitarFile as decodeProvisionalTuxGuitarFile,
   TuxGuitarImportError,
@@ -364,9 +365,9 @@ function text(node, name, fallback = "") {
 
 function intText(node, name, fallback = null) {
   const source = text(node, name, fallback === null ? "" : String(fallback));
-  const value = Number(source);
+  const value = integerEvidence(source);
   requireValue(
-    Number.isInteger(value),
+    Number.isSafeInteger(value),
     `The TuxGuitar XML ${name} value is invalid.`,
     "INVALID_TUXGUITAR_XML"
   );
@@ -375,9 +376,9 @@ function intText(node, name, fallback = null) {
 
 function parseApplicationVersion(root) {
   const node = one(root, "TGVersion");
-  const major = Number(node.getAttribute("major"));
-  const minor = Number(node.getAttribute("minor"));
-  const revision = Number(node.getAttribute("revision"));
+  const major = integerEvidence(node.getAttribute("major"));
+  const minor = integerEvidence(node.getAttribute("minor"));
+  const revision = integerEvidence(node.getAttribute("revision"));
   requireValue(
     Number.isInteger(major) &&
       Number.isInteger(minor) &&
@@ -453,8 +454,8 @@ function parseModernXml(source) {
       "UNSUPPORTED_TUXGUITAR_MEASURE_STRUCTURE"
     );
     const signature = one(header, "timeSignature");
-    const numerator = Number(signature.getAttribute("numerator"));
-    const denominator = Number(signature.getAttribute("denominator"));
+    const numerator = integerEvidence(signature.getAttribute("numerator"));
+    const denominator = integerEvidence(signature.getAttribute("denominator"));
     requireValue(
       numerator === 4 && denominator === 4,
       `TuxGuitar measure ${index + 1} is not 4/4.`,
@@ -476,7 +477,7 @@ function parseModernXml(source) {
       "UNSUPPORTED_TUXGUITAR_TRACK_STATE"
     );
     const tuning = direct(trackNode, "TGString").map((node) =>
-      Number(String(node.textContent || "").trim())
+      integerEvidence(node.textContent)
     );
     requireValue(
       arraysEqual(tuning, STANDARD_GUITAR_TUNING),
@@ -532,7 +533,7 @@ function parseModernXml(source) {
         );
         const voice = activeVoices[0];
         const durationNode = one(voice, "duration");
-        const durationDenominator = Number(durationNode.getAttribute("value"));
+        const durationDenominator = integerEvidence(durationNode.getAttribute("value"));
         const dotted = String(durationNode.getAttribute("dotted") || "");
         requireValue(
           [1, 2, 4, 8, 16, 32, 64].includes(durationDenominator) &&
@@ -543,8 +544,8 @@ function parseModernXml(source) {
         );
 
         const notes = direct(voice, "note").map((noteNode) => {
-          const fret = Number(noteNode.getAttribute("value"));
-          const sourceString = Number(noteNode.getAttribute("string"));
+          const fret = integerEvidence(noteNode.getAttribute("value"));
+          const sourceString = integerEvidence(noteNode.getAttribute("string"));
           requireValue(
             Number.isInteger(fret) && Number.isInteger(sourceString),
             "A TuxGuitar note lacks fret/string coordinates.",

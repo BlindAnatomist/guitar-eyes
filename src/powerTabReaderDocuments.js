@@ -1,3 +1,4 @@
+import { validateSemanticDocument } from "./semanticDocumentValidation";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { PowerTabImportError } from "./powerTabErrors";
 import { decodePowerTabPt2File } from "./powerTabPt2Decoder";
@@ -58,6 +59,7 @@ export async function buildPowerTabReaderDocuments(
   const semanticDocument = normalize(resolvedIntermediate, {
     selection: resolvedSelection,
   });
+  validateSemanticDocument(semanticDocument);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

@@ -1,3 +1,4 @@
+import { verifiedStandardInstrument } from "./semanticEvidence";
 import { GUITAR_PRO_LIMITS } from "./guitarProLimits";
 
 const GUITAR_PRO_SOURCE_FORMAT = "guitar-pro-archive";
@@ -341,7 +342,7 @@ function selectCandidateStaff(tracks, selection = null) {
   });
 
   const supported = frettedCandidates.filter((candidate) =>
-    SUPPORTED_STRING_COUNTS.has(candidate.stringCount)
+    verifiedStandardInstrument(candidate.staff.tuningMidiHighToLow) !== null
   );
 
 
@@ -384,6 +385,9 @@ if (selection !== null) {
   }
 
   if (supported.length === 0) {
+    if (frettedCandidates.some((candidate) => SUPPORTED_STRING_COUNTS.has(candidate.stringCount))) {
+      throw new GuitarProImportError("The tuning does not establish a verified guitar or bass profile. This fretted staff cannot be loaded.", "UNVERIFIED_INSTRUMENT_PROFILE");
+    }
     const unsupportedCounts = [...new Set(frettedCandidates.map((candidate) => candidate.stringCount))];
     if (unsupportedCounts.length > 0) {
       throw new GuitarProImportError(
@@ -758,7 +762,7 @@ export function normalizeGuitarProIntermediate(
   });
 
   const stringCount = stringsWithRows.length;
-  const instrument = stringCount === 4 ? "bass" : "guitar";
+  const instrument = verifiedStandardInstrument(tuning);
   const trackName = String(candidate.track.name || candidate.track.shortName || `${instrument} track`).trim();
   const block = {
     type: "tablature-block",

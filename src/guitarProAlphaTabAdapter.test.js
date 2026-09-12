@@ -212,3 +212,12 @@ describe("alphaTabScoreToGuitarProIntermediate", () => {
     expect(() => JSON.stringify(result)).not.toThrow();
   });
 });
+
+test("adapter preserves absent coordinates as unknown and keeps genuine zero", () => {
+  const score = makeScore(makeBeat({ notes: [makeNote({fret: null}), makeNote({string: undefined}), makeNote({fret: 0})] }));
+  const result = alphaTabScoreToGuitarProIntermediate(score, GP8_VERSION_EVIDENCE);
+  const notes = result.tracks[0].staves[0].bars[0].voices[0].beats[0].notes;
+  expect(notes[0].fret).toBeNull();
+  expect(notes[1].stringNumberLowToHigh).toBeNull();
+  expect(notes[2].fret).toBe(0);
+});

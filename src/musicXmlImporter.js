@@ -87,7 +87,7 @@ function integerText(node, label, { minimum = null } = {}) {
   }
 
   const value = Number.parseInt(raw, 10);
-  if (minimum !== null && value < minimum) {
+  if (!Number.isSafeInteger(value) || (minimum !== null && value < minimum)) {
     throw new MusicXmlImportError(
       `${label} must be at least ${minimum}.`,
       "INVALID_MUSICXML_NUMBER"
@@ -332,49 +332,45 @@ function makeStrings(tuning) {
   }));
 }
 
-function durationName(note, quarterNoteUnits) {
-  const noteType = textOf(firstChild(note, "type"));
-  const base = NOTE_TYPE_NAMES[noteType] || null;
-  const dots = childElements(note, "dot").length;
-
-  if (base) {
-    if (dots === 1) return `dotted ${base}`;
-    if (dots > 1) return `${dots}-dot ${base}`;
-    return base;
-  }
-
-  const knownByUnits = new Map([
-    [4, "whole note"],
-    [2, "half note"],
-    [1, "quarter note"],
-    [0.5, "eighth note"],
-    [0.25, "sixteenth note"],
-  ]);
-  return knownByUnits.get(quarterNoteUnits) || `${quarterNoteUnits} quarter-note units`;
-}
+const NOTE_TYPE_UNITS = { whole: 4, half: 2, quarter: 1, eighth: 0.5, "16th": 0.25, "32nd": 0.125 };
 
 function parseDuration(note, divisions, measureNumber) {
   const durationNode = firstChild(note, "duration");
-  if (!durationNode || !Number.isInteger(divisions) || divisions <= 0) {
+  if (!durationNode || !Number.isSafeInteger(divisions) || divisions <= 0) {
     throw new MusicXmlImportError(
       `Measure ${measureNumber} requires positive divisions and note duration values.`,
       "MISSING_MUSICXML_DURATION"
     );
   }
-
-  const durationDivisions = integerText(
-    durationNode,
-    `MusicXML duration in measure ${measureNumber}`,
-    { minimum: 1 }
-  );
+  const durationDivisions = integerText(durationNode, `MusicXML duration in measure ${measureNumber}`, { minimum: 1 });
   const quarterNoteUnits = durationDivisions / divisions;
-
+  const typeNode = firstChild(note, "type");
+  const noteType = typeNode ? textOf(typeNode) : null;
+  const dots = childElements(note, "dot").length;
+  if (firstChild(note, "time-modification") || descendants(note, "tuplet").length) {
+    throw new MusicXmlImportError(
+      `Measure ${measureNumber} uses a MusicXML tuplet duration relationship that this reader does not yet support.`,
+      "UNSUPPORTED_MUSICXML_DURATION_RELATIONSHIP"
+    );
+  }
+  if ((typeNode && !NOTE_TYPE_NAMES[noteType]) || dots > 2 || (!typeNode && dots > 0)) {
+    throw new MusicXmlImportError("The MusicXML notated duration is incomplete or unsupported.", "UNSUPPORTED_MUSICXML_DURATION_RELATIONSHIP");
+  }
+  const notatedUnits = typeNode ? NOTE_TYPE_UNITS[noteType] * (2 - 2 ** -dots) : null;
+  if (typeNode && notatedUnits !== quarterNoteUnits) {
+    throw new MusicXmlImportError(
+      `Measure ${measureNumber} has contradictory notated and elapsed duration evidence. The file was not loaded.`,
+      "CONTRADICTORY_MUSICXML_DURATION"
+    );
+  }
+  const name = typeNode
+    ? `${dots === 1 ? "dotted " : dots === 2 ? "2-dot " : ""}${NOTE_TYPE_NAMES[noteType]}`
+    : `${quarterNoteUnits} quarter-note units`;
   return {
-    name: durationName(note, quarterNoteUnits),
-    quarterNoteUnits,
-    source: "musicxml",
-    durationDivisions,
-    divisionsPerQuarter: divisions,
+    name, quarterNoteUnits, source: "musicxml", durationDivisions, divisionsPerQuarter: divisions,
+    notated: typeNode ? { type: noteType, dots, quarterNoteUnits: notatedUnits } : null,
+    elapsed: { durationDivisions, divisionsPerQuarter: divisions, quarterNoteUnits },
+    relationship: typeNode ? "ordinary" : "elapsed-only",
   };
 }
 
@@ -416,7 +412,7 @@ function directNoteChildren(measure) {
   return childElements(measure).filter((child) => localName(child) === "note");
 }
 
-function parseMeasurePositions(measure, strings, divisions, warnings, measureIndex) {
+function parseMeasurePositions(measure, strings, divisions, warnings, measureIndex, losses) {
   const displayNumber = measure.getAttribute("number") || String(measureIndex + 1);
 
   if (
@@ -467,9 +463,11 @@ function parseMeasurePositions(measure, strings, divisions, warnings, measureInd
     let position;
     if (isChordNote) {
       position = positions.at(-1);
-      if (position.duration.quarterNoteUnits !== duration.quarterNoteUnits) {
-        warnings.push(
-          `Measure ${displayNumber} contains a chord note with a different duration; the onset duration from the first chord note was preserved.`
+      if (position.duration.quarterNoteUnits !== duration.quarterNoteUnits ||
+          JSON.stringify(position.duration.notated) !== JSON.stringify(duration.notated)) {
+        throw new MusicXmlImportError(
+          `Measure ${displayNumber} contains chord members with different duration evidence. This relationship is not supported.`,
+          "UNSUPPORTED_MUSICXML_CHORD_DURATION"
         );
       }
     } else {
@@ -512,6 +510,7 @@ function parseMeasurePositions(measure, strings, divisions, warnings, measureInd
 
     const techniqueResult = collectTechniques(coordinates);
     techniqueResult.unsupported.forEach((name) => {
+      losses.push({ kind: "unsupported-technical", sourceFormat: "musicxml", measureNumber: displayNumber, noteIndex, element: name, disposition: "not-interpreted" });
       warnings.push(
         `Measure ${displayNumber} preserves unsupported MusicXML technical element ${name} without interpreting it.`
       );
@@ -567,6 +566,7 @@ export function parseMusicXmlTablature(sourceText) {
   const tuning = parseStaffTuning(part);
   let strings = makeStrings(tuning);
   const warnings = [];
+  const losses = [];
   const measureNodes = childElements(part, "measure");
 
   if (measureNodes.length === 0) {
@@ -590,7 +590,12 @@ export function parseMusicXmlTablature(sourceText) {
       );
     }
 
-    return parseMeasurePositions(measure, strings, divisions, warnings, measureIndex);
+    const repeats = [...descendants(measure, "repeat"), ...descendants(measure, "ending")];
+    repeats.forEach((element) => {
+      losses.push({ kind: "source-order-only", sourceFormat: "musicxml", measureNumber: measure.getAttribute("number") || String(measureIndex + 1), element: localName(element), attributes: Object.fromEntries(Array.from(element.attributes).map((a) => [a.name, a.value])), disposition: "not-expanded" });
+    });
+    if (repeats.length) warnings.push(`Measure ${measure.getAttribute("number") || measureIndex + 1} contains repeat or ending notation. Positions are read in source order; repeats are not expanded.`);
+    return parseMeasurePositions(measure, strings, divisions, warnings, measureIndex, losses);
   });
 
   const measureCount = measureDrafts.length;
@@ -709,5 +714,6 @@ export function parseMusicXmlTablature(sourceText) {
       documentTotal: measures.length,
     })),
     warnings: [...new Set(warnings)],
+    semanticLosses: losses,
   };
 }
