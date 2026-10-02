@@ -60,6 +60,12 @@ function App() {
   const [structuredSelectionSession, setStructuredSelectionSession] = useState(null);
   const [iphoneFocusRequest, setIphoneFocusRequest] = useState(0);
 
+  // Async import/selection work must settle into the presentation that is current.
+  const readingModeRef = useRef(readingMode);
+  const readerRequestRef = useRef(0);
+  const focusGenerationRef = useRef(0);
+  const desktopFocusTimerRef = useRef(null);
+
   const iphoneHeadingRef = useRef(null);
   const desktopHeadingRef = useRef(null);
   const legacyDesktopHeadingRef = useRef(null);
@@ -69,10 +75,33 @@ function App() {
   const pendingIphoneFocusTargetRef = useRef(null);
   const iphoneFocusFrameRef = useRef(null);
 
+  const cancelPendingFocus = useCallback(() => {
+    focusGenerationRef.current += 1;
+    pendingIphoneFocusTargetRef.current = null;
+    desktopFocusPendingRef.current = false;
+    if (iphoneFocusFrameRef.current !== null) {
+      window.cancelAnimationFrame(iphoneFocusFrameRef.current);
+      iphoneFocusFrameRef.current = null;
+    }
+    if (desktopFocusTimerRef.current !== null) {
+      window.clearTimeout(desktopFocusTimerRef.current);
+      desktopFocusTimerRef.current = null;
+    }
+  }, []);
+
+  const beginReaderRequest = () => {
+    cancelPendingFocus();
+    readerRequestRef.current += 1;
+    return readerRequestRef.current;
+  };
+
+  const isCurrentReaderRequest = (requestId) =>
+    readerRequestRef.current === requestId;
+
   const focusPendingIphoneTargetWhenBrowserReturns = useCallback(() => {
     if (
       !pendingIphoneFocusTargetRef.current ||
-      readingMode !== "iphone" ||
+      readingModeRef.current !== "iphone" ||
       document.visibilityState === "hidden"
     ) {
       return;
@@ -82,12 +111,26 @@ function App() {
       window.cancelAnimationFrame(iphoneFocusFrameRef.current);
     }
 
+    const pendingTarget = pendingIphoneFocusTargetRef.current;
+    const requestId = readerRequestRef.current;
+    const focusGeneration = focusGenerationRef.current;
+    const isCurrentFocusRequest = () =>
+      readerRequestRef.current === requestId &&
+      focusGenerationRef.current === focusGeneration &&
+      pendingIphoneFocusTargetRef.current === pendingTarget &&
+      readingModeRef.current === "iphone" &&
+      document.visibilityState !== "hidden";
+
     iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
+      iphoneFocusFrameRef.current = null;
+      if (!isCurrentFocusRequest()) return;
       iphoneFocusFrameRef.current = window.requestAnimationFrame(() => {
+        iphoneFocusFrameRef.current = null;
+        if (!isCurrentFocusRequest()) return;
         const target =
-          pendingIphoneFocusTargetRef.current === "reader"
+          pendingTarget === "reader"
             ? iphoneHeadingRef.current
-            : pendingIphoneFocusTargetRef.current === "track-selection"
+            : pendingTarget === "track-selection"
               ? trackSelectionHeadingRef.current
               : errorHeadingRef.current;
 
@@ -99,7 +142,7 @@ function App() {
         }
       });
     });
-  }, [readingMode]);
+  }, []);
 
   useLayoutEffect(() => {
     if (iphoneFocusRequest === 0 || readingMode !== "iphone") return;
@@ -121,11 +164,11 @@ function App() {
       window.removeEventListener("focus", recoverPendingIphoneFocus);
       window.removeEventListener("pageshow", recoverPendingIphoneFocus);
       document.removeEventListener("visibilitychange", recoverPendingIphoneFocus);
-      if (iphoneFocusFrameRef.current !== null) {
-        window.cancelAnimationFrame(iphoneFocusFrameRef.current);
-      }
+      // Unmount cancels the authority of unfinished work, not only its focus.
+      readerRequestRef.current += 1;
+      cancelPendingFocus();
     };
-  }, [focusPendingIphoneTargetWhenBrowserReturns]);
+  }, [cancelPendingFocus, focusPendingIphoneTargetWhenBrowserReturns]);
 
   useEffect(() => {
     if (readingMode !== "desktop" || !desktopFocusPendingRef.current) {
@@ -143,7 +186,21 @@ function App() {
   }, [desktopBlocks, readingMode, semanticDocument]);
 
   const focusSoon = (ref) => {
-    window.setTimeout(() => ref.current?.focus({ preventScroll: true }), 0);
+    const requestId = readerRequestRef.current;
+    const focusGeneration = focusGenerationRef.current;
+    if (desktopFocusTimerRef.current !== null) {
+      window.clearTimeout(desktopFocusTimerRef.current);
+    }
+    desktopFocusTimerRef.current = window.setTimeout(() => {
+      desktopFocusTimerRef.current = null;
+      if (
+        isCurrentReaderRequest(requestId) &&
+        focusGenerationRef.current === focusGeneration &&
+        readingModeRef.current === "desktop"
+      ) {
+        ref.current?.focus({ preventScroll: true });
+      }
+    }, 0);
   };
 
   const commitIphoneOutcome = ({
@@ -175,6 +232,7 @@ function App() {
     const sourceFormatLabel =
       readerDocuments.sourceFormatLabel || "Guitar Pro tablature";
     const session = {
+      requestId: readerRequestRef.current,
       file,
       intermediate: readerDocuments.selectionIntermediate,
       inventory: readerDocuments.trackInventory,
@@ -184,7 +242,7 @@ function App() {
       readerDocuments.trackInventory.selectorLabels?.plural || "tracks";
     const status = `${sourceFormatLabel} contains ${readerDocuments.trackInventory.supportedCount} supported tablature ${pluralLabel}. Choose one to continue.`;
 
-    if (readingMode === "iphone") {
+    if (readingModeRef.current === "iphone") {
       pendingIphoneFocusTargetRef.current = "track-selection";
       flushSync(() => {
         setDesktopBlocks([]);
@@ -210,7 +268,7 @@ function App() {
   };
 
   const finishUnreadableUpload = (message, status) => {
-    if (readingMode === "iphone") {
+    if (readingModeRef.current === "iphone") {
       commitIphoneOutcome({
         target: "error",
         iphoneErrorMessage: message,
@@ -237,8 +295,7 @@ function App() {
   };
 
   const handleFileUpload = async (file) => {
-    pendingIphoneFocusTargetRef.current = null;
-    desktopFocusPendingRef.current = false;
+    const requestId = beginReaderRequest();
     setIsReadingFile(true);
     setStatusMessage("Reading the selected tablature file.");
     setIphoneError("");
@@ -277,11 +334,13 @@ function App() {
               : "Guitar Pro";
       try {
         readerDocuments = await buildStructuredTabReaderDocuments(file);
+        if (!isCurrentReaderRequest(requestId)) return;
         if (readerDocuments.requiresTrackSelection) {
           showStructuredTrackSelection(file, readerDocuments);
           return;
         }
       } catch (error) {
+        if (!isCurrentReaderRequest(requestId)) return;
         finishUnreadableUpload(
           messageFromError(
             error,
@@ -294,11 +353,13 @@ function App() {
     } else if (initialFormat.id === "compressed-musicxml") {
       try {
         const sourceText = await readCompressedMusicXmlFile(file);
+        if (!isCurrentReaderRequest(requestId)) return;
         readerDocuments = buildMusicXmlReaderDocuments(sourceText, {
           sourceFormat: "compressed-musicxml",
           sourceFormatLabel: "compressed MusicXML tablature",
         });
       } catch (error) {
+        if (!isCurrentReaderRequest(requestId)) return;
         finishUnreadableUpload(
           messageFromError(
             error,
@@ -317,7 +378,9 @@ function App() {
       let sourceText;
       try {
         sourceText = await readTextFile(file);
+        if (!isCurrentReaderRequest(requestId)) return;
       } catch (error) {
+        if (!isCurrentReaderRequest(requestId)) return;
         finishUnreadableUpload(
           messageFromError(error, "The selected file could not be read."),
           "The selected file could not be read."
@@ -378,7 +441,7 @@ function App() {
     if (nextDocument) {
       const iphoneSuccessStatus = `${formatPrefix}${detectedPrefix}Loaded ${nextDocument.positions.length} synchronized positions in iPhone reading mode.`;
 
-      if (readingMode === "iphone") {
+      if (readingModeRef.current === "iphone") {
         commitIphoneOutcome({
           target: "reader",
           semanticDocument: nextDocument,
@@ -415,7 +478,7 @@ function App() {
       return;
     }
 
-    if (readingMode === "iphone") {
+    if (readingModeRef.current === "iphone") {
       commitIphoneOutcome({
         target: "error",
         iphoneErrorMessage: semanticMessage,
@@ -447,8 +510,9 @@ function App() {
 
   const handleStructuredTrackSelection = async (selection) => {
     const session = structuredSelectionSession;
-    if (!session) return;
+    if (!session || !isCurrentReaderRequest(session.requestId)) return;
 
+    const requestId = beginReaderRequest();
     const labels = session.inventory?.selectorLabels || {};
     const formatName = labels.formatName || "Guitar Pro";
     const selectionName = labels.singular || "track";
@@ -464,7 +528,9 @@ function App() {
         intermediate: session.intermediate,
         selection,
       });
+      if (!isCurrentReaderRequest(requestId)) return;
     } catch (error) {
+      if (!isCurrentReaderRequest(requestId)) return;
       setStructuredSelectionSession(null);
       finishUnreadableUpload(
         messageFromError(
@@ -494,7 +560,7 @@ function App() {
       session.sourceFormatLabel ||
       `${formatName} tablature`;
     const status = `Imported ${sourceFormatLabel}. Loaded ${nextDocument.positions.length} synchronized positions`;
-    if (readingMode === "iphone") {
+    if (readingModeRef.current === "iphone") {
       commitIphoneOutcome({
         target: "reader",
         semanticDocument: nextDocument,
@@ -517,6 +583,8 @@ function App() {
 
   const handleReadingModeChange = (event) => {
     const nextMode = event.target.value;
+    cancelPendingFocus();
+    readingModeRef.current = nextMode;
     setReadingMode(nextMode);
 
     if (nextMode === "iphone") {

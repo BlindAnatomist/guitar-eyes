@@ -4,11 +4,50 @@ function formatList(items) {
   return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
+// Exact attached category names already mapped by the existing importers.
+// Naming a category does not interpret missing parameters or broaden format support.
+const RECOGNIZED_ATTACHED_TECHNIQUES = new Set([
+  "hammer-on",
+  "pull-off",
+  "slide",
+  "ascending slide",
+  "descending slide",
+  "bend",
+  "bend release",
+  "vibrato",
+  "let ring",
+  "palm mute",
+  "tap",
+  "slap",
+  "pop",
+  "harmonic",
+  "open-string",
+  "fingernails",
+  "pluck",
+]);
+
 function techniquePhrase(techniques) {
   if (!techniques || techniques.length === 0) return "";
-  return `, with ${formatList(
-    techniques.map((technique) => technique.name)
-  )} notation preserved but not yet interpreted`;
+  const phrases = [];
+  let recognizedNames = [];
+  const flushRecognized = () => {
+    if (recognizedNames.length === 0) return;
+    phrases.push(`with ${formatList(recognizedNames)}`);
+    recognizedNames = [];
+  };
+
+  techniques.forEach(({ name }) => {
+    if (RECOGNIZED_ATTACHED_TECHNIQUES.has(name)) {
+      recognizedNames.push(name);
+    } else {
+      flushRecognized();
+      phrases.push(
+        `${phrases.length === 0 ? "with " : ""}${name} notation preserved but not yet interpreted`
+      );
+    }
+  });
+  flushRecognized();
+  return `, ${phrases.join("; ")}`;
 }
 
 export function describePlayablePosition(document, positionIndex) {

@@ -81,11 +81,90 @@ describe("describePlayablePosition", () => {
 
     expect(document.positions).toHaveLength(3);
     expect(describePlayablePosition(document, 1)).toContain(
-      "High E string, fret 7, with hammer-on notation preserved but not yet interpreted."
+      "High E string, fret 7, with hammer-on."
     );
     expect(describePlayablePosition(document, 2)).toContain(
-      "High E string, fret 5, with pull-off notation preserved but not yet interpreted."
+      "High E string, fret 5, with pull-off."
     );
+  });
+
+  const recognizedAttachedNames = [
+    "hammer-on", "pull-off", "slide", "ascending slide", "descending slide",
+    "bend", "bend release", "vibrato", "let ring", "palm mute", "tap",
+    "slap", "pop", "harmonic", "open-string", "fingernails", "pluck",
+  ];
+
+  function documentWithTechniques(names, fret = 3) {
+    const document = parseSixStringTabText(makeTab([
+      `e|--${fret}--|`, "B|-----|", "G|-----|", "D|-----|", "A|-----|", "E|-----|",
+    ]));
+    document.positions[0].strings[0].techniques = names.map((name) => ({ name }));
+    return document;
+  }
+
+  test.each(recognizedAttachedNames)("speaks the exact recognized attached category %s", (name) => {
+    const fret = name === "open-string" ? 0 : 3;
+    expect(describePlayablePosition(documentWithTechniques([name], fret), 0)).toBe(
+      `Position 1 of 1. High E string, ${fret === 0 ? "open" : "fret 3"}, with ${name}.`
+    );
+  });
+
+  test("lists recognized techniques on an open note in source order", () => {
+    expect(describePlayablePosition(documentWithTechniques(["palm mute", "let ring", "vibrato"], 0), 0)).toBe(
+      "Position 1 of 1. High E string, open, with palm mute, let ring, and vibrato."
+    );
+  });
+
+  test.each(["rasgueado", "PalmMuting", "Palm Mute", "palm mute variation", "muted note"])(
+    "retains disclosure for an unrecognized attached name %s without guessing aliases",
+    (name) => {
+      expect(describePlayablePosition(documentWithTechniques([name]), 0)).toBe(
+        `Position 1 of 1. High E string, fret 3, with ${name} notation preserved but not yet interpreted.`
+      );
+    }
+  );
+
+  test("retains separate disclosures for multiple unknown attached techniques", () => {
+    expect(describePlayablePosition(documentWithTechniques(["rasgueado", "unknown effect"]), 0)).toBe(
+      "Position 1 of 1. High E string, fret 3, with rasgueado notation preserved but not yet interpreted; unknown effect notation preserved but not yet interpreted."
+    );
+  });
+
+  test.each([
+    [["palm mute", "unknown effect"], "palm mute; unknown effect notation preserved but not yet interpreted"],
+    [["unknown effect", "hammer-on"], "unknown effect notation preserved but not yet interpreted; with hammer-on"],
+    [["hammer-on", "unknown effect", "vibrato"], "hammer-on; unknown effect notation preserved but not yet interpreted; with vibrato"],
+    [["hammer-on", "pull-off", "unknown effect", "vibrato", "palm mute"], "hammer-on and pull-off; unknown effect notation preserved but not yet interpreted; with vibrato and palm mute"],
+  ])("discloses only unknown items in mixed list %s", (names, phrase) => {
+    expect(describePlayablePosition(documentWithTechniques(names), 0)).toBe(
+      `Position 1 of 1. High E string, fret 3, with ${phrase}.`
+    );
+  });
+
+  test("does not rewrite raw technique evidence, warnings or semantic losses while describing it", () => {
+    const document = documentWithTechniques(["bend", "unknown effect"]);
+    document.positions[0].strings[0].techniques[0] = {
+      name: "bend", raw: "b", attachment: "previous", sourceColumn: 3,
+      parameters: { amount: null, targetPitch: null },
+    };
+    document.warnings = ["Unsupported effect parameters remain unknown."];
+    document.semanticLosses = [{ element: "unknown effect", disposition: "preserved-not-interpreted" }];
+    const snapshot = JSON.stringify(document);
+
+    expect(describePlayablePosition(document, 0)).toBe(
+      "Position 1 of 1. High E string, fret 3, with bend; unknown effect notation preserved but not yet interpreted."
+    );
+    expect(JSON.stringify(document)).toBe(snapshot);
+  });
+
+  test("keeps an unattached recognized symbol as source evidence without inventing an instruction", () => {
+    const document = parseSixStringTabText(makeTab([
+      "e|--0--h|", "B|------|", "G|------|", "D|------|", "A|------|", "E|------|",
+    ]));
+    expect(document.positions).toHaveLength(1);
+    expect(describePlayablePosition(document, 0)).toBe("Position 1 of 1. High E string, open.");
+    expect(document.warnings.join(" ")).toMatch(/could not be attached/i);
+    expect(document.strings[0].tokens).toContainEqual(expect.objectContaining({ name: "hammer-on", raw: "h" }));
   });
 
   test("announces a mapped duration through the existing current-position action", () => {

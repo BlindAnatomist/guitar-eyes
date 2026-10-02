@@ -137,7 +137,7 @@ describe("parseMusicXmlTablature", () => {
       techniques: [expect.objectContaining({ name: "hammer-on" })],
     });
     expect(describePlayablePosition(document, 3)).toContain(
-      "D string, fret 2, with hammer-on notation preserved but not yet interpreted."
+      "D string, fret 2, with hammer-on."
     );
     expect(document.positions[4]).toMatchObject({
       measureNumber: 2,

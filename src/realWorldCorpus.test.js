@@ -128,8 +128,8 @@ describe("real-world tablature format corpus", () => {
     ]);
     expect(descriptions).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("fret 7, with hammer-on notation"),
-        expect.stringContaining("fret 5, with pull-off notation"),
+        expect.stringContaining("fret 7, with hammer-on."),
+        expect.stringContaining("fret 5, with pull-off."),
       ])
     );
     expect(result.semanticDocument.warnings.join(" ")).toMatch(
@@ -203,7 +203,7 @@ describe("real-world tablature format corpus", () => {
     expect(result.semanticDocument.positions[1].isRest).toBe(true);
     expect(describePlayablePosition(result.semanticDocument, 1)).toContain("Rest.");
     expect(describePlayablePosition(result.semanticDocument, 3)).toContain(
-      "hammer-on notation preserved"
+      "D string, fret 2, with hammer-on."
     );
     expect(result.desktopBlocks[0]).toHaveLength(6);
   });

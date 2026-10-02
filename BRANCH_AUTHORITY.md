@@ -1,5 +1,7 @@
 # Accepted Format-Intake Authority
 
+Latest technical continuation: `docs/checkpoints/reader-reliability-556-2026-10-02.md` preserves the completed 556-test source checkpoint on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+
 Date: 2026-08-14
 
 Current accepted format-only operational branch: `work/accepted-bass-convergence`
