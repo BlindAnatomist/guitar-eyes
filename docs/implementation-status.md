@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-708-2026-10-02.md` preserves the completed 708-test bounded-stream checkpoint and the earlier 556- and 621-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/reader-reliability-786-2026-10-02.md` preserves the completed 786-test TuxGuitar file-size preflight and the earlier 556-, 621- and 708-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
 
 Last reconciled: August 14, 2026.
 

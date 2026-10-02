@@ -171,6 +171,38 @@
           "blob_sha1": "0cff908394cf989d30d7cc2de30970ba52852ec5"
         }
       ]
+    },
+    {
+      "passed_tests": 786,
+      "tested_runtime": "e9c1f565a751acacdbf943b2f727f68b0ec19884",
+      "completed_source_snapshot": "66021cb5b92af1b11e7ee27cf83751ae6624f1d1",
+      "src_tree": "69fec798e951c67e0b1d80d487f656847bf49be3",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/tuxGuitarDecoder.js",
+          "mode": "100644",
+          "blob_sha1": "28c80034ed46a9f29dfda1a2d897767f0c1bdf89",
+          "sha256": "ac1c50b436d362e4c1b095d3c3450ff78ee58463a742d405daac4c4851e02220"
+        },
+        {
+          "path": "src/tuxGuitarFileSize.test.js",
+          "mode": "100644",
+          "blob_sha1": "4076914b717d576faa20749c65fd802c5b3dd65d",
+          "sha256": "4db97852c12c3007cd542c47096071b3bfc879c0f233b460a2bc9c6fa6c385a0"
+        },
+        {
+          "path": "src/tuxGuitarProfileDecoder.js",
+          "mode": "100644",
+          "blob_sha1": "280d5c393108b6f6209825feb9501dbd5cf5af96",
+          "sha256": "d30d62b94e5d0d35d1d225592802a339c96de5f4c39fe420f8d83b669df97c0d"
+        },
+        {
+          "path": "src/tuxGuitarStandardBassAdapter.js",
+          "mode": "100644",
+          "blob_sha1": "991097f137f677e4312778eb19d8b36313498a57",
+          "sha256": "e1393c4dfa0e9e0a71e9b4bd4a10bf02abf41e1a1954ff0e6a2d09b592a2e539"
+        }
+      ]
     }
   ]
 }

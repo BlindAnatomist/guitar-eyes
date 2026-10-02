@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "scope": "Sanitized technical summary of completed source/build verification. Publication transport does not rerun tests or regenerate fixtures.",
+  "tested_runtime": "e9c1f565a751acacdbf943b2f727f68b0ec19884",
+  "completed_source_snapshot": "66021cb5b92af1b11e7ee27cf83751ae6624f1d1",
+  "src_tree": "69fec798e951c67e0b1d80d487f656847bf49be3",
+  "changed_source_and_test_blobs": [
+    {
+      "path": "src/tuxGuitarDecoder.js",
+      "mode": "100644",
+      "blob_sha1": "28c80034ed46a9f29dfda1a2d897767f0c1bdf89",
+      "sha256": "ac1c50b436d362e4c1b095d3c3450ff78ee58463a742d405daac4c4851e02220"
+    },
+    {
+      "path": "src/tuxGuitarFileSize.test.js",
+      "mode": "100644",
+      "blob_sha1": "4076914b717d576faa20749c65fd802c5b3dd65d",
+      "sha256": "4db97852c12c3007cd542c47096071b3bfc879c0f233b460a2bc9c6fa6c385a0"
+    },
+    {
+      "path": "src/tuxGuitarProfileDecoder.js",
+      "mode": "100644",
+      "blob_sha1": "280d5c393108b6f6209825feb9501dbd5cf5af96",
+      "sha256": "d30d62b94e5d0d35d1d225592802a339c96de5f4c39fe420f8d83b669df97c0d"
+    },
+    {
+      "path": "src/tuxGuitarStandardBassAdapter.js",
+      "mode": "100644",
+      "blob_sha1": "991097f137f677e4312778eb19d8b36313498a57",
+      "sha256": "e1393c4dfa0e9e0a71e9b4bd4a10bf02abf41e1a1954ff0e6a2d09b592a2e539"
+    }
+  ],
+  "baseline_reproduction": {
+    "sentinel_failures": 3,
+    "file_bytes_allocated": false,
+    "cause": "Each entrypoint attempted arrayBuffer for advertised 16 MiB + 1 input."
+  },
+  "implementation_gates": {
+    "new_file_boundary_tests": 78,
+    "focused": {
+      "passed_suites": 7,
+      "passed_tests": 203,
+      "exit_code": 0
+    },
+    "complete": {
+      "passed_suites": 79,
+      "passed_tests": 786,
+      "skipped_suites": 1,
+      "skipped_tests": 4,
+      "exit_code": 0
+    },
+    "changed_file_lint_exit_code": 0,
+    "production_build_exit_code": 0
+  },
+  "independent_review": {
+    "status": "approved-source-and-build-gate",
+    "executed": {
+      "supplemental_native_checks": 56,
+      "metadata_matrix_outcomes": 66,
+      "accepted_fixture_parity_cases": 108,
+      "accepted_fixtures": 12,
+      "native_generations": [
+        "1.0",
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.5",
+        "2.0"
+      ],
+      "fixture_projection_sha256": "28aa33ebf86c9d6f16480faff9aaecbbeb429edb045e8824f5971226b78986c9",
+      "targeted_app_suites": 4,
+      "targeted_app_tests": 38
+    },
+    "inspected_without_duplicate_execution": [
+      "Full 786-test implementation log",
+      "Focused 203-test implementation log",
+      "Changed-file lint log",
+      "Existing production build and build log"
+    ],
+    "remaining_blockers": []
+  },
+  "build_inspection": {
+    "emitted_files": 30,
+    "manifest_javascript_assets": 8,
+    "source_map_exact_matches": [
+      "tuxGuitarDecoder.js",
+      "tuxGuitarProfileDecoder.js",
+      "tuxGuitarStandardBassAdapter.js"
+    ],
+    "format_only": true,
+    "forbidden_assets": [],
+    "main_asset": "main.a8d22eac.js",
+    "main_asset_sha256": "aef13306514a457e9c8503e694498c63152c4a8ad0fddd22b9d9c819e792522e"
+  },
+  "verification_limits": [
+    "File metadata is not proof of actual byte length.",
+    "Missing or forged-small metadata can allocate bytes before the retained actual-size check.",
+    "This is not a global process-memory budget or a profile-retry redesign.",
+    "No new musical profile or device-acceptance claim."
+  ],
+  "reproduction_commands": {
+    "focused": "CI=true npm test -- --watchAll=false --runInBand src/tuxGuitarFileSize.test.js src/tuxGuitarCompatibility.test.js src/tuxGuitarBassCompatibility.test.js src/structuredTabReaderDocuments.test.js src/semanticReliability.test.js src/techniqueSpeechParity.test.js src/App.importModeInvestigation.test.js",
+    "complete": "CI=true npm test -- --watchAll=false --runInBand",
+    "lint": "./node_modules/.bin/eslint src/tuxGuitarDecoder.js src/tuxGuitarProfileDecoder.js src/tuxGuitarStandardBassAdapter.js src/tuxGuitarFileSize.test.js",
+    "build": "npm run build"
+  },
+  "reproduction_note": "Use installed locked dependencies and preserved lawful fixtures. Do not run test:tuxguitar or producer generation for transport verification."
+}

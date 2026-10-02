@@ -663,12 +663,27 @@ async function readModern(bytes) {
   };
 }
 
+export function requireTuxGuitarFileSize(
+  size,
+  message = "The TuxGuitar file is empty or exceeds the checkpoint size limit."
+) {
+  // Internal file-like objects may omit size. Metadata never replaces the
+  // actual byte-length check after reading, and present values are not coerced.
+  requireValue(
+    size === undefined ||
+      (Number.isInteger(size) && size > 0 && size <= MAX_ARCHIVE_BYTES),
+    message,
+    "TUXGUITAR_FILE_SIZE_LIMIT"
+  );
+}
+
 export async function decodeTuxGuitarFile(file) {
   requireValue(
     file && typeof file.arrayBuffer === "function",
     "Choose a TuxGuitar .tg file first.",
     "MISSING_TUXGUITAR_FILE"
   );
+  requireTuxGuitarFileSize(file.size);
   const arrayBuffer = await file.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
   requireValue(

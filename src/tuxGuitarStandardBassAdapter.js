@@ -1,4 +1,4 @@
-import { decodeTuxGuitarFile } from "./tuxGuitarDecoder";
+import { decodeTuxGuitarFile, requireTuxGuitarFileSize } from "./tuxGuitarDecoder";
 import { canonicalizeLegacyBass } from "./tuxGuitarStandardBassLegacy";
 import { canonicalizeModernBass } from "./tuxGuitarStandardBassModern";
 import {
@@ -30,10 +30,11 @@ function restoreBassIntermediate(intermediate) {
 
 export async function decodeStandardBassTuxGuitarFile(file) {
   requireValue(file && typeof file.arrayBuffer === "function", "Choose a TuxGuitar .tg file first.", "MISSING_TUXGUITAR_FILE");
-  const bytes = new Uint8Array(await file.arrayBuffer()).slice();
-  requireValue(bytes.byteLength > 0 && bytes.byteLength <= MAX_ARCHIVE_BYTES, "The TuxGuitar bass file is empty or too large.", "TUXGUITAR_FILE_SIZE_LIMIT");
+  requireTuxGuitarFileSize(file.size, "The TuxGuitar bass file is empty or too large.");
+  const readBytes = new Uint8Array(await file.arrayBuffer());
+  requireValue(readBytes.byteLength > 0 && readBytes.byteLength <= MAX_ARCHIVE_BYTES, "The TuxGuitar bass file is empty or too large.", "TUXGUITAR_FILE_SIZE_LIMIT");
+  const bytes = readBytes.slice();
   const canonical = bytes[0] === 0x50 && bytes[1] === 0x4b ? await canonicalizeModernBass(bytes) : canonicalizeLegacyBass(bytes);
   const intermediate = await decodeTuxGuitarFile(memoryFile(file, canonical));
   return restoreBassIntermediate(intermediate);
 }
-
