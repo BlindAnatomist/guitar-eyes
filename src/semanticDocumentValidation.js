@@ -63,6 +63,119 @@ function validateDuration(duration) {
   }
 }
 
+// Importers historically keep equivalent nested copies without global numbering.
+// Check every copy before joining it to the document's canonical navigation view.
+const POSITION_GLOBAL_FIELDS = new Set(["index", "number", "total"]);
+const MEASURE_GLOBAL_FIELDS = new Set(["documentNumber", "documentTotal"]);
+function equalEvidence(left, right) {
+  if (Object.is(left, right)) return true;
+  if (left === null || right === null || typeof left !== "object" || typeof right !== "object") return false;
+  if (Array.isArray(left) !== Array.isArray(right)) return false;
+  const keys = Object.keys(left);
+  return keys.length === Object.keys(right).length && keys.every((key) =>
+    Object.prototype.hasOwnProperty.call(right, key) && equalEvidence(left[key], right[key]));
+}
+function matchingCopy(copy, canonical, permittedMissing = new Set(), ignored = new Set()) {
+  if (!copy || !canonical || typeof copy !== "object") return false;
+  const keys = new Set([...Object.keys(copy), ...Object.keys(canonical)]);
+  return [...keys].every((key) => {
+    if (ignored.has(key)) return true;
+    if (!Object.prototype.hasOwnProperty.call(copy, key)) return permittedMissing.has(key);
+    return Object.prototype.hasOwnProperty.call(canonical, key) && equalEvidence(copy[key], canonical[key]);
+  });
+}
+function validateNavigationCollections(document) {
+  let positionOffset = 0;
+  let measureOffset = 0;
+  const measureIds = new Set();
+  const positionIds = new Set();
+  requireTruth(document.measures === undefined || Array.isArray(document.measures), "invalid document measures");
+  const documentMeasures = document.measures || [];
+  document.blocks.forEach((block, blockIndex) => {
+    requireTruth(block.index === blockIndex && block.number === blockIndex + 1, "block navigation identity is inconsistent");
+    requireTruth(Array.isArray(block.positions) && block.positions.length > 0, "block positions are missing");
+    const blockPositions = block.positions.map((position, blockPositionIndex) => {
+      const canonical = document.positions[positionOffset];
+      requireTruth(canonical && canonical.blockIndex === blockIndex &&
+        canonical.index === positionOffset && canonical.number === positionOffset + 1 &&
+        canonical.total === document.positions.length && canonical.blockNumber === blockIndex + 1 &&
+        canonical.positionInBlock === blockPositionIndex + 1 && canonical.positionsInBlock === block.positions.length,
+      "document position navigation identity is inconsistent");
+      if (canonical.id !== undefined) {
+        requireTruth(typeof canonical.id === "string" && canonical.id.length > 0 && !positionIds.has(canonical.id),
+          "missing or duplicate position identity");
+        positionIds.add(canonical.id);
+      }
+      requireTruth(matchingCopy(position, canonical, POSITION_GLOBAL_FIELDS), "block and document position evidence disagree");
+      positionOffset += 1;
+      return canonical;
+    });
+    requireTruth(block.measures === undefined || Array.isArray(block.measures), "invalid block measures");
+    const measures = block.measures || [];
+    requireTruth(measures.length > 0 || blockPositions.every((position) =>
+      position.measureNumber == null && position.positionInMeasure == null &&
+      position.positionsInMeasure == null && position.measureCountInBlock == null),
+    "position declares a measure absent from its block");
+    let blockPositionOffset = 0;
+    measures.forEach((measure, measureIndex) => {
+      const canonical = documentMeasures[measureOffset];
+      requireTruth(canonical && typeof canonical.id === "string" && canonical.id.length > 0 &&
+        !measureIds.has(canonical.id), "missing or duplicate measure identity");
+      measureIds.add(canonical.id);
+      requireTruth(canonical.blockIndex === blockIndex && canonical.blockNumber === blockIndex + 1 &&
+        canonical.number === measureIndex + 1 && canonical.totalInBlock === measures.length &&
+        canonical.documentNumber === measureOffset + 1 && canonical.documentTotal === documentMeasures.length,
+      "measure navigation identity is inconsistent");
+      requireTruth(matchingCopy(measure, canonical, MEASURE_GLOBAL_FIELDS, new Set(["positions"])),
+        "block and document measure evidence disagree");
+      requireTruth(Array.isArray(measure.positions) && Array.isArray(canonical.positions) &&
+        measure.positions.length === canonical.positions.length, "measure positions are missing or inconsistent");
+      canonical.positions.forEach((position, index) => {
+        const documentPosition = blockPositions[blockPositionOffset];
+        requireTruth(documentPosition && documentPosition.measureNumber === measureIndex + 1 &&
+          documentPosition.positionInMeasure === index + 1 &&
+          documentPosition.positionsInMeasure === canonical.positions.length &&
+          documentPosition.measureCountInBlock === measures.length,
+        "measure position membership or order is inconsistent");
+        requireTruth(matchingCopy(position, documentPosition, POSITION_GLOBAL_FIELDS) &&
+          matchingCopy(measure.positions[index], documentPosition, POSITION_GLOBAL_FIELDS),
+        "measure and document position evidence disagree");
+        blockPositionOffset += 1;
+      });
+      measureOffset += 1;
+    });
+    requireTruth(measures.length === 0 || blockPositionOffset === blockPositions.length,
+      "measures do not cover their block positions");
+  });
+  requireTruth(positionOffset === document.positions.length, "blocks do not cover document positions");
+  requireTruth(measureOffset === documentMeasures.length, "blocks do not cover document measures");
+}
+
+// A pure admission step: contradictory copies reject, and only equivalent
+// collections are joined. Existing musical values and source evidence are kept.
+export function finalizeSemanticDocument(document) {
+  validateSemanticDocument(document);
+  let positionOffset = 0;
+  let measureOffset = 0;
+  const blocks = document.blocks.map((block) => {
+    const positions = document.positions.slice(positionOffset, positionOffset + block.positions.length);
+    positionOffset += positions.length;
+    let blockPositionOffset = 0;
+    const measures = (block.measures || []).map((measure) => {
+      const canonical = document.measures[measureOffset++];
+      const measurePositions = positions.slice(blockPositionOffset, blockPositionOffset + measure.positions.length);
+      blockPositionOffset += measurePositions.length;
+      return { ...canonical, positions: measurePositions };
+    });
+    return { ...block, positions, ...(block.measures !== undefined ? { measures } : {}) };
+  });
+  return {
+    ...document,
+    blocks,
+    ...(document.measures !== undefined ? { measures: blocks.flatMap((block) => block.measures || []) } : {}),
+  };
+}
+
 // Staged boundary: inherited adapters still establish format/profile admission.
 // This validates their common output without reconstructing source or changing it.
 export function validateSemanticDocument(document) {
@@ -120,5 +233,6 @@ export function validateSemanticDocument(document) {
     document.semanticLosses.forEach((loss) => requireTruth(loss && typeof loss.kind === "string" &&
       typeof loss.sourceFormat === "string" && typeof loss.disposition === "string", "incomplete semantic loss record"));
   }
+  validateNavigationCollections(document);
   return document;
 }

@@ -1,4 +1,4 @@
-import { validateSemanticDocument } from "./semanticDocumentValidation";
+import { finalizeSemanticDocument } from "./semanticDocumentValidation";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { TuxGuitarImportError } from "./tuxGuitarDecoder";
 import { decodeTuxGuitarProfileFile } from "./tuxGuitarProfileDecoder";
@@ -62,10 +62,10 @@ export async function buildTuxGuitarReaderDocuments(
     };
   }
 
-  const semanticDocument = normalize(resolved, {
+  const normalizedDocument = normalize(resolved, {
     selection: selection || trackInventory.autoSelection,
   });
-  validateSemanticDocument(semanticDocument);
+  const semanticDocument = finalizeSemanticDocument(normalizedDocument);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

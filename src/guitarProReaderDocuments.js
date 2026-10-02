@@ -1,4 +1,4 @@
-import { validateSemanticDocument } from "./semanticDocumentValidation";
+import { finalizeSemanticDocument } from "./semanticDocumentValidation";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { normalizeVerifiedGuitarProIntermediate } from "./guitarProSourceNormalizer";
 import { buildGuitarProTrackInventory } from "./guitarProTrackInventory";
@@ -68,10 +68,10 @@ export async function buildGuitarProReaderDocuments(
   }
 
   const resolvedSelection = selection || trackInventory.autoSelection;
-  const semanticDocument = normalize(resolvedIntermediate, {
+  const normalizedDocument = normalize(resolvedIntermediate, {
     selection: resolvedSelection,
   });
-  validateSemanticDocument(semanticDocument);
+  const semanticDocument = finalizeSemanticDocument(normalizedDocument);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

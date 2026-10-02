@@ -1,4 +1,4 @@
-import { validateSemanticDocument } from "./semanticDocumentValidation";
+import { finalizeSemanticDocument } from "./semanticDocumentValidation";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { decodePowerTabLegacyFile } from "./powerTabLegacyDecoder";
 import { PowerTabImportError } from "./powerTabErrors";
@@ -63,11 +63,11 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
   }
 
   const selection = options.selection || trackInventory.autoSelection;
-  const semanticDocument = normalize(intermediate, {
+  const normalizedDocument = normalize(intermediate, {
     ...options,
     selection,
   });
-  validateSemanticDocument(semanticDocument);
+  const semanticDocument = finalizeSemanticDocument(normalizedDocument);
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

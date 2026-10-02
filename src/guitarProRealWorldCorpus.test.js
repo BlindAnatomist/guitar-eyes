@@ -202,6 +202,17 @@ describe("verified real-world Guitar Pro corpus", () => {
       });
 
       expect(decode).toHaveBeenCalledTimes(1);
+      // Every view refers to the same verified musical events after admission.
+      const document = result.semanticDocument;
+      document.blocks[0].positions.forEach((position, index) => {
+        expect(position).toBe(document.positions[index]);
+      });
+      document.blocks[0].measures.forEach((measure, index) => {
+        expect(measure).toBe(document.measures[index]);
+        measure.positions.forEach((position) => {
+          expect(position).toBe(document.positions[position.index]);
+        });
+      });
       expect(result).toMatchObject({
         desktopSource: "semantic",
         semanticError: null,

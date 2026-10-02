@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "scope": "Exact source and test blob mapping; technical documentation is independently authored, so whole-tree and commit identities differ.",
+  "public_transfer_base": "983e18531af012e28317c561d401c042512bb2db",
+  "checkpoints": [
+    {
+      "passed_tests": 556,
+      "tested_runtime": "c89436fdd27c07393600ddf7a2430d531b3f70b6",
+      "completed_source_snapshot": "c0db3e3a283eccdda24a1d73b4dfc132f24e94a4",
+      "src_tree": "626706216fab425e6e39506c933ba09dab012686",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/App.importModeInvestigation.test.js",
+          "mode": "100644",
+          "blob_sha1": "11eba9bd902533c38c9b7fbd7250e539880813c8"
+        },
+        {
+          "path": "src/App.js",
+          "mode": "100644",
+          "blob_sha1": "71c4eb23fc05b4679ed4c99c4627217926a92942"
+        },
+        {
+          "path": "src/musicXmlImporter.test.js",
+          "mode": "100644",
+          "blob_sha1": "a373ca110bf344ae84ff0eedd03241bdbd3d4999"
+        },
+        {
+          "path": "src/positionDescription.js",
+          "mode": "100644",
+          "blob_sha1": "ae614d2dda9cdb54b0d881e99a0d1bb71690afb0"
+        },
+        {
+          "path": "src/positionDescription.test.js",
+          "mode": "100644",
+          "blob_sha1": "5f91efc15b12da30e3aecb5b88f0c79245761279"
+        },
+        {
+          "path": "src/realWorldCorpus.test.js",
+          "mode": "100644",
+          "blob_sha1": "e0dad39ba295eaf6bc42e4532fbb32520663bc68"
+        },
+        {
+          "path": "src/techniqueSpeechParity.test.js",
+          "mode": "100644",
+          "blob_sha1": "10590dcdbf8035513a77daac5201196d4c1bf922"
+        }
+      ]
+    },
+    {
+      "passed_tests": 621,
+      "tested_runtime": "6f677308bd39d4f0494490cd438e95b7013f13c6",
+      "completed_source_snapshot": "96d4023cdb54cc1f72a735516aa6c3405dc588a0",
+      "src_tree": "9b533fcfa8921a7886fb9c49a5a03f5849fe5161",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/App.importModeInvestigation.test.js",
+          "mode": "100644",
+          "blob_sha1": "11eba9bd902533c38c9b7fbd7250e539880813c8"
+        },
+        {
+          "path": "src/App.js",
+          "mode": "100644",
+          "blob_sha1": "71c4eb23fc05b4679ed4c99c4627217926a92942"
+        },
+        {
+          "path": "src/guitarProReaderDocuments.js",
+          "mode": "100644",
+          "blob_sha1": "17e5eb542f4fcef22cfbb90635e65107b1909fb9"
+        },
+        {
+          "path": "src/guitarProRealWorldCorpus.test.js",
+          "mode": "100644",
+          "blob_sha1": "5089e0f29513c3d8893ca0704f5e510f2439782a"
+        },
+        {
+          "path": "src/musicXmlImporter.test.js",
+          "mode": "100644",
+          "blob_sha1": "a373ca110bf344ae84ff0eedd03241bdbd3d4999"
+        },
+        {
+          "path": "src/positionDescription.js",
+          "mode": "100644",
+          "blob_sha1": "ae614d2dda9cdb54b0d881e99a0d1bb71690afb0"
+        },
+        {
+          "path": "src/positionDescription.test.js",
+          "mode": "100644",
+          "blob_sha1": "5f91efc15b12da30e3aecb5b88f0c79245761279"
+        },
+        {
+          "path": "src/powerTabLegacyReaderDocuments.js",
+          "mode": "100644",
+          "blob_sha1": "35953349c29cbaf9bcc9b149e67cb1103c41e3df"
+        },
+        {
+          "path": "src/powerTabReaderDocuments.js",
+          "mode": "100644",
+          "blob_sha1": "b9f4631cbce5263cae8cb9a5e6f4e33e4879a9da"
+        },
+        {
+          "path": "src/realWorldCorpus.test.js",
+          "mode": "100644",
+          "blob_sha1": "e0dad39ba295eaf6bc42e4532fbb32520663bc68"
+        },
+        {
+          "path": "src/semanticDocumentValidation.js",
+          "mode": "100644",
+          "blob_sha1": "c36b09c3fe6d7f5de44258d7f7e8a95ee0f9d925"
+        },
+        {
+          "path": "src/semanticNavigationIdentity.test.js",
+          "mode": "100644",
+          "blob_sha1": "45ef1160982c8957cbeb8ff7801637477cb661a3"
+        },
+        {
+          "path": "src/tabImportCoordinator.js",
+          "mode": "100644",
+          "blob_sha1": "5ca87ac1bc90bcb6ce380418b6b5af65925744a2"
+        },
+        {
+          "path": "src/techniqueSpeechParity.test.js",
+          "mode": "100644",
+          "blob_sha1": "10590dcdbf8035513a77daac5201196d4c1bf922"
+        },
+        {
+          "path": "src/tuxGuitarReaderDocuments.js",
+          "mode": "100644",
+          "blob_sha1": "ee2b5c3533f3aa5b15e1cc4b27c4dbbf6453d7a9"
+        }
+      ]
+    }
+  ]
+}

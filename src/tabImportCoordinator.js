@@ -1,4 +1,4 @@
-import { validateSemanticDocument } from "./semanticDocumentValidation";
+import { finalizeSemanticDocument } from "./semanticDocumentValidation";
 import { applyAsciiRhythmToDocument } from "./asciiRhythm";
 import { semanticDocumentToDesktopBlocks } from "./desktopSemanticAdapter";
 import { parseTabDocumentText, TabParseError } from "./iphoneTabModel";
@@ -160,8 +160,7 @@ export function buildReaderDocuments(sourceText, selectedInstrument = "guitar") 
         sourceText,
         identifiedDocument
       );
-      const semanticDocument = applyExplicitMeasuresToDocument(rhythmDocument);
-      validateSemanticDocument(semanticDocument);
+      const semanticDocument = finalizeSemanticDocument(applyExplicitMeasuresToDocument(rhythmDocument));
       const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
       return {
@@ -224,8 +223,7 @@ export function buildMusicXmlReaderDocuments(
     sourceFormatLabel = "MusicXML tablature",
   } = {}
 ) {
-  const semanticDocument = parseMusicXmlTablature(sourceText);
-  validateSemanticDocument(semanticDocument);
+  const semanticDocument = finalizeSemanticDocument(parseMusicXmlTablature(sourceText));
   const desktopBlocks = semanticDocumentToDesktopBlocks(semanticDocument);
 
   return {

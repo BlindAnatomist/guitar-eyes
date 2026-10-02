@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-556-2026-10-02.md` preserves the completed 556-test source checkpoint on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/reader-reliability-621-2026-10-02.md` preserves the completed 621-test canonical-identity checkpoint and the earlier 556-test checkpoint on an isolated work branch. This does not promote or replace the accepted operational baseline below.
 
 Last reconciled: August 14, 2026.
 
