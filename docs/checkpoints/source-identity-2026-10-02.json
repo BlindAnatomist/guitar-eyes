@@ -128,6 +128,49 @@
           "blob_sha1": "ee2b5c3533f3aa5b15e1cc4b27c4dbbf6453d7a9"
         }
       ]
+    },
+    {
+      "passed_tests": 708,
+      "tested_runtime": "1204069da11d9075def26841d810e864393e24cc",
+      "completed_source_snapshot": "29d7c84d4added0637f0b7d2b35fc09cf8ca9a60",
+      "src_tree": "355babcd74b03fe46cb4b750eb54414725651dfc",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/guitarProArchiveVersion.js",
+          "mode": "100644",
+          "blob_sha1": "a0eb38a7b3e5a0db00fdf2d50cb811e40d9522a8"
+        },
+        {
+          "path": "src/importExpansionBounds.test.js",
+          "mode": "100644",
+          "blob_sha1": "68330955a8093c57870b0c41166ea93302d1ccf4"
+        },
+        {
+          "path": "src/powerTabPt2Decoder.js",
+          "mode": "100644",
+          "blob_sha1": "732c8f223aaa94248a305eec9b4dc85fbea3bd53"
+        },
+        {
+          "path": "src/powerTabV11Decoder.js",
+          "mode": "100644",
+          "blob_sha1": "49c843c70c6d1c4855df425072f10f178d4d216a"
+        },
+        {
+          "path": "src/readBoundedByteStream.js",
+          "mode": "100644",
+          "blob_sha1": "969ab40925f2ccb42ad0394ac92d56f577159564"
+        },
+        {
+          "path": "src/readBoundedByteStream.test.js",
+          "mode": "100644",
+          "blob_sha1": "ad16a3cbf779b95071c75c76e3bc26dedefcc42a"
+        },
+        {
+          "path": "src/tuxGuitarStandardBassZip.js",
+          "mode": "100644",
+          "blob_sha1": "0cff908394cf989d30d7cc2de30970ba52852ec5"
+        }
+      ]
     }
   ]
 }

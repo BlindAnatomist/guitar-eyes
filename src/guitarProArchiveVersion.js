@@ -1,3 +1,5 @@
+import { readBoundedByteStream } from "./readBoundedByteStream";
+
 const ZIP_SIGNATURES = Object.freeze({
   localHeader: 0x04034b50,
   centralHeader: 0x02014b50,
@@ -53,7 +55,7 @@ function decodeUtf8(bytes, label) {
   }
 }
 
-async function browserInflateRaw(bytes) {
+async function browserInflateRaw(bytes, maxBytes, name = "A Guitar Pro archive entry") {
   if (typeof DecompressionStream !== "function") {
     throw new GuitarProArchiveError(
       "This browser cannot inspect compressed Guitar Pro archive entries.",
@@ -71,8 +73,14 @@ async function browserInflateRaw(bytes) {
     );
   }
 
-  const response = new Response(new Blob([bytes]).stream().pipeThrough(stream));
-  return new Uint8Array(await response.arrayBuffer());
+  return readBoundedByteStream(
+    new Blob([bytes]).stream().pipeThrough(stream),
+    maxBytes,
+    new GuitarProArchiveError(
+      `${name} exceeds the checkpoint extraction limit.`,
+      "GUITAR_PRO_ARCHIVE_EXPANSION_LIMIT"
+    )
+  );
 }
 
 function parseCentralDirectory(bytes, limits) {
@@ -163,9 +171,12 @@ async function readEntry(bytes, view, entry, maxBytes, inflateRaw) {
   const compressed = bytes.subarray(dataStart, dataEnd);
   let output;
   if (method === 0) {
+    // Stored bytes already expose the actual size; reject before copying them.
+    requireBounds(compressed.byteLength === entry.uncompressedSize, `${entry.name} expanded to an unexpected size.`, "GUITAR_PRO_ARCHIVE_SIZE_MISMATCH");
+    requireBounds(compressed.byteLength <= maxBytes, `${entry.name} exceeds the checkpoint extraction limit.`, "GUITAR_PRO_ARCHIVE_EXPANSION_LIMIT");
     output = new Uint8Array(compressed);
   } else {
-    output = await inflateRaw(compressed);
+    output = await inflateRaw(compressed, maxBytes, entry.name);
   }
 
   requireBounds(output.byteLength === entry.uncompressedSize, `${entry.name} expanded to an unexpected size.`, "GUITAR_PRO_ARCHIVE_SIZE_MISMATCH");

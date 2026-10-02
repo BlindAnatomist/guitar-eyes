@@ -1,3 +1,5 @@
+import { readBoundedByteStream } from "./readBoundedByteStream";
+import { TuxGuitarImportError } from "./tuxGuitarDecoder";
 import {
   MAX_XML_BYTES,
   fail,
@@ -13,9 +15,14 @@ function findEocd(view) {
 async function inflateRaw(bytes, maxBytes) {
   requireValue(typeof DecompressionStream === "function", "This browser cannot expand compressed TuxGuitar entries.", "TUXGUITAR_DECOMPRESSION_UNAVAILABLE");
   const stream = new DecompressionStream("deflate-raw");
-  const output = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer());
-  requireValue(output.byteLength <= maxBytes, "A TuxGuitar bass ZIP entry exceeds the extraction limit.", "TUXGUITAR_ARCHIVE_EXPANSION_LIMIT");
-  return output;
+  return readBoundedByteStream(
+    new Blob([bytes]).stream().pipeThrough(stream),
+    maxBytes,
+    new TuxGuitarImportError(
+      "A TuxGuitar bass ZIP entry exceeds the extraction limit.",
+      "TUXGUITAR_ARCHIVE_EXPANSION_LIMIT"
+    )
+  );
 }
 export async function readModernEntries(bytes) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -36,6 +43,11 @@ export async function readModernEntries(bytes) {
     const localNameLength = view.getUint16(localOffset + 26, true), localExtraLength = view.getUint16(localOffset + 28, true), start = localOffset + 30 + localNameLength + localExtraLength, end = start + compressedSize;
     requireValue(end <= bytes.length && uncompressedSize <= MAX_XML_BYTES, "A TuxGuitar bass ZIP entry is truncated or too large.", "TUXGUITAR_ARCHIVE_EXPANSION_LIMIT");
     const packed = bytes.subarray(start, end);
+    if (method === 0) {
+      // Preserve the stored-entry error contract without allocating a copy first.
+      requireValue(packed.byteLength === uncompressedSize, "A TuxGuitar bass ZIP entry expanded to an unexpected size.", "INVALID_TUXGUITAR_ZIP");
+      requireValue(packed.byteLength <= MAX_XML_BYTES, "A TuxGuitar bass ZIP entry exceeds the extraction limit.", "TUXGUITAR_ARCHIVE_EXPANSION_LIMIT");
+    }
     const data = method === 0 ? new Uint8Array(packed) : await inflateRaw(packed, MAX_XML_BYTES);
     requireValue(data.byteLength === uncompressedSize, "A TuxGuitar bass ZIP entry expanded to an unexpected size.", "INVALID_TUXGUITAR_ZIP");
     entries.set(name, data);

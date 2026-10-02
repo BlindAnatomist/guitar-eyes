@@ -1,3 +1,4 @@
+import { readBoundedByteStream } from "./readBoundedByteStream";
 import { PowerTabImportError } from "./powerTabErrors";
 import {
   canonicalizeHistoricalPowerTabDocument,
@@ -46,14 +47,14 @@ async function decompressGzip(bytes, limits) {
     const stream = new Blob([bytes])
       .stream()
       .pipeThrough(new DecompressionStream("gzip"));
-    const decompressed = new Uint8Array(await new Response(stream).arrayBuffer());
-    if (decompressed.byteLength > limits.maxDecompressedBytes) {
-      fail(
+    return await readBoundedByteStream(
+      stream,
+      limits.maxDecompressedBytes,
+      new PowerTabImportError(
         `The decompressed PowerTab document exceeds the ${limits.maxDecompressedBytes}-byte safety limit.`,
         "POWERTAB_DECOMPRESSED_SIZE_LIMIT"
-      );
-    }
-    return decompressed;
+      )
+    );
   } catch (error) {
     if (error instanceof PowerTabImportError) throw error;
     fail(
