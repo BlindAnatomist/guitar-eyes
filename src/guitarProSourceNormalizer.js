@@ -184,5 +184,29 @@ export function normalizeVerifiedGuitarProIntermediate(
     options
   );
 
-  return restoreSourceMetadata(normalized, sourceVersion, versionEvidence);
+  const document = restoreSourceMetadata(normalized, sourceVersion, versionEvidence);
+  // Only this verified GP wrapper adopts the loss contract. The shared
+  // compatibility normalizer also serves PowerTab and TuxGuitar.
+  const bars = intermediate.tracks[document.sourceTrackIndex]
+    .staves[document.sourceStaffIndex].bars;
+  const semanticLosses = bars.flatMap((bar, sourceMeasureIndex) => {
+    if (!(bar.repeatStart || (bar.repeatCount ?? 0) > 0 || (bar.alternateEndings ?? 0) > 0)) return [];
+    const measure = document.measures[sourceMeasureIndex];
+    return [{
+      kind: "source-order-only",
+      sourceFormat: "guitar-pro",
+      disposition: "not-expanded",
+      sourceMeasureIndex,
+      measureNumber: measure.sourceNumber,
+      location: { scope: "measure", measureId: measure.id },
+      // Keep the decoded values, including false/zero companions. In
+      // particular, alternateEndings is a bit mask, not an ending number.
+      sourceMetadata: {
+        repeatStart: bar.repeatStart,
+        repeatCount: bar.repeatCount,
+        alternateEndings: bar.alternateEndings,
+      },
+    }];
+  });
+  return semanticLosses.length ? { ...document, semanticLosses } : document;
 }

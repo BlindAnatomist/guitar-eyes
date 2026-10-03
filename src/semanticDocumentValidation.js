@@ -195,10 +195,13 @@ function validateSemanticLosses(document) {
       ? nonemptyText(location.positionId) && position
       : nonemptyText(location.measureId) && measure, "dangling semantic loss reference");
 
-    // This first adopter already retains the source facts needed to prove attachment.
-    // Other importers keep their established loss policy and are not migrated here.
-    if (loss.sourceFormat !== "musicxml" || !["unsupported-technical", "source-order-only"].includes(loss.kind)) return;
-    requireTruth(document.sourceFormat === "musicxml" && Number.isSafeInteger(loss.sourceMeasureIndex) &&
+    // These bounded adopters retain the source facts needed to prove attachment.
+    // Other loss kinds and importers keep their established policy.
+    const musicXmlLoss = loss.sourceFormat === "musicxml" &&
+      ["unsupported-technical", "source-order-only"].includes(loss.kind);
+    const guitarProLoss = loss.sourceFormat === "guitar-pro" && loss.kind === "source-order-only";
+    if (!musicXmlLoss && !guitarProLoss) return;
+    requireTruth(document.sourceFormat === loss.sourceFormat && Number.isSafeInteger(loss.sourceMeasureIndex) &&
       loss.sourceMeasureIndex >= 0 && measure && document.measures?.[loss.sourceMeasureIndex] === measure &&
       measure.sourceNumber === loss.measureNumber, "semantic loss source measure contradicts its reference");
     if (loss.kind === "source-order-only") {
