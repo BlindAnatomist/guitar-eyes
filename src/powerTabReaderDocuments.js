@@ -32,7 +32,7 @@ export async function buildPowerTabReaderDocuments(
       .join(" ");
     throw new PowerTabImportError(
       reasons ||
-        "The PowerTab file contains no supported six-string guitar player in the fixture-proven profile.",
+        "The PowerTab file contains no supported player within its version-specific profile. Internal versions 1 through 11 have bounded six-string guitar profiles; exact standard four-string bass in high-to-low tuning G2, D2, A1, E1 is supported only for internal version 11.",
       "NO_SUPPORTED_POWERTAB_PLAYER"
     );
   }

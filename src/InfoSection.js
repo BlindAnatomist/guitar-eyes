@@ -4,7 +4,7 @@ const InfoSection = () => (
   <>
     <p>
       Welcome to Guitar Eyes for Mac. Supported ASCII, MusicXML, compressed MusicXML,
-      and bounded Guitar Pro guitar and bass files are imported into the same synchronized
+      Guitar Pro, PowerTab, and TuxGuitar profiles are imported into the same synchronized
       musical document used by the iPhone reader. The desktop view preserves strings as
       rows and musical positions as columns while retaining rhythm, measures, rests,
       open strings, frets, chords, and supported notation.
@@ -16,12 +16,38 @@ const InfoSection = () => (
       plus exact standard seven-string and eight-string guitar and five-string and
       six-string bass when every string label includes the expected octave. Uncompressed
       .musicxml or .xml and compressed .mxl support remain bounded to six-string guitar
-      tablature containing explicit string and fret data. The current Guitar Pro
-      foundation accepts internally verified GP3, GP4, GP5, GP6 GPX, and supported GP7 or
-      GP8 .gp files when alphaTab preserves a four-string bass or six-string guitar staff,
-      exact string and fret identity, measures, and supported duration. This is bounded
-      cross-format intake, not a claim that every feature in every Guitar Pro file is
-      supported.
+      tablature containing explicit string and fret data.
+    </p>
+    <p>
+      Guitar Pro support is bounded to the verified GP3, GP4, GP5, GP6 GPX, and GP7
+      shared .gp corpus and profiles. Shared .gp archives require internal version
+      evidence and a supported four-string bass or six-string guitar track with exact
+      string, fret, measure, and supported duration data. The existing GP8-style project
+      proofs do not establish general GP8 compatibility.
+    </p>
+
+    <h3>PowerTab profiles</h3>
+    <p>
+      PowerTab .pt2 supports internal versions 1 through 11 within the accepted
+      six-string guitar profiles. Exact standard four-string bass in high-to-low tuning
+      G2, D2, A1, E1 is supported only for internal version 11. Internal versions 1
+      through 10 do not support bass.
+    </p>
+    <p>
+      Legacy PowerTab .ptb supports file version 1 (PowerTab 1.0), file version 2
+      (PowerTab 1.0.2), file version 3 (PowerTab 1.5), and file version 4 (PowerTab 1.7).
+      Each has bounded six-string guitar and exact standard four-string bass profiles.
+      The bass tuning must be G2, D2, A1, E1 from highest to lowest.
+    </p>
+
+    <h3>TuxGuitar profiles</h3>
+    <p>
+      TuxGuitar .tg supports native generations 1.0, 1.1, 1.2, 1.3, and 1.5 plus
+      modern native file format 2.0.0 within bounded six-string guitar and exact standard
+      four-string bass profiles. The bass tuning must be G2, D2, A1, E1 from highest to
+      lowest. The modern file format was validated against TuxGuitar 2.1.0 producer
+      evidence; the application version and native file-format version are distinct.
+      Native 0.7, 0.8, and 0.9 remain unsupported, and no native 1.4 route is inferred.
     </p>
 
     <h3>Guitar Pro track selection</h3>
@@ -81,9 +107,12 @@ const InfoSection = () => (
       When an ASCII text file cannot yet be interpreted safely by the shared semantic
       model, the original Guitar Eyes grid remains available as a compatibility fallback
       rather than inventing musical meaning. Extended-string ASCII without the exact
-      bounded octave evidence, Guitar Pro 2 .gtp, unsupported Guitar Pro structures,
-      PowerTab, TuxGuitar, and TablEdit produce explicit messages instead of misleading
-      reader results.
+      bounded octave evidence, Guitar Pro 2 .gtp, TablEdit .tef, and unsupported
+      structures within Guitar Pro, PowerTab, or TuxGuitar produce explicit messages
+      instead of misleading reader results. Recognition by filename does not establish
+      reading support. PowerTab and TuxGuitar support is limited to the version-specific
+      profiles above; arbitrary files, alternate or extended bass tunings, and other
+      unproved structures are not supported.
     </p>
   </>
 );

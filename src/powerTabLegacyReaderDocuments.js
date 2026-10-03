@@ -36,7 +36,7 @@ export async function buildPowerTabLegacyReaderDocuments(file, options = {}) {
       .join(" ");
     throw new PowerTabImportError(
       reasons ||
-        `The PowerTab ${powerTabVersion} file contains no player within the bounded six-string guitar profile.`,
+        `The PowerTab ${powerTabVersion} file contains no player within the bounded six-string guitar or exact standard four-string bass profiles. The bass tuning must be G2, D2, A1, E1 from highest to lowest.`,
       "NO_SUPPORTED_POWERTAB_LEGACY_PLAYER"
     );
   }

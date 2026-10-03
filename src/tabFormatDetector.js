@@ -196,11 +196,11 @@ export function unsupportedTabFormatMessage(format) {
     case "guitar-pro-2":
       return "A Guitar Pro 2 .gtp file was recognized. Guitar Eyes does not import GP2 files; support requires a separate lawful fixture and version-specific decoder evidence.";
     case "powertab-pt2":
-      return "The PowerTab 2 file could not be imported. Guitar Eyes requires valid supported .pt2 internal-version evidence plus preserved string, fret, tuning, measure, and duration identity.";
+      return "The PowerTab 2 file could not be imported. Guitar Eyes requires valid supported .pt2 internal-version evidence: internal versions 1 through 11 have bounded six-string guitar profiles, and only internal version 11 supports exact standard four-string bass in high-to-low tuning G2, D2, A1, E1. String, fret, tuning, measure, and duration identity must be preserved; other structures remain unsupported.";
     case "powertab-legacy":
-      return "The legacy PowerTab file could not be imported. This checkpoint recognizes exact ptab file-version values 1 through 4 only, using version-specific bounded six-string guitar profiles; unsupported historical structures must fail explicitly rather than being guessed.";
+      return "The legacy PowerTab file could not be imported. Guitar Eyes requires exact ptab file-version values 1 through 4: PowerTab 1.0, 1.0.2, 1.5, and 1.7 respectively. Each has bounded six-string guitar and exact standard four-string bass profiles, with bass tuning G2, D2, A1, E1 from highest to lowest. Recognizing the file does not establish that its musical structures are supported; unsupported structures are rejected rather than guessed.";
     case "tuxguitar":
-      return "The TuxGuitar file could not be imported. This checkpoint recognizes exact legacy .tg generations 1.0, 1.1, 1.2, 1.3, and 1.5 plus modern native file format 2.0.0 within the bounded six-string guitar profile; other structures must fail explicitly rather than being guessed.";
+      return "The TuxGuitar file could not be imported. Guitar Eyes supports exact legacy .tg generations 1.0, 1.1, 1.2, 1.3, and 1.5 plus modern native file format 2.0.0 within bounded six-string guitar and exact standard four-string bass profiles, with bass tuning G2, D2, A1, E1 from highest to lowest. Native 0.7, 0.8, and 0.9 remain unsupported, and no native 1.4 route is inferred. Recognizing the file does not establish that its musical structures are supported; unsupported structures are rejected rather than guessed.";
     case "tabledit":
       return "A TablEdit file was recognized. Guitar Eyes does not yet import .tef files; owner-performed conversion remains the current route.";
     default:

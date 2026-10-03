@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "scope": "Sanitized technical source/build checkpoint only",
+  "tested_runtime": "33765dbf8aad03f51652911b54b0c4385743749b",
+  "completed_source_snapshot": "3595d88c473c1f5d4f85251d88c7a6e8926ece0d",
+  "implementation_base": "5d3b6f01009348b82a9c5189ea6f1fdf00d3c8d0",
+  "src_tree": "11f3ee100caae945cf02b0c5f1e074695e7d6b57",
+  "public_tree": "b1c73387c657f97bfec9c1ecad1a108dd44d2c01",
+  "changed_source_test_and_readme_blobs": [
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "blob_sha1": "eb0eb113e371374428c9f3eeeb82be92786321da",
+      "sha256": "597eda0f95bb236a68ccf13d560a3586d98c0ffbd23caa621d1f82028653acb9"
+    },
+    {
+      "path": "src/App.js",
+      "mode": "100644",
+      "blob_sha1": "368a4eb06e70e16824766bd86ba2f893bf94fc78",
+      "sha256": "32ce5a693db7fffe97a56ea432d227ded84f610235a90c5959b031ba5cb4a58f"
+    },
+    {
+      "path": "src/App.supportCopy.test.js",
+      "mode": "100644",
+      "blob_sha1": "3691ab25c7f5978f6acbd940dd3d9505d0869651",
+      "sha256": "2fe50b0b84f99263d3c8e3e5386938b360ecb3a794104101e51dcdd98252c3a9"
+    },
+    {
+      "path": "src/InfoSection.js",
+      "mode": "100644",
+      "blob_sha1": "84857b107dd1a18feab37b598d669bd57b3dca37",
+      "sha256": "dfa3e6ab030119e0ef98b5f7bf948c578ab006cdb700887357ac3eb243213a84"
+    },
+    {
+      "path": "src/InfoSection.supportCopy.test.js",
+      "mode": "100644",
+      "blob_sha1": "ffc34dc91e41944a079109e9ad318a3528373604",
+      "sha256": "7b25fdd4f31ac2efda8270964b7959f3c81b67f759b2883b889faaeb1e4963f5"
+    },
+    {
+      "path": "src/powerTabLegacyReaderDocuments.js",
+      "mode": "100644",
+      "blob_sha1": "67f190a334f011212da8efc7699eb2610b22d553",
+      "sha256": "9b618856829cb798f01ff77cdeba005ca6ba858189a2335d2070f686d16cdcd7"
+    },
+    {
+      "path": "src/powerTabReaderDocuments.js",
+      "mode": "100644",
+      "blob_sha1": "84d797bca4a78a1ab8099456e4251364216f467c",
+      "sha256": "0a4d2eafafd5893f7e2b7ff887c0f09441f1e78deb72f08efc67427c47f6ddf5"
+    },
+    {
+      "path": "src/powerTabSupportCopy.test.js",
+      "mode": "100644",
+      "blob_sha1": "25a319945c0a3657d94dd634b38092229cdb81c0",
+      "sha256": "bddd94e04ce0dd383fe96271b70cd0959754ac53a1730420ab7db43c3db69ecb"
+    },
+    {
+      "path": "src/tabFormatDetector.js",
+      "mode": "100644",
+      "blob_sha1": "c5188693f4487e7eed82eae1b69b836608dd5c42",
+      "sha256": "6696c7a9bef927bed8ee93003a70e1e0a12bcf335f7e04d2ae531e6b65b41437"
+    },
+    {
+      "path": "src/tabFormatDetector.supportCopy.test.js",
+      "mode": "100644",
+      "blob_sha1": "f39193517b372f3f4d1bfd4d7fc97a3c3bfde9c6",
+      "sha256": "921e0988440e13908b3afc512b81e429e5c8f56095cdcb34bfee0f3fce09e305"
+    }
+  ],
+  "focused": {
+    "suites": 4,
+    "tests": 58
+  },
+  "complete": {
+    "passed_suites": 89,
+    "passed_tests": 1044,
+    "skipped_suites": 1,
+    "skipped_tests": 4
+  },
+  "lint": {
+    "changed_production_and_new_tests": "9 files, zero errors",
+    "four_unchanged_inherited_tests": "35 preexisting errors"
+  },
+  "build": "pass",
+  "independent_review": {
+    "status": "pass",
+    "focused_tests": 58,
+    "full_suite_passed_tests": 1044,
+    "baseline_expected_copy_failures": 44,
+    "baseline_preservation_passes": 14,
+    "non_help_runtime_nonliteral_ast_equal": true,
+    "unchanged_inherited_tests": 86,
+    "unchanged_other_runtime_files": 77,
+    "rebuilt_assets_identical": 30,
+    "findings": []
+  },
+  "assets": {
+    "files": 30,
+    "javascript_assets": 8,
+    "embedded_source_entries": 83,
+    "unique_application_sources": 77,
+    "changed_js_chunks": 3,
+    "unchanged_js_chunks": 5,
+    "css_unchanged": true,
+    "html_only_main_script_hash_changed": true,
+    "format_only": true,
+    "main": "main.6107a1c8.js",
+    "main_sha256": "27e29c3927d7782968bcd57f8cf7757ca2fb1b8dcfebdfe05de78758dbac1805"
+  },
+  "runtime_environment": {
+    "node": "24.19.0",
+    "npm": "11.9.0"
+  },
+  "limits": [
+    "No new browser, native-picker or screen-reader acceptance.",
+    "No parsing, routing, supported-profile or internal-taxonomy changes.",
+    "No accepted-baseline promotion.",
+    "Four intentional producer-dependent test skips and 35 inherited lint errors remain."
+  ]
+}

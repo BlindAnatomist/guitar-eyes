@@ -330,7 +330,7 @@ function App() {
         initialFormat.id === "tuxguitar"
           ? "TuxGuitar"
           : initialFormat.id === "powertab-legacy"
-            ? "PowerTab 1.7"
+            ? "legacy PowerTab"
             : initialFormat.id === "powertab-pt2"
               ? "PowerTab 2"
               : "Guitar Pro";
