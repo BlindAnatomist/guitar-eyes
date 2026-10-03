@@ -24,8 +24,6 @@ jobs:
     timeout-minutes: 10
     env:
       CI: 'true'
-      PLAYWRIGHT_PREFIX: ${{ runner.temp }}/teacher-playwright
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/teacher-browsers
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       npm_config_fetch_retries: '0'
       npm_config_fetch_timeout: '45000'
@@ -41,6 +39,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          printf 'PLAYWRIGHT_PREFIX=%s/teacher-playwright\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PLAYWRIGHT_BROWSERS_PATH=%s/teacher-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/teacher-smoke-results"
           python3 technical-verification/teacher-chromium-smoke/verify-reviewed-build.py \
             "$RUNNER_TEMP/teacher-reviewed-build" "$GITHUB_WORKSPACE" \
