@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "scope": "Sanitized source/build checkpoint; no publication or human acceptance inferred.",
+  "tested_runtime": "d321e99ce436bd5aea6940d0533b7a48b126c028",
+  "completed_source_snapshot": "aa07d4f3408e6bda8b0261148b9dac0e1c8a357c",
+  "implementation_base": "38d015aa2b8d3ff6151f6bbd4e31579963b114c1",
+  "src_tree": "dafdc805e9d70e74487e2aa3545caad302096a6d",
+  "changed_source_and_test_blobs": [
+    {
+      "path": "src/DesktopSemanticReader.js",
+      "mode": "100644",
+      "blob_sha1": "2a22f4f60bffd3a86281a8bda222beb8762344ab",
+      "sha256": "9711a4f5e48184880f6cb14ab811d4e92a3d336585b2ef3799406e05449e1070"
+    },
+    {
+      "path": "src/desktopTechniqueParity.test.js",
+      "mode": "100644",
+      "blob_sha1": "69a3f14382b23ea574b93ade81085709023fdbd8",
+      "sha256": "33fd97cf6deb56a02ac5bc463f9662df6c380216f42096b75a5592611a7d8510"
+    },
+    {
+      "path": "src/positionDescription.js",
+      "mode": "100644",
+      "blob_sha1": "e4a893f9bac11c9ecb681b57c963d4334db0a702",
+      "sha256": "78ed284bfa2afae997b915d824d584166267ae9e977adf3427ceadf50e7987e1"
+    },
+    {
+      "path": "src/techniqueSpeechParity.test.js",
+      "mode": "100644",
+      "blob_sha1": "0cee5d209164827a97b3e47fdcec5ec5b2e0a10d",
+      "sha256": "98e10e720f2e9954d20bafd06eb90e3bcd04e4ccf7a3fda58d268a4fa8b95f7a"
+    }
+  ],
+  "baseline_expected_failures": 50,
+  "new_tests": 59,
+  "focused": {
+    "suites": 7,
+    "tests": 228,
+    "lifecycle_regressions": 32,
+    "locality_regressions": 59
+  },
+  "complete": {
+    "passed_suites": 81,
+    "passed_tests": 904,
+    "skipped_suites": 1,
+    "skipped_tests": 4
+  },
+  "lint": "pass",
+  "build": "pass",
+  "independent_review": {
+    "status": "approved",
+    "baseline_cases": 87,
+    "cells": 1254,
+    "positions": 221,
+    "full_suite_passed_tests": 904,
+    "focused_passed_tests": 137,
+    "blockers": []
+  },
+  "assets": {
+    "files": 30,
+    "javascript_assets": 8,
+    "embedded_source_entries": 80,
+    "unique_application_sources": 74,
+    "non_main_javascript_unchanged": 7,
+    "css_unchanged": true,
+    "main": "main.e6730016.js",
+    "main_sha256": "b45078a733e16222c0a00e861c9a9e165ffb62a8d8a3d3481527be370e65fd92",
+    "format_only": true
+  },
+  "limits": [
+    "Technical proof only; no actual desktop screen-reader or spatial acceptance.",
+    "Open/fret attachments only; continuation and standalone semantics unchanged.",
+    "No expanded importer or format profile.",
+    "Document-local identity does not establish durable cross-import bookmarks."
+  ],
+  "commands": {
+    "focused": "CI=true npm test -- --watchAll=false --runInBand desktopTechniqueParity.test.js techniqueSpeechParity.test.js positionDescription.test.js DesktopSemanticReader.test.js IPhoneTabReader.test.js App.importModeInvestigation.test.js semanticLossLocality.test.js",
+    "complete": "CI=true npm test -- --watchAll=false --runInBand",
+    "lint": "./node_modules/.bin/eslint src/positionDescription.js src/DesktopSemanticReader.js src/desktopTechniqueParity.test.js src/techniqueSpeechParity.test.js",
+    "build": "npm run build"
+  }
+}

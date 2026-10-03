@@ -1,6 +1,6 @@
 # Guitar Eyes Fork Instructions
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-845-2026-10-03.md` preserves the completed 845-test MusicXML loss-locality checkpoint and the earlier 556-, 621-, 708- and 786-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/reader-reliability-904-2026-10-03.md` preserves the completed 904-test desktop attached-technique parity checkpoint and the earlier 556-, 621-, 708-, 786- and 845-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 

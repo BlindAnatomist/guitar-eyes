@@ -26,7 +26,7 @@ const RECOGNIZED_ATTACHED_TECHNIQUES = new Set([
   "pluck",
 ]);
 
-function techniquePhrase(techniques) {
+export function techniquePhrase(techniques) {
   if (!techniques || techniques.length === 0) return "";
   const phrases = [];
   let recognizedNames = [];

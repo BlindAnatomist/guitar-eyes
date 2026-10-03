@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { TextDecoder, TextEncoder } from "util";
 import { gunzipSync } from "zlib";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import IPhoneTabReader from "./IPhoneTabReader";
 import DesktopSemanticReader from "./DesktopSemanticReader";
 import { describePlayablePosition } from "./positionDescription";
@@ -77,6 +77,14 @@ function expectAttached(document, index, spokenName, stateEvidence, name) {
   const snapshot = JSON.stringify(document);
   const note = stateEvidence.type === "open" ? "open" : `fret ${stateEvidence.fret}`;
   expect(describePlayablePosition(document, index)).toContain(`${spokenName}, ${note}, with ${name}.`);
+  const { unmount } = render(<DesktopSemanticReader document={document} />);
+  const position = document.positions[index];
+  const table = screen.getAllByRole("table")[position.blockIndex];
+  const stringIndex = document.blocks[position.blockIndex].strings.findIndex((item) => item.id === string.id);
+  const row = within(table).getAllByRole("row")[stringIndex + 1];
+  const cell = within(row).getAllByRole("cell")[position.positionInBlock - 1];
+  expect(cell).toHaveAccessibleName(`${note[0].toUpperCase()}${note.slice(1)}, with ${name}`);
+  unmount();
   expect(JSON.stringify(document)).toBe(snapshot);
 }
 

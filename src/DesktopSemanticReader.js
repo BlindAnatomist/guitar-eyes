@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useState } from "react";
-import { describePlayablePosition } from "./positionDescription";
+import { describePlayablePosition, techniquePhrase } from "./positionDescription";
 
 function positionCountText(position, document) {
   if (position.measureNumber) {
@@ -57,9 +57,9 @@ function stringStateText(state) {
 
   switch (state.type) {
     case "fret":
-      return `Fret ${state.fret}`;
+      return `Fret ${state.fret}${techniquePhrase(state.techniques)}`;
     case "open":
-      return "Open";
+      return `Open${techniquePhrase(state.techniques)}`;
     case "continuation":
       return `Continuation of fret ${state.fret}`;
     case "technique":
