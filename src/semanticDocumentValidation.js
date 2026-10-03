@@ -151,6 +151,68 @@ function validateNavigationCollections(document) {
   requireTruth(measureOffset === documentMeasures.length, "blocks do not cover document measures");
 }
 
+function nonemptyText(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+// Optional document-local references, not durable identity across imports.
+// Run only after canonical navigation membership has been checked.
+function validateSemanticLosses(document) {
+  if (document.semanticLosses === undefined) return;
+  requireTruth(Array.isArray(document.semanticLosses), "invalid semantic loss declarations");
+  if (document.semanticLosses.length === 0) return;
+  const positions = new Map(document.positions.filter((position) => position.id !== undefined)
+    .map((position) => [position.id, position]));
+  const measures = new Map((document.measures || []).map((measure) => [measure.id, measure]));
+  const positionMeasures = new Map();
+  measures.forEach((measure) => measure.positions.forEach((position) => {
+    if (position.id !== undefined) positionMeasures.set(position.id, measure);
+  }));
+
+  document.semanticLosses.forEach((loss) => {
+    requireTruth(loss && typeof loss.kind === "string" && typeof loss.sourceFormat === "string" &&
+      typeof loss.disposition === "string", "incomplete semantic loss record");
+    const location = loss.location;
+    if (location === undefined) return; // Compatibility for records not yet migrated.
+    requireTruth(location && typeof location === "object" && !Array.isArray(location),
+      "invalid semantic loss location");
+    const fields = {
+      position: ["scope", "positionId"],
+      measure: ["scope", "measureId"],
+      unlocalized: ["scope", "reason"],
+    };
+    const keys = Object.keys(location);
+    const expected = Object.prototype.hasOwnProperty.call(fields, location.scope) ? fields[location.scope] : null;
+    requireTruth(expected && keys.length === expected.length && expected.every((key) => keys.includes(key)),
+      "invalid semantic loss location shape");
+    if (location.scope === "unlocalized") {
+      requireTruth(nonemptyText(location.reason), "unlocalized semantic loss needs a reason");
+      return; // Preserve uncertain evidence; never infer a target from source labels.
+    }
+    const position = location.scope === "position" ? positions.get(location.positionId) : null;
+    const measure = location.scope === "measure" ? measures.get(location.measureId) : positionMeasures.get(location.positionId);
+    requireTruth(location.scope === "position"
+      ? nonemptyText(location.positionId) && position
+      : nonemptyText(location.measureId) && measure, "dangling semantic loss reference");
+
+    // This first adopter already retains the source facts needed to prove attachment.
+    // Other importers keep their established loss policy and are not migrated here.
+    if (loss.sourceFormat !== "musicxml" || !["unsupported-technical", "source-order-only"].includes(loss.kind)) return;
+    requireTruth(document.sourceFormat === "musicxml" && Number.isSafeInteger(loss.sourceMeasureIndex) &&
+      loss.sourceMeasureIndex >= 0 && measure && document.measures?.[loss.sourceMeasureIndex] === measure &&
+      measure.sourceNumber === loss.measureNumber, "semantic loss source measure contradicts its reference");
+    if (loss.kind === "source-order-only") {
+      requireTruth(location.scope === "measure", "source-order semantic loss must reference a measure");
+    } else {
+      requireTruth(location.scope === "position" && !position.isRest &&
+        position.sourceMeasureNumber === loss.measureNumber &&
+        Number.isSafeInteger(loss.noteIndex) && loss.noteIndex >= 0 && position.strings.some((state) =>
+          state.source?.format === "musicxml" && state.source.measureNumber === loss.measureNumber &&
+          state.source.noteIndex === loss.noteIndex), "semantic loss source note contradicts its reference");
+    }
+  });
+}
+
 // A pure admission step: contradictory copies reject, and only equivalent
 // collections are joined. Existing musical values and source evidence are kept.
 export function finalizeSemanticDocument(document) {
@@ -228,11 +290,7 @@ export function validateSemanticDocument(document) {
     validateDuration(position.duration);
     if (document.sourceFormat && document.sourceFormat !== "ascii-text") requireTruth(position.duration != null, "structured position lacks duration");
   });
-  if (document.semanticLosses !== undefined) {
-    requireTruth(Array.isArray(document.semanticLosses), "invalid semantic loss declarations");
-    document.semanticLosses.forEach((loss) => requireTruth(loss && typeof loss.kind === "string" &&
-      typeof loss.sourceFormat === "string" && typeof loss.disposition === "string", "incomplete semantic loss record"));
-  }
   validateNavigationCollections(document);
+  validateSemanticLosses(document);
   return document;
 }

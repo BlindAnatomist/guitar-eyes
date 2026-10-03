@@ -203,6 +203,32 @@
           "sha256": "e1393c4dfa0e9e0a71e9b4bd4a10bf02abf41e1a1954ff0e6a2d09b592a2e539"
         }
       ]
+    },
+    {
+      "passed_tests": 845,
+      "tested_runtime": "6ae462852c938d7f725f619e5eb68cf2703cd5ee",
+      "completed_source_snapshot": "8f3ecef9c53f73147ff644c9bd411d990c6ee118",
+      "src_tree": "ec49c2ebfa81a8b1fc279bd8c78537ed46a84e8f",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/musicXmlImporter.js",
+          "mode": "100644",
+          "blob_sha1": "167d60b7b4c5b527c87f0c6997203b3604befe26",
+          "sha256": "d34758e34cce2f4c20b0d643b18414283e0ed2e77de14fb742fed40a314335ca"
+        },
+        {
+          "path": "src/semanticDocumentValidation.js",
+          "mode": "100644",
+          "blob_sha1": "78fd3b6a5b21ff158bc9216556d4684d08f23d5d",
+          "sha256": "a97d5f6f5655d9e92733c949e157ecc42de8034bcb449cd3eeb640c9131ac552"
+        },
+        {
+          "path": "src/semanticLossLocality.test.js",
+          "mode": "100644",
+          "blob_sha1": "db20bc80fa6179d9567e7b38fe7b5924f76b5ac4",
+          "sha256": "e20a64c44cbc9952c656c76ea4df46543f44bfcaaa2ea654a7803f96dcc1e962"
+        }
+      ]
     }
   ]
 }

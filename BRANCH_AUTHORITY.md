@@ -1,6 +1,6 @@
 # Accepted Format-Intake Authority
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-786-2026-10-02.md` preserves the completed 786-test TuxGuitar file-size preflight and the earlier 556-, 621- and 708-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/reader-reliability-845-2026-10-03.md` preserves the completed 845-test MusicXML loss-locality checkpoint and the earlier 556-, 621-, 708- and 786-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
 
 Date: 2026-08-14
 

@@ -510,7 +510,12 @@ function parseMeasurePositions(measure, strings, divisions, warnings, measureInd
 
     const techniqueResult = collectTechniques(coordinates);
     techniqueResult.unsupported.forEach((name) => {
-      losses.push({ kind: "unsupported-technical", sourceFormat: "musicxml", measureNumber: displayNumber, noteIndex, element: name, disposition: "not-interpreted" });
+      losses.push({
+        kind: "unsupported-technical", sourceFormat: "musicxml", measureNumber: displayNumber,
+        noteIndex, element: name, disposition: "not-interpreted", sourceMeasureIndex: measureIndex,
+        // A chord member shares its onset's position; noteIndex is not a position index.
+        location: { scope: "position", positionId: position.id },
+      });
       warnings.push(
         `Measure ${displayNumber} preserves unsupported MusicXML technical element ${name} without interpreting it.`
       );
@@ -592,7 +597,15 @@ export function parseMusicXmlTablature(sourceText) {
 
     const repeats = [...descendants(measure, "repeat"), ...descendants(measure, "ending")];
     repeats.forEach((element) => {
-      losses.push({ kind: "source-order-only", sourceFormat: "musicxml", measureNumber: measure.getAttribute("number") || String(measureIndex + 1), element: localName(element), attributes: Object.fromEntries(Array.from(element.attributes).map((a) => [a.name, a.value])), disposition: "not-expanded" });
+      losses.push({
+        kind: "source-order-only", sourceFormat: "musicxml",
+        measureNumber: measure.getAttribute("number") || String(measureIndex + 1),
+        element: localName(element),
+        attributes: Object.fromEntries(Array.from(element.attributes).map((a) => [a.name, a.value])),
+        disposition: "not-expanded", sourceMeasureIndex: measureIndex,
+        // Source order identifies even duplicate labels and measures with no positions.
+        location: { scope: "measure", measureId: `block-1-measure-${measureIndex + 1}` },
+      });
     });
     if (repeats.length) warnings.push(`Measure ${measure.getAttribute("number") || measureIndex + 1} contains repeat or ending notation. Positions are read in source order; repeats are not expanded.`);
     return parseMeasurePositions(measure, strings, divisions, warnings, measureIndex, losses);
