@@ -261,6 +261,62 @@
           "sha256": "98e10e720f2e9954d20bafd06eb90e3bcd04e4ccf7a3fda58d268a4fa8b95f7a"
         }
       ]
+    },
+    {
+      "passed_tests": 968,
+      "tested_runtime": "9385826cf3cc7ae4a126efcc9a13114754e9cff2",
+      "completed_source_snapshot": "b96786f312c8fcf6e639c3d397c502256ea137ef",
+      "src_tree": "502d60b80899b742ba52944daf3c1c0ecbd06ef7",
+      "changed_source_and_test_blobs": [
+        {
+          "path": "src/App.js",
+          "mode": "100644",
+          "blob_sha1": "ac752ee8b05dcf3e22a98eed4fe70276430d75e7",
+          "sha256": "80ad862503f3a18009f79eaed683274dc3edee8df8e5957ae91da8af664f585b"
+        },
+        {
+          "path": "src/App.sessionPassage.test.js",
+          "mode": "100644",
+          "blob_sha1": "3d6f212364cdbad8cbba2a88be6d4027a928d595",
+          "sha256": "ffea32e6129917bd23a8ad55cfd40e84429cd0f25fec7c569eee263c03a0343b"
+        },
+        {
+          "path": "src/DesktopSemanticReader.js",
+          "mode": "100644",
+          "blob_sha1": "41b0ac3eb4f9b7e267a1d9a899cf68934ecf60b2",
+          "sha256": "00beb507d9f8e3f6b8471b156c41e431a8c93b0f2aa13f045d8b06fa2f881379"
+        },
+        {
+          "path": "src/IPhoneTabReader.js",
+          "mode": "100644",
+          "blob_sha1": "fbbbc5f5d09311f437e1b6d12158128afae8a61d",
+          "sha256": "ecd3ab3a60fce3f6532f00ded1db3ce6b26646944a664c0bd7cec2700ed943a1"
+        },
+        {
+          "path": "src/PassageControls.js",
+          "mode": "100644",
+          "blob_sha1": "69b24e222f8b3969d1f35dc4d0ebe9c29e80d5cd",
+          "sha256": "a500e55a654a1a1ee100c6040a6f76fcb77bd3a2f2640fce056fd6865aa43417"
+        },
+        {
+          "path": "src/sessionPassageMark.js",
+          "mode": "100644",
+          "blob_sha1": "ef98977da7bb89e84bc4128f83b88a6d16c5f7e4",
+          "sha256": "703ef8eef9206195579da6303ce39677b5445e6178650bdf24bb455663b6e817"
+        },
+        {
+          "path": "src/sessionPassageMark.test.js",
+          "mode": "100644",
+          "blob_sha1": "5d06ea5441778c5e571457db20af25765d109a5f",
+          "sha256": "52f3120c842ad19583682e0673a75cdba4eaa4a2ae54aee2394c151eb72f749f"
+        },
+        {
+          "path": "src/sessionPassageReaders.test.js",
+          "mode": "100644",
+          "blob_sha1": "78c8933c5106940972c049a0ae6126e8f3539dcf",
+          "sha256": "b90f8f350b0a381823235cde353bb977f4a599f42524b410f0c32ca13ecbefd6"
+        }
+      ]
     }
   ]
 }

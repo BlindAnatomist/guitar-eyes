@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
+import PassageControls from "./PassageControls";
 import { describePlayablePosition, techniquePhrase } from "./positionDescription";
 
 function positionCountText(position, document) {
@@ -80,13 +81,15 @@ function positionsForBlock(document, block) {
 }
 
 const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
-  { document },
+  { document, passageMark },
   headingRef
 ) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const activeDocumentRef = useRef(document);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
 
   useEffect(() => {
+    activeDocumentRef.current = document;
     setCurrentIndex(0);
     setAnnouncement({ text: "", sequence: 0 });
   }, [document]);
@@ -95,7 +98,8 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
     return null;
   }
 
-  const currentPosition = document.positions[currentIndex] ?? document.positions[0];
+  const resolvedIndex = activeDocumentRef.current === document ? currentIndex : 0;
+  const currentPosition = document.positions[resolvedIndex] ?? document.positions[0];
   const activeIndex = currentPosition.index;
   const currentDescription = describePlayablePosition(document, activeIndex);
   const hasMultipleBlocks = document.blocks.length > 1;
@@ -225,6 +229,14 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
           Next position
         </button>
       </div>
+
+      <PassageControls
+        document={document}
+        currentIndex={activeIndex}
+        passageMark={passageMark}
+        onMove={moveTo}
+        onQuietAction={() => setAnnouncement((current) => ({ text: "", sequence: current.sequence }))}
+      />
 
       <p className="position-count">{positionCountText(currentPosition, document)}</p>
 

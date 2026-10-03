@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
+import PassageControls from "./PassageControls";
 import { installFirstAuditionFocusGuard } from "./firstAuditionFocusGuard";
 import { describePlayablePosition } from "./positionDescription";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
@@ -22,7 +23,7 @@ export function resolveReaderPositionIndex(activeDocument, nextDocument, current
   );
 }
 
-const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headingRef) {
+const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document, passageMark }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
   const [auditionStatus, setAuditionStatus] = useState("");
@@ -263,6 +264,14 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document }, headin
           Next position
         </button>
       </div>
+
+      <PassageControls
+        document={document}
+        currentIndex={resolvedCurrentIndex}
+        passageMark={passageMark}
+        onMove={moveTo}
+        onQuietAction={clearAnnouncement}
+      />
 
       {!formatOnlyBuild && (
         <>

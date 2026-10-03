@@ -15,6 +15,7 @@ import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
 import LegacyDesktopReader from "./LegacyDesktopReader";
 import Upload from "./Upload";
+import { useSessionPassageMark } from "./sessionPassageMark";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
 import {
   buildMusicXmlReaderDocuments,
@@ -48,6 +49,7 @@ function messageFromError(error, fallback) {
 function App() {
   const [desktopBlocks, setDesktopBlocks] = useState([]);
   const [semanticDocument, setSemanticDocument] = useState(null);
+  const passageMark = useSessionPassageMark(semanticDocument);
   const [isInfoOpen, setIsInfoOpen] = useState(
     () => getInitialReadingMode() === "desktop"
   );
@@ -90,6 +92,7 @@ function App() {
   }, []);
 
   const beginReaderRequest = () => {
+    passageMark.clear();
     cancelPendingFocus();
     readerRequestRef.current += 1;
     return readerRequestRef.current;
@@ -682,7 +685,7 @@ function App() {
       )}
 
       {readingMode === "iphone" && (
-        <IPhoneTabReader document={semanticDocument} ref={iphoneHeadingRef} />
+        <IPhoneTabReader document={semanticDocument} passageMark={passageMark} ref={iphoneHeadingRef} />
       )}
 
       <section className="desktop-instructions-control">
@@ -703,7 +706,7 @@ function App() {
 
       {readingMode === "desktop" &&
         (semanticDocument ? (
-          <DesktopSemanticReader document={semanticDocument} ref={desktopHeadingRef} />
+          <DesktopSemanticReader document={semanticDocument} passageMark={passageMark} ref={desktopHeadingRef} />
         ) : (
           <LegacyDesktopReader
             tablature={desktopBlocks}
