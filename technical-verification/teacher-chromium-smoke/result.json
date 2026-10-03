@@ -1,0 +1,96 @@
+{
+  "status": "passed",
+  "commit": "4a29cc49dc5fcab18c938a4e2bc236f281179ff6",
+  "runtimeCommit": "c8376b990874eee60f31b5aaad47cd8b12ca3f19",
+  "closureCommit": "f07c679005c4948640f8aa7371a82c5cc7b79981",
+  "archiveSha256": "8ae36e3a65b3324cd126983c82af50ae3bf19bf4d3b8cc1189a35ba5ab2b5d22",
+  "assetCount": 30,
+  "playwrightVersion": "1.63.0",
+  "browserVersion": "153.0.8010.12",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "name": "production identity and original example",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "independent mark and lesson explanation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "changed ending, explicit Read, and exact return focus",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "recurrence, preserved mark, and quiet ordinary navigation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "unchanged original upload is eligible",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "changed source has an honest teacher limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "ordinary upload remains readable with an honest limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "empty browser storage and mobile-width containment",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "production identity and original example",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "independent mark and lesson explanation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "changed ending, explicit Read, and exact return focus",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "recurrence, preserved mark, and quiet ordinary navigation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "unchanged original upload is eligible",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "changed source has an honest teacher limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "ordinary upload remains readable with an honest limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "empty browser storage and mobile-width containment",
+      "status": "passed"
+    }
+  ],
+  "error": null,
+  "limitations": [
+    "Chromium technical smoke only; no Safari, VoiceOver, native picker, or teaching-value acceptance."
+  ]
+}

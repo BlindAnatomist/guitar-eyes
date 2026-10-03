@@ -19,12 +19,14 @@ Frozen runtime: `c8376b990874eee60f31b5aaad47cd8b12ca3f19`.
 - Existing minifiers run serially as a resource-only setting; production minimization, source maps and lint remain enabled.
 - Production-asset JSDOM preflight: 49 checks passed, covering the new lesson and inherited importer/reader/mark behavior.
 
-JSDOM and source review are not real-browser or VoiceOver acceptance. The separate one-shot Chromium workflow tests the exact already reviewed build archive. Its result remains pending until the exact workflow run completes and its report is read back.
+JSDOM and source review are not real-browser or VoiceOver acceptance. The separate one-shot Chromium workflow tests the exact already reviewed build archive. Its downloaded result is verified: [run 37154405896](https://github.com/BlindAnatomist/guitar-eyes/actions/runs/37154405896) passed all 16 checks across desktop and mobile-size views with zero browser console/network/runtime errors. The first workflow attempt failed before allocating any job because two runner-context expressions were at job-env scope; the minimal reviewed correction moved them to runner-time initialization. Application and archive bytes did not change. See the [technical result](../../technical-verification/teacher-chromium-smoke/RESULT.md).
 
 ## Bounded Chromium verification
 
-The workflow is restricted to `work/teacher-chromium-smoke-2026-10-03`, an explicit head-commit intent marker and a first run attempt. It uses one standard Ubuntu job, finite timeout and read-only repository permissions. It validates the committed archive hash and complete build manifest before serving the unchanged assets to a pinned Chromium/Playwright smoke. It does not install/rebuild the application, write a bot commit, deploy Pages or change sharing.
+The completed workflow was restricted to `work/teacher-chromium-smoke-2026-10-03`, an explicit head-commit intent marker and a first run attempt. It used one standard Ubuntu job, finite timeout and read-only repository permissions. It validated the committed archive hash and complete build manifest before serving the unchanged assets to a pinned Chromium/Playwright smoke. It did not install/rebuild the application, write a bot commit, deploy Pages or change sharing.
 
-The commit carries `[skip netlify]` to suppress linked hosting while allowing the deliberately requested Actions run. The two inherited manual workflows are unchanged and are not dispatched. No budget, automatic stop, paid overage or credential settings are changed. A blocked allowance stops the checkpoint.
+The executing commit carried `[skip netlify]` to suppress linked hosting while allowing the deliberately requested Actions run. The two inherited manual workflows are unchanged and are not dispatched. No budget, automatic stop, paid overage or credential settings are changed. A blocked allowance stops the checkpoint.
 
 A successful automated browser smoke still does not establish Safari/VoiceOver behavior or the teaching value experienced by a person. Those remain a bounded later candidate check, not repetition of completed historical marking acceptance.
+
+The temporary trigger was removed after the successful job, with skip markers on the documentation/cleanup commit. The original and corrected workflow remain in Git history as evidence. No additional run, rerun, main promotion or app deployment is part of this cleanup.

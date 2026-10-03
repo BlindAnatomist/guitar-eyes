@@ -1,6 +1,6 @@
 # Guitar Eyes Fork Instructions
 
-Latest technical continuation: `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` records the isolated original-example teacher prototype, its 1159-test local gate and pending one-shot Chromium verification. Read `docs/continuation-state-2026-10-02.md` for preserved 1045/1104 and earlier checkpoints. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` records the isolated original-example teacher prototype, its 1159-test local gate and passed one-shot Chromium technical proof. Read `docs/continuation-state-2026-10-02.md` for preserved 1045/1104 and earlier checkpoints. This does not promote or replace the accepted operational baseline below.
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 

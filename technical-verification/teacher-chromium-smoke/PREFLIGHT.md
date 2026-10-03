@@ -1,3 +1,5 @@
+Completed result: [RESULT.md](RESULT.md). The following preserves the original prepared scope and its verification boundary.
+
 # One bounded teacher Chromium smoke
 
 This is a prepared technical-verification checkpoint, not a browser-pass result or product acceptance.

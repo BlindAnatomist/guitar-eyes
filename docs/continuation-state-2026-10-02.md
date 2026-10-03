@@ -4,7 +4,7 @@ Updated 2026-10-03. This index preserves candidate technical work on `work/reade
 
 ## Current isolated checkpoint
 
-[Pattern-and-variation teacher prototype: 1159 tests](checkpoints/teacher-pattern-prototype-1159-2026-10-03.md) records the original-example lesson, canonical evidence controls and suggested rehearsal order. Local source/test and exact production artifact review pass; the separately bounded real-Chromium run remains pending. No Safari/VoiceOver acceptance, deployment or operational-baseline promotion is claimed.
+[Pattern-and-variation teacher prototype: 1159 tests](checkpoints/teacher-pattern-prototype-1159-2026-10-03.md) records the original-example lesson, canonical evidence controls and suggested rehearsal order. Local source/test and exact production artifact review pass; the separately bounded real-Chromium job passed all 16 desktop/mobile-size checks. No Safari/VoiceOver acceptance, deployment or operational-baseline promotion is claimed.
 
 ## Preserved acceptance-identity checkpoint
 
