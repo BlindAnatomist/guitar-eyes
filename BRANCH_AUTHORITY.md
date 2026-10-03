@@ -1,6 +1,6 @@
 # Accepted Format-Intake Authority
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-1044-2026-10-03.md` preserves the completed 1044-test bounded support/help/failure-wording checkpoint and earlier reliability/navigation checkpoints on an isolated work branch. Read `docs/continuation-state-2026-10-02.md` for the public technical index. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/acceptance-identity-1045-2026-10-03.md` records the identity-only acceptance candidate and 1045-test gate. Read `docs/continuation-state-2026-10-02.md` for all preserved checkpoints. This does not promote or replace the accepted operational baseline below.
 
 Date: 2026-08-14
 

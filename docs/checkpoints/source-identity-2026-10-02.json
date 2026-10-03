@@ -467,6 +467,35 @@
           "sha256": "921e0988440e13908b3afc512b81e429e5c8f56095cdcb34bfee0f3fce09e305"
         }
       ]
+    },
+    {
+      "passed_tests": 1045,
+      "tested_runtime": "9f4b7f1dc950e9eef895093a2ea1e62b0113929e",
+      "completed_source_snapshot": "00e0270370658597cb8e0e8258d98c3bef203a81",
+      "src_tree": "e9d1a78d7f888a407295a454b6a68907718f4b60",
+      "public_tree": "02fe095b52b9b67381018a86a6b07e4e10b90b1b",
+      "changed_identity_and_test_blobs": [
+        {
+          "path": "public/index.html",
+          "blob_sha1": "5a1af88d42390995ebffd4e21625f53c6be435e8",
+          "sha256": "de63d52e97d20a79675bd18c3ef98c07e71698dbef472a98ac60929697f1ea62"
+        },
+        {
+          "path": "src/buildIdentity.js",
+          "blob_sha1": "40d768e7176d50e54882a0e90a986c6fbe8c8d56",
+          "sha256": "aa8d6dd622227432cd400e3077a7121bdfbb42a6a65f53f45e302f100febc9f1"
+        },
+        {
+          "path": "src/buildIdentity.test.js",
+          "blob_sha1": "83a5870e5c3861d1ad633afd6c34580b003dd293",
+          "sha256": "8cde904af1f64b2f044a4edec4eb97bdc1eac766b900622093b2db9e61e06052"
+        },
+        {
+          "path": "src/App.test.js",
+          "blob_sha1": "2fc8b9714012a4c838520ac6789cf2092b83c235",
+          "sha256": "0f25f2054bfd3bb7e8cbb07caabbeefae752d84dcadd0ff5dfc551c98b1ff5bc"
+        }
+      ]
     }
   ]
 }

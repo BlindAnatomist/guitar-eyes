@@ -4,6 +4,10 @@ Updated 2026-10-03. This index records candidate technical work on `work/reader-
 
 ## Current checkpoint
 
+[Acceptance candidate 1: unique static identity](checkpoints/acceptance-identity-1045-2026-10-03.md) gives this checkpoint a recognizable static page title and first heading. All 1045 tests pass, four intentional skips, with independent all-asset equality proof. Only identity text and tests change; no device acceptance is claimed.
+
+## Preserved support-wording checkpoint
+
 [Bounded support and failure wording: 1044 tests](checkpoints/reader-reliability-1044-2026-10-03.md) aligns desktop help and generic failure copy with the existing version-specific PowerTab and TuxGuitar profiles, removes a pre-decode legacy PowerTab version guess, and corrects README setup instructions. It changes no parser, supported profile, routing, rejection code, focus, navigation, session mark or format-only policy.
 
 Exact source trees and changed blobs are in [source identity](checkpoints/source-identity-2026-10-02.json). Automated source/build evidence is summarized in [1044-test technical evidence](checkpoints/support-wording-1044-evidence.json). Local technical proof is distinct from deployment or real-device acceptance.
