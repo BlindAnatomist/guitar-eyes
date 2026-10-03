@@ -26,9 +26,8 @@ import {
   shouldReadTabFileAsText,
   unsupportedTabFormatMessage,
 } from "./tabFormatDetector";
+import { CANDIDATE_BUILD_LABEL } from "./buildIdentity";
 import "./App.css";
-
-const TEST_BUILD_LABEL = "PowerTab 2 version 11 source checkpoint";
 
 function getInitialReadingMode() {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -626,7 +625,7 @@ function App() {
         This branch preserves Jason Washburn&apos;s desktop reader and uses one accepted
         semantic foundation for desktop and iPhone access.
       </p>
-      <p className="test-build-label">Test build: {TEST_BUILD_LABEL}.</p>
+      <p className="test-build-label">{CANDIDATE_BUILD_LABEL}</p>
 
       <fieldset className="mode-selector">
         <legend>Reading mode</legend>

@@ -32,8 +32,10 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document, passageM
   const auditionButtonRef = useRef(null);
   const firstAuditionFocusGuardCleanupRef = useRef(null);
   const activeDocumentRef = useRef(document);
+  // Historical audition requires an explicit boolean opt-in. Missing or malformed
+  // entry-point configuration must preserve the current format-only boundary.
   const formatOnlyBuild =
-    typeof window !== "undefined" && window.GUITAR_EYES_FORMAT_ONLY === true;
+    typeof window === "undefined" || window.GUITAR_EYES_FORMAT_ONLY !== false;
 
   const clearFirstAuditionFocusGuard = () => {
     const cleanup = firstAuditionFocusGuardCleanupRef.current;

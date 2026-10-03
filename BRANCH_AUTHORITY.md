@@ -1,6 +1,6 @@
 # Accepted Format-Intake Authority
 
-Latest technical continuation: `docs/checkpoints/reader-reliability-968-2026-10-03.md` preserves the completed 968-test session-local passage mark checkpoint and earlier 556-, 621-, 708-, 786-, 845- and 904-test checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/reader-reliability-986-2026-10-03.md` preserves the completed 986-test format-only defaults and candidate-identity checkpoint and earlier reliability/navigation checkpoints on an isolated work branch. This does not promote or replace the accepted operational baseline below.
 
 Date: 2026-08-14
 

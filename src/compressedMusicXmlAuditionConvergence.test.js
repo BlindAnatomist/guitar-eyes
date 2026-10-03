@@ -14,6 +14,12 @@ jest.mock("./proceduralPluckedString", () => ({
 }));
 
 const originalMatchMedia = window.matchMedia;
+const originalFormatOnly = window.GUITAR_EYES_FORMAT_ONLY;
+
+beforeEach(() => {
+  // This suite preserves the historical opt-in path, not the shipped surface.
+  window.GUITAR_EYES_FORMAT_ONLY = false;
+});
 
 function fixture(name) {
   return fs.readFileSync(
@@ -40,6 +46,8 @@ function useTouchDevice() {
 }
 
 afterEach(() => {
+  if (originalFormatOnly === undefined) delete window.GUITAR_EYES_FORMAT_ONLY;
+  else window.GUITAR_EYES_FORMAT_ONLY = originalFormatOnly;
   jest.clearAllMocks();
   if (originalMatchMedia) {
     Object.defineProperty(window, "matchMedia", {

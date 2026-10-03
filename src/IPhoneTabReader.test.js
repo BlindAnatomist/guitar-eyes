@@ -66,8 +66,11 @@ function liveRegion(container) {
 
 describe("IPhoneTabReader", () => {
   let auditioner;
+  const originalFormatOnly = window.GUITAR_EYES_FORMAT_ONLY;
 
   beforeEach(() => {
+    // Retained historical audio is exercised only through its explicit opt-in.
+    window.GUITAR_EYES_FORMAT_ONLY = false;
     auditioner = {
       audition: jest.fn().mockResolvedValue({
         outcome: "auditioned",
@@ -85,6 +88,8 @@ describe("IPhoneTabReader", () => {
   });
 
   afterEach(() => {
+    if (originalFormatOnly === undefined) delete window.GUITAR_EYES_FORMAT_ONLY;
+    else window.GUITAR_EYES_FORMAT_ONLY = originalFormatOnly;
     jest.clearAllMocks();
   });
 
