@@ -1,6 +1,6 @@
 # Guitar Eyes Fork Instructions
 
-Latest technical continuation: `docs/checkpoints/acceptance-identity-1045-2026-10-03.md` records the identity-only acceptance candidate and 1045-test gate. Read `docs/continuation-state-2026-10-02.md` for all preserved checkpoints. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` records the isolated original-example teacher prototype, its 1159-test local gate and pending one-shot Chromium verification. Read `docs/continuation-state-2026-10-02.md` for preserved 1045/1104 and earlier checkpoints. This does not promote or replace the accepted operational baseline below.
 
 These instructions govern every human or agent working in `BlindAnatomist/guitar-eyes`.
 
@@ -292,3 +292,8 @@ Use the committed-target focus, native-picker return, accessible build identity,
 Do not bring the owner into dependency setup, source implementation, automated testing, build verification, artifact inspection, or non-UI engine work. Bring the owner in only after a stable exact hosted candidate requires real-iPhone VoiceOver judgment.
 
 Jason Washburn's desktop testing remains optional unless he agrees to participate. His absence is not an active blocker.
+
+
+## Isolated teacher prototype verification — October 3, 2026
+
+The separately authorized `work/teacher-chromium-smoke-2026-10-03` branch contains the bounded original-example pattern-and-variation prototype and one deliberate real-Chromium verification. Read `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` before using it. This does not change the accepted operational authority, main, upstream, format support, playback boundary or deployment audience. Teaching eligibility is restricted to the exact reviewed decoded example source; ordinary uploaded-song teaching is not claimed.

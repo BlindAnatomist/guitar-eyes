@@ -216,3 +216,22 @@
   height: 1.35rem;
   flex: 0 0 auto;
 }
+
+.teacher-example,
+.teacher-lesson {
+  margin-block: 1rem;
+  padding: 1rem;
+  border: 1px solid currentColor;
+}
+
+.teacher-evidence-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.teacher-evidence-controls button {
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere;
+}

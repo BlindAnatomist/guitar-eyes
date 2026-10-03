@@ -1,8 +1,12 @@
 # Public technical continuation index
 
-Updated 2026-10-03. This index records candidate technical work on `work/reader-reliability-checkpoints-2026-10-02`. Read `../AGENTS.md` and `../BRANCH_AUTHORITY.md` for the accepted operational authority. These later checkpoints do not replace or promote that baseline.
+Updated 2026-10-03. This index preserves candidate technical work on `work/reader-reliability-checkpoints-2026-10-02` and the separate bounded `work/teacher-chromium-smoke-2026-10-03` verification branch. Read `../AGENTS.md` and `../BRANCH_AUTHORITY.md` for the accepted operational authority. These later checkpoints do not replace or promote that baseline.
 
-## Current checkpoint
+## Current isolated checkpoint
+
+[Pattern-and-variation teacher prototype: 1159 tests](checkpoints/teacher-pattern-prototype-1159-2026-10-03.md) records the original-example lesson, canonical evidence controls and suggested rehearsal order. Local source/test and exact production artifact review pass; the separately bounded real-Chromium run remains pending. No Safari/VoiceOver acceptance, deployment or operational-baseline promotion is claimed.
+
+## Preserved acceptance-identity checkpoint
 
 [Acceptance candidate 1: unique static identity](checkpoints/acceptance-identity-1045-2026-10-03.md) gives this checkpoint a recognizable static page title and first heading. All 1045 tests pass, four intentional skips, with independent all-asset equality proof. Only identity text and tests change; no device acceptance is claimed.
 
@@ -26,3 +30,8 @@ Exact source trees and changed blobs are in [source identity](checkpoints/source
 ## Continuation limits
 
 Preserve the exact source/test, fixture, workflow and dependency evidence. Read the current checkpoint before choosing further implementation. Recognition by filename is not general reading support; no new format or broader compatibility follows from these wording changes. The single semantic musical authority, quiet navigation, explicit Read, bounded focus/import contracts and retained passage mark remain authoritative. There is no authorization here for a pull request, merge, baseline promotion, workflow action, deployment, new producer work, playback expansion or AI/scoring work. Fork main and upstream remain untouched.
+
+
+## Isolated teacher prototype verification — October 3, 2026
+
+The separately authorized `work/teacher-chromium-smoke-2026-10-03` branch contains the bounded original-example pattern-and-variation prototype and one deliberate real-Chromium verification. Read `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` before using it. This does not change the accepted operational authority, main, upstream, format support, playback boundary or deployment audience. Teaching eligibility is restricted to the exact reviewed decoded example source; ordinary uploaded-song teaching is not claimed.

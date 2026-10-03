@@ -15,6 +15,7 @@ import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
 import LegacyDesktopReader from "./LegacyDesktopReader";
 import Upload from "./Upload";
+import { buildTeacherExampleDocuments, isTeacherExampleSource } from "./teacherExample";
 import { useSessionPassageMark } from "./sessionPassageMark";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
 import {
@@ -407,7 +408,7 @@ function App() {
       try {
         readerDocuments =
           detectedFormat.id === "musicxml"
-            ? buildMusicXmlReaderDocuments(sourceText)
+            ? (isTeacherExampleSource(sourceText) ? buildTeacherExampleDocuments(sourceText) : buildMusicXmlReaderDocuments(sourceText))
             : buildReaderDocuments(sourceText, selectedInstrument);
       } catch (error) {
         const formatLabel =
@@ -583,6 +584,26 @@ function App() {
     desktopFocusPendingRef.current = true;
   };
 
+  const handleTeacherExample = () => {
+    beginReaderRequest();
+    const result = buildTeacherExampleDocuments();
+    setStructuredSelectionSession(null);
+    const status = "Loaded the original three-measure teacher example. Open pattern lesson to explore the relationship.";
+    if (readingModeRef.current === "iphone") {
+      commitIphoneOutcome({ target: "reader", semanticDocument: result.semanticDocument,
+        desktopBlocks: result.desktopBlocks, status, resolvedInstrument: result.resolvedInstrument });
+      return;
+    }
+    setDesktopBlocks(result.desktopBlocks);
+    setSemanticDocument(result.semanticDocument);
+    setIphoneError("");
+    setDesktopError("");
+    setSelectedInstrument(result.resolvedInstrument);
+    setIsReadingFile(false);
+    setStatusMessage(status);
+    desktopFocusPendingRef.current = true;
+  };
+
   const handleReadingModeChange = (event) => {
     const nextMode = event.target.value;
     cancelPendingFocus();
@@ -656,6 +677,12 @@ function App() {
         onSelectInstrument={setSelectedInstrument}
       />
       <Upload onFileUpload={handleFileUpload} disabled={isReadingFile} />
+
+      <section className="teacher-example" aria-labelledby="teacher-example-heading">
+        <h2 id="teacher-example-heading">Teacher prototype</h2>
+        <p>Explore a repeated measure and one changed ending in an original example. Loading it replaces the current file and clears the session mark.</p>
+        <button type="button" disabled={isReadingFile} onClick={handleTeacherExample}>Load original teacher example</button>
+      </section>
 
       <div className="status-message" aria-live="polite" aria-atomic="true">
         {statusMessage}

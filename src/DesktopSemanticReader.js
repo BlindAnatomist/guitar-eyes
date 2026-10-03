@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 import PassageControls from "./PassageControls";
+import TeacherLesson from "./TeacherLesson";
 import { describePlayablePosition, techniquePhrase } from "./positionDescription";
 
 function positionCountText(position, document) {
@@ -85,6 +86,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
   headingRef
 ) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const readButtonRef = useRef(null);
   const activeDocumentRef = useRef(document);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
 
@@ -210,6 +212,15 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
         </div>
       )}
 
+      <TeacherLesson
+        document={document}
+        onQuietAction={() => setAnnouncement((current) => ({ text: "", sequence: current.sequence }))}
+        onInspect={(index) => {
+          moveTo(index);
+          readButtonRef.current?.focus();
+        }}
+      />
+
       <div className="position-controls" role="group" aria-label="Position navigation">
         <button
           type="button"
@@ -218,7 +229,7 @@ const DesktopSemanticReader = forwardRef(function DesktopSemanticReader(
         >
           Previous position
         </button>
-        <button type="button" onClick={() => announce(currentDescription)}>
+        <button type="button" ref={readButtonRef} onClick={() => announce(currentDescription)}>
           Read current position
         </button>
         <button

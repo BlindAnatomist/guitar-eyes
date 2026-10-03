@@ -1,6 +1,6 @@
 # Guitar Eyes Implementation Status
 
-Latest technical continuation: `docs/checkpoints/acceptance-identity-1045-2026-10-03.md` records the identity-only acceptance candidate and 1045-test gate. Read `docs/continuation-state-2026-10-02.md` for all preserved checkpoints. This does not promote or replace the accepted operational baseline below.
+Latest technical continuation: `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` records the isolated original-example teacher prototype, its 1159-test local gate and pending one-shot Chromium verification. Read `docs/continuation-state-2026-10-02.md` for preserved 1045/1104 and earlier checkpoints. This does not promote or replace the accepted operational baseline below.
 
 Last reconciled: August 14, 2026.
 
@@ -267,3 +267,8 @@ Dependency work, source implementation, automated testing, builds, artifact insp
 The owner is needed only after an exact hosted candidate passes every non-device gate and requires bounded real-iPhone VoiceOver judgment.
 
 Jason Washburn is not involved unless he separately agrees to desktop testing.
+
+
+## Isolated teacher prototype verification — October 3, 2026
+
+The separately authorized `work/teacher-chromium-smoke-2026-10-03` branch contains the bounded original-example pattern-and-variation prototype and one deliberate real-Chromium verification. Read `docs/checkpoints/teacher-pattern-prototype-1159-2026-10-03.md` before using it. This does not change the accepted operational authority, main, upstream, format support, playback boundary or deployment audience. Teaching eligibility is restricted to the exact reviewed decoded example source; ordinary uploaded-song teaching is not claimed.

@@ -1,5 +1,6 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 import PassageControls from "./PassageControls";
+import TeacherLesson from "./TeacherLesson";
 import { installFirstAuditionFocusGuard } from "./firstAuditionFocusGuard";
 import { describePlayablePosition } from "./positionDescription";
 import { buildPositionSoundEvents } from "./positionSoundEvents";
@@ -25,6 +26,7 @@ export function resolveReaderPositionIndex(activeDocument, nextDocument, current
 
 const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document, passageMark }, headingRef) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const readButtonRef = useRef(null);
   const [announcement, setAnnouncement] = useState({ text: "", sequence: 0 });
   const [auditionStatus, setAuditionStatus] = useState("");
   const [auditionDelaySeconds, setAuditionDelaySeconds] = useState(2);
@@ -243,6 +245,15 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document, passageM
         </div>
       )}
 
+      <TeacherLesson
+        document={document}
+        onQuietAction={() => setAnnouncement((current) => ({ text: "", sequence: current.sequence }))}
+        onInspect={(index) => {
+          moveTo(index);
+          readButtonRef.current?.focus();
+        }}
+      />
+
       <div
         className="position-controls"
         role="group"
@@ -255,7 +266,7 @@ const IPhoneTabReader = forwardRef(function IPhoneTabReader({ document, passageM
         >
           Previous position
         </button>
-        <button type="button" onClick={() => announce(currentDescription)}>
+        <button type="button" ref={readButtonRef} onClick={() => announce(currentDescription)}>
           Read current position
         </button>
         <button

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "runtimeCommit": "c8376b990874eee60f31b5aaad47cd8b12ca3f19",
+  "closureCommit": "f07c679005c4948640f8aa7371a82c5cc7b79981",
+  "archive": {
+    "file": "reviewed-build.tar.gz",
+    "bytes": 1823488,
+    "sha256": "8ae36e3a65b3324cd126983c82af50ae3bf19bf4d3b8cc1189a35ba5ab2b5d22"
+  },
+  "assetCount": 30,
+  "assets": [
+    {
+      "path": "asset-manifest.json",
+      "bytes": 1480,
+      "sha256": "9a9603c4e3948606c27d55e1190aa763610fdb780ab09359678e3b5aed07fbdd"
+    },
+    {
+      "path": "favicon.ico",
+      "bytes": 3870,
+      "sha256": "3d10f7da6c603178340081668c4ac5b3ae9743ca9a262ab0fcd312fbb9f48bdd"
+    },
+    {
+      "path": "fixtures/iphone-proof-six-string.txt",
+      "bytes": 222,
+      "sha256": "15bec319482694dbacd410943fbdc4fd3fe38292998f00e2a8bb94c4cfc72556"
+    },
+    {
+      "path": "fixtures/shared-core-four-string-bass.txt",
+      "bytes": 74,
+      "sha256": "4e98914f3e4eb232eae92121d5e6dd0f930b42d646f3c40164ac47dbbba297d8"
+    },
+    {
+      "path": "fixtures/shared-core-two-block-guitar.txt",
+      "bytes": 306,
+      "sha256": "db9e3e903acfa025ce614586dd71628410b6f72ea099099ae3a22a514dd27c40"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1307,
+      "sha256": "b47fd876137ef1ab4978c54b2e3a91eb8e400138ebc2fc7e23bb3fc31677617c"
+    },
+    {
+      "path": "logo192.png",
+      "bytes": 5347,
+      "sha256": "c386396ec70db3608075b5fbfaac4ab1ccaa86ba05a68ab393ec551eb66c3e00"
+    },
+    {
+      "path": "logo512.png",
+      "bytes": 9664,
+      "sha256": "9ea4f4da7050c0cc408926f6a39c253624e9babb1d43c7977cd821445a60b461"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 492,
+      "sha256": "50b3d8c3903af3f78d871b94557ab14f4e39ca192eaca3d2cfa863c867279a14"
+    },
+    {
+      "path": "robots.txt",
+      "bytes": 67,
+      "sha256": "90d24bc3bf698ac1e173739502298ccca72adf1f564fab05f484b8c48d1cadd2"
+    },
+    {
+      "path": "static/css/main.ac7463b6.css",
+      "bytes": 3438,
+      "sha256": "7ac0fef4d628247bf54136f6172aa9e7e9e30a547ca83205c3df23c495e5e6d2"
+    },
+    {
+      "path": "static/css/main.ac7463b6.css.map",
+      "bytes": 5914,
+      "sha256": "ea342605ac87a0dd7835ef93b770f194fa26a1343f417e81a1352d948078820b"
+    },
+    {
+      "path": "static/js/11.8e7dfa74.chunk.js",
+      "bytes": 4519,
+      "sha256": "66ebc3498d2e70ef7937313c86aeccf9d4015c0a37c9124a6901c181c1cbf2a1"
+    },
+    {
+      "path": "static/js/11.8e7dfa74.chunk.js.map",
+      "bytes": 10654,
+      "sha256": "231124a7d315d8ec520677382b0f7fccc5ccae2eaa372f4b251dd1354d774415"
+    },
+    {
+      "path": "static/js/118.378dfcf7.chunk.js",
+      "bytes": 56174,
+      "sha256": "18ac294f81c6fdc1e1b88df35bd76e897c3c066c76f4401304e87d7cfe0335cb"
+    },
+    {
+      "path": "static/js/118.378dfcf7.chunk.js.map",
+      "bytes": 153811,
+      "sha256": "8fb125c026e0e718d88207b0e676a67cfda55be605d56a1f617437078592192e"
+    },
+    {
+      "path": "static/js/222.2f42f1e0.chunk.js",
+      "bytes": 34010,
+      "sha256": "e5190815ba65f3a49d56a7e092930a72b0742b9e38cc399c1f72b8b3c462f88a"
+    },
+    {
+      "path": "static/js/222.2f42f1e0.chunk.js.map",
+      "bytes": 104621,
+      "sha256": "d4f4c87702240ad9ac02cf5da799bff34c2bbe608a2093ddd91d2c3b96a44179"
+    },
+    {
+      "path": "static/js/386.d4b4e468.chunk.js",
+      "bytes": 1232043,
+      "sha256": "4b9364ed6385947abce3c94ba338496fe5009bea62394a02af6518923a716df2"
+    },
+    {
+      "path": "static/js/386.d4b4e468.chunk.js.LICENSE.txt",
+      "bytes": 1514,
+      "sha256": "bdf36ab66b2d72304d37f8bb8cec296045154c9e0cee66605176d574a7bf501d"
+    },
+    {
+      "path": "static/js/386.d4b4e468.chunk.js.map",
+      "bytes": 4168335,
+      "sha256": "941aeb8e0f33a19820fe75cf46ba42a03df0265992c434b2075cf560983fb0a6"
+    },
+    {
+      "path": "static/js/691.90281e3b.chunk.js",
+      "bytes": 50817,
+      "sha256": "bf0133a37bdc77cc31d8f2d07e35fcefc6218e2c9c0bf92a59f6821ad30ee65d"
+    },
+    {
+      "path": "static/js/691.90281e3b.chunk.js.map",
+      "bytes": 132807,
+      "sha256": "13017b64d6eabe67a9d46256b8623e38547e427a7739c6cf5f8962616cbfd7d0"
+    },
+    {
+      "path": "static/js/965.70707253.chunk.js",
+      "bytes": 315,
+      "sha256": "82e3363c8f4178de986756b47805fdc803c1b000f3a4eb117be4d9f26c2d5dcb"
+    },
+    {
+      "path": "static/js/965.70707253.chunk.js.map",
+      "bytes": 515,
+      "sha256": "0e7443bc5def6cca492374ed3e706537402f567c1e33f8bf1d5eef4b656c9893"
+    },
+    {
+      "path": "static/js/guitar-eyes-guitar-pro-import.27d45714.chunk.js",
+      "bytes": 18904,
+      "sha256": "b7f36be764488f21986a280062cc8e4fc21922994dbc144122b7506e70aa5b6a"
+    },
+    {
+      "path": "static/js/guitar-eyes-guitar-pro-import.27d45714.chunk.js.map",
+      "bytes": 55935,
+      "sha256": "394d4012ef2993a07f9aaa1771f98bda23aa209a42babfd51fe0dfe91c473cbb"
+    },
+    {
+      "path": "static/js/main.4bac6d75.js",
+      "bytes": 373243,
+      "sha256": "07ea0f58f53b91eed3343b47540a9d36bd8a91971494045ed7bd233f36398211"
+    },
+    {
+      "path": "static/js/main.4bac6d75.js.LICENSE.txt",
+      "bytes": 971,
+      "sha256": "bc83aaff43d3ef9301331bbfeaacc4d2d8549dfc9029f786bd6abdd32363b020"
+    },
+    {
+      "path": "static/js/main.4bac6d75.js.map",
+      "bytes": 1159000,
+      "sha256": "e5c276f4f8b44566f65e515a13970ec9e264e5c4ca541cab9ea1d0914bfb8ac6"
+    }
+  ],
+  "teacherFixture": {
+    "path": "fixtures/teacher/pattern-and-ending.musicxml",
+    "bytes": 4097,
+    "sha256": "5ba20a3b0d96ef3f84df2ce94837d9119f28ee1716ee5cbf1d908b35179c9162"
+  },
+  "checkoutGitObjects": {
+    "src": "c8ad19eb3ee15625240ec43d7bc06e2e3cc0ad16",
+    "public": "1a5d97cb24950f5dc31f3224340ab9e4e21f94b8",
+    "package.json": "8b8f39cc6d52174cbadddd02b67e659518433a89",
+    "package-lock.json": "145a4dadf237906d301554655ca895365acb8505"
+  }
+}

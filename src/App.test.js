@@ -69,7 +69,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByRole("option", { name: "Bass family" })).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText("Guitar Eyes acceptance candidate 1")
+      screen.getByText("Guitar Eyes teacher prototype 1")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })
@@ -136,7 +136,7 @@ describe("Guitar Eyes application shell", () => {
 
     fireEvent.focus(window);
 
-    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByText(/Loaded 5 synchronized positions/i)).toBeInTheDocument();
   });
 
@@ -161,7 +161,7 @@ describe("Guitar Eyes application shell", () => {
 
     fireEvent.focus(window);
 
-    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await waitFor(() => expect(heading).toHaveFocus());
     expect(screen.getByText(/could not be loaded in iPhone reading mode/i)).toBeInTheDocument();
   });
 
@@ -190,7 +190,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.queryByRole("heading", { name: "Tablature could not be loaded" })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Choose Instrument:")).toHaveValue("guitar");
 
-    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await waitFor(() => expect(heading).toHaveFocus());
   });
 
   test("imports MusicXML into the iPhone reader and recovers picker-return focus", async () => {
@@ -219,7 +219,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByText(/Duration, quarter note/i)).toBeInTheDocument();
 
     fireEvent.focus(window);
-    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await waitFor(() => expect(heading).toHaveFocus());
   });
 
   test("imports MusicXML into the desktop semantic reader without switching modes", async () => {
@@ -244,7 +244,7 @@ describe("Guitar Eyes application shell", () => {
       screen.getByText(/Imported MusicXML tablature\. Loaded 6 synchronized positions/i)
     ).toBeInTheDocument();
     expect(screen.getAllByRole("table")).toHaveLength(1);
-    await waitFor(() => expect(document.activeElement).toBe(heading));
+    await waitFor(() => expect(heading).toHaveFocus());
 
     fireEvent.click(screen.getByRole("button", { name: "Next position" }));
     expect(screen.getByText(/Duration, quarter note\. Rest\./i)).toBeInTheDocument();
