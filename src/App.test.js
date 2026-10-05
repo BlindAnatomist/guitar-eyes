@@ -69,7 +69,7 @@ describe("Guitar Eyes application shell", () => {
     expect(screen.getByRole("option", { name: "Bass family" })).toBeInTheDocument();
     expect(screen.getByLabelText("Multi-Column Navigation")).toBeInTheDocument();
     expect(
-      screen.getByText("Guitar Eyes teacher prototype 1")
+      screen.getByText("Guitar Eyes repetition prototype 2")
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Close Mac keyboard instructions" })

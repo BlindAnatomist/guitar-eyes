@@ -1,6 +1,6 @@
 import { validateSemanticDocument } from "./semanticDocumentValidation";
 import { describePlayablePosition } from "./positionDescription";
-import { hasReviewedTeacherSource } from "./teacherExample";
+import { reviewedTeacherLessonKind } from "./teacherExample";
 
 export const TEACHER_LIMITS = Object.freeze({ measures: 256, positions: 4096 });
 const PITCH_CLASS = { C: 0, "C#": 1, Db: 1, D: 2, "D#": 3, Eb: 3, E: 4, F: 5, "F#": 6, Gb: 6, G: 7, "G#": 8, Ab: 8, A: 9, "A#": 10, Bb: 10, B: 11 };
@@ -29,7 +29,7 @@ function durationKey(duration) {
 
 // Pure bounded query. These are relationships among supported canonical facts,
 // not a completeness certificate for the source. createTeacherLesson adds that gate.
-export function compareTeacherMeasures(document) {
+function analyzeTeacherMeasures(document) {
   if (!Array.isArray(document?.measures) || !Array.isArray(document?.positions) ||
       document.measures.length > TEACHER_LIMITS.measures || document.positions.length > TEACHER_LIMITS.positions) {
     return unavailable("The prototype compares at most 256 explicit measures and 4,096 positions.");
@@ -40,8 +40,8 @@ export function compareTeacherMeasures(document) {
   if (document.instrument !== "guitar" || document.stringCount !== 6 || document.sourceFormat !== "musicxml") {
     return unavailable("This prototype requires the reviewed six-string MusicXML guitar profile.");
   }
-  if (document.measures.length < 3 || document.blocks.some((block) => !block.measures?.length)) {
-    return unavailable("This lesson needs explicit measures containing a recurrence and one changed ending.");
+  if (document.measures.length < 2 || document.blocks.some((block) => !block.measures?.length)) {
+    return unavailable("This lesson needs at least two explicit measures to compare.");
   }
   if (document.warnings.length || document.semanticLosses?.length) {
     return unavailable("Preserved notation or source-order limitations prevent this comparison. The prototype requires a technique-free, repeat-free source.");
@@ -93,6 +93,23 @@ export function compareTeacherMeasures(document) {
     groups.get(fact.key).push(fact);
   });
   const repeatedGroups = [...groups.values()].filter((group) => group.length > 1);
+  return { status: "available", facts, repeatedGroups };
+}
+
+// Recurrence is useful on its own. It does not require or invent a changed ending.
+export function findTeacherRecurrence(document) {
+  const analysis = analyzeTeacherMeasures(document);
+  if (analysis.status !== "available") return analysis;
+  if (!analysis.repeatedGroups.length) {
+    return unavailable("No exact repeated measure was found in this bounded comparison.");
+  }
+  return { status: "available", repeatedGroups: analysis.repeatedGroups, recurrence: analysis.repeatedGroups[0] };
+}
+
+export function compareTeacherMeasures(document) {
+  const analysis = analyzeTeacherMeasures(document);
+  if (analysis.status !== "available") return analysis;
+  const { facts, repeatedGroups } = analysis;
   const repeatedOpenings = new Map();
   repeatedGroups.forEach((group) => {
     if (group[0].openingKey && !repeatedOpenings.has(group[0].openingKey)) repeatedOpenings.set(group[0].openingKey, group);
@@ -106,26 +123,75 @@ export function compareTeacherMeasures(document) {
   return unavailable("No exact repeated measure with a shared opening and just one changed final position was found in this bounded comparison.");
 }
 
+function measureList(facts) {
+  const numbers = facts.map((fact) => fact.measure.documentNumber);
+  return numbers.length < 2 ? String(numbers[0]) : `${numbers.slice(0, -1).join(", ")} and ${numbers[numbers.length - 1]}`;
+}
+
+function measurePhrase(facts) {
+  return `${facts.length === 1 ? "measure" : "measures"} ${measureList(facts)}`;
+}
+
+// Selection is explicit, unique and in written order, even when the variant
+// precedes the repeated group or an unrelated measure falls between occurrences.
+export function teacherPracticeSelection(comparison) {
+  if (comparison?.status !== "available" || !comparison.recurrence?.length) return [];
+  return [...new Set([...comparison.recurrence, ...(comparison.variation ? [comparison.variation] : [])])]
+    .sort((a, b) => a.measure.documentNumber - b.measure.documentNumber);
+}
+
+const evidence = (id, label, references) => ({ id, label, references });
+const recurrenceControls = (recurrence) => recurrence.map((fact, index) => evidence(
+  index === 0 ? "first" : index === 1 ? "recurrence" : `recurrence-${fact.measure.documentNumber}`,
+  `Inspect ${index === 0 ? "first pattern" : "recurrence"}: measure ${fact.measure.documentNumber}`,
+  fact.references,
+));
+
+function createRepetitionLesson(document, comparison) {
+  const { recurrence } = comparison;
+  const first = recurrence[0];
+  const repeatedNumbers = measureList(recurrence);
+  return {
+    status: "available", kind: "repetition", document,
+    title: "Recognize exact repetition",
+    overview: `This original example contains ${document.measures.length} explicit measures. This lesson covers measures ${repeatedNumbers}. A measure is a written unit, not an inferred phrase.`,
+    claims: [{ text: `Measures ${repeatedNumbers} have the same imported string-and-fret positions, simultaneous notes, rests and notated durations.`, references: recurrence.flatMap((fact) => fact.references) }],
+    reusableText: "The whole measure can be reused at each listed occurrence, including its simultaneous notes, rest and rhythm. This lesson identifies an exact recurrence; it does not infer phrases or assess your playing.",
+    evidence: recurrenceControls(recurrence),
+    selectedMeasures: teacherPracticeSelection(comparison).map((fact) => fact.measure.documentNumber),
+    practice: [
+      `Study measure ${first.measure.documentNumber} with Inspect first pattern and the existing reader. Keep the whole measure together as one practice unit.`,
+      `Compare ${measurePhrase(recurrence.slice(1))} with measure ${first.measure.documentNumber} using each recurrence control. Reuse the same measure-length pattern where the imported facts match.`,
+      `Try the selected measures in written order: ${repeatedNumbers}. This suggestion covers only those measures; choose your own pace and repetitions.`,
+    ],
+  };
+}
+
 export function createTeacherLesson(document) {
-  if (!hasReviewedTeacherSource(document)) {
-    return unavailable("Teaching is available only for the reviewed original example, including an unchanged upload of it. Other files may omit notation the reader cannot yet interpret; no warnings does not prove they are safe to compare.");
+  const kind = reviewedTeacherLessonKind(document);
+  if (!kind) {
+    return unavailable("Teaching is available only for the reviewed original examples, including unchanged uploads of them. Other files may omit notation the reader cannot yet interpret; no warnings does not prove they are safe to compare.");
   }
-  const comparison = compareTeacherMeasures(document);
+  const comparison = kind === "repetition" ? findTeacherRecurrence(document) : compareTeacherMeasures(document);
   if (comparison.status !== "available") return comparison;
+  if (kind === "repetition") return createRepetitionLesson(document, comparison);
   const { recurrence, variation, changedPosition } = comparison;
   const first = recurrence[0];
-  const repeatedNumbers = recurrence.map((fact) => fact.measure.documentNumber).join(" and ");
+  const repeatedNumbers = measureList(recurrence);
+  const selected = teacherPracticeSelection(comparison);
+  const selectedNumbers = measureList(selected);
   const variantNumber = variation.measure.documentNumber;
   const originalEnding = first.references[changedPosition];
   const changedEnding = variation.references[changedPosition];
-  const evidence = (id, label, references) => ({ id, label, references });
   return {
-    status: "available",
-    document,
+    status: "available", kind: "changed-ending", document,
+    title: "Pattern and changed ending",
+    overview: `This original example contains ${document.measures.length} explicit measures. This lesson covers measures ${selectedNumbers}. A measure is a written unit, not an inferred phrase.`,
     claims: [
       { text: `Measures ${repeatedNumbers} have the same imported string-and-fret positions, simultaneous notes, rests and notated durations.`, references: recurrence.flatMap((fact) => fact.references) },
-      { text: `Measure ${variantNumber} shares the first ${changedPosition} positions, then changes position ${changedPosition + 1}, the final position.`, references: [...first.references, ...variation.references] },
+      { text: `Measure ${variantNumber} shares the first ${changedPosition} positions with measure ${first.measure.documentNumber}, then changes position ${changedPosition + 1}, the final position.`, references: [...first.references, ...variation.references] },
     ],
+    openingIntroduction: `Learn these positions once for measures ${selectedNumbers}. Notes within one position are played together.`,
     opening: first.references.slice(0, changedPosition).map((reference) => ({
       text: describePlayablePosition(document, reference.index), references: [reference],
     })),
@@ -133,16 +199,16 @@ export function createTeacherLesson(document) {
       text: describePlayablePosition(document, reference.index), references: [reference],
     })),
     evidence: [
-      evidence("first", `Inspect first pattern: measure ${first.measure.documentNumber}`, first.references),
-      evidence("recurrence", `Inspect recurrence: measure ${recurrence[1].measure.documentNumber}`, recurrence[1].references),
+      ...recurrenceControls(recurrence),
       evidence("original-ending", `Inspect original ending: measure ${first.measure.documentNumber}, position ${changedPosition + 1}`, [originalEnding]),
       evidence("changed-ending", `Inspect changed ending: measure ${variantNumber}, position ${changedPosition + 1}`, [changedEnding]),
       evidence("variant", `Inspect shared opening with changed ending: measure ${variantNumber}`, variation.references),
     ],
+    selectedMeasures: selected.map((fact) => fact.measure.documentNumber),
     practice: [
-      `Learn measure ${first.measure.documentNumber} once, then check its recurrence in measure ${recurrence[1].measure.documentNumber}.`,
+      `Learn measure ${first.measure.documentNumber} once, then check its recurrence in ${measurePhrase(recurrence.slice(1))}.`,
       `Isolate the final position in measures ${first.measure.documentNumber} and ${variantNumber}. Compare the two endings using the reader.`,
-      `Join the shared first ${changedPosition} positions to each ending, then try the three measures in written order.`,
+      `Join the shared first ${changedPosition} positions to each ending, then try the selected measures in written order: ${selectedNumbers}. This suggestion covers only those measures.`,
     ],
   };
 }

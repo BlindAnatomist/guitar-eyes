@@ -33,16 +33,25 @@ export default function TeacherLesson({ document, onInspect, onQuietAction }) {
       )}
       {current.view === "lesson" && (
         <>
-          <h3 tabIndex="-1" ref={headingRef}>Pattern and changed ending</h3>
+          <h3 tabIndex="-1" ref={headingRef}>{lesson.title || "Pattern lesson unavailable"}</h3>
           {lesson.status === "available" ? (
             <>
-              <p>This original example has three explicit measures. A measure is a written unit, not an inferred phrase.</p>
+              <p>{lesson.overview}</p>
               {lesson.claims.map((claim, index) => <p key={index}>{claim.text}</p>)}
-              <h4>Shared opening</h4>
-              <p>Learn these positions once for all three measures. Notes within one position are played together.</p>
-              <ol>{lesson.opening.map((position, index) => <li key={index}>{position.text}</li>)}</ol>
-              <h4>The two endings</h4>
-              {lesson.endings.map((ending, index) => <p key={index}>{ending.text}</p>)}
+              {lesson.kind === "repetition" ? (
+                <>
+                  <h4>What can be reused</h4>
+                  <p>{lesson.reusableText}</p>
+                </>
+              ) : (
+                <>
+                  <h4>Shared opening</h4>
+                  <p>{lesson.openingIntroduction}</p>
+                  <ol>{lesson.opening.map((position, index) => <li key={index}>{position.text}</li>)}</ol>
+                  <h4>The two endings</h4>
+                  {lesson.endings.map((ending, index) => <p key={index}>{ending.text}</p>)}
+                </>
+              )}
               <h4>Suggested rehearsal order</h4>
               <ol>{lesson.practice.map((step) => <li key={step}>{step}</li>)}</ol>
               <p>This is a practice suggestion. Guitar Eyes does not listen to or assess your playing.</p>

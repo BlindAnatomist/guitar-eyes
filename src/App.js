@@ -15,7 +15,7 @@ import InstrumentDropdown from "./InstrumentDropdown";
 import IPhoneTabReader from "./IPhoneTabReader";
 import LegacyDesktopReader from "./LegacyDesktopReader";
 import Upload from "./Upload";
-import { buildTeacherExampleDocuments, isTeacherExampleSource } from "./teacherExample";
+import { buildTeacherExampleDocuments, isTeacherExampleSource, TEACHER_REPETITION_XML } from "./teacherExample";
 import { useSessionPassageMark } from "./sessionPassageMark";
 import { readTextFile, TabParseError } from "./iphoneTabModel";
 import {
@@ -584,11 +584,13 @@ function App() {
     desktopFocusPendingRef.current = true;
   };
 
-  const handleTeacherExample = () => {
+  const handleTeacherExample = (sourceText) => {
     beginReaderRequest();
-    const result = buildTeacherExampleDocuments();
+    const result = buildTeacherExampleDocuments(sourceText);
     setStructuredSelectionSession(null);
-    const status = "Loaded the original three-measure teacher example. Open pattern lesson to explore the relationship.";
+    const status = sourceText === TEACHER_REPETITION_XML
+      ? "Loaded the original repetition study. Open pattern lesson to explore exact recurrence."
+      : "Loaded the original three-measure teacher example. Open pattern lesson to explore the relationship.";
     if (readingModeRef.current === "iphone") {
       commitIphoneOutcome({ target: "reader", semanticDocument: result.semanticDocument,
         desktopBlocks: result.desktopBlocks, status, resolvedInstrument: result.resolvedInstrument });
@@ -680,8 +682,11 @@ function App() {
 
       <section className="teacher-example" aria-labelledby="teacher-example-heading">
         <h2 id="teacher-example-heading">Teacher prototype</h2>
-        <p>Explore a repeated measure and one changed ending in an original example. Loading it replaces the current file and clears the session mark.</p>
-        <button type="button" disabled={isReadingFile} onClick={handleTeacherExample}>Load original teacher example</button>
+        <p>Start with exact repetition, then explore one changed ending. Loading either original example replaces the current file and clears the session mark.</p>
+        <div className="teacher-evidence-controls" role="group" aria-label="Choose a reviewed lesson example">
+          <button type="button" disabled={isReadingFile} onClick={() => handleTeacherExample(TEACHER_REPETITION_XML)}>Load repetition study</button>
+          <button type="button" disabled={isReadingFile} onClick={() => handleTeacherExample()}>Load original teacher example</button>
+        </div>
       </section>
 
       <div className="status-message" aria-live="polite" aria-atomic="true">

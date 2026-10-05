@@ -9,3 +9,16 @@ Three explicit 4/4 measures in standard six-string guitar tuning E4 B3 G3 D3 A2 
 The source is mirrored exactly as a bundled string in `src/teacherExample.js` and checked by a test. The normal MusicXML importer and semantic finalizer create the sole musical document. An exact decoded source-text gate admits only this reviewed example (built in or uploaded with identical decoded text) to the lesson. It is not a raw-upload byte hash: encoding or byte-order-mark differences that decode identically preserve the reviewed musical source. A changed source, even with no warning, remains readable under existing importer policy but receives no teacher source-coverage claim. This is intentionally narrower than a general MusicXML teacher profile.
 
 No generated sound, listening, playing assessment, harmonic naming, finger choice, automatic phrases or performed repeat order are part of this example or prototype.
+
+
+## Exact repetition study (2026-10-05)
+
+`exact-repetition.musicxml` is a second project-authored CC0 1.0 Universal study. It repeats the project's own original first measure three times, using a distinct title. It is not transcribed or adapted from an outside song. The first fixture is unchanged.
+
+SHA-256: `71d13c00b68b85b1e71ad54783db2e95eadc5d75d5cdb9d62e27be2a8aa4da8f`.
+
+The source contains three explicit 4/4 measures in standard six-string guitar tuning E4 B3 G3 D3 A2 E2. Each has the same four quarter-note positions: simultaneous high E open and B fret 1; G string open; rest; high E fret 3. Written pitches agree with tuning and frets. There is no changed ending, MusicXML repeat symbol, technique, tie, capo, tempo change, multiple voice or part. The lesson describes recurrence in written measures, not performed repeat order.
+
+`TEACHER_REPETITION_XML` in `src/teacherExample.js` mirrors this fixture exactly. The normal MusicXML importer remains the only source of musical facts. The two fixture texts are separately and exactly admitted; document-scoped proof records the lesson kind plus an unchanged-content guard. Generic imports, copied semantic documents, whitespace changes and unsupported notation acquire no teacher proof. Encoding/BOM variants that decode identically retain the existing decoded-text contract.
+
+The recurrence query is independent from the changed-ending query. It selects the first exact recurrence group in written measure order and retains every occurrence in that group. The lesson offers a measure-length practice organization, not automatic mastery, inferred phrases, fingering, harmony, listening, grading, audio or playback.

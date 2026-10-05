@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import App from "./App";
 import { readTextFile } from "./iphoneTabModel";
 import { buildStructuredTabReaderDocuments } from "./structuredTabReaderDocuments";
-import { TEACHER_EXAMPLE_XML } from "./teacherExample";
+import { TEACHER_EXAMPLE_XML, TEACHER_REPETITION_XML } from "./teacherExample";
 import { buildReaderDocuments } from "./tabImportCoordinator";
 
 jest.mock("./iphoneTabModel", () => ({ ...jest.requireActual("./iphoneTabModel"), readTextFile: jest.fn() }));
@@ -155,5 +155,98 @@ describe.each(["phone", "desktop"])("%s teacher interaction", (mode) => {
     fireEvent.click(screen.getByRole("radio", { name: "Guitar 2" })); click("Load selected track");
     await act(async () => { await Promise.resolve(); }); settleFocus(); click("Open pattern lesson");
     expect(screen.getByText(/Teaching is available only/)).toBeInTheDocument();
+  });
+});
+
+
+describe.each(["phone", "desktop"])("%s repetition study", (mode) => {
+  const third = "Inspect recurrence: measure 3";
+  function loadStudy() { click("Load repetition study"); settleFocus(); }
+
+  test("repetition is the first example and teaches reuse without claiming a changed ending", () => {
+    start(mode);
+    expect(within(screen.getByRole("group", { name: "Choose a reviewed lesson example" })).getAllByRole("button").map((node) => node.textContent)).toEqual(["Load repetition study", "Load original teacher example"]);
+    loadStudy(); click("Open pattern lesson");
+    expect(screen.getByRole("heading", { name: "Recognize exact repetition" })).toHaveFocus();
+    expect(screen.getByText(/Measures 1, 2 and 3 have the same imported/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What can be reused" })).toBeInTheDocument();
+    expect(screen.getByText(/Try the selected measures in written order: 1, 2 and 3/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "The two endings" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /changed ending|played it|audition|playback/i })).not.toBeInTheDocument();
+    expect(within(screen.getByRole("group", { name: "Inspect lesson evidence" })).getAllByRole("button")).toHaveLength(3);
+  });
+
+  test("every occurrence quietly resolves through the reader and returns to its exact control", () => {
+    const { container } = start(mode); loadStudy(); click("Open pattern lesson");
+    ["Inspect first pattern: measure 1", recurrence, third].forEach((label, index) => {
+      click(label);
+      expect(button("Read current position")).toHaveFocus();
+      expect(description(container)).toHaveTextContent(`Measure ${index + 1} of 3. Position 1 of 4`);
+      expect(liveRegion(container)).toBeEmptyDOMElement();
+      click("Read current position");
+      expect(liveRegion(container)).toHaveTextContent(description(container).textContent);
+      click("Return to pattern lesson");
+      expect(button(label)).toHaveFocus();
+      expect(liveRegion(container)).toBeEmptyDOMElement();
+    });
+    click("Close pattern lesson"); expect(button("Open pattern lesson")).toHaveFocus();
+  });
+
+  test("marks and picker cancellation survive recurrence inspection and mode changes", () => {
+    const { container } = start(mode); loadStudy(); click("Next position"); click("Mark current position");
+    const marked = description(container).textContent;
+    click("Open pattern lesson"); click(third); selectFile("", []);
+    expect(button("Return to pattern lesson")).toBeInTheDocument();
+    expect(description(container)).toHaveTextContent("Measure 3 of 3. Position 1 of 4");
+    click("Return to mark"); expect(description(container)).toHaveTextContent(marked);
+    fireEvent.click(screen.getByRole("radio", { name: mode === "phone" ? "Desktop grid reader" : "iPhone semantic reader" })); settleFocus();
+    expect(screen.queryByRole("button", { name: "Return to pattern lesson" })).not.toBeInTheDocument();
+    click("Return to mark"); expect(description(container)).toHaveTextContent(marked);
+    click("Open pattern lesson"); expect(button(third)).toBeInTheDocument();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
+  });
+
+  test("switching lessons clears old inspection and marks, and leaves the original comparison available", () => {
+    start(mode); loadStudy(); click("Open pattern lesson"); click(third); click("Mark current position");
+    loadExample(); expect(button("Return to mark")).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Return to pattern lesson" })).not.toBeInTheDocument();
+    click("Open pattern lesson"); expect(button(changedEnding)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Pattern and changed ending" })).toHaveFocus();
+    loadStudy(); click("Open pattern lesson");
+    expect(screen.getByRole("heading", { name: "Recognize exact repetition" })).toHaveFocus();
+    expect(screen.queryByRole("button", { name: changedEnding })).not.toBeInTheDocument();
+  });
+
+  test("exact repetition uploads are admitted, changed text is not", async () => {
+    start(mode); await upload(TEACHER_REPETITION_XML); click("Open pattern lesson");
+    expect(button(third)).toBeInTheDocument();
+    await upload(TEACHER_REPETITION_XML + "\n"); click("Open pattern lesson");
+    expect(screen.getByText(/Teaching is available only/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: third })).not.toBeInTheDocument();
+    await upload(TEACHER_REPETITION_XML); click("Open pattern lesson");
+    expect(button(third)).toBeInTheDocument();
+  });
+
+  test("failed import clears repetition references and the original reader recovers", async () => {
+    const { container } = start(mode); loadStudy(); click("Open pattern lesson"); click(third);
+    await upload("invalid", "broken.musicxml");
+    expect(screen.getByRole("heading", { name: "Tablature could not be loaded" })).toHaveFocus();
+    expect(screen.queryByRole("button", { name: "Return to pattern lesson" })).not.toBeInTheDocument();
+    await upload(source, "ordinary.tab");
+    expect(button("Read current position")).toBeInTheDocument();
+    click("Next position"); expect(liveRegion(container)).toBeEmptyDOMElement();
+    click("Open pattern lesson"); expect(screen.getByText(/Teaching is available only/)).toBeInTheDocument();
+  });
+
+  test("repeated lesson flows create no progress, storage or instruction live region", () => {
+    const storage = jest.spyOn(Storage.prototype, "setItem");
+    const { container } = start(mode); loadStudy();
+    for (let i = 0; i < 3; i += 1) {
+      click("Open pattern lesson"); click(third); click("Return to pattern lesson"); click("Close pattern lesson");
+    }
+    expect(storage).not.toHaveBeenCalled();
+    expect(liveRegion(container)).toBeEmptyDOMElement();
+    expect(container.querySelector(".teacher-lesson [aria-live]")).toBeNull();
+    expect(screen.queryByText(/mastered|completed lesson|score:|correctly played/i)).not.toBeInTheDocument();
   });
 });

@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "runtimeCommit": "5e738338fa5927112e33081af69a51c4c148b73f",
+  "closureCommit": "d1aacf9b61e561fbc7b26ad820a5fa8804f8754b",
+  "archive": {
+    "file": "reviewed-build.tar.gz",
+    "bytes": 1827308,
+    "sha256": "a1330cc2bca1d86a3ab66e84de27d04475af90c805b678af825f3f4f80e6c59f"
+  },
+  "assetCount": 30,
+  "assets": [
+    {
+      "path": "asset-manifest.json",
+      "bytes": 1484,
+      "sha256": "05de975606bf135f921ecfcd429451984dd8a7b7ec75b240d673e364d41e65e8"
+    },
+    {
+      "path": "favicon.ico",
+      "bytes": 3870,
+      "sha256": "3d10f7da6c603178340081668c4ac5b3ae9743ca9a262ab0fcd312fbb9f48bdd"
+    },
+    {
+      "path": "fixtures/iphone-proof-six-string.txt",
+      "bytes": 222,
+      "sha256": "15bec319482694dbacd410943fbdc4fd3fe38292998f00e2a8bb94c4cfc72556"
+    },
+    {
+      "path": "fixtures/shared-core-four-string-bass.txt",
+      "bytes": 74,
+      "sha256": "4e98914f3e4eb232eae92121d5e6dd0f930b42d646f3c40164ac47dbbba297d8"
+    },
+    {
+      "path": "fixtures/shared-core-two-block-guitar.txt",
+      "bytes": 306,
+      "sha256": "db9e3e903acfa025ce614586dd71628410b6f72ea099099ae3a22a514dd27c40"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1313,
+      "sha256": "e65ad07f3ade1fc3f76da266e2014fac103223fb5124fd5162d417d554799de1"
+    },
+    {
+      "path": "logo192.png",
+      "bytes": 5347,
+      "sha256": "c386396ec70db3608075b5fbfaac4ab1ccaa86ba05a68ab393ec551eb66c3e00"
+    },
+    {
+      "path": "logo512.png",
+      "bytes": 9664,
+      "sha256": "9ea4f4da7050c0cc408926f6a39c253624e9babb1d43c7977cd821445a60b461"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 492,
+      "sha256": "50b3d8c3903af3f78d871b94557ab14f4e39ca192eaca3d2cfa863c867279a14"
+    },
+    {
+      "path": "robots.txt",
+      "bytes": 67,
+      "sha256": "90d24bc3bf698ac1e173739502298ccca72adf1f564fab05f484b8c48d1cadd2"
+    },
+    {
+      "path": "static/css/main.ac7463b6.css",
+      "bytes": 3438,
+      "sha256": "7ac0fef4d628247bf54136f6172aa9e7e9e30a547ca83205c3df23c495e5e6d2"
+    },
+    {
+      "path": "static/css/main.ac7463b6.css.map",
+      "bytes": 5914,
+      "sha256": "ea342605ac87a0dd7835ef93b770f194fa26a1343f417e81a1352d948078820b"
+    },
+    {
+      "path": "static/js/102.30436319.chunk.js",
+      "bytes": 4522,
+      "sha256": "6c8648ee4a43d1bfc97322b76d97d5aefec725e70ee95bc67270a7f37c37467d"
+    },
+    {
+      "path": "static/js/102.30436319.chunk.js.map",
+      "bytes": 10686,
+      "sha256": "1435b695d6005ad238218590e50c69caa78c7d7246dc0642b3e1ed532a3402d8"
+    },
+    {
+      "path": "static/js/373.562dff8b.chunk.js",
+      "bytes": 34012,
+      "sha256": "e9496aff8daaa5fc26986f38ef3f9258d7c964213b231be4b9da9c1904b2fd05"
+    },
+    {
+      "path": "static/js/373.562dff8b.chunk.js.map",
+      "bytes": 104621,
+      "sha256": "b5a95dbf1ab7432556283099a8fd072a45a60c8251b2a2cdd7ef08a33c07591c"
+    },
+    {
+      "path": "static/js/429.25287006.chunk.js",
+      "bytes": 315,
+      "sha256": "51febc1f3bd3258551fdc4247d432f0200a8b6ba1f520415318547ea7d32cc8e"
+    },
+    {
+      "path": "static/js/429.25287006.chunk.js.map",
+      "bytes": 515,
+      "sha256": "20e6ec5be5c19a1f5b4f2982f7a6907dfcafd90cbfce751738c5063bdab1fd55"
+    },
+    {
+      "path": "static/js/603.e331cca7.chunk.js",
+      "bytes": 1232368,
+      "sha256": "32a3d676a9561b77527658171d55b601ab431cb51107a8d5e9389cabed944a63"
+    },
+    {
+      "path": "static/js/603.e331cca7.chunk.js.LICENSE.txt",
+      "bytes": 1514,
+      "sha256": "bdf36ab66b2d72304d37f8bb8cec296045154c9e0cee66605176d574a7bf501d"
+    },
+    {
+      "path": "static/js/603.e331cca7.chunk.js.map",
+      "bytes": 4168397,
+      "sha256": "a11e096a0ec22537ee32f580074fffd10952861decb455990cc268f4baf81a9c"
+    },
+    {
+      "path": "static/js/687.9a56b7d2.chunk.js",
+      "bytes": 50820,
+      "sha256": "258c5767c15a9432fb295e6f58991ce3e84583b2408627a756d1f225a3c690ed"
+    },
+    {
+      "path": "static/js/687.9a56b7d2.chunk.js.map",
+      "bytes": 132807,
+      "sha256": "35027ca836d08eb7b136c21578a7cc3c5b13c521312229d302d4f20057b1eb74"
+    },
+    {
+      "path": "static/js/865.da4a1747.chunk.js",
+      "bytes": 56176,
+      "sha256": "18f7ff70d16c5386a7fd4258fb5ac1a8b4c67a2b694b6201022da495f7608aec"
+    },
+    {
+      "path": "static/js/865.da4a1747.chunk.js.map",
+      "bytes": 153811,
+      "sha256": "e4cece606a6605e4660ca71a4b78e5ed24a2ca0a898a94db76331dfaeb3ea4a4"
+    },
+    {
+      "path": "static/js/guitar-eyes-guitar-pro-import.f9472030.chunk.js",
+      "bytes": 18904,
+      "sha256": "603091dd83cb4f3b69ffb1f39cbef13f5bbed4a433f4abe570c98503869898a1"
+    },
+    {
+      "path": "static/js/guitar-eyes-guitar-pro-import.f9472030.chunk.js.map",
+      "bytes": 55935,
+      "sha256": "0b43b130610c881257e4cd1b60b3867973d8eaa0f2518ac265bbc5c464783ba1"
+    },
+    {
+      "path": "static/js/main.4f9cf571.js",
+      "bytes": 380454,
+      "sha256": "5fda8286d5177334c7f160bc85785a46424de7128dc76f75cd530642c25a429a"
+    },
+    {
+      "path": "static/js/main.4f9cf571.js.LICENSE.txt",
+      "bytes": 971,
+      "sha256": "bc83aaff43d3ef9301331bbfeaacc4d2d8549dfc9029f786bd6abdd32363b020"
+    },
+    {
+      "path": "static/js/main.4f9cf571.js.map",
+      "bytes": 1173009,
+      "sha256": "a2b75f0c9b4f5a269b9e1e73d482420361ab48a8608a55c98fc7403b5485c389"
+    }
+  ],
+  "teacherFixture": {
+    "path": "fixtures/teacher/pattern-and-ending.musicxml",
+    "bytes": 4097,
+    "sha256": "5ba20a3b0d96ef3f84df2ce94837d9119f28ee1716ee5cbf1d908b35179c9162"
+  },
+  "repetitionFixture": {
+    "path": "fixtures/teacher/exact-repetition.musicxml",
+    "bytes": 4093,
+    "sha256": "71d13c00b68b85b1e71ad54783db2e95eadc5d75d5cdb9d62e27be2a8aa4da8f"
+  },
+  "checkoutGitObjects": {
+    "src": "339062157448443e2b51e1a8c57238032f38bafb",
+    "public": "e9740d5e05a3f8e1fcccd7ead563d0da201c1327",
+    "package.json": "8b8f39cc6d52174cbadddd02b67e659518433a89",
+    "package-lock.json": "145a4dadf237906d301554655ca895365acb8505"
+  }
+}

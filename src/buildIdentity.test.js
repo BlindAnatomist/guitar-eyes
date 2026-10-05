@@ -11,7 +11,7 @@ describe("source entry-point identity", () => {
     const heading = page.getElementById("test-build-heading");
     const root = page.getElementById("root");
 
-    expect(CANDIDATE_BUILD_LABEL).toBe("Guitar Eyes teacher prototype 1");
+    expect(CANDIDATE_BUILD_LABEL).toBe("Guitar Eyes repetition prototype 2");
     expect(page.title).toBe(CANDIDATE_BUILD_LABEL);
     expect(heading.textContent).toBe(CANDIDATE_BUILD_LABEL);
     expect(page.querySelector("h1")).toBe(heading);
@@ -36,6 +36,6 @@ describe("source entry-point identity", () => {
     expect(heading.hasAttribute("tabindex")).toBe(false);
     expect(heading.closest("#root")).toBeNull();
     expect(heading.className).toBe("");
-    expect(heading.textContent).toBe("Guitar Eyes teacher prototype 1");
+    expect(heading.textContent).toBe("Guitar Eyes repetition prototype 2");
   });
 });
