@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "runtimeCommit": "5e738338fa5927112e33081af69a51c4c148b73f",
+  "closureCommit": "d1aacf9b61e561fbc7b26ad820a5fa8804f8754b",
+  "archiveSha256": "a1330cc2bca1d86a3ab66e84de27d04475af90c805b678af825f3f4f80e6c59f",
+  "assetCount": 30,
+  "expandedBytes": 7612028,
+  "checkoutGitObjects": {
+    "src": "339062157448443e2b51e1a8c57238032f38bafb",
+    "public": "e9740d5e05a3f8e1fcccd7ead563d0da201c1327",
+    "package.json": "8b8f39cc6d52174cbadddd02b67e659518433a89",
+    "package-lock.json": "145a4dadf237906d301554655ca895365acb8505"
+  },
+  "teacherFixtureSha256": "5ba20a3b0d96ef3f84df2ce94837d9119f28ee1716ee5cbf1d908b35179c9162",
+  "repetitionFixtureSha256": "71d13c00b68b85b1e71ad54783db2e95eadc5d75d5cdb9d62e27be2a8aa4da8f"
+}

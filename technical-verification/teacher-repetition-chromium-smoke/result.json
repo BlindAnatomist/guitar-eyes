@@ -1,0 +1,136 @@
+{
+  "status": "passed",
+  "commit": "e00a0daddc8a8ea4207707602094880c8b3159b7",
+  "runtimeCommit": "5e738338fa5927112e33081af69a51c4c148b73f",
+  "closureCommit": "d1aacf9b61e561fbc7b26ad820a5fa8804f8754b",
+  "archiveSha256": "a1330cc2bca1d86a3ab66e84de27d04475af90c805b678af825f3f4f80e6c59f",
+  "assetCount": 30,
+  "playwrightVersion": "1.63.0",
+  "browserVersion": "153.0.8010.12",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "name": "production identity and original example",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "independent mark and lesson explanation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "changed ending, explicit Read, and exact return focus",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "recurrence, preserved mark, and quiet ordinary navigation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "unchanged original upload is eligible",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "changed source has an honest teacher limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "ordinary upload remains readable with an honest limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "empty browser storage and mobile-width containment",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "repetition choice, exact scope and reusable measure",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "every recurrence traverses canonical evidence and preserves the mark",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "repetition source admission and separate original comparison",
+      "status": "passed"
+    },
+    {
+      "viewport": "desktop",
+      "name": "repetition cancellation, mode reset and repeated returns stay bounded",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "production identity and original example",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "independent mark and lesson explanation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "changed ending, explicit Read, and exact return focus",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "recurrence, preserved mark, and quiet ordinary navigation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "unchanged original upload is eligible",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "changed source has an honest teacher limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "ordinary upload remains readable with an honest limitation",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "empty browser storage and mobile-width containment",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "repetition choice, exact scope and reusable measure",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "every recurrence traverses canonical evidence and preserves the mark",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "repetition source admission and separate original comparison",
+      "status": "passed"
+    },
+    {
+      "viewport": "mobile-size",
+      "name": "repetition cancellation, mode reset and repeated returns stay bounded",
+      "status": "passed"
+    }
+  ],
+  "error": null,
+  "limitations": [
+    "Chromium technical smoke only; no Safari, VoiceOver, native picker, or teaching-value acceptance."
+  ]
+}

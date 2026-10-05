@@ -1,3 +1,5 @@
+Completed result: [RESULT.md](RESULT.md). The following preserves the prepared scope and verification boundary.
+
 # One bounded exact-repetition Chromium gate
 
 Prepared, not yet executed. User approved publication of code and project-created examples to an isolated public branch and one 24-check browser test, with a 10-minute standard-runner cap and no live-preview change.
