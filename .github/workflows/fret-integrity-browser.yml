@@ -21,7 +21,7 @@ jobs:
       github.repository == 'BlindAnatomist/guitar-eyes' &&
       github.ref == 'refs/heads/review/fret-integrity-2026-10-10' &&
       github.event.deleted == false &&
-      contains(github.event.head_commit.message, '[fret browser 2026-10-10 once]') &&
+      contains(github.event.head_commit.message, '[fret browser geometry correction once]') &&
       github.run_attempt == 1
     runs-on: ubuntu-24.04
     timeout-minutes: 12
@@ -36,14 +36,14 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-          fetch-depth: 2
+          fetch-depth: 3
 
       - name: Verify the unchanged application repair and allowed added files
         shell: bash
         run: |
           set -euo pipefail
           base=543f3beecde5be80fccf4457d36ebbf58a9ed30e
-          test "$(git rev-parse HEAD^)" = "$base"
+          test "$(git rev-parse HEAD^)" = "972e12c1cf3c0815a378f19e94e3e1efb6b749f1"
           test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 2
           git diff --name-only "$base" HEAD | sort > "$RUNNER_TEMP/actual-files"
           printf '%s\n' '.github/workflows/fret-integrity-browser.yml' 'tests/browser/README.md' 'tests/browser/fret-integrity.mjs' | sort > "$RUNNER_TEMP/allowed-files"
@@ -53,7 +53,7 @@ jobs:
           printf 'PLAYWRIGHT_BROWSERS_PATH=%s/fret-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/fret-browser-results"
           git rev-parse HEAD > "$RUNNER_TEMP/fret-browser-results/tested-commit.txt"
-          git rev-parse HEAD^ > "$RUNNER_TEMP/fret-browser-results/application-repair.txt"
+          git rev-parse "$base" > "$RUNNER_TEMP/fret-browser-results/application-repair.txt"
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

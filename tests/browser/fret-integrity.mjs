@@ -31,6 +31,15 @@ function safeGroups(rows, width) {
   }
   return groups;
 }
+function assertSpanningCellGeometry({ noteBox, first, continuation, afterTop, afterSecond }) {
+  const evidence = JSON.stringify({ noteBox, first, continuation, afterTop, afterSecond });
+  assert(Math.abs(noteBox.x - first.x) < 0.5, `Fret start is misaligned: ${evidence}`);
+  // A colspan cell includes any internal border-spacing between source columns.
+  // Compare their outer edges rather than assuming the intercell gap is zero.
+  assert(Math.abs(noteBox.x + noteBox.width - continuation.x - continuation.width) < 0.5,
+    `Fret end is misaligned: ${evidence}`);
+  assert(Math.abs(afterTop.x - afterSecond.x) < 0.5, `Following source column is misaligned: ${evidence}`);
+}
 function validateFixtures() {
   for (const rows of [FIXTURE, CASCADE, SHORT, RANGE]) {
     assert.equal(rows.length, 6);
@@ -40,7 +49,14 @@ function validateFixtures() {
   assert.deepEqual(safeGroups(FIXTURE, 5), [{ start: 0, end: 6 }, { start: 6, end: 9 }]);
   assert.deepEqual(safeGroups(CASCADE, 5), [{ start: 0, end: 10 }, { start: 10, end: 11 }]);
   assert.deepEqual(sourceTokens(RANGE[0]).filter(token => /^\d/.test(token.text)).map(token => token.text), ALL_FRETS);
-  console.log('PASS: independent source fixtures and boundary expectations');
+  for (const gap of [0, 2]) {
+    const geometry = { noteBox: { x: 10, width: 20 + gap }, first: { x: 10, width: 10 },
+      continuation: { x: 20 + gap, width: 10 }, afterTop: { x: 30 + gap * 2 }, afterSecond: { x: 30 + gap * 2 } };
+    assertSpanningCellGeometry(geometry);
+    assert.throws(() => assertSpanningCellGeometry({ ...geometry, noteBox: { x: 10, width: 18 + gap } }), /Fret end is misaligned/);
+    assert.throws(() => assertSpanningCellGeometry({ ...geometry, afterSecond: { x: 100 } }), /Following source column is misaligned/);
+  }
+  console.log('PASS: independent source fixtures, boundary expectations, and spacing-aware geometry oracle');
 }
 validateFixtures();
 if (process.argv.includes('--check-fixtures')) process.exit(0);
@@ -164,9 +180,14 @@ try {
     note.boundingBox(), cell('String 1, column 5, dash').boundingBox(), cell('String 1, column 6, dash').boundingBox(),
     cell('String 1, column 7, fret 3').boundingBox(), cell('String 2, column 7, dash').boundingBox(),
   ]);
-  assert(Math.abs(noteBox.x - first.x) < 0.5);
-  assert(Math.abs(noteBox.width - first.width - continuation.width) < 0.5);
-  assert(Math.abs(afterTop.x - afterSecond.x) < 0.5);
+  report.geometry = { noteBox, first, continuation, afterTop, afterSecond,
+    internalGap: continuation.x - first.x - first.width,
+    tableStyle: await grid().evaluate(element => {
+      const style = getComputedStyle(element);
+      return { borderSpacing: style.borderSpacing, borderCollapse: style.borderCollapse };
+    }) };
+  console.log('GEOMETRY:', JSON.stringify(report.geometry));
+  assertSpanningCellGeometry(report.geometry);
   await page.screenshot({ path: path.join(results, 'six-string-fret-12.png'), fullPage: true });
   pass('Actual six-string Chromium table geometry keeps fret 12 atomic and subsequent strings aligned');
 

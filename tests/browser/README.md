@@ -9,7 +9,7 @@ Coverage includes all fret values 0–99, source-text and colspan preservation, 
 
 Speech mocks do not test audible output, VoiceOver, macOS shortcut interception, or compatibility with assistive technology. Those require acceptance on the intended device/browser.
 
-The workflow has an exact review-branch push filter and a unique commit-message gate. It only runs on attempt 1, uses one standard Ubuntu runner with a 12-minute job limit and read-only contents permission, disables persisted checkout credentials, and has no deployment or hosting steps. The one intentional run is authorized; reruns require separate approval. Small synthetic diagnostics expire after one day. The application repair's exact parent and source content are checked before dependency installation.
+The workflow has an exact review-branch push filter and a unique commit-message gate. It only runs on attempt 1, uses one standard Ubuntu runner with a 12-minute job limit and read-only contents permission, disables persisted checkout credentials, and has no deployment or hosting steps. Each intentional run requires approval; reruns are never automatic. Small synthetic diagnostics expire after one day. The expected test-only parent and unchanged application repair content are checked before dependency installation.
 
 For an explicitly authorized local test on a browser-capable machine, install Playwright 1.63.0 into an isolated prefix, install Chromium with its CLI, build the app, then run:
 
