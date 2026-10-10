@@ -64,7 +64,7 @@ if (process.argv.includes('--check-fixtures')) process.exit(0);
 const build = path.resolve(process.argv[2] || 'build');
 const results = path.resolve(process.argv[3] || 'browser-results');
 await fs.mkdir(results, { recursive: true });
-const report = { applicationRepair: '543f3beecde5be80fccf4457d36ebbf58a9ed30e', testedCommit: process.env.GITHUB_SHA || null,
+const report = { originalRepairBase: '543f3beecde5be80fccf4457d36ebbf58a9ed30e', testedCommit: process.env.GITHUB_SHA || null,
   startedAt: new Date().toISOString(), passed: [], runtimeErrors: [], unexpectedRequests: [], status: 'running',
   limitations: ['Speech synthesis is mocked; no audible speech or VoiceOver tested.', 'Linux Chromium does not establish macOS shortcut interception or assistive-technology compatibility.'] };
 const require = createRequire(path.join(process.env.PLAYWRIGHT_PREFIX || process.cwd(), 'package.json'));
@@ -87,9 +87,30 @@ const deadline = setTimeout(() => { console.error('Browser test exceeded 150-sec
 function pass(name) { report.passed.push(name); console.log(`PASS: ${name}`); }
 function grid(number = 1) { return page.getByRole('grid', { name: `Tablature ${number}`, exact: true }); }
 function cell(label, number = 1) { return grid(number).getByRole('gridcell', { name: label, exact: true }); }
+async function focusDiagnostics() {
+  return page.evaluate(() => {
+    const describe = element => element && ({ tag: element.tagName, id: element.id,
+      label: element.getAttribute('aria-label'), role: element.getAttribute('role'),
+      enclosingGrid: element.closest?.('[role="grid"]')?.getAttribute('aria-label'),
+      row: element.getAttribute('data-row'), column: element.getAttribute('data-column'),
+      connected: element.isConnected, text: element.textContent?.slice(0, 100) });
+    return { activeElement: describe(document.activeElement),
+      width: document.querySelector('#column-dropdown')?.value,
+      multi: document.querySelector('#multi-column')?.checked,
+      visibleFirstCells: [...document.querySelectorAll('[role="grid"]')].map(grid => ({
+        grid: grid.getAttribute('aria-label'), firstCell: describe(grid.querySelector('[role="gridcell"]')),
+      })), lastKeys: window.testKeys?.slice(-12), focusEvents: window.testFocusEvents?.slice(-40) };
+  });
+}
 async function focused(locator) {
-  await locator.waitFor({ state: 'visible' });
-  await page.waitForFunction(element => document.activeElement === element, await locator.elementHandle());
+  try {
+    await locator.waitFor({ state: 'visible' });
+    await page.waitForFunction(element => document.activeElement === element, await locator.elementHandle());
+  } catch (error) {
+    report.focusFailure = { expectedLocator: locator.toString(), ...(await focusDiagnostics()) };
+    console.error('FOCUS FAILURE:', JSON.stringify(report.focusFailure));
+    throw error;
+  }
 }
 async function upload(text, name = 'fixture.txt') {
   await page.locator('#file-upload').setInputFiles({ name, mimeType: 'text/plain', buffer: Buffer.from(text) });
@@ -157,6 +178,15 @@ try {
     } });
     window.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
     window.testKeys = [];
+    window.testFocusEvents = [];
+    for (const type of ['focusin', 'focusout']) document.addEventListener(type, event => {
+      const describe = element => element && ({ tag: element.tagName, id: element.id,
+        label: element.getAttribute?.('aria-label'), row: element.getAttribute?.('data-row'),
+        enclosingGrid: element.closest?.('[role="grid"]')?.getAttribute('aria-label'),
+        column: element.getAttribute?.('data-column') });
+      window.testFocusEvents.push({ type, target: describe(event.target), relatedTarget: describe(event.relatedTarget) });
+      if (window.testFocusEvents.length > 80) window.testFocusEvents.shift();
+    });
     document.addEventListener('keydown', event => window.testKeys.push({ key: event.key, code: event.code, shift: event.shiftKey, ctrl: event.ctrlKey, meta: event.metaKey }));
   });
   page = await context.newPage();
@@ -318,6 +348,7 @@ try {
 } catch (error) {
   report.status = 'failed';
   report.failure = { message: error.message, stack: error.stack };
+  if (page) report.finalFocusState = await focusDiagnostics().catch(diagnosticError => ({ error: diagnosticError.message }));
   if (page) await page.screenshot({ path: path.join(results, 'failure.png'), fullPage: true }).catch(() => {});
   console.error(error);
   process.exitCode = 1;

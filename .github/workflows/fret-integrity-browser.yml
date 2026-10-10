@@ -21,7 +21,7 @@ jobs:
       github.repository == 'BlindAnatomist/guitar-eyes' &&
       github.ref == 'refs/heads/review/fret-integrity-2026-10-10' &&
       github.event.deleted == false &&
-      contains(github.event.head_commit.message, '[fret browser geometry correction once]') &&
+      contains(github.event.head_commit.message, '[fret browser focus repair first]') &&
       github.run_attempt == 1
     runs-on: ubuntu-24.04
     timeout-minutes: 12
@@ -36,24 +36,30 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-          fetch-depth: 3
+          fetch-depth: 4
 
-      - name: Verify the unchanged application repair and allowed added files
+      - name: Verify reviewed focus repair and unchanged baseline
         shell: bash
         run: |
           set -euo pipefail
           base=543f3beecde5be80fccf4457d36ebbf58a9ed30e
-          test "$(git rev-parse HEAD^)" = "972e12c1cf3c0815a378f19e94e3e1efb6b749f1"
+          test "$(git rev-parse HEAD^)" = "476844a549a40b3630e3e692ce41d9f2968e82fb"
           test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 2
           git diff --name-only "$base" HEAD | sort > "$RUNNER_TEMP/actual-files"
-          printf '%s\n' '.github/workflows/fret-integrity-browser.yml' 'tests/browser/README.md' 'tests/browser/fret-integrity.mjs' | sort > "$RUNNER_TEMP/allowed-files"
+          printf '%s\n' '.github/workflows/fret-integrity-browser.yml' 'src/App.test.js' 'src/DataGrid.js' 'tests/browser/README.md' 'tests/browser/fret-integrity.mjs' | sort > "$RUNNER_TEMP/allowed-files"
           diff -u "$RUNNER_TEMP/allowed-files" "$RUNNER_TEMP/actual-files"
-          git diff --exit-code "$base" HEAD -- src public package.json package-lock.json tests/tablature.test.mjs TESTING.md
+          git diff --exit-code "$base" HEAD -- . \
+            ':(exclude).github/workflows/fret-integrity-browser.yml' \
+            ':(exclude)tests/browser/README.md' ':(exclude)tests/browser/fret-integrity.mjs' \
+            ':(exclude)src/DataGrid.js' ':(exclude)src/App.test.js'
+          test "$(git hash-object src/DataGrid.js)" = "4a9ad1f69fd43e2f9d56857cfa93d2d4ab230631"
+          test "$(git hash-object src/App.test.js)" = "4ad6869d8faedb61dfe16dd01b84c03d82423448"
           printf 'PLAYWRIGHT_PREFIX=%s/fret-playwright\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           printf 'PLAYWRIGHT_BROWSERS_PATH=%s/fret-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           mkdir -p "$RUNNER_TEMP/fret-browser-results"
           git rev-parse HEAD > "$RUNNER_TEMP/fret-browser-results/tested-commit.txt"
-          git rev-parse "$base" > "$RUNNER_TEMP/fret-browser-results/application-repair.txt"
+          git rev-parse "$base" > "$RUNNER_TEMP/fret-browser-results/original-repair-base.txt"
+          git hash-object src/DataGrid.js src/App.test.js > "$RUNNER_TEMP/fret-browser-results/reviewed-focus-source-blobs.txt"
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

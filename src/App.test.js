@@ -238,3 +238,115 @@ test('width shortcuts on a short block respect the shared dropdown range', async
   expect(width).toHaveValue('8');
   expect(within(shortGrid).getByRole('gridcell', { name: 'String 1, column 1, e' })).toHaveFocus();
 });
+
+
+test('keyboard width 5 to 4 from a later group focuses only the reset cell and keeps the next arrow in sync', () => {
+  render(<Grid columns={5} />);
+  const grid = screen.getByRole('grid');
+  grid.focus();
+  fireEvent.keyDown(grid, { key: 'ArrowRight', ...groups });
+  expect(screen.getByRole('gridcell', { name: 'String 1, column 7, fret 3' })).toHaveFocus();
+  const focusedCells = [];
+  grid.addEventListener('focusin', event => {
+    if (event.target.getAttribute('role') === 'gridcell') {
+      focusedCells.push([event.target.dataset.row, event.target.dataset.column]);
+    }
+  });
+
+  fireEvent.keyDown(document.activeElement, { key: '_', code: 'Minus', ...groups });
+
+  expect(screen.getByRole('gridcell', { name: 'String 1, column 1, e' })).toHaveFocus();
+  expect(within(grid).getAllByRole('gridcell')).toHaveLength(24);
+  expect(focusedCells).toEqual([['0', '0']]);
+  fireEvent.keyDown(document.activeElement, { key: 'ArrowRight', ...arrows });
+  expect(screen.getByRole('gridcell', { name: 'String 1, column 2, bar' })).toHaveFocus();
+});
+
+test('keyboard width clamps leave the current cell unchanged and a later valid change still resets focus', () => {
+  render(<Grid columns={1} />);
+  const grid = screen.getByRole('grid');
+  grid.focus();
+  fireEvent.keyDown(grid, { key: 'ArrowRight', ...groups });
+  const secondColumn = screen.getByRole('gridcell', { name: 'String 1, column 2, bar' });
+  expect(secondColumn).toHaveFocus();
+  fireEvent.keyDown(secondColumn, { key: '_', code: 'Minus', ...groups });
+  expect(secondColumn).toHaveFocus();
+  expect(within(grid).getAllByRole('gridcell')).toHaveLength(6);
+
+  for (let width = 1; width < 9; width++) {
+    fireEvent.keyDown(document.activeElement, { key: '+', code: 'Equal', ...groups });
+    expect(screen.getByRole('gridcell', { name: 'String 1, column 1, e' })).toHaveFocus();
+  }
+  fireEvent.keyDown(document.activeElement, { key: 'ArrowRight', ...arrows });
+  const atMaximum = screen.getByRole('gridcell', { name: 'String 1, column 2, bar' });
+  fireEvent.keyDown(atMaximum, { key: '+', code: 'Equal', ...groups });
+  expect(atMaximum).toHaveFocus();
+  expect(within(grid).getAllByRole('gridcell')).toHaveLength(53);
+  fireEvent.keyDown(atMaximum, { key: '_', code: 'Minus', ...groups });
+  expect(screen.getByRole('gridcell', { name: 'String 1, column 1, e' })).toHaveFocus();
+});
+
+test('dropdown width 5 to 4 resets later groups without moving focus from the control', async () => {
+  render(<App />);
+  upload(rows.join('\n') + '\n\n' + rows.join('\n'));
+  const first = await screen.findByRole('grid', { name: 'Tablature 1' });
+  const second = screen.getByRole('grid', { name: 'Tablature 2' });
+  fireEvent.click(screen.getByLabelText('Multi-Column Navigation'));
+  const width = screen.getByLabelText(/Number of Columns/);
+  width.focus();
+  fireEvent.change(width, { target: { value: '5' } });
+  for (const grid of [first, second]) {
+    grid.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowRight', ...groups });
+    expect(within(grid).getByRole('gridcell', { name: 'String 1, column 7, fret 3' })).toHaveFocus();
+  }
+  width.focus();
+  const focusedCells = [];
+  for (const grid of [first, second]) {
+    grid.addEventListener('focusin', event => focusedCells.push(event.target));
+  }
+  fireEvent.change(width, { target: { value: '4' } });
+
+  expect(width).toHaveFocus();
+  expect(focusedCells).toEqual([]);
+  for (const grid of [first, second]) {
+    expect(within(grid).getAllByRole('gridcell')).toHaveLength(24);
+    expect(within(grid).getByRole('gridcell', { name: 'String 1, column 1, e' })).toBeInTheDocument();
+  }
+  second.focus();
+  fireEvent.keyDown(second, { key: 'ArrowRight', ...arrows });
+  fireEvent.keyDown(document.activeElement, { key: 'ArrowRight', ...arrows });
+  expect(within(second).getByRole('gridcell', { name: 'String 1, column 2, bar' })).toHaveFocus();
+});
+
+test.each(['Tablature 1', 'Tablature 2'])('a shared width reset keeps focus in the initiating grid: %s', async gridName => {
+  render(<App />);
+  upload(rows.join('\n') + '\n\n' + rows.join('\n'));
+  const first = await screen.findByRole('grid', { name: 'Tablature 1' });
+  const second = screen.getByRole('grid', { name: 'Tablature 2' });
+  fireEvent.click(screen.getByLabelText('Multi-Column Navigation'));
+  const width = screen.getByLabelText(/Number of Columns/);
+  width.focus();
+  fireEvent.change(width, { target: { value: '5' } });
+  const initiator = screen.getByRole('grid', { name: gridName });
+  const other = initiator === first ? second : first;
+  for (const grid of [other, initiator]) {
+    grid.focus();
+    fireEvent.keyDown(grid, { key: 'ArrowRight', ...groups });
+  }
+  const focusTrace = [];
+  for (const grid of [first, second]) {
+    grid.addEventListener('focusin', event => {
+      focusTrace.push([grid.getAttribute('aria-label'), event.target.dataset.column]);
+    });
+  }
+
+  fireEvent.keyDown(document.activeElement, { key: '_', code: 'Minus', ...groups });
+
+  expect(width).toHaveValue('4');
+  expect(within(initiator).getByRole('gridcell', { name: 'String 1, column 1, e' })).toHaveFocus();
+  expect(focusTrace).toEqual([[gridName, '0']]);
+  expect(within(other).getByRole('gridcell', { name: 'String 1, column 1, e' })).toBeInTheDocument();
+  fireEvent.keyDown(document.activeElement, { key: 'ArrowRight', ...arrows });
+  expect(within(initiator).getByRole('gridcell', { name: 'String 1, column 2, bar' })).toHaveFocus();
+});

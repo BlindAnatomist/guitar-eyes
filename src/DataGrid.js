@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react";
 import { Table, Tbody, Tr, Td } from "@chakra-ui/react";
 import {
   createTablatureModel, createColumnGroups, tokensInGroup, tokenAtColumn,
@@ -11,52 +11,51 @@ function DataGrid({ data, numColumns, isMultiColumnNav, setNumColumns, maxGroupW
   const positionRef = useRef({ row: 0, column: 0 });
   const pendingFocus = useRef(false);
   const focusedWithin = useRef(false);
-  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [speechStatus, setSpeechStatus] = useState("");
   const model = useMemo(() => createTablatureModel(data), [data]);
   const groups = useMemo(() => isMultiColumnNav
     ? createColumnGroups(model, numColumns)
     : [{ start: 0, end: model.width }], [model, numColumns, isMultiColumnNav]);
-  const groupIndex = Math.min(currentGroupIndex, groups.length - 1);
+  const [groupSelection, setGroupSelection] = useState({ groups, index: 0 });
+  const previousGroups = useRef(groups);
+  // A new width, model, or navigation mode renders its first group immediately.
+  // Never apply an old group index to the new groups, even for one commit.
+  const groupIndex = groupSelection.groups === groups
+    ? Math.min(groupSelection.index, groups.length - 1) : 0;
   const group = groups[groupIndex];
   const gridRows = tokensInGroup(model, group);
   const player = useMemo(() => createSpeechPlayer(
     window.speechSynthesis, window.SpeechSynthesisUtterance, setSpeechStatus
   ), []);
 
-  const focusPosition = (position) => {
+  const focusPosition = useCallback((position) => {
     const token = tokenAtColumn(model, position.row, position.column);
     const cell = token && tableRef.current?.querySelector(
       `[data-row="${position.row}"][data-column="${token.start}"]`
     );
-    if (cell) {
-      cell.focus();
-      // Preserve a vertical source-column anchor even inside a two-digit fret.
-      positionRef.current = position;
-    }
-  };
+    if (!cell) return false;
+    cell.focus();
+    if (document.activeElement !== cell) return false;
+    // Preserve a vertical source-column anchor even inside a two-digit fret.
+    positionRef.current = position;
+    return true;
+  }, [model]);
 
-  useEffect(() => {
-    setCurrentGroupIndex(0);
-    positionRef.current = { row: 0, column: 0 };
-  }, [model, numColumns, isMultiColumnNav]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     player.stop();
     setSpeechStatus("");
-    const position = positionRef.current;
+    const position = previousGroups.current === groups
+      ? positionRef.current : { row: 0, column: 0 };
+    previousGroups.current = groups;
     positionRef.current = {
       row: Math.min(position.row, model.rows.length - 1),
       column: Math.max(group.start, Math.min(position.column, group.end - 1)),
     };
     if (pendingFocus.current || focusedWithin.current) {
-      const { row, column } = positionRef.current;
-      const token = tokenAtColumn(model, row, column);
-      tableRef.current?.querySelector(`[data-row="${row}"][data-column="${token.start}"]`)?.focus();
-      positionRef.current = { row, column };
-      pendingFocus.current = false;
+      // Keep the request until the intended visible cell has actually focused.
+      pendingFocus.current = !focusPosition(positionRef.current);
     }
-  }, [model, group.start, group.end, player, numColumns, isMultiColumnNav]);
+  }, [model, groups, group, player, focusPosition]);
 
   useEffect(() => {
     const stopOnEscape = (event) => {
@@ -90,7 +89,7 @@ function DataGrid({ data, numColumns, isMultiColumnNav, setNumColumns, maxGroupW
         if (nextIndex === groupIndex) focusPosition(positionRef.current);
         else {
           pendingFocus.current = true;
-          setCurrentGroupIndex(nextIndex);
+          setGroupSelection({ groups, index: nextIndex });
         }
       } else if (event.key === "=" || event.key === "+" || event.key === "-" || event.key === "_") {
         event.preventDefault();
@@ -117,6 +116,7 @@ function DataGrid({ data, numColumns, isMultiColumnNav, setNumColumns, maxGroupW
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             focusedWithin.current = false;
+            pendingFocus.current = false;
             player.stop();
             setSpeechStatus("");
           }
