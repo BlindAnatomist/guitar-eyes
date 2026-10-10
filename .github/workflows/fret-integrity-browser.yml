@@ -1,0 +1,102 @@
+name: One bounded fret-integrity Chromium check
+
+on:
+  push:
+    branches:
+      - review/fret-integrity-2026-10-10
+    paths:
+      - .github/workflows/fret-integrity-browser.yml
+      - tests/browser/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fret-integrity-browser-2026-10-10
+  cancel-in-progress: false
+
+jobs:
+  browser:
+    if: >-
+      github.repository == 'BlindAnatomist/guitar-eyes' &&
+      github.ref == 'refs/heads/review/fret-integrity-2026-10-10' &&
+      github.event.deleted == false &&
+      contains(github.event.head_commit.message, '[fret browser 2026-10-10 once]') &&
+      github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      CI: 'true'
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+      npm_config_fetch_retries: '0'
+      npm_config_fetch_timeout: '45000'
+    steps:
+      - name: Check out the exact verification commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+
+      - name: Verify the unchanged application repair and allowed added files
+        shell: bash
+        run: |
+          set -euo pipefail
+          base=543f3beecde5be80fccf4457d36ebbf58a9ed30e
+          test "$(git rev-parse HEAD^)" = "$base"
+          test "$(git rev-list --parents -n 1 HEAD | wc -w)" -eq 2
+          git diff --name-only "$base" HEAD | sort > "$RUNNER_TEMP/actual-files"
+          printf '%s\n' '.github/workflows/fret-integrity-browser.yml' 'tests/browser/README.md' 'tests/browser/fret-integrity.mjs' | sort > "$RUNNER_TEMP/allowed-files"
+          diff -u "$RUNNER_TEMP/allowed-files" "$RUNNER_TEMP/actual-files"
+          git diff --exit-code "$base" HEAD -- src public package.json package-lock.json tests/tablature.test.mjs TESTING.md
+          printf 'PLAYWRIGHT_PREFIX=%s/fret-playwright\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'PLAYWRIGHT_BROWSERS_PATH=%s/fret-browsers\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/fret-browser-results"
+          git rev-parse HEAD > "$RUNNER_TEMP/fret-browser-results/tested-commit.txt"
+          git rev-parse HEAD^ > "$RUNNER_TEMP/fret-browser-results/application-repair.txt"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+
+      - name: Validate browser harness without launching
+        run: |
+          node --check tests/browser/fret-integrity.mjs
+          node tests/browser/fret-integrity.mjs --check-fixtures
+
+      - name: Install locked application dependencies
+        timeout-minutes: 3
+        run: npm ci --no-audit --no-fund
+
+      - name: Run model and React regressions
+        timeout-minutes: 2
+        run: |
+          npm run test:tablature
+          npm test -- --watchAll=false --runInBand
+
+      - name: Build the exact repaired application
+        timeout-minutes: 2
+        run: npm run build
+
+      - name: Install isolated pinned Playwright
+        timeout-minutes: 2
+        run: npm install --prefix "$PLAYWRIGHT_PREFIX" --no-audit --no-fund --ignore-scripts --no-package-lock --save-exact playwright@1.63.0
+
+      - name: Install official Chromium and Linux dependencies
+        timeout-minutes: 4
+        run: node "$PLAYWRIGHT_PREFIX/node_modules/playwright/cli.js" install --with-deps --no-shell chromium
+
+      - name: Run one bounded Chromium session against loopback only
+        timeout-minutes: 3
+        run: node tests/browser/fret-integrity.mjs build "$RUNNER_TEMP/fret-browser-results"
+
+      - name: Preserve small synthetic test diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fret-browser-results-${{ github.run_id }}
+          path: ${{ runner.temp }}/fret-browser-results/
+          retention-days: 1
+          if-no-files-found: warn
+          compression-level: 6
