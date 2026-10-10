@@ -7,11 +7,13 @@ const InfoSection = () => (
       Once uploaded, you have the choice of navigating the tablature either one cell at a time or you can select the 'Multi-Column Navigation' checkbox, select how many columns you wish to navigate at a time, and the app will create multi-column groups within each grid which you can have read aloud vertically.
     </p>
     <p>
+      Upload plain-text tab blocks with six guitar rows or four bass rows. Rows in a block must have equal text width. Labels, bars, spaces, and notation are kept as written. Frets use one or two digits; separate distinct notes with notation such as dashes. Titles, incomplete blocks, and misaligned rows show an error. Multi-column groups can extend past the chosen width to keep every fret whole.
+      <br />
       Here are the key commands for using this app:
       <br />
       <strong>NAVIGATION of the Tablature Grids:</strong>
       <br />
-      Tab Key & Shift+Tab Key - Jump to next tablature grid and back to previous tablature grid
+      Tab Key & Shift+Tab Key - Move between tablature grids and the controls; arrow commands enter and navigate a grid
       <br />
       <br />
       <strong>NON-MULTI-COLUMN NAVIGATION:</strong>
@@ -39,3 +41,4 @@ const InfoSection = () => (
 );
 
 export default InfoSection;
+

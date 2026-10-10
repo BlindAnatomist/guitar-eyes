@@ -4,6 +4,7 @@ import React, { useRef } from "react";
  const fileInputRef = useRef(null);
  const handleFileChange = (e) => {
  const file = e.target.files[0];
+ e.target.value = ""; // Allow retrying the same file after a validation error.
  if (file) { onFileUpload(file);
  }
  };
